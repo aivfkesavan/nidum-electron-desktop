@@ -15,7 +15,7 @@ import Info from "@/components/common/info";
 
 function Chat() {
   const project_id = useContextStore(s => s.project_id)
-  const projectdetails = useConvoStore(s => s.projects[project_id] || {})
+  const projectdetails = useConvoStore(s => s.projects[project_id] || null)
   const projects = useConvoStore(s => Object.values(s.projects))
   const editProject = useConvoStore(s => s.editProject)
 
