@@ -8,6 +8,9 @@ importers:
 
   .:
     dependencies:
+      '@babel/runtime-corejs3':
+        specifier: ^7.25.0
+        version: 7.25.0
       '@radix-ui/react-accordion':
         specifier: ^1.2.0
         version: 1.2.0(@types/react@18.3.3)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
@@ -758,6 +761,10 @@ packages:
 
   '@babel/runtime-corejs3@7.24.7':
     resolution: {integrity: sha512-eytSX6JLBY6PVAeQa2bFlDx/7Mmln/gaEpsit5a3WEvjGfiIytEsgAwuIXCPM0xvw0v0cJn3ilq0/TvXrW0kgA==}
+    engines: {node: '>=6.9.0'}
+
+  '@babel/runtime-corejs3@7.25.0':
+    resolution: {integrity: sha512-BOehWE7MgQ8W8Qn0CQnMtg2tHPHPulcS/5AVpFvs2KCK1ET+0WqZqPvnpRpFN81gYoFopdIEJX9Sgjw3ZBccPg==}
     engines: {node: '>=6.9.0'}
 
   '@babel/runtime@7.24.7':
@@ -4928,6 +4935,11 @@ snapshots:
   '@babel/regjsgen@0.8.0': {}
 
   '@babel/runtime-corejs3@7.24.7':
+    dependencies:
+      core-js-pure: 3.38.0
+      regenerator-runtime: 0.14.1
+
+  '@babel/runtime-corejs3@7.25.0':
     dependencies:
       core-js-pure: 3.38.0
       regenerator-runtime: 0.14.1

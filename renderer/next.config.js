@@ -1,6 +1,6 @@
 /** @type {import('next').NextConfig} */
 module.exports = {
-  output: 'export',
+  output: "export",
   distDir: process.env.NODE_ENV === 'production' ? '../app' : '.next',
   trailingSlash: true,
   images: {
@@ -19,4 +19,8 @@ module.exports = {
 
     return config
   },
+  experimental: {
+    esmExternals: 'loose',
+  },
+  transpilePackages: ['@uiw/react-markdown-preview'],
 }
