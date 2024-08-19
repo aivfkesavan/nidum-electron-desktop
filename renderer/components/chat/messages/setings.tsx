@@ -35,7 +35,7 @@ function Setings({ project_id }: props) {
     return allVoices.filter(voice => voice.lang.startsWith('en-')) || []
   })
 
-  const projectdetails = useConvoStore(s => s.projects[project_id] || {})
+  const projectdetails = useConvoStore(s => s.projects[project_id] || null)
   const editProject = useConvoStore(s => s.editProject)
 
   const updateContext = useContextStore(s => s.updateContext)

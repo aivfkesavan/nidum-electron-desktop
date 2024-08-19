@@ -35,7 +35,7 @@ function Messages() {
     vb_type, qdrantDBUrl,
   } = useContextStore()
 
-  const projectdetails = useConvoStore(s => s.projects[project_id] || {})
+  const projectdetails = useConvoStore(s => s.projects[project_id] || null)
   const pushIntoMessages = useConvoStore(s => s.pushIntoMessages)
   const deleteMessage = useConvoStore(s => s.deleteMessage)
   const editChat = useConvoStore(s => s.editChat)
