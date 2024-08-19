@@ -1,60 +1,164 @@
+@import url('https://fonts.googleapis.com/css2?family=Roboto+Flex:opsz,wght@8..144,100..1000&family=Outfit:wght@700&&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 222.2 84% 4.9%;
-    --card: 0 0% 100%;
-    --card-foreground: 222.2 84% 4.9%;
-    --popover: 0 0% 100%;
-    --popover-foreground: 222.2 84% 4.9%;
-    --primary: 222.2 47.4% 11.2%;
-    --primary-foreground: 210 40% 98%;
-    --secondary: 210 40% 96.1%;
-    --secondary-foreground: 222.2 47.4% 11.2%;
-    --muted: 210 40% 96.1%;
-    --muted-foreground: 215.4 16.3% 46.9%;
-    --accent: 210 40% 96.1%;
-    --accent-foreground: 222.2 47.4% 11.2%;
-    --destructive: 0 84.2% 60.2%;
+    --background: 0 0% 13%;
+    --foreground: 0 0% 100%;
+
+    --muted: 0 0% 11%;
+    --muted-foreground: 0 0% 100%;
+
+    --accent: 0 0% 8%;
+    --accent-foreground: 0 0% 98%;
+
+    --popover: 0 0% 4%;
+    --popover-foreground: 0 0% 100%;
+
+    --border: 0 0% 18%;
+    --input: 0 0% 20%;
+
+    --card: 224 71% 4%;
+    --card-foreground: 213 31% 91%;
+
+    --secondary: 0 0% 13%;
+    --secondary-foreground: 0 0% 100%;
+
+    --destructive: 0 63% 31%;
     --destructive-foreground: 210 40% 98%;
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-    --ring: 222.2 84% 4.9%;
+
+    --ring: 0 0% 20%;
+
+    --primary-lighter: 171 77% 64%;
+    --primary-light: 172 66% 50%;
+    --primary: 173 80% 40%;
+    --primary-dark: 175 84% 32%;
+    --primary-darker: 175 77% 26%;
+    --primary-foreground: 222.2 47.4% 1.2%;
+
     --radius: 0.5rem;
   }
 
-  .dark {
-    --background: 222.2 84% 4.9%;
-    --foreground: 210 40% 98%;
-    --card: 222.2 84% 4.9%;
-    --card-foreground: 210 40% 98%;
-    --popover: 222.2 84% 4.9%;
-    --popover-foreground: 210 40% 98%;
-    --primary: 210 40% 98%;
-    --primary-foreground: 222.2 47.4% 11.2%;
-    --secondary: 217.2 32.6% 17.5%;
-    --secondary-foreground: 210 40% 98%;
-    --muted: 217.2 32.6% 17.5%;
-    --muted-foreground: 215 20.2% 65.1%;
-    --accent: 217.2 32.6% 17.5%;
-    --accent-foreground: 210 40% 98%;
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 210 40% 98%;
-    --border: 217.2 32.6% 17.5%;
-    --input: 217.2 32.6% 17.5%;
-    --ring: 212.7 26.8% 83.9;
+  html,
+  body {
+    scroll-behavior: smooth;
+  }
+
+  *,
+  body {
+    font-family: "Roboto Flex", sans-serif;
+  }
+
+  ::-webkit-scrollbar {
+    height: 10px;
+    width: 10px;
+  }
+
+  ::-webkit-scrollbar-track {
+    border-radius: 10px;
+    box-shadow: none;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background-color: rgba(66, 66, 66, 0.4);
+    border-radius: 10px;
+    box-shadow: none;
+  }
+
+  ::-webkit-scrollbar-thumb:window-inactive {
+    background: rgba(66, 66, 66, 0.4);
+  }
+
+  input,
+  textarea,
+  select {
+    @apply block w-full p-2 text-white outline-none rounded disabled:cursor-not-allowed;
+  }
+
+  button {
+    @apply px-2 py-1 w-fit rounded-sm outline-none disabled:cursor-not-allowed disabled:opacity-80;
+  }
+
+  img {
+    @apply max-w-full object-cover;
   }
 }
-
 
 @layer base {
   * {
     @apply border-border;
   }
+
   body {
     @apply bg-background text-foreground;
+    font-feature-settings: "rlig" 1, "calt" 1;
+  }
+}
+
+@layer components {
+
+  .df,
+  .dfc,
+  .dc {
+    @apply flex gap-2;
+  }
+
+  .df,
+  .dc {
+    @apply items-center;
+  }
+
+  .dfc {
+    @apply flex-col;
+  }
+
+  .dc {
+    @apply justify-center;
+  }
+
+  .font-Outfit {
+    font-family: "Outfit", serif;
+  }
+
+  .scroll-y {
+    @apply flex-1 overflow-y-auto;
+  }
+
+  .no-scroll-bar::-webkit-scrollbar {
+    height: 0;
+    width: 0;
+  }
+
+  .mini-scroll-bar::-webkit-scrollbar,
+  .mini-scroll-bar ::-webkit-scrollbar {
+    height: var(--scroll-bar-size, 5px);
+    width: var(--scroll-bar-size, 5px);
+  }
+
+  /* input number hide arrows - Chrome, Safari, Edge, Opera */
+  .no-number-arrows::-webkit-outer-spin-button,
+  .no-number-arrows::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+  }
+
+  /* input number hide arrows - Firefox */
+  .no-number-arrows {
+    -moz-appearance: textfield;
+  }
+
+  body .side-nav {
+    @apply fixed left-0 -translate-x-full;
+  }
+
+  body.open .side-nav {
+    @apply translate-x-0;
+  }
+
+  body.open .app-wrapper {
+    @apply md:pl-[240px];
   }
 }
