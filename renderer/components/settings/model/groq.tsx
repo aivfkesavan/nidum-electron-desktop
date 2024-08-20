@@ -47,7 +47,7 @@ function Groq() {
   return (
     <div>
       <div className="my-4">
-        <label htmlFor="" className="mb-0.5 text-xs">Groq api key</label>
+        <label htmlFor="" className="mb-0.5 text-xs opacity-70">Groq api key</label>
 
         <input
           type="text"
@@ -59,7 +59,7 @@ function Groq() {
       </div>
 
       <div>
-        <label htmlFor="" className="mb-0.5 text-xs">Model</label>
+        <label htmlFor="" className="mb-0.5 text-xs opacity-70">Model</label>
 
         <Select value={model} onValueChange={v => updateContext({ groqModel: v })}>
           <SelectTrigger className="h-8">
