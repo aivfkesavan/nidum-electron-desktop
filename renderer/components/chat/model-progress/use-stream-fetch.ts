@@ -61,7 +61,7 @@ function useStreamingFetch() {
 
       } catch (err) {
         console.log(err)
-        toast({ title: err?.message || "something went wrong" })
+        // toast({ title: err?.message || "something went wrong" })
         setData(0)
         updateContext({ is_downloading: false, name: "" })
       }
@@ -75,6 +75,7 @@ function useStreamingFetch() {
   }, [ollamaUrl, name])
 
   useEffect(() => {
+    console.log("data", data)
     if (data === 100) {
       toast({ title: "Dowload completed" })
       updateContext({ is_downloading: false, name: "" })
