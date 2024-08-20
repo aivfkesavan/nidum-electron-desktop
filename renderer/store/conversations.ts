@@ -13,6 +13,7 @@ type Chat = {
   id: string;
   title: string;
   file_id: string | null
+  rag_enabled: boolean
 }
 
 type Project = {

@@ -52,13 +52,14 @@ router.delete("/index/:folderName/:filename", async (req, res) => {
   }
 })
 
-router.get("/ask", async (req, res) => {
+router.get("/ask/:folderName", async (req, res) => {
   try {
+    const { folderName } = req.params
     const { query } = req.query
 
     if (!query) return res.status(400).json({ error: "Query parameter is required" })
 
-    const result = await queryIndex(query)
+    const result = await queryIndex(query, folderName)
 
     return res.json(result)
 

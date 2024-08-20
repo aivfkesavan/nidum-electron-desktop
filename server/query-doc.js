@@ -5,20 +5,18 @@ const {
   OllamaEmbedding,
   VectorIndexRetriever
 } = require("llamaindex");
+const { getRagPath } = require("./path-helper");
 
-const INDEX_STORE_PATH = "./index_store";
-
-async function queryIndex(query) {
+async function queryIndex(query, folderName) {
   Settings.embedModel = new OllamaEmbedding({ model: "mxbai-embed-large" })
 
-  const storageContext = await storageContextFromDefaults({
-    persistDir: INDEX_STORE_PATH,
-  })
+  const persistDir = getRagPath(folderName)
+  const storageContext = await storageContextFromDefaults({ persistDir })
 
   const loadedIndex = await VectorStoreIndex.init({ storageContext })
 
   const retriever = new VectorIndexRetriever({ similarityTopK: 6, index: loadedIndex })
-  return await retriever.retrieve({ query })
+  return (await retriever.retrieve({ query }))?.map(doc => ({ text: doc?.node?.text, score: doc?.score }))
 
   // const queryEngine = loadedIndex.asQueryEngine();
   // const data = await queryEngine.retriever.retrieve({ query })

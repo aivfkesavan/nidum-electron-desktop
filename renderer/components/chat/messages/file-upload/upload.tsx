@@ -7,6 +7,7 @@ import axios from 'axios';
 import useContextStore from '@store/context';
 import useConvoStore from '@store/conversations';
 // import useEmbedding from './use-embedding';
+import Settings from "./settings";
 
 function Upload() {
   const [loading, setLoading] = useState(false)
@@ -108,6 +109,8 @@ function Upload() {
         }
         Upload
       </button>
+
+      <Settings />
     </div>
   )
 }
