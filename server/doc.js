@@ -1,38 +1,33 @@
-const fs = require("fs/promises")
 const express = require('express')
 const {
-  OllamaEmbedding, Settings, Document,
-  VectorStoreIndex, storageContextFromDefaults,
+  OllamaEmbedding, Settings,
+  VectorStoreIndex, storageContextFromDefaults, SimpleDirectoryReader,
 } = require("llamaindex")
 require("dotenv/config")
 
+const { createPath, getRagPath } = require("./path-helper")
 const { queryIndex } = require("./query-doc")
+const { upload } = require("./add-files")
+
 const router = express.Router()
 
-const INDEX_STORE_PATH = "./index_store"
-
-router.post("/create-index", async (req, res) => {
+router.post("/create-index/:folderName", upload.array('files'), async (req, res) => {
   try {
+    const { folderName } = req.params
     Settings.embedModel = new OllamaEmbedding({ model: "mxbai-embed-large" })
 
-    const essay = await fs.readFile(
-      "node_modules/llamaindex/examples/abramov.txt",
-      "utf-8",
-    )
+    const directoryPath = createPath([folderName])
+    const documents = await new SimpleDirectoryReader().loadData({ directoryPath })
 
-    const document = new Document({ text: essay, id_: "essay" })
+    const persistDir = getRagPath(folderName)
+    const storageContext = await storageContextFromDefaults({ persistDir })
 
-    const storageContext = await storageContextFromDefaults({
-      persistDir: INDEX_STORE_PATH,
-    })
+    await VectorStoreIndex.fromDocuments(documents, { storageContext })
 
-    const index = await VectorStoreIndex.fromDocuments([document], { storageContext })
-    const stored = await index.storage.persist(INDEX_STORE_PATH)
-
-    return res.json({ msg: "index stored", stored })
+    return res.json({ msg: "index stored" })
 
   } catch (error) {
-    res.status(400).json({ error, msg: "m" })
+    return res.status(400).json({ error })
   }
 })
 
@@ -47,7 +42,7 @@ router.get("/ask", async (req, res) => {
     return res.json(result)
 
   } catch (error) {
-    res.status(500).json({ error })
+    return res.status(500).json({ error })
   }
 })
 
