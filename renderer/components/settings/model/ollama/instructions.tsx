@@ -2,6 +2,7 @@ import { useState } from "react";
 import { cn } from "@/lib/utils";
 
 import Copy from "../../copy";
+import MarkdownParse from "@components/chat/messages/markdown-parse";
 
 const list: any = {
   macos: {
@@ -17,6 +18,12 @@ const list: any = {
     txt: "Paste this into a Command or cmd.exe prompt.",
   }
 }
+
+const res = `
+### Getting Started with Ollama
+1. *Open Terminal:* Launch the terminal and enter the command ollama serve or simply open the Ollama application on your desktop.
+2. *Get Model ID:* Visit the Ollama website catalog at [ollama.com/library](https://ollama.com/library) to obtain the model ID or download the default model. Then, go to the Model Management section to start chatting.
+`
 
 function Instructions() {
   const [selected, setSelected] = useState("macos")
@@ -45,7 +52,8 @@ function Instructions() {
       </div>
 
       <div className="mt-8 text-xs">
-        <p className="mb-4 text-white/60">To get started,</p>
+        <MarkdownParse response={res} />
+        {/* <p className="mb-4 text-white/60">To get started,</p>
         <ul className="pl-5 list-decimal text-white/80">
           <li className="mb-4">Open <span className="font-medium text-white">TWO Terminals</span></li>
           <li className="mb-4 space-y-2">
@@ -57,7 +65,7 @@ function Instructions() {
             <Copy val="ollama pull nidumai/nidum-limitless-gemma-2b" />
             <Copy val="ollama run nidumai/nidum-limitless-gemma-2b" />
           </li>
-        </ul>
+        </ul> */}
       </div>
     </>
   )
