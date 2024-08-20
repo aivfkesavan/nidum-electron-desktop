@@ -93,7 +93,7 @@
   }
 
   body {
-    @apply bg-background text-foreground;
+    @apply bg-background text-foreground transition-all;
     font-feature-settings: "rlig" 1, "calt" 1;
   }
 }
@@ -158,7 +158,7 @@
     @apply translate-x-0;
   }
 
-  body.open .app-wrapper {
+  body.open {
     @apply md:pl-[240px];
   }
 }
