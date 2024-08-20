@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { MdOutlineRecordVoiceOver } from "react-icons/md";
-// import { HiCubeTransparent } from "react-icons/hi2";
+import { HiCubeTransparent } from "react-icons/hi2";
 import { GoProjectRoadmap } from "react-icons/go";
 import { RiVoiceprintFill } from "react-icons/ri";
 // import { BsTextParagraph } from "react-icons/bs";
@@ -21,7 +21,7 @@ import {
 import SettingIcon from '@/assets/svg/settings.svg';
 
 import Transcribe from "../../settings/transcribe";
-// import Embedder from "../../settings/embedder";
+import Embedder from "../../settings/embedder";
 import Model from "../../settings/model";
 // import VecDB from "../../settings/vecdb";
 import Voice from "../../settings/voice";
@@ -54,12 +54,12 @@ const list = [
   //   logo: <LuDatabase className="text-base" />,
   //   child: <VecDB />,
   // },
-  // {
-  //   id: "5",
-  //   title: "Embedder",
-  //   logo: <HiCubeTransparent className="text-base" />,
-  //   child: <Embedder />,
-  // },
+  {
+    id: "5",
+    title: "Embedder",
+    logo: <HiCubeTransparent className="text-base" />,
+    child: <Embedder />,
+  },
   // {
   //   id: "6",
   //   title: "RAG",
