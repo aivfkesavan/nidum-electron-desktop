@@ -2,11 +2,17 @@ import { useState, useCallback } from 'react';
 import { useDropzone, FileRejection } from 'react-dropzone';
 import { nanoid } from 'nanoid';
 import { LuX } from 'react-icons/lu';
+import axios from 'axios';
 
-import useEmbedding from './use-embedding';
+import useContextStore from '@store/context';
+import useConvoStore from '@store/conversations';
+// import useEmbedding from './use-embedding';
 
 function Upload() {
-  const { loading, processFile } = useEmbedding()
+  const [loading, setLoading] = useState(false)
+  // const { loading, processFile } = useEmbedding()
+  const project_id = useContextStore(s => s.project_id)
+  const addFile = useConvoStore(s => s.addFile)
 
   const [file, setFile] = useState<File | null>(null)
 
@@ -29,15 +35,38 @@ function Upload() {
     },
   })
 
-  const upload = () => {
+  const upload = async () => {
     if (file) {
-      processFile({
-        file,
-        collectionName: nanoid(),
-        onSuccess() {
-          setFile(null)
-        }
-      })
+      try {
+        console.log(file)
+        setLoading(true)
+        const formData = new FormData()
+        formData.append("files", file)
+
+        const { data } = await axios.post(`http://localhost:4000/doc/index/${project_id}`, formData)
+        console.log(data)
+
+        addFile(project_id, {
+          id: nanoid(10),
+          name: file.name,
+          size: file.size,
+          type: file.type,
+        })
+        setLoading(false)
+        setFile(null)
+
+      } catch (error) {
+        console.log(error)
+        setLoading(false)
+        setFile(null)
+      }
+      // processFile({
+      //   file,
+      //   collectionName: nanoid(),
+      //   onSuccess() {
+      //     setFile(null)
+      //   }
+      // })
     }
   }
 

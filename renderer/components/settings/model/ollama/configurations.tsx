@@ -1,16 +1,7 @@
-import { useQuery } from "@tanstack/react-query";
-
-import { getOllamaTags } from "@actions/ollama";
 import useContextStore from "@store/context";
 
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { useToast } from "@components/ui/use-toast";
+import ModelSelect from "./model-select";
 
 function Configurations() {
   const updateContext = useContextStore(s => s.updateContext)
@@ -18,11 +9,6 @@ function Configurations() {
   const ollamaUrl = useContextStore(s => s.ollamaUrl)
 
   const { toast } = useToast()
-
-  const { data, isLoading } = useQuery({
-    queryKey: ["ollama-tags", ollamaUrl],
-    queryFn: getOllamaTags,
-  })
 
   async function checkAutoDetect() {
     try {
@@ -70,25 +56,12 @@ function Configurations() {
       <div className="mb-8">
         <label htmlFor="" className="text-xs opacity-70">Ollama Model Name</label>
 
-        <Select value={ollamaModel} onValueChange={v => updateContext({ ollamaModel: v })}>
-          <SelectTrigger className="h-9 px-2 py-1.5 text-sm bg-transparent border focus:ring-0">
-            <SelectValue placeholder="Server" />
-          </SelectTrigger>
-
-          <SelectContent className="[&_svg]:hidden min-w-[100px]">
-            {
-              !isLoading && data?.map(m => (
-                <SelectItem
-                  className="h-6 px-2 text-xs"
-                  value={m.model}
-                  key={m.model}
-                >
-                  {m.name}
-                </SelectItem>
-              ))
-            }
-          </SelectContent>
-        </Select>
+        <ModelSelect
+          ollamaUrl={ollamaUrl}
+          val={ollamaModel}
+          onChange={v => updateContext({ ollamaModel: v })}
+          filterFn={m => !m?.details?.family?.includes("bert")}
+        />
       </div>
     </>
   )
