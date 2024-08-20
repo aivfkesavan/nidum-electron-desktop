@@ -2,6 +2,7 @@ import path from 'path'
 import { app, ipcMain } from 'electron'
 import serve from 'electron-serve'
 import { createWindow } from './helpers'
+import startServer from '../server'
 
 const isProd = process.env.NODE_ENV === 'production'
 
@@ -29,6 +30,8 @@ if (isProd) {
     await mainWindow.loadURL(`http://localhost:${port}/home`)
     mainWindow.webContents.openDevTools()
   }
+
+  startServer()
 })()
 
 app.on('window-all-closed', () => {
