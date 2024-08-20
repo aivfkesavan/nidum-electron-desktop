@@ -4,6 +4,7 @@ import { useQuery } from "@tanstack/react-query";
 import { getOllamaTags } from "@actions/ollama";
 import useContextStore from "@store/context";
 import useModelStore from "@store/model";
+import { useToast } from "@components/ui/use-toast";
 
 import DeleteModel from "./delete-model";
 import ModelInfo from "./model-info";
@@ -15,6 +16,7 @@ type props = {
 function Manage({ filterFn }: props) {
   const [modelName, setModelName] = useState("")
   const [model, setModel] = useState("")
+  const { toast } = useToast()
 
   const updateContext = useModelStore(s => s.updateContext)
   const ollamaUrl = useContextStore(s => s.ollamaUrl)
@@ -27,6 +29,9 @@ function Manage({ filterFn }: props) {
   const updateModel = (v: string = "") => setModel(v)
 
   function startDownloading() {
+    const found = data?.find(d => d?.model === modelName)
+    if (found) return toast({ title: "Model already downloaded" })
+
     setModelName("")
     updateContext({ is_downloading: true, name: modelName })
   }
