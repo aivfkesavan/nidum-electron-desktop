@@ -13,3 +13,4 @@ app
 dist
 
 /.vscode
+.env

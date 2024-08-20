@@ -14,6 +14,25 @@ function SpeechToText({ disabled, postData }: props) {
   const stt_type = useContextStore(s => s.stt_type)
   const isSupported = useSttValidCheck()
 
+  async function get() {
+    try {
+      const query = "summersie the document"
+      const res = await fetch(`http://localhost:4000/doc?query=${query}`, {
+        method: "GET",
+      })
+      const g = await res.json()
+      console.log(g)
+    } catch (error) {
+      console.log(error)
+    }
+  }
+
+  return (
+    <button onClick={get}>
+      hi
+    </button>
+  )
+
   if (!isSupported) return null
 
   return stt_type === "Groq" ? (
