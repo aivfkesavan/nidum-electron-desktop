@@ -1,29 +1,19 @@
 const fs = require("fs/promises")
 const express = require('express')
-const { OllamaEmbedding, Settings, Document, VectorStoreIndex, } = require("llamaindex");
+const {
+  OllamaEmbedding, Settings, Document,
+  VectorStoreIndex, storageContextFromDefaults,
+} = require("llamaindex")
 require("dotenv/config")
 
-// const axios = require("axios")
-
+const { queryIndex } = require("./query-doc")
 const router = express.Router()
 
-// const { SimpleDirectoryReader, } = require("llamaindex")
+const INDEX_STORE_PATH = "./index_store"
 
-// async function get() {
-//   try {
-//     const reader = new SimpleDirectoryReader();
-//     const documents = await reader.loadData("./doc");
-
-//   } catch (error) {
-//     console.log(error)
-//   }
-// }
-
-router.get("/", async (req, res) => {
+router.post("/create-index", async (req, res) => {
   try {
-    const { query } = req.query
-
-    Settings.embedModel = new OllamaEmbedding({ model: "mxbai-embed-large" });
+    Settings.embedModel = new OllamaEmbedding({ model: "mxbai-embed-large" })
 
     const essay = await fs.readFile(
       "node_modules/llamaindex/examples/abramov.txt",
@@ -32,30 +22,32 @@ router.get("/", async (req, res) => {
 
     const document = new Document({ text: essay, id_: "essay" })
 
-    const index = await VectorStoreIndex.fromDocuments([document])
+    const storageContext = await storageContextFromDefaults({
+      persistDir: INDEX_STORE_PATH,
+    })
 
-    const queryEngine = index.asQueryEngine()
+    const index = await VectorStoreIndex.fromDocuments([document], { storageContext })
+    const stored = await index.storage.persist(INDEX_STORE_PATH)
 
-    const response = await queryEngine.query({
-      query,
-    });
-
-    // console.log(response?.message?.content)
-
-    // const response = await axios.post("http://localhost:11434/api/embeddings", {
-    //   model: "mxbai-embed-large",
-    //   prompt: essay,
-    // })
-    // console.log(response.data)
-
-    // const reader = new SimpleDirectoryReader();
-    // const documents = await reader.loadData("/Users/rajkumar/Documents/nextron-with-shadcn-ui/server/doc");
-    // console.log("documents-----", documents)
-
-    return res.json({ msg: response?.message?.content })
+    return res.json({ msg: "index stored", stored })
 
   } catch (error) {
     res.status(400).json({ error, msg: "m" })
+  }
+})
+
+router.get("/ask", async (req, res) => {
+  try {
+    const { query } = req.query
+
+    if (!query) return res.status(400).json({ error: "Query parameter is required" })
+
+    const result = await queryIndex(query)
+
+    return res.json(result)
+
+  } catch (error) {
+    res.status(500).json({ error })
   }
 })
 
