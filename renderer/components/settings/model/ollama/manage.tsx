@@ -8,7 +8,11 @@ import useModelStore from "@store/model";
 import DeleteModel from "./delete-model";
 import ModelInfo from "./model-info";
 
-function Manage() {
+type props = {
+  filterFn: (m: any) => boolean;
+}
+
+function Manage({ filterFn }: props) {
   const [modelName, setModelName] = useState("")
   const [model, setModel] = useState("")
 
@@ -33,16 +37,19 @@ function Manage() {
       <div className="mini-scroll-bar p-2 pr-4 -mr-4 mb-8 max-h-40 overflow-y-auto rounded border">
 
         {
-          !isLoading && data?.map(m => (
-            <ModelInfo
-              key={m?.model}
-              size={m?.size}
-              name={m?.name}
-              model={m?.model}
-              quantization_level={m?.details?.quantization_level}
-              updateModel={updateModel}
-            />
-          ))
+          !isLoading &&
+          data
+            ?.filter(filterFn)
+            ?.map(m => (
+              <ModelInfo
+                key={m?.model}
+                size={m?.size}
+                name={m?.name}
+                model={m?.model}
+                quantization_level={m?.details?.quantization_level}
+                updateModel={updateModel}
+              />
+            ))
         }
       </div>
 

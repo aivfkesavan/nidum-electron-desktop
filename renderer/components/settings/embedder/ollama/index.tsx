@@ -2,7 +2,7 @@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import Configurations from "./configurations";
 import Instructions from "./instructions";
-import Manage from "./manage";
+import Manage from "../../model/ollama/manage";
 
 const tabs = ["Configurations", "Manage Models", "Instructions"]
 
@@ -28,7 +28,7 @@ function index() {
       </TabsContent>
 
       <TabsContent value="Manage Models">
-        <Manage filterFn={m => !m?.details?.family?.includes("bert")} />
+        <Manage filterFn={m => m?.details?.family?.includes("bert")} />
       </TabsContent>
 
       <TabsContent value="Instructions">
