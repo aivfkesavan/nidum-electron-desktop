@@ -1,4 +1,5 @@
 import useContextStore from "@/store/context";
+import ModelSelect from "@components/settings/model/ollama/model-select";
 import { useToast } from "@components/ui/use-toast";
 
 function Configurations() {
@@ -27,6 +28,7 @@ function Configurations() {
       console.log(error)
     }
   }
+
   return (
     <>
       <div className="mb-4">
@@ -52,12 +54,11 @@ function Configurations() {
       <div className="my-4">
         <label htmlFor="" className="mb-0.5 text-xs opacity-70">Embedding Model</label>
 
-        <input
-          type="text"
-          className="text-sm px-2 py-1.5 bg-transparent border"
-          placeholder="mxbai-embed-large"
-          value={embeddingModel}
-          onChange={e => updateContext({ ollamaEmbeddingModel: e.target.value })}
+        <ModelSelect
+          ollamaUrl={embeddingUrl}
+          val={embeddingModel}
+          onChange={v => updateContext({ ollamaEmbeddingModel: v })}
+          filterFn={m => m?.details?.family?.includes("bert")}
         />
       </div>
     </>

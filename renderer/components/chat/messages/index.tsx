@@ -441,7 +441,7 @@ function Messages() {
           disabled={isChatInputDisabled}
         />
 
-        {/* <FileUpload /> */}
+        <FileUpload />
 
         {
           isModelDownloading &&

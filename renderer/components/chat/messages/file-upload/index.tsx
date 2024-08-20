@@ -20,23 +20,23 @@ function FileUpload() {
   const ollamEmbeddingUrl = useContextStore(s => s.ollamEmbeddingUrl)
   const embedding_type = useContextStore(s => s.embedding_type)
 
-  const qdrantDBUrl = useContextStore(s => s.qdrantDBUrl)
-  const vb_type = useContextStore(s => s.vb_type)
+  // const qdrantDBUrl = useContextStore(s => s.qdrantDBUrl)
+  // const vb_type = useContextStore(s => s.vb_type)
 
   const project_id = useContextStore(s => s.project_id)
 
   const { toast } = useToast()
 
-  const isNotValid = !embedding_type || !ollamEmbeddingUrl || !ollamaEmbeddingModel || !vb_type || !qdrantDBUrl
+  const isNotValid = !embedding_type || !ollamEmbeddingUrl || !ollamaEmbeddingModel  // || !vb_type || !qdrantDBUrl
 
   function onClk() {
     if (!embedding_type || !ollamEmbeddingUrl || !ollamaEmbeddingModel) {
       return toast({ title: "Please check your embedding configurations" })
     }
 
-    if (!vb_type || !qdrantDBUrl) {
-      return toast({ title: "Please check your vector database configurations" })
-    }
+    // if (!vb_type || !qdrantDBUrl) {
+    //   return toast({ title: "Please check your vector database configurations" })
+    // }
   }
 
   if (isNotValid) {

@@ -1,3 +1,5 @@
+const fs = require('fs').promises
+const path = require('path')
 const express = require('express')
 const {
   OllamaEmbedding, Settings,
@@ -11,18 +13,37 @@ const { upload } = require("./add-files")
 
 const router = express.Router()
 
-router.post("/create-index/:folderName", upload.array('files'), async (req, res) => {
+async function indexFolder({ folderName }) {
+  Settings.embedModel = new OllamaEmbedding({ model: "mxbai-embed-large" })
+
+  const directoryPath = createPath([folderName])
+  const documents = await new SimpleDirectoryReader().loadData({ directoryPath })
+
+  const persistDir = getRagPath(folderName)
+  const storageContext = await storageContextFromDefaults({ persistDir })
+
+  await VectorStoreIndex.fromDocuments(documents, { storageContext })
+}
+
+router.post("/index/:folderName", upload.array('files'), async (req, res) => {
   try {
     const { folderName } = req.params
-    Settings.embedModel = new OllamaEmbedding({ model: "mxbai-embed-large" })
+    await indexFolder({ folderName })
 
-    const directoryPath = createPath([folderName])
-    const documents = await new SimpleDirectoryReader().loadData({ directoryPath })
+    return res.json({ msg: "index stored" })
 
-    const persistDir = getRagPath(folderName)
-    const storageContext = await storageContextFromDefaults({ persistDir })
+  } catch (error) {
+    return res.status(400).json({ error })
+  }
+})
 
-    await VectorStoreIndex.fromDocuments(documents, { storageContext })
+router.delete("/index/:folderName/:filename", async (req, res) => {
+  try {
+    const { folderName, filename } = req.params
+    const filePath = createPath([folderName, filename])
+    console.log(filePath)
+    await fs.unlink(filePath)
+    await indexFolder({ folderName })
 
     return res.json({ msg: "index stored" })
 
