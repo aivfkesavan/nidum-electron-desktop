@@ -1,5 +1,6 @@
 export { default as duckDuckGoSerach } from "./duck-duck-go-search";
 export { default as fileSearchQdrant } from "./file-search-qdrant";
+export { default as ragSearch } from "./rag-search";
 
 export const duckDuckGoPrompt = "You are an assistant for question-answering tasks. Use the following pieces of retrieved context to answer the question. If the context does not contain the answer, then answer on your own. If the user asks a general question, you need to answer. "
 

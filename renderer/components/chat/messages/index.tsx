@@ -4,7 +4,7 @@ import { LuSend } from "react-icons/lu";
 import { nanoid } from "nanoid";
 import { LuX } from "react-icons/lu";
 
-import { createContext, duckDuckGoPrompt, duckDuckGoSerach, fileSearchQdrant } from "../../../utils/improve-context";
+import { createContext, duckDuckGoPrompt, duckDuckGoSerach, fileSearchQdrant, ragSearch } from "../../../utils/improve-context";
 import isWithinTokenLimit from "@/utils/is-within-token-limit";
 
 import { useAudio } from "./use-speech";
@@ -44,10 +44,12 @@ function Messages() {
   const editChat = useConvoStore(s => s.editChat)
   const addChat = useConvoStore(s => s.addChat)
 
-  const fileDetails = useConvoStore(s => {
-    const file_id = s.chats?.[project_id]?.find(c => c.id === id)?.file_id
-    return s.files?.[project_id]?.find(f => f.id === file_id)
-  })
+  const ragEnabled = useConvoStore(s => s.chats?.[project_id]?.find(c => c.id === id)?.rag_enabled)
+
+  // const fileDetails = useConvoStore(s => {
+  //   const file_id = s.chats?.[project_id]?.find(c => c.id === id)?.file_id
+  //   return s.files?.[project_id]?.find(f => f.id === file_id)
+  // })
 
   const [reachedLimit, setReachedLimit] = useState(false)
   const [tempData, setTempData] = useState<msg[]>([])
@@ -95,9 +97,9 @@ function Messages() {
           if (!ollamaModel) return toast({ title: "Please choose a Ollama Model" })
         }
 
-        if (fileDetails) {
+        if (ragEnabled) {
           if (embedding_type === "Ollama" && (!ollamEmbeddingUrl || !ollamaEmbeddingModel)) return toast({ title: "Please Check your Ollama embedding configurations in settings" })
-          if (vb_type === "Qdrant" && !qdrantDBUrl) return toast({ title: "Please Check your Qdrant db configurations in settings" })
+          // if (vb_type === "Qdrant" && !qdrantDBUrl) return toast({ title: "Please Check your Qdrant db configurations in settings" })
         }
 
         setMessage('')
@@ -111,6 +113,7 @@ function Messages() {
             id: temContextId,
             title: msg,
             file_id: null,
+            rag_enabled: false
           })
 
           updateContext({ chat_id: temContextId })
@@ -145,7 +148,7 @@ function Messages() {
 
         let systemPrompt = projectdetails?.systemPrompt || "You are a helpful AI assistant"
 
-        if (webEnabled && !fileDetails) {
+        if (webEnabled && !ragEnabled) {
           const searchReult = await duckDuckGoSerach(msg)
           systemPrompt = createContext({
             base: duckDuckGoPrompt,
@@ -153,8 +156,10 @@ function Messages() {
           })
         }
 
-        if (fileDetails) {
-          const searchReult = await fileSearchQdrant(msg, fileDetails.id)
+        if (ragEnabled) {
+          const searchReult = await ragSearch(msg)
+          console.log(searchReult)
+          // const searchReult = await fileSearchQdrant(msg, fileDetails.id)
           systemPrompt = createContext({
             base: duckDuckGoPrompt,
             context: searchReult,
@@ -386,14 +391,14 @@ function Messages() {
         <Settings />
 
         {
-          fileDetails &&
-          <div className="df py-2 pl-3 text-xs absolute bottom-full left-4 sm:left-[68px] text-white/80 bg-border rounded-sm">
-            <FaFileAlt className="shrink-0 text-xl text-white/50" />
-            <p className="w-48 truncate">{fileDetails.name}</p>
+          ragEnabled &&
+          <div className="df py-1 pl-2 text-xs absolute bottom-full left-4 sm:left-[68px] text-white/80 bg-border rounded-sm">
+            <FaFileAlt className="shrink-0 text-base text-white/50" />
+            <p className="w-24 truncate">Rag enabled</p>
 
             <button
               className="shrink-0 p-1 hover:bg-red-400 mr-1"
-              onClick={() => editChat(project_id, { id, file_id: null })}
+              onClick={() => editChat(project_id, { id, rag_enabled: false })}
             >
               <LuX />
             </button>

@@ -25,7 +25,7 @@ function Create() {
   const onClk = () => {
     if (project_id) {
       const id = nanoid(10)
-      addChat(project_id, { id, title: "New Chat", file_id: null })
+      addChat(project_id, { id, title: "New Chat", file_id: null, rag_enabled: false })
       updateContext({ chat_id: id })
       return
     }
