@@ -23,6 +23,8 @@ type state = {
   qdrantDBApiKey: string;
 
   stt_type: "Groq" | "System native";
+  nativeSttModelsDownloaded: string;
+  nativeSttModel: string;
   sttGroqApiKey: string;
 
   tts_type: "System native";
@@ -57,6 +59,8 @@ const useContextStore = create<state & actions>()(persist(set => ({
   qdrantDBApiKey: "",
 
   stt_type: "System native",
+  nativeSttModelsDownloaded: "",
+  nativeSttModel: "",
   sttGroqApiKey: "",
 
   tts_type: "System native",
