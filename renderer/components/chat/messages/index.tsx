@@ -112,8 +112,6 @@ function Messages() {
           addChat(project_id, {
             id: temContextId,
             title: msg,
-            file_id: null,
-            rag_enabled: false
           })
 
           updateContext({ chat_id: temContextId })
