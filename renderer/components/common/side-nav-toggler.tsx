@@ -7,7 +7,7 @@ function SideNavToggler() {
 
   return (
     <button
-      className="fixed top-2 left-2 p-1 text-lg z-[2] bg-background"
+      className="side-nav-toggle fixed top-2 left-2 p-1 text-lg z-[2]"
       onClick={toggleNav}
     >
       <SideBar />

@@ -63,7 +63,7 @@ function NativeProvider({ disabled, postData }: props) {
 
       {isRecording && (
         <>
-          <span className='mic-bg-animation absolute w-10 h-10 left-0 top-0 bg-primary rounded-full z-[-1]'></span>
+          <span className='mic-bg-animation absolute w-10 h-10 left-0 top-0 bg-blue-400 rounded-full z-[-1]'></span>
           <button
             className='dc w-7 h-7 p-0 absolute -top-8 left-1.5 animate-enter-opacity text-base rounded-full text-white bg-red-400'
             onClick={() => stopRecording(false)}
