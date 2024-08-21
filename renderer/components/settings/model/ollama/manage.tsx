@@ -40,7 +40,6 @@ function Manage({ filterFn }: props) {
     <>
       <h6 className="mb-0.5 text-[11px] text-white/70">Available Models</h6>
       <div className="mini-scroll-bar p-2 pr-4 -mr-4 mb-8 max-h-40 overflow-y-auto rounded border">
-
         {
           !isLoading &&
           data

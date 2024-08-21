@@ -3,7 +3,10 @@ import { IoMdMic } from "react-icons/io";
 import { LuX } from "react-icons/lu";
 
 import { convertToWav } from "@utils/audio-help";
+import useContextStore from "@store/context";
+import { useToast } from "@components/ui/use-toast";
 import useRecord from "./use-record";
+import constants from "@utils/constants";
 
 type props = {
   disabled: boolean
@@ -11,7 +14,10 @@ type props = {
 }
 
 function NativeProvider({ disabled, postData }: props) {
+  const nativeSttModel = useContextStore(s => s.nativeSttModel)
+
   const { isRecording, isSupported, onClk, stopRecording } = useRecord()
+  const { toast } = useToast()
 
   const sendAudioToServer = async (audioBlob: Blob) => {
     const wavBlob = await convertToWav(audioBlob, 16000);
@@ -19,11 +25,15 @@ function NativeProvider({ disabled, postData }: props) {
     formData.append('audio', wavBlob, 'recording.wav')
 
     try {
-      const response = await fetch('/whisper/transcribe/1', {
+      const response = await fetch(`${constants.backendUrl}/whisper/transcribe/audio`, {
         method: 'POST',
         body: formData,
       })
-      console.log(response)
+      const res = await response.json()
+
+      if (res.transcriped) {
+        postData(res.transcriped, true)
+      }
 
     } catch (error) {
       console.error('Error uploading audio:', error);
@@ -31,7 +41,7 @@ function NativeProvider({ disabled, postData }: props) {
   }
 
   const onClick = () => {
-    // if (!sttGroqApiKey) return toast({ title: "Please provide groq api key" })
+    if (!nativeSttModel) return toast({ title: "Please select whisper model" })
     onClk(sendAudioToServer)
   }
 
