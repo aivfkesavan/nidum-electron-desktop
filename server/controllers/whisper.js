@@ -4,34 +4,48 @@ const {
   installWhisperCpp,
   transcribe,
   convertToCaptions,
-
 } = require("@remotion/install-whisper-cpp");
+
+const { getWhisperPath } = require('../utils/path-helper');
+const { upload } = require("../middleawres/upload");
 
 const router = express.Router()
 
-const { getWhisperPath } = require('server/utils/path-helper');
-const { upload } = require("../middleawres/upload");
-
 router.post("/", async (req, res) => {
+  res.writeHead(200, {
+    'Content-Type': 'text/event-stream',
+    'Cache-Control': 'no-cache',
+    'Connection': 'keep-alive'
+  })
+
+  const sendProgress = (message) => res.write(`data: ${JSON.stringify(message)}\n\n`)
+
   try {
     const whisperPath = getWhisperPath()
+
+    sendProgress({ stage: 'install', status: 'started' })
     await installWhisperCpp({
       to: whisperPath,
       version: "1.5.5",
     })
+    sendProgress({ stage: 'install', status: 'completed' })
 
+    sendProgress({ stage: 'download', status: 'started' })
     await downloadWhisperModel({
       model: "medium.en",
       folder: whisperPath,
       onProgress(r) {
-        console.log(r)
+        sendProgress({ stage: 'download', status: 'in-progress', progress: r })
       }
     })
+    sendProgress({ stage: 'download', status: 'completed' })
 
-    res.send("")
+    sendProgress({ stage: 'overall', status: 'completed' })
 
   } catch (error) {
-    return res.status(500).json({ error })
+    sendProgress({ stage: 'error', error: error.message })
+  } finally {
+    res.end()
   }
 })
 
