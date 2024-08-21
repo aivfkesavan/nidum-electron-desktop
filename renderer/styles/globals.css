@@ -158,7 +158,7 @@
     @apply translate-x-0;
   }
 
-  body.open {
+  body.open .app-wrapper {
     @apply md:pl-[240px];
   }
 }

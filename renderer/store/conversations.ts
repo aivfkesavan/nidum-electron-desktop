@@ -39,6 +39,7 @@ type FileT = {
 }
 
 type state = {
+  initialised: boolean
   projects: Record<string, Project>; // project_id
   files: Record<string, FileT[]>; // project_id
   chats: Record<string, Chat[]>; // project_id
@@ -54,6 +55,7 @@ type addProjectType = {
 }
 
 type actions = {
+  init: () => void;
   addProject: (project: addProjectType) => void;
   editProject: (project_id: string, obj: Partial<Project>) => void;
   deleteProject: (project_id: string) => void;
@@ -87,7 +89,7 @@ const createDefaultProject = (): [string, Project] => {
   }];
 }
 
-const createDefaultChat = (projectId: string): Chat => ({
+const createDefaultChat = (): Chat => ({
   id: nanoid(10),
   title: "Default Chat",
   file_id: null,
@@ -95,10 +97,23 @@ const createDefaultChat = (projectId: string): Chat => ({
 })
 
 const useConvoStore = create<state & actions>()(persist(immer(set => ({
+  initialised: false,
   projects: {},
   chats: {},
   messages: {},
   files: {},
+
+  init: () => set(state => {
+    if (!state.initialised && Object.keys(state.projects).length === 0) {
+      const [defaultProjectId, defaultProject] = createDefaultProject();
+      state.projects[defaultProjectId] = defaultProject;
+
+      const defaultChat = createDefaultChat();
+      state.chats[defaultProjectId] = [defaultChat];
+      state.messages[defaultChat.id] = [];
+      state.initialised = true
+    }
+  }),
 
   addProject: (project) => set(state => {
     const id = nanoid(10)
@@ -178,18 +193,6 @@ const useConvoStore = create<state & actions>()(persist(immer(set => ({
 })),
   {
     name: 'convo-storage',
-    onRehydrateStorage: () => (state) => {
-      if (state) {
-        if (Object.keys(state.projects).length === 0) {
-          const [defaultProjectId, defaultProject] = createDefaultProject();
-          state.projects[defaultProjectId] = defaultProject;
-
-          const defaultChat = createDefaultChat(defaultProjectId);
-          state.chats[defaultProjectId] = [defaultChat];
-          state.messages[defaultChat.id] = [];
-        }
-      }
-    },
   }
 ))
 

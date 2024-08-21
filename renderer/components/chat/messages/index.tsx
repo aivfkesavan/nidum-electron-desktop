@@ -34,7 +34,7 @@ function Messages() {
     updateContext, project_id, chat_id: id, webEnabled,
     model_type, groqApiKey, groqModel, ollamaUrl, ollamaModel,
     embedding_type, ollamEmbeddingUrl, ollamaEmbeddingModel,
-    vb_type, qdrantDBUrl,
+    // vb_type, qdrantDBUrl,
   } = useContextStore()
 
   const isModelDownloading = useModelStore(s => s.is_downloading)
@@ -43,13 +43,9 @@ function Messages() {
   const deleteMessage = useConvoStore(s => s.deleteMessage)
   const editChat = useConvoStore(s => s.editChat)
   const addChat = useConvoStore(s => s.addChat)
+  const init = useConvoStore(s => s.init)
 
   const ragEnabled = useConvoStore(s => s.chats?.[project_id]?.find(c => c.id === id)?.rag_enabled)
-
-  // const fileDetails = useConvoStore(s => {
-  //   const file_id = s.chats?.[project_id]?.find(c => c.id === id)?.file_id
-  //   return s.files?.[project_id]?.find(f => f.id === file_id)
-  // })
 
   const [reachedLimit, setReachedLimit] = useState(false)
   const [tempData, setTempData] = useState<msg[]>([])
@@ -63,6 +59,10 @@ function Messages() {
 
   const data = useConvoStore(s => s.messages?.[id] || [])
   const isChatInputDisabled = reachedLimit || !project_id
+
+  useEffect(() => {
+    init()
+  }, [])
 
   useEffect(() => {
     setTempData([])

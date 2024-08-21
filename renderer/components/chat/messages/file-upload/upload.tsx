@@ -11,6 +11,7 @@ import Settings from "./settings";
 function Upload() {
   const [loading, setLoading] = useState(false)
   const project_id = useContextStore(s => s.project_id)
+  const chat_id = useContextStore(s => s.chat_id)
   const addFile = useConvoStore(s => s.addFile)
 
   const [files, setFiles] = useState<File[]>([])
@@ -37,8 +38,7 @@ function Upload() {
         const formData = new FormData()
         files.forEach(file => formData.append("files", file))
 
-        const { data } = await axios.post(`http://localhost:4000/doc/index/${project_id}`, formData)
-        console.log(data)
+        await axios.post(`http://localhost:4000/doc/index/${project_id}`, formData)
 
         files.forEach(file => {
           addFile(project_id, {
@@ -96,7 +96,10 @@ function Upload() {
         Upload
       </button>
 
-      <Settings />
+      {
+        chat_id &&
+        <Settings />
+      }
     </div>
   );
 }
