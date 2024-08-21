@@ -1,6 +1,6 @@
 const fs = require('fs').promises
-const path = require('path')
 const express = require('express')
+
 const {
   OllamaEmbedding, Settings,
   VectorStoreIndex, storageContextFromDefaults, SimpleDirectoryReader,
@@ -41,8 +41,12 @@ router.delete("/index/:folderName/:filename", async (req, res) => {
   try {
     const { folderName, filename } = req.params
     const filePath = createPath([folderName, filename])
-    console.log(filePath)
+
     await fs.unlink(filePath)
+
+    const indexStore = getRagPath(folderName)
+    await fs.rm(indexStore, { recursive: true, force: true })
+
     await indexFolder({ folderName })
 
     return res.json({ msg: "index stored" })
