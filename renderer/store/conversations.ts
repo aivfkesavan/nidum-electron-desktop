@@ -12,8 +12,7 @@ type Message = {
 type Chat = {
   id: string;
   title: string;
-  file_id: string | null
-  rag_enabled: boolean
+  rag_enabled: boolean;
 }
 
 type Project = {
@@ -60,7 +59,7 @@ type actions = {
   editProject: (project_id: string, obj: Partial<Project>) => void;
   deleteProject: (project_id: string) => void;
 
-  addChat: (projectId: string, chat: Chat) => void;
+  addChat: (projectId: string, chat: Omit<Chat, "rag_enabled">) => void;
   editChat: (projectId: string, chat: Partial<Chat>) => void;
   deleteChat: (project_id: string, chat_id: string) => void;
 
@@ -92,7 +91,6 @@ const createDefaultProject = (): [string, Project] => {
 const createDefaultChat = (): Chat => ({
   id: nanoid(10),
   title: "Default Chat",
-  file_id: null,
   rag_enabled: false,
 })
 
@@ -127,6 +125,12 @@ const useConvoStore = create<state & actions>()(persist(immer(set => ({
       top_p: 1,
       n: 1,
     }
+
+    state.chats[id] = [{
+      id: nanoid(10),
+      title: "New Chat",
+      rag_enabled: false,
+    }]
   }),
 
   editProject: (project_id, details) => set(state => {
@@ -147,7 +151,10 @@ const useConvoStore = create<state & actions>()(persist(immer(set => ({
     if (!state.chats[projectId]) {
       state.chats[projectId] = []
     }
-    state.chats[projectId].unshift(chat)
+    state.chats[projectId].unshift({
+      ...chat,
+      rag_enabled: false,
+    })
   }),
 
   editChat: (projectId, chat) => set(state => {
