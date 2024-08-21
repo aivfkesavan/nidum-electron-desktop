@@ -6,7 +6,7 @@ const { createPath } = require("./path-helper")
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
     const uploadDir = createPath([req.params.folderName])
-    fs.mkdirSync(uploadDir, { recursive: true })
+    fs.mkdirSync(uploadDir, { recursive: true, mode: 0o777 })
     cb(null, uploadDir);
   },
   filename: function (req, file, cb) {
