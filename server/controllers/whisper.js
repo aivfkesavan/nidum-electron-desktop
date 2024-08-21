@@ -9,56 +9,53 @@ const {
 
 const router = express.Router()
 
-const { upload } = require("../middleawres/upload")
+const { getWhisperPath } = require('server/utils/path-helper');
+const { upload } = require("../middleawres/upload");
 
 router.post("/", async (req, res) => {
   try {
-    const to = "/Users/rajkumar/.nidum/whisper/whisper.cpp"
-    const re = await installWhisperCpp({
-      to,
+    const whisperPath = getWhisperPath()
+    await installWhisperCpp({
+      to: whisperPath,
       version: "1.5.5",
-    });
-    console.log(re)
+    })
 
-    const g = await downloadWhisperModel({
+    await downloadWhisperModel({
       model: "medium.en",
-      folder: to,
+      folder: whisperPath,
       onProgress(r) {
         console.log(r)
       }
     })
-    console.log(g)
 
-    res.send("nljnkl")
+    res.send("")
+
   } catch (error) {
-    console.log(error)
-    res.send("nljnkl")
+    return res.status(500).json({ error })
   }
 })
 
 router.post("/transcribe/:folderName", upload.single('audio'), async (req, res) => {
   try {
-    const to = "/Users/rajkumar/.nidum/whisper/whisper.cpp"
+    const whisperPath = getWhisperPath()
     const { transcription } = await transcribe({
-      model: "medium.en",
-      whisperPath: to,
-      inputPath: req.file.path,
       tokenLevelTimestamps: true,
-    });
+      inputPath: req.file.path,
+      model: "medium.en",
+      whisperPath,
+    })
 
     const { captions } = convertToCaptions({
-      transcription,
       combineTokensWithinMilliseconds: 200,
-    });
+      transcription,
+    })
 
     const transcriped = captions?.map(cap => cap.text).join(' ')
-    console.log(transcriped)
 
-    res.send("nljnkl")
+    return res.json({ transcriped })
 
   } catch (error) {
-    console.log(error)
-    res.send("nljnkl")
+    return res.status(500).json({ error })
   }
 })
 
