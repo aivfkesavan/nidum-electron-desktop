@@ -69,6 +69,31 @@ type actions = {
   deleteFile: (project_id: string, file_id: string) => void;
 }
 
+const createDefaultProject = (): [string, Project] => {
+  const id = nanoid(10);
+  return [id, {
+    id,
+    name: "Default Project",
+    description: "This is a default project",
+    category: "General",
+    other: "",
+    systemPrompt: "You are a helpful assistant.",
+    frequency_penalty: 0,
+    temperature: 0.1,
+    tokenLimit: 8000,
+    max_tokens: 500,
+    top_p: 1,
+    n: 1,
+  }];
+}
+
+const createDefaultChat = (projectId: string): Chat => ({
+  id: nanoid(10),
+  title: "Default Chat",
+  file_id: null,
+  rag_enabled: false,
+})
+
 const useConvoStore = create<state & actions>()(persist(immer(set => ({
   projects: {},
   chats: {},
@@ -153,6 +178,18 @@ const useConvoStore = create<state & actions>()(persist(immer(set => ({
 })),
   {
     name: 'convo-storage',
+    onRehydrateStorage: () => (state) => {
+      if (state) {
+        if (Object.keys(state.projects).length === 0) {
+          const [defaultProjectId, defaultProject] = createDefaultProject();
+          state.projects[defaultProjectId] = defaultProject;
+
+          const defaultChat = createDefaultChat(defaultProjectId);
+          state.chats[defaultProjectId] = [defaultChat];
+          state.messages[defaultChat.id] = [];
+        }
+      }
+    },
   }
 ))
 
