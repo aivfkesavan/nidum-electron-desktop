@@ -16,18 +16,31 @@ function Upload() {
 
   const [files, setFiles] = useState<File[]>([])
 
+  const acceptedFileTypes = {
+    'application/pdf': ['.pdf'],
+    'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet': ['.xlsx'],
+    'application/vnd.ms-excel': ['.xls'],
+    'application/vnd.openxmlformats-officedocument.presentationml.presentation': ['.pptx'],
+    'application/vnd.ms-powerpoint': ['.ppt'],
+    'application/vnd.openxmlformats-officedocument.wordprocessingml.document': ['.docx'],
+    'application/msword': ['.doc'],
+    'text/plain': ['.txt'],
+    'text/markdown': ['.md']
+  }
+
   const onDrop = useCallback((acceptedFiles: File[], fileRejections: FileRejection[]) => {
     if (fileRejections.length > 0) return;
 
-    const newFiles = acceptedFiles.filter(file => file.type === 'application/pdf')
+    const newFiles = acceptedFiles.filter(file =>
+      Object.keys(acceptedFileTypes).includes(file.type) ||
+      Object.values(acceptedFileTypes).flat().includes(`.${file.name.split('.').pop()?.toLowerCase()}`)
+    )
     setFiles(pre => [...pre, ...newFiles].slice(0, 4))
   }, [])
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     onDrop,
-    accept: {
-      'application/pdf': ['.pdf']
-    },
+    accept: acceptedFileTypes,
     maxFiles: 4,
   })
 
