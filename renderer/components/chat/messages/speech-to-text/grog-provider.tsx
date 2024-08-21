@@ -15,9 +15,8 @@ type Props = {
 function GroqProvider({ disabled, postData }: Props) {
   const sttGroqApiKey = useContextStore(s => s.sttGroqApiKey)
 
-  const { toast } = useToast()
-
   const { isRecording, isSupported, onClk, stopRecording } = useRecord()
+  const { toast } = useToast()
 
   const sendAudioTo_STT_API = async (audioBlob: Blob) => {
     const transcript = await transcribeAudio(audioBlob)

@@ -11,36 +11,38 @@ import { upload } from "../middleawres/upload.js";
 
 const router = express.Router()
 
-router.post("/", async (req, res) => {
-  res.writeHead(200, {
-    'Content-Type': 'text/event-stream',
-    'Cache-Control': 'no-cache',
-    'Connection': 'keep-alive'
-  })
-
-  const sendProgress = (message) => res.write(`data: ${JSON.stringify(message)}\n\n`)
-
+router.post("/download", async (req, res) => {
   try {
+    const { model } = req.body
+
+    res.writeHead(200, {
+      'Content-Type': 'text/event-stream',
+      'Cache-Control': 'no-cache',
+      'Connection': 'keep-alive'
+    })
+
+    const sendProgress = (message) => res.write(`data: ${JSON.stringify(message)}\n\n`)
+
     const whisperPath = getWhisperPath()
 
-    sendProgress({ stage: 'install', status: 'started' })
+    sendProgress({ stage: 'install', status: 'started', name: "Whisper" })
     await installWhisperCpp({
       to: whisperPath,
       version: "1.5.5",
     })
-    sendProgress({ stage: 'install', status: 'completed' })
+    sendProgress({ stage: 'install', status: 'completed', name: "Whisper" })
 
-    sendProgress({ stage: 'download', status: 'started' })
+    sendProgress({ stage: 'download', status: 'started', name: model })
     await downloadWhisperModel({
-      model: "medium.en",
+      model,
       folder: whisperPath,
       onProgress(r) {
-        sendProgress({ stage: 'download', status: 'in-progress', progress: r })
+        sendProgress({ stage: 'download', status: 'in-progress', progress: r, name: model })
       }
     })
-    sendProgress({ stage: 'download', status: 'completed' })
+    sendProgress({ stage: 'download', status: 'completed', name: model })
 
-    sendProgress({ stage: 'overall', status: 'completed' })
+    sendProgress({ stage: 'overall', status: 'completed', name: model })
 
   } catch (error) {
     sendProgress({ stage: 'error', error: error.message })
