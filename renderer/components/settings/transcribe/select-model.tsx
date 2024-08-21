@@ -18,12 +18,12 @@ type listT = {
 }
 
 const list: listT[] = [
-  {
-    id: "1",
-    logo: "/logo.png",
-    title: "System native",
-    para: "Uses your browser's built in STT service if supported."
-  },
+  // {
+  //   id: "1",
+  //   logo: "/logo.png",
+  //   title: "System native",
+  //   para: "Uses your browser's built in STT service if supported."
+  // },
   {
     id: "2",
     logo: "/groq.png",
