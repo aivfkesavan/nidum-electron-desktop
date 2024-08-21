@@ -1,13 +1,13 @@
-const express = require('express')
-const {
+import express from 'express';
+import {
   downloadWhisperModel,
   installWhisperCpp,
   transcribe,
   convertToCaptions,
-} = require("@remotion/install-whisper-cpp");
+} from "@remotion/install-whisper-cpp";
 
-const { getWhisperPath } = require('../utils/path-helper');
-const { upload } = require("../middleawres/upload");
+import { getWhisperPath } from '../utils/path-helper.js';
+import { upload } from "../middleawres/upload.js";
 
 const router = express.Router()
 
@@ -73,4 +73,4 @@ router.post("/transcribe/:folderName", upload.single('audio'), async (req, res) 
   }
 })
 
-module.exports = router
+export default router
