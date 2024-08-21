@@ -1,6 +1,7 @@
 const express = require('express');
 const cors = require("cors")
 
+const whisper = require("./whisper")
 const doc = require("./doc")
 
 function startServer() {
@@ -12,6 +13,7 @@ function startServer() {
   app.use(express.json())
 
   app.use("/doc", doc)
+  app.use("/whisper", whisper)
 
   app.listen(port, () => {
     console.log(`Server running at http://localhost:${port}`)

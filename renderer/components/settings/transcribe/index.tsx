@@ -1,6 +1,7 @@
 import useContextStore from "@/store/context";
 
 import SelectModel from "./select-model";
+import Native from "./native";
 import Groq from "./groq";
 
 function Transcribe() {
@@ -13,6 +14,10 @@ function Transcribe() {
 
       {
         sttType === "Groq" && <Groq />
+      }
+
+      {
+        sttType === "System native" && <Native />
       }
     </div>
   )
