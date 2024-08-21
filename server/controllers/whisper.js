@@ -9,7 +9,7 @@ const {
 
 const router = express.Router()
 
-const { upload } = require("./add-files")
+const { upload } = require("../middleawres/upload")
 
 router.post("/", async (req, res) => {
   try {

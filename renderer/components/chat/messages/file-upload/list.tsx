@@ -1,8 +1,10 @@
 import { useMutation } from '@tanstack/react-query';
+import axios from 'axios';
+
 import useContextStore from '@/store/context';
 import useConvoStore from '@/store/conversations';
 import bytesToSize from '@/utils/bytes-to-size';
-import axios from 'axios';
+import constants from '@utils/constants';
 
 import { Label } from "@/components/ui/label";
 
@@ -14,7 +16,7 @@ function List() {
   const files = useConvoStore(s => s.files[projectId] || [])
 
   const { mutate, isPending } = useMutation({
-    mutationFn: ({ name }: any) => axios.delete(`http://localhost:4000/doc/index/${projectId}/${name}`),
+    mutationFn: ({ name }: any) => axios.delete(`${constants.backendUrl}/doc/${projectId}/${name}`),
     onSuccess(res, variables) {
       console.log(res, variables)
       deleteFile(projectId, variables.id)

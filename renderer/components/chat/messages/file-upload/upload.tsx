@@ -6,6 +6,8 @@ import axios from 'axios';
 
 import useContextStore from '@store/context';
 import useConvoStore from '@store/conversations';
+import constants from '@utils/constants';
+
 import Settings from "./settings";
 
 function Upload() {
@@ -51,7 +53,7 @@ function Upload() {
         const formData = new FormData()
         files.forEach(file => formData.append("files", file))
 
-        await axios.post(`http://localhost:4000/doc/index/${project_id}`, formData)
+        await axios.post(`${constants.backendUrl}/doc/${project_id}`, formData)
 
         files.forEach(file => {
           addFile(project_id, {

@@ -2,8 +2,8 @@ import { LuSendHorizonal } from "react-icons/lu";
 import { IoMdMic } from "react-icons/io";
 import { LuX } from "react-icons/lu";
 
-import useRecord from "./use-record";
 import { convertToWav } from "@utils/audio-help";
+import useRecord from "./use-record";
 
 type props = {
   disabled: boolean
@@ -19,7 +19,7 @@ function NativeProvider({ disabled, postData }: props) {
     formData.append('audio', wavBlob, 'recording.wav')
 
     try {
-      const response = await fetch('http://localhost:4000/whisper/transcribe/1', {
+      const response = await fetch('/whisper/transcribe/1', {
         method: 'POST',
         body: formData,
       })
