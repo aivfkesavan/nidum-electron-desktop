@@ -1,8 +1,8 @@
-const express = require('express');
-const cors = require("cors")
+import express from 'express';
+import cors from "cors";
 
-const whisper = require("./controllers/whisper")
-const doc = require("./controllers/doc")
+import whisper from "./controllers/whisper";
+import doc from "./controllers/doc";
 
 function startServer() {
   const app = express()
@@ -20,4 +20,4 @@ function startServer() {
   })
 }
 
-module.exports = startServer
+export default startServer

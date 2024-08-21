@@ -1,15 +1,15 @@
-const {
+import {
   Settings,
   OllamaEmbedding,
   VectorStoreIndex,
   VectorIndexRetriever,
   SimpleDirectoryReader,
   storageContextFromDefaults,
-} = require("llamaindex");
+} from "llamaindex"
 
-const { getRagPath, createPath } = require("./path-helper");
+import { getRagPath, createPath } from "./path-helper"
 
-async function indexFolder({ folderName }) {
+export async function indexFolder({ folderName }) {
   Settings.embedModel = new OllamaEmbedding({ model: "mxbai-embed-large" })
 
   const directoryPath = createPath([folderName])
@@ -21,7 +21,7 @@ async function indexFolder({ folderName }) {
   await VectorStoreIndex.fromDocuments(documents, { storageContext })
 }
 
-async function queryIndex(query, folderName) {
+export async function queryIndex(query, folderName) {
   Settings.embedModel = new OllamaEmbedding({ model: "mxbai-embed-large" })
 
   const persistDir = getRagPath(folderName)
@@ -31,9 +31,4 @@ async function queryIndex(query, folderName) {
 
   const retriever = new VectorIndexRetriever({ similarityTopK: 6, index: loadedIndex })
   return (await retriever.retrieve({ query }))?.map(doc => ({ text: doc?.node?.text, score: doc?.score }))
-}
-
-module.exports = {
-  indexFolder,
-  queryIndex,
 }

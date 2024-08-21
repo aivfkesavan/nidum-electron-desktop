@@ -1,6 +1,6 @@
-const express = require('express')
-const fs = require('fs').promises
-require("dotenv/config")
+import express from 'express';
+import { promises as fs } from 'fs';
+import 'dotenv/config';
 
 const { queryIndex, indexFolder } = require("../utils/llama")
 const { createPath, getRagPath } = require("../utils/path-helper")
@@ -55,4 +55,4 @@ router.delete("/:folderName/:filename", async (req, res) => {
   }
 })
 
-module.exports = router
+export default router

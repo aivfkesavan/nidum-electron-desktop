@@ -1,29 +1,22 @@
-const path = require('path');
-const os = require('os');
+import path from 'path';
+import os from 'os';
 
 const homeDirectory = os.homedir()
 
 const mainPath = ".nidum"
 
-function getRoot() {
+export function getRoot() {
   return path.join(homeDirectory, mainPath)
 }
 
-function createPath(newPath = []) {
+export function createPath(newPath = []) {
   return path.join(getRoot(), ...newPath)
 }
 
-function getRagPath(newPath = "") {
+export function getRagPath(newPath = "") {
   return createPath([newPath, "index-store"])
 }
 
-function getWhisperPath() {
+export function getWhisperPath() {
   return createPath(["whisper"])
-}
-
-module.exports = {
-  getRoot,
-  createPath,
-  getRagPath,
-  getWhisperPath,
 }
