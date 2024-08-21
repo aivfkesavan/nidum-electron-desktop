@@ -13,7 +13,7 @@ function createPath(newPath = []) {
   return path.join(getRoot(), ...newPath)
 }
 
-function getRagPath(newPath) {
+function getRagPath(newPath = "") {
   return createPath([newPath, "index-store"])
 }
 

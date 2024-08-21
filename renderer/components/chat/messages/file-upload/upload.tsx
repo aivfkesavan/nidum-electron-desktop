@@ -6,74 +6,63 @@ import axios from 'axios';
 
 import useContextStore from '@store/context';
 import useConvoStore from '@store/conversations';
-// import useEmbedding from './use-embedding';
 import Settings from "./settings";
 
 function Upload() {
   const [loading, setLoading] = useState(false)
-  // const { loading, processFile } = useEmbedding()
   const project_id = useContextStore(s => s.project_id)
   const addFile = useConvoStore(s => s.addFile)
 
-  const [file, setFile] = useState<File | null>(null)
+  const [files, setFiles] = useState<File[]>([])
 
   const onDrop = useCallback((acceptedFiles: File[], fileRejections: FileRejection[]) => {
-    if (fileRejections.length > 0) return setFile(null)
+    if (fileRejections.length > 0) return;
 
-    const selectedFile = acceptedFiles[0]
-    if (selectedFile && selectedFile.type === 'application/pdf') {
-      setFile(selectedFile)
-    } else {
-      setFile(null)
-    }
+    const newFiles = acceptedFiles.filter(file => file.type === 'application/pdf')
+    setFiles(pre => [...pre, ...newFiles].slice(0, 4))
   }, [])
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     onDrop,
-    multiple: false,
     accept: {
       'application/pdf': ['.pdf']
     },
+    maxFiles: 4,
   })
 
   const upload = async () => {
-    if (file) {
+    if (files.length > 0) {
       try {
-        console.log(file)
         setLoading(true)
         const formData = new FormData()
-        formData.append("files", file)
+        files.forEach(file => formData.append("files", file))
 
         const { data } = await axios.post(`http://localhost:4000/doc/index/${project_id}`, formData)
         console.log(data)
 
-        addFile(project_id, {
-          id: nanoid(10),
-          name: file.name,
-          size: file.size,
-          type: file.type,
+        files.forEach(file => {
+          addFile(project_id, {
+            id: nanoid(10),
+            name: file.name,
+            size: file.size,
+            type: file.type,
+          })
         })
-        setLoading(false)
-        setFile(null)
 
+        setLoading(false)
+        setFiles([])
       } catch (error) {
         console.log(error)
         setLoading(false)
-        setFile(null)
       }
-      // processFile({
-      //   file,
-      //   collectionName: nanoid(),
-      //   onSuccess() {
-      //     setFile(null)
-      //   }
-      // })
     }
   }
 
+  const removeFile = (j: number) => setFiles(p => p.filter((_, i) => i !== j))
+
   return (
     <div className='flex-1'>
-      <h6 className="mb-6 text-sm font-medium text-center text-white/80">Add New File</h6>
+      <h6 className="mb-6 text-sm font-medium text-center text-white/80">Add New Files</h6>
 
       <div
         className="dc flex-col mb-6 py-10 px-8 border rounded-md text-center text-white/60"
@@ -81,38 +70,35 @@ function Upload() {
       >
         <input {...getInputProps()} />
 
-        <p>{isDragActive ? "Drop the PDF file here..." : "Drag and drop a PDF file here, or click to select a file"}</p>
+        <p>{isDragActive ? "Drop PDF files here..." : "Drag and drop up to 4 PDF files here, or click to select files"}</p>
       </div>
 
-      {
-        file &&
-        <div className='df justify-between pl-2 py-0.5 hover:bg-secondary rounded-sm'>
-          <p>{file?.name?.replace?.(/\\/g, '/')?.split('/')?.pop() || ""}</p>
+      {files.map((file, index) => (
+        <div key={index} className='df justify-between pl-2 py-0.5 hover:bg-secondary rounded-sm'>
+          <p>{file.name.replace(/\\/g, '/').split('/').pop() || ""}</p>
 
           <button
             className='p-1 text-foreground hover:bg-red-500 hover'
-            onClick={() => setFile(null)}
+            onClick={() => removeFile(index)}
             disabled={loading}
           >
             <LuX />
           </button>
         </div>
-      }
+      ))}
 
       <button
         className="df px-12 py-1.5 mt-4 mx-auto bg-input hover:bg-input/80"
         onClick={upload}
-        disabled={loading || !file}
+        disabled={loading || files.length === 0}
       >
-        {
-          loading && <span className='loader-2'></span>
-        }
+        {loading && <span className='loader-2'></span>}
         Upload
       </button>
 
       <Settings />
     </div>
-  )
+  );
 }
 
 export default Upload
