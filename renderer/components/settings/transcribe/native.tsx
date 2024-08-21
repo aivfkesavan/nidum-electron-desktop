@@ -1,10 +1,12 @@
-import axios from "axios"
+import axios from "axios";
+
+import constants from "@utils/constants";
 
 function Native() {
 
   async function download() {
     try {
-      const { data } = await axios.post("http://localhost:4000/whisper")
+      const { data } = await axios.post(`${constants.backendUrl}/whisper`)
 
       console.log(data)
     } catch (error) {

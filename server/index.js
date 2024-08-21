@@ -1,8 +1,8 @@
 const express = require('express');
 const cors = require("cors")
 
-const whisper = require("./whisper")
-const doc = require("./doc")
+const whisper = require("./controllers/whisper")
+const doc = require("./controllers/doc")
 
 function startServer() {
   const app = express()
