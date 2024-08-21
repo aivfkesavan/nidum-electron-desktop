@@ -161,4 +161,12 @@
   body.open .app-wrapper {
     @apply md:pl-[240px];
   }
+
+  .side-nav-toggle {
+    @apply bg-background;
+  }
+
+  body.open .side-nav-toggle {
+    @apply bg-[#171717];
+  }
 }

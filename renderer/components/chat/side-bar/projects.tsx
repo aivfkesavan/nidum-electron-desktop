@@ -5,9 +5,11 @@ import useContextStore from "@/store/context";
 import useConvoStore from "@/store/conversations";
 import { cn } from "@/lib/utils";
 
+import Message from '@/assets/svg/message.svg';
+
+import DeleteProject from "./delete-project";
 import ProjectCard from "./project-card";
 import Model from "@/components/project/model";
-import DeleteProject from "./delete-project";
 
 function Projects() {
   const updateContext = useContextStore(s => s.updateContext)
@@ -16,6 +18,7 @@ function Projects() {
 
   const [searchBy, setSearchBy] = useState("")
   const [modal, setModal] = useState<{ state: string, data: any }>({ state: "", data: null })
+  const [open, setOpen] = useState(false)
 
   const updateModal = (state: string, data: any = null) => setModal({ state, data })
 
@@ -39,6 +42,16 @@ function Projects() {
           value={searchBy}
           onChange={e => setSearchBy(e.target.value)}
         />
+      </div>
+
+      <div className="my-2 mx-2.5">
+        <button
+          className="df w-full px-3 py-2 text-[13px] text-left text-white/70 cursor-pointer rounded-lg group bg-secondary hover:text-white group"
+          onClick={() => setOpen(true)}
+        >
+          <span className="flex-1">New Project</span>
+          <Message className="size-4 group-hover:stroke-white" />
+        </button>
       </div>
 
       <div className="scroll-y p-2">
@@ -74,6 +87,11 @@ function Projects() {
           closeModel={() => updateModal("")}
         />
       }
+
+      <Model
+        open={open}
+        closeModel={() => setOpen(false)}
+      />
     </div>
   )
 }

@@ -1,9 +1,12 @@
 import { useState } from "react";
 import { IoSearch } from "react-icons/io5";
+import { nanoid } from "nanoid";
 
 import useContextStore from "@/store/context";
 import useConvoStore from "@/store/conversations";
 import { cn } from "@/lib/utils";
+
+import Message from '@/assets/svg/message.svg';
 
 import SystemPrompt from "./system-prompt";
 import GoToProject from "./go-to-project";
@@ -13,11 +16,18 @@ import ChatCard from "./chat-card";
 function Histories() {
   const { chat_id, project_id, updateContext } = useContextStore()
   const chats = useConvoStore(s => s.chats?.[project_id] || [])
+  const addChat = useConvoStore(s => s.addChat)
 
   const [searchBy, setSearchBy] = useState("")
   const [modal, setModal] = useState<{ state: string, data: any }>({ state: "", data: null })
 
   const updateModal = (state: string, data: any = null) => setModal({ state, data })
+
+  function addChatTo() {
+    const id = nanoid(10)
+    addChat(project_id, { id, title: "New Chat" })
+    updateContext({ chat_id: id })
+  }
 
   return (
     <div
@@ -41,6 +51,16 @@ function Histories() {
           value={searchBy}
           onChange={e => setSearchBy(e.target.value)}
         />
+      </div>
+
+      <div className="my-2 mx-2.5">
+        <button
+          className="df w-full px-3 py-2 text-[13px] text-left text-white/70 cursor-pointer rounded-lg group bg-secondary hover:text-white group"
+          onClick={addChatTo}
+        >
+          <span className="flex-1">New Chat</span>
+          <Message className="size-4 group-hover:stroke-white" />
+        </button>
       </div>
 
       <div className="scroll-y p-2 border-b">

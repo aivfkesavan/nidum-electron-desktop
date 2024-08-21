@@ -56,7 +56,7 @@ const list = [
   // },
   {
     id: "5",
-    title: "Embedder",
+    title: "RAG",
     logo: <HiCubeTransparent className="text-base" />,
     child: <Embedder />,
   },
@@ -90,33 +90,31 @@ function Settings() {
         <SettingIcon />
       </DialogTrigger>
 
-      <DialogContent className="md:max-w-2xl">
+      <DialogContent className="">
         <DialogHeader className="pb-2 md:pb-5 mb-2 border-b">
           <DialogTitle>Settings</DialogTitle>
           <DialogDescription></DialogDescription>
         </DialogHeader>
 
-        <div className="grid md:grid-cols-[auto_1fr] gap-8">
-          <div className="mini-scroll-bar flex md:flex-col items-center gap-2 py-2 md:py-0 md:w-40 overflow-x-auto">
-            {
-              list
-                .filter(l => isSupported ? true : l.title !== "Transcription")
-                .map(l => (
-                  <button
-                    key={l.id}
-                    onClick={() => setSelected(l.title)}
-                    className={`df w-full text-nowrap text-xs text-left ${selected === l.title ? "bg-input" : ""}`}
-                  >
-                    {l.logo}
-                    {l.title}
-                  </button>
-                ))
-            }
-          </div>
+        <div className="mini-scroll-bar flex items-center gap-2 py-2 overflow-x-auto">
+          {
+            list
+              .filter(l => isSupported ? true : l.title !== "Transcription")
+              .map(l => (
+                <button
+                  key={l.id}
+                  onClick={() => setSelected(l.title)}
+                  className={`df w-full text-nowrap text-xs text-left ${selected === l.title ? "bg-input" : ""}`}
+                >
+                  {l.logo}
+                  {l.title}
+                </button>
+              ))
+          }
+        </div>
 
-          <div className="h-96 -mr-6 pr-6 overflow-y-auto">
-            {list?.find(l => l.title === selected)?.child}
-          </div>
+        <div className="h-96 -mr-6 pr-6 overflow-y-auto">
+          {list?.find(l => l.title === selected)?.child}
         </div>
       </DialogContent>
     </Dialog>
