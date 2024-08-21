@@ -56,7 +56,7 @@ const useContextStore = create<state & actions>()(persist(set => ({
   qdrantDBUrl: "",
   qdrantDBApiKey: "",
 
-  stt_type: "Groq",
+  stt_type: "System native",
   sttGroqApiKey: "",
 
   tts_type: "System native",

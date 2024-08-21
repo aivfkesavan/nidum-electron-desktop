@@ -1,13 +1,11 @@
-import { useEffect, useState } from 'react';
 import { LuSendHorizonal, LuX } from "react-icons/lu";
 import { IoMdMic } from "react-icons/io";
 
-import { useAudioStore } from '../use-speech';
 import useContextStore from '@/store/context';
 import { useToast } from '@/components/ui/use-toast';
 
-import { mediaRecorderService } from './MediaRecorderService';
 import transcribeAudio from './transcribe';
+import useRecord from './use-record';
 
 type Props = {
   disabled: boolean
@@ -16,73 +14,19 @@ type Props = {
 
 function GroqProvider({ disabled, postData }: Props) {
   const sttGroqApiKey = useContextStore(s => s.sttGroqApiKey)
-  const update = useAudioStore(u => u.update)
 
   const { toast } = useToast()
 
-  const [isSupported, setIsSupported] = useState(true)
-  const [isRecording, setIsRecording] = useState(false)
-
-  useEffect(() => {
-    const isBrowserSupported = () => {
-      return !!(navigator.mediaDevices && navigator.mediaDevices.getUserMedia)
-    }
-
-    const willRecordingWork = isBrowserSupported()
-    setIsSupported(willRecordingWork)
-
-    return () => {
-      if (isRecording) {
-        mediaRecorderService.cancelRecording().catch((e: any) => {
-          console.log(e)
-        })
-      }
-    }
-  }, [])
-
-  const startRecording = async () => {
-    try {
-      await mediaRecorderService.startRecording()
-      setIsRecording(true)
-
-    } catch (error) {
-      console.error('Error starting recording:', error)
-      setIsRecording(false)
-    }
-  }
-
-  const stopRecording = async (needTranscribe: boolean) => {
-    if (!needTranscribe) {
-      mediaRecorderService.stopRecording()
-      setIsRecording(false)
-      return
-    }
-
-    try {
-      const audioBlob = await mediaRecorderService.stopRecording()
-      setIsRecording(false)
-      sendAudioTo_STT_API(audioBlob)
-
-    } catch (error) {
-      console.error('Error stopping recording:', error)
-      setIsRecording(false)
-    }
-  }
+  const { isRecording, isSupported, onClk, stopRecording } = useRecord()
 
   const sendAudioTo_STT_API = async (audioBlob: Blob) => {
     const transcript = await transcribeAudio(audioBlob)
     postData(transcript, true)
   }
 
-  const onClk = () => {
+  const onClick = () => {
     if (!sttGroqApiKey) return toast({ title: "Please provide groq api key" })
-
-    if (isRecording) {
-      stopRecording(true)
-      update({ needAutoPlay: true })
-    } else {
-      startRecording()
-    }
+    onClk(sendAudioTo_STT_API)
   }
 
   if (!isSupported) return null
@@ -91,7 +35,7 @@ function GroqProvider({ disabled, postData }: Props) {
     <div className='relative'>
       <button
         className={`dc w-10 h-10 p-0 shrink-0 text-xl rounded-full cursor-pointer hover:bg-input z-[1] ${isRecording ? "text-primary-darker" : ""}`}
-        onClick={onClk}
+        onClick={onClick}
         disabled={disabled}
       >
         {
