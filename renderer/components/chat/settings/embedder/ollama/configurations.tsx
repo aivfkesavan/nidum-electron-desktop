@@ -1,5 +1,5 @@
 import useContextStore from "@/store/context";
-import ModelSelect from "@components/settings/model/ollama/model-select";
+import ModelSelect from "@components/chat/settings/model/ollama/model-select";
 import { useToast } from "@components/ui/use-toast";
 
 function Configurations() {

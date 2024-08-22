@@ -1,22 +1,26 @@
 import useContextStore from "@/store/context";
 
 import SelectModel from "./select-model";
-import Ollama from "./ollama";
+import Qdrant from "./qdrant";
 
-function Embedder() {
-  const embedding_type = useContextStore(s => s.embedding_type)
+type props = {
+  onOpenChange: (v: boolean) => void
+}
+
+function VecDB({ onOpenChange }: props) {
+  const vb_type = useContextStore(s => s.vb_type)
 
   return (
     <div>
       <SelectModel />
 
       {
-        embedding_type === "Ollama" &&
-        <Ollama />
+        vb_type === "Qdrant" &&
+        <Qdrant />
       }
 
       {/* {
-        embedding_type === "Nidum" &&
+        vb_type === "Nidum" &&
         <div className="mt-6 text-xs text-white/60">
           There is no configuration needed for this provider.
         </div>
@@ -25,4 +29,4 @@ function Embedder() {
   )
 }
 
-export default Embedder
+export default VecDB

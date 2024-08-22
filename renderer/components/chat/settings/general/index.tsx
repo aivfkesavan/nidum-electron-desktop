@@ -11,7 +11,11 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
-function General() {
+type props = {
+  onOpenChange: (v: boolean) => void
+}
+
+function General({ onOpenChange }: props) {
   const [voices, setVoices] = useState(() => {
     const synth = window.speechSynthesis
     const allVoices = synth.getVoices()
