@@ -4,6 +4,10 @@ import SelectModel from "./select-model";
 import Native from "./native";
 import Groq from "./groq";
 
+type props = {
+  onOpenChange: (v: boolean) => void
+}
+
 function Transcribe() {
   const sttType = useContextStore(s => s.stt_type)
 

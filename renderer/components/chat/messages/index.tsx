@@ -4,7 +4,7 @@ import { LuSend } from "react-icons/lu";
 import { nanoid } from "nanoid";
 import { LuX } from "react-icons/lu";
 
-import { createContext, duckDuckGoPrompt, duckDuckGoSerach, fileSearchQdrant, ragSearch } from "../../../utils/improve-context";
+import { createContext, duckDuckGoPrompt, duckDuckGoSerach, ragSearch } from "../../../utils/improve-context";
 import isWithinTokenLimit from "@/utils/is-within-token-limit";
 
 import { useAudio } from "./use-speech";
@@ -156,8 +156,6 @@ function Messages() {
 
         if (ragEnabled) {
           const searchReult = await ragSearch(msg)
-          console.log(searchReult)
-          // const searchReult = await fileSearchQdrant(msg, fileDetails.id)
           systemPrompt = createContext({
             base: duckDuckGoPrompt,
             context: searchReult,
@@ -175,7 +173,6 @@ function Messages() {
             content: msg,
           },
         ]
-        // console.log(prompt)
 
         type urlsT = Record<"Groq" | "Ollama" | "Nidum", string>
         const urls: urlsT = {
@@ -212,7 +209,6 @@ function Messages() {
         if (model_type === "Ollama") {
           payload.model = ollamaModel
         }
-        // console.log(config)
 
         if (!isWithinTokenLimit(JSON.stringify(prompt), projectdetails.tokenLimit)) {
           toast({
@@ -235,22 +231,12 @@ function Messages() {
         if (!response.ok) {
           const err = await response.json()
           const errMsg = err?.error?.message || err?.error
-          // console.log(errMsg)
-          // const content = errMsg ? `Error: ${errMsg}` : "Error"
-          // const botReply: msg = {
-          //   role: "assistant",
-          //   id: nanoid(10),
-          //   content,
-          // }
           setTempData([])
           setLoading(false)
-          // pushIntoMessages(currContextId, [
-          //   user,
-          //   botReply
-          // ])
           toast({ title: errMsg || "Something went wrong!" })
           return
         }
+
         if (model_type === "Nidum" || model_type === "Groq") {
           const res = await response.json()
           const content = res?.choices?.[0]?.message?.content

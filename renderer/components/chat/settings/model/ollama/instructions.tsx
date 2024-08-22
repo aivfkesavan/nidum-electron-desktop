@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { cn } from "@/lib/utils";
 
-import Copy from "../../copy";
+import Copy from "../../common/copy";
 import MarkdownParse from "@components/chat/messages/markdown-parse";
 
 const list: any = {

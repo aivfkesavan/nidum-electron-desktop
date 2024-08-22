@@ -1,6 +1,10 @@
 import useContextStore from "@/store/context";
 
-function Rag() {
+type props = {
+  onOpenChange: (v: boolean) => void
+}
+
+function Rag({ onOpenChange }: props) {
   const updateContext = useContextStore(s => s.updateContext)
   const ragRetrieval = useContextStore(s => s.ragRetrieval)
 

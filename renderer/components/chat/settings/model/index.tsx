@@ -5,7 +5,11 @@ import Ollama from "./ollama";
 // import Nidum from "./nidum";
 import Groq from "./groq";
 
-function Model() {
+type props = {
+  onOpenChange: (v: boolean) => void
+}
+
+function Model({ onOpenChange }: props) {
   const modelType = useContextStore(s => s.model_type)
 
   return (

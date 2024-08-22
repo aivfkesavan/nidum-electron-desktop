@@ -2,7 +2,11 @@ import useContextStore from "@/store/context";
 
 import SelectModel from "./select-model";
 
-function Voice() {
+type props = {
+  onOpenChange: (v: boolean) => void
+}
+
+function Voice({ onOpenChange }: props) {
   const tts_type = useContextStore(s => s.tts_type)
 
   return (

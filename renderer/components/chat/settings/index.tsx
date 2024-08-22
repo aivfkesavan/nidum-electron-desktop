@@ -20,13 +20,13 @@ import {
 
 import SettingIcon from '@/assets/svg/settings.svg';
 
-import Transcribe from "../../settings/transcribe";
-import Embedder from "../../settings/embedder";
-import Model from "../../settings/model";
-// import VecDB from "../../settings/vecdb";
-import Voice from "../../settings/voice";
-// import Rag from "../../settings/rag";
+// import VecDB from "./vecdb";
+// import Rag from "./rag";
+import Transcribe from "./transcribe";
+import Embedder from "./embedder";
 import General from "./general";
+import Model from "./model";
+import Voice from "./voice";
 import Chat from "./chat";
 
 const list = [
@@ -34,58 +34,66 @@ const list = [
     id: "1",
     title: "General",
     logo: <SettingIcon className=" stroke-white" />,
-    child: <General />,
+    child: General,
   },
   {
     id: "2",
     title: "Project",
     logo: <GoProjectRoadmap className="text-base" />,
-    child: <Chat />,
+    child: Chat,
   },
   {
     id: "3",
     title: "LLM",
     logo: <FaLinode className="text-base" />,
-    child: <Model />,
+    child: Model,
   },
   // {
   //   id: "4",
   //   title: "Vector Database",
   //   logo: <LuDatabase className="text-base" />,
-  //   child: <VecDB />,
+  //   child: VecDB,
   // },
   {
     id: "5",
     title: "RAG",
     logo: <HiCubeTransparent className="text-base" />,
-    child: <Embedder />,
+    child: Embedder,
   },
   // {
   //   id: "6",
   //   title: "RAG",
   //   logo: <BsTextParagraph className="text-base" />,
-  //   child: <Rag />,
+  //   child: Rag,
   // },
   {
     id: "7",
     title: "Voice & Speech",
     logo: <RiVoiceprintFill className="text-base" />,
-    child: <Voice />,
+    child: Voice,
   },
   {
     id: "8",
     title: "Transcription",
     logo: <MdOutlineRecordVoiceOver className="text-base" />,
-    child: <Transcribe />,
+    child: Transcribe,
   },
 ]
 
 function Settings() {
+  const [open, setOpen] = useState(false)
   const [selected, setSelected] = useState("General")
   const isSupported = useSttValidCheck()
 
+  function onOpenChange(val: boolean) {
+    setOpen(val)
+    if (!val) setSelected("General")
+  }
+
+  let Comp = list?.find(l => l.title === selected)?.child
+
   return (
-    <Dialog onOpenChange={() => setSelected("General")}>
+    <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogTrigger className="dc w-8 h-8 p-0 shrink-0 text-xl rounded-full cursor-pointer hover:bg-input">
         <SettingIcon />
       </DialogTrigger>
@@ -114,7 +122,7 @@ function Settings() {
         </div>
 
         <div className="h-96 -mr-6 pr-6 overflow-y-auto">
-          {list?.find(l => l.title === selected)?.child}
+          <Comp onOpenChange={onOpenChange} />
         </div>
       </DialogContent>
     </Dialog>

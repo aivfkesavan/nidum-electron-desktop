@@ -13,7 +13,11 @@ import {
 
 import Info from "@/components/common/info";
 
-function Chat() {
+type props = {
+  onOpenChange: (v: boolean) => void
+}
+
+function Chat({ onOpenChange }: props) {
   const project_id = useContextStore(s => s.project_id)
   const projectdetails = useConvoStore(s => s.projects[project_id] || null)
   const projects = useConvoStore(s => Object.values(s.projects))
