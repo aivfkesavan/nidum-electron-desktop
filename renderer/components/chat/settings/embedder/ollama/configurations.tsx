@@ -1,11 +1,20 @@
+import { useState } from "react";
+
 import useContextStore from "@/store/context";
-import ModelSelect from "@components/chat/settings/model/ollama/model-select";
+
 import { useToast } from "@components/ui/use-toast";
+import ModelSelect from "../../common/model-select";
+import Footer from "../../common/footer";
 
 function Configurations() {
   const updateContext = useContextStore(s => s.updateContext)
-  const embeddingModel = useContextStore(s => s.ollamaEmbeddingModel)
-  const embeddingUrl = useContextStore(s => s.ollamEmbeddingUrl)
+  const ollamaEmbeddingModel = useContextStore(s => s.ollamaEmbeddingModel)
+  const ollamEmbeddingUrl = useContextStore(s => s.ollamEmbeddingUrl)
+
+  const [details, setDetails] = useState({
+    ollamaEmbeddingModel,
+    ollamEmbeddingUrl,
+  })
 
   const { toast } = useToast()
 
@@ -16,10 +25,12 @@ function Configurations() {
 
       if (txt === "Ollama is running") {
         toast({ title: "Ollama detected" })
-        updateContext({
+        let payload = {
           ollamEmbeddingUrl: "http://localhost:11434",
           ollamaEmbeddingModel: "",
-        })
+        }
+        setDetails(payload)
+        updateContext(payload)
       }
 
     } catch (error) {
@@ -27,6 +38,17 @@ function Configurations() {
 
       console.log(error)
     }
+  }
+
+  function onChange(payload: Record<string, any>) {
+    setDetails(pr => ({
+      ...pr,
+      ...payload,
+    }))
+  }
+
+  function onSave() {
+    updateContext(details)
   }
 
   return (
@@ -46,8 +68,8 @@ function Configurations() {
           type="text"
           className="text-sm px-2 py-1.5 bg-transparent border"
           placeholder="http://localhost:11434"
-          value={embeddingUrl}
-          onChange={e => updateContext({ ollamEmbeddingUrl: e.target.value })}
+          value={details.ollamEmbeddingUrl}
+          onChange={e => onChange({ ollamEmbeddingUrl: e.target.value })}
         />
       </div>
 
@@ -55,12 +77,14 @@ function Configurations() {
         <label htmlFor="" className="mb-0.5 text-xs opacity-70">Embedding Model</label>
 
         <ModelSelect
-          ollamaUrl={embeddingUrl}
-          val={embeddingModel}
-          onChange={v => updateContext({ ollamaEmbeddingModel: v })}
+          ollamaUrl={ollamEmbeddingUrl}
+          val={details.ollamaEmbeddingModel}
+          onChange={v => onChange({ ollamaEmbeddingModel: v })}
           filterFn={m => m?.details?.family?.includes("bert")}
         />
       </div>
+
+      <Footer onSave={onSave} />
     </>
   )
 }

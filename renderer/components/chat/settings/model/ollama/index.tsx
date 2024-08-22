@@ -8,7 +8,7 @@ const tabs = ["Configurations", "Manage Models", "Instructions"]
 
 function index() {
   return (
-    <Tabs defaultValue="Configurations" className="mt-6">
+    <Tabs defaultValue="Configurations" className="mt-4">
       <TabsList className="mb-2 bg-transparent">
         {
           tabs.map(tab => (

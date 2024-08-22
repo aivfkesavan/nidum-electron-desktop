@@ -1,5 +1,8 @@
-import MarkdownParse from "@/components/chat/messages/markdown-parse";
+import { useState } from "react";
 import useContextStore from "@/store/context";
+
+import MarkdownParse from "@/components/chat/messages/markdown-parse";
+import Footer from "../common/footer";
 
 const markdown = `
 ### How to Get Started with Qdrant Locally
@@ -39,8 +42,24 @@ function Qdrant() {
   const qdrantDBApiKey = useContextStore(s => s.qdrantDBApiKey)
   const qdrantDBUrl = useContextStore(s => s.qdrantDBUrl)
 
+  const [details, setDetails] = useState({
+    qdrantDBApiKey,
+    qdrantDBUrl,
+  })
+
+  function onChange(payload: Record<string, any>) {
+    setDetails(pr => ({
+      ...pr,
+      ...payload,
+    }))
+  }
+
+  function onSave() {
+    updateContext(details)
+  }
+
   return (
-    <div>
+    <>
       <div className="my-4">
         <label htmlFor="" className="mb-0.5 text-xs">Qdrant DB URL</label>
 
@@ -48,8 +67,8 @@ function Qdrant() {
           type="text"
           className="text-sm px-2 py-1.5 bg-transparent border"
           placeholder="http://123.45.567.89:6334"
-          value={qdrantDBUrl}
-          onChange={e => updateContext({ qdrantDBUrl: e.target.value })}
+          value={details.qdrantDBUrl}
+          onChange={e => onChange({ qdrantDBUrl: e.target.value })}
         />
       </div>
 
@@ -60,15 +79,17 @@ function Qdrant() {
           type="text"
           className="text-sm px-2 py-1.5 bg-transparent border"
           placeholder="giueHUGOrt_ouyFYJqagetouq"
-          value={qdrantDBApiKey}
-          onChange={e => updateContext({ qdrantDBApiKey: e.target.value })}
+          value={details.qdrantDBApiKey}
+          onChange={e => onChange({ qdrantDBApiKey: e.target.value })}
         />
       </div>
 
       <MarkdownParse
         response={markdown}
       />
-    </div>
+
+      <Footer onSave={onSave} />
+    </>
   )
 }
 
