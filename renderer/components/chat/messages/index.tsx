@@ -351,7 +351,7 @@ function Messages() {
           (!data || data?.length === 0) &&
           <div className="dc h-[calc(100%-16px)]">
             <img
-              className="w-12 opacity-60"
+              className="w-20 opacity-60"
               src="/logo.png"
               alt=""
             />
