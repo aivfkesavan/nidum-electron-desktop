@@ -1,6 +1,7 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 
 import useContextStore from "@/store/context";
+import useVoices from "./use-voices";
 
 import { Switch } from "@/components/ui/switch";
 import {
@@ -16,34 +17,37 @@ type props = {
 }
 
 function General({ onOpenChange }: props) {
-  const [voices, setVoices] = useState(() => {
-    const synth = window.speechSynthesis
-    const allVoices = synth.getVoices()
-    return allVoices.filter(voice => voice.lang.startsWith('en-')) || []
-  })
+  const voices = useVoices()
 
   const updateContext = useContextStore(s => s.updateContext)
   const webEnabled = useContextStore(s => s.webEnabled)
   const model_type = useContextStore(s => s.model_type)
   const voice = useContextStore(s => s.voice)
 
-  useEffect(() => {
-    setTimeout(() => {
-      const synth = window.speechSynthesis
-      const allVoices = synth.getVoices()
-      const filtered = allVoices.filter(voice => voice.lang.startsWith('en-')) || []
-      if (filtered.length > 0) {
-        setVoices(filtered)
-      }
-    }, 300);
-  }, [])
+  const [details, setDetails] = useState({
+    webEnabled,
+    model_type,
+    voice,
+  })
+
+  function onChange(payload: Record<string, any>) {
+    setDetails(pr => ({
+      ...pr,
+      ...payload,
+    }))
+  }
+
+  function onSubmit() {
+    updateContext(details)
+    onOpenChange(false)
+  }
 
   return (
-    <div className="">
+    <>
       <div className="mb-2">
         <label className="mb-0.5 text-xs opacity-70">Server</label>
 
-        <Select value={model_type} onValueChange={v => updateContext({ model_type: v as any })}>
+        <Select value={details.model_type} onValueChange={v => onChange({ model_type: v })}>
           <SelectTrigger className="w-full h-8 text-sm">
             <SelectValue placeholder="Server" />
           </SelectTrigger>
@@ -59,7 +63,7 @@ function General({ onOpenChange }: props) {
       <div className="mb-4">
         <label className="mb-0.5 text-xs opacity-70">Voice</label>
 
-        <Select value={voice} onValueChange={v => updateContext({ voice: v as any })}>
+        <Select value={details.voice} onValueChange={v => onChange({ voice: v })}>
           <SelectTrigger className="w-full h-8 text-sm">
             <SelectValue placeholder="Voice" />
           </SelectTrigger>
@@ -79,15 +83,31 @@ function General({ onOpenChange }: props) {
         </Select>
       </div>
 
-      <div className="df mb-2">
+      <div className="df mb-12">
         <label htmlFor="" className="mb-0.5 text-xs opacity-70">Web Search</label>
         <Switch
-          checked={webEnabled}
-          onCheckedChange={val => updateContext({ webEnabled: val })}
+          checked={details.webEnabled}
+          onCheckedChange={val => onChange({ webEnabled: val })}
           title="Enable web search"
         />
       </div>
-    </div>
+
+      <div className="df justify-between">
+        <button
+          onClick={() => onOpenChange(false)}
+          className="w-20 py-1.5 text-[13px] text-white/70 border hover:text-white hover:bg-input"
+        >
+          Cancel
+        </button>
+
+        <button
+          className="w-20 py-1.5 text-[13px] bg-black/60 hover:bg-input"
+          onClick={onSubmit}
+        >
+          Save
+        </button>
+      </div>
+    </>
   )
 }
 
