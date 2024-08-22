@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 
 import { useDownloads } from "@components/chat/download-manager/provider";
 import useContextStore from "@/store/context";
@@ -8,9 +9,10 @@ import {
   AccordionContent,
   AccordionItem,
   AccordionTrigger,
-} from "@/components/ui/accordion"
+} from "@/components/ui/accordion";
 import { useToast } from "@components/ui/use-toast";
 import Instructions from "../../llm/ollama/instructions";
+import Footer from "../../common/footer";
 
 function Ollama() {
   const updateContext = useContextStore(s => s.updateContext)
@@ -23,7 +25,8 @@ function Ollama() {
     ollamEmbeddingUrl,
   })
 
-  const { startDownload } = useDownloads()
+  const { downloadModel } = useDownloads()
+  const queryClient = useQueryClient()
   const { toast } = useToast()
 
   async function checkAutoDetect() {
@@ -106,12 +109,23 @@ function Ollama() {
           <p className="mb-0.5 text-white/60">It's seem you don't downloaded model, would you like to download,</p>
           <button
             className="px-3 py-1.5 bg-input"
-            onClick={() => startDownload("file1")}
+            onClick={() => downloadModel({
+              name: "mxbai-embed-large:latest",
+              ollamaUrl: ollamEmbeddingUrl,
+              initiater: "embedder",
+              onSuccess() {
+                queryClient.invalidateQueries({ queryKey: ["ollama-tags"] })
+                updateContext({ ollamaEmbeddingModel: "mxbai-embed-large:latest" })
+              },
+              onError() { },
+            })}
           >
             Download and setup
           </button>
         </div>
       }
+
+      <Footer onSave={onSave} />
     </>
   )
 }

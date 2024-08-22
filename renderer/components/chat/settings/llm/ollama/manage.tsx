@@ -1,13 +1,14 @@
 import { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 
 import { getOllamaTags } from "@actions/ollama";
+import { useDownloads } from "@components/chat/download-manager/provider";
 import useContextStore from "@store/context";
-import useModelStore from "@store/model";
 import { useToast } from "@components/ui/use-toast";
 
 import DeleteModel from "./delete-model";
 import ModelInfo from "./model-info";
+import useUIStore from "@store/ui";
 
 type props = {
   filterFn: (m: any) => boolean;
@@ -16,11 +17,13 @@ type props = {
 function Manage({ filterFn }: props) {
   const [modelName, setModelName] = useState("")
   const [model, setModel] = useState("")
+  const closeModel = useUIStore(s => s.close)
   const { toast } = useToast()
 
-  const updateContext = useModelStore(s => s.updateContext)
+  const { downloadModel } = useDownloads()
   const ollamaUrl = useContextStore(s => s.ollamaUrl)
 
+  const queryClient = useQueryClient()
   const { data, isLoading } = useQuery({
     queryKey: ["ollama-tags", ollamaUrl],
     queryFn: () => getOllamaTags(ollamaUrl),
@@ -34,7 +37,16 @@ function Manage({ filterFn }: props) {
     if (found) return toast({ title: "Model already downloaded" })
 
     setModelName("")
-    updateContext({ is_downloading: true, name: modelName })
+    downloadModel({
+      name: modelName,
+      ollamaUrl,
+      initiater: "llm",
+      onSuccess() {
+        queryClient.invalidateQueries({ queryKey: ["ollama-tags"] })
+      },
+      onError() { },
+    })
+    closeModel()
   }
 
   return (

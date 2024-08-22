@@ -11,6 +11,7 @@ type Downloads = {
 
 type downloadModelProps = {
   name: string
+  initiater: string
   ollamaUrl: string
   onSuccess: () => void
   onError: () => void
@@ -20,8 +21,6 @@ type DownloadContextType = {
   downloads: Downloads
   isDownloading: boolean
   downloadModel: (v: downloadModelProps) => void
-  startDownload: (id: string) => void
-  showAllPendingDownloads: () => void
 }
 
 type props = {
@@ -38,10 +37,9 @@ export const useDownloads = (): DownloadContextType => {
 }
 
 export function DownloadProvider({ children }: props) {
-  // const [visibleToasts, setVisibleToasts] = useState<VisibleToasts>({})
   const [downloads, setDownloads] = useState<Downloads>({})
 
-  const downloadModel = async ({ ollamaUrl, name, onSuccess, onError }: downloadModelProps) => {
+  const downloadModel = async ({ ollamaUrl, name, initiater, onSuccess, onError }: downloadModelProps) => {
     try {
       const response = await fetch(`${ollamaUrl}/api/pull`, {
         method: 'POST',
@@ -64,60 +62,54 @@ export function DownloadProvider({ children }: props) {
           const parsed = JSON?.parse(chunk)
           if (parsed && parsed.status?.startsWith("pulling")) {
             const perc = Math.round((Number(parsed.completed) / Number(parsed.total)) * 100)
-            // setData(isNaN(perc) ? 0 : perc)
+            const title = initiater === "embedder" ? "RAG setup" : name
+            toast.loading(title, {
+              description: `Progress: ${isNaN(perc) ? 0 : perc}%`,
+              richColors: false,
+              position: "top-center",
+              duration: Infinity,
+              id: name,
+            })
+            setDownloads(p => ({
+              ...p,
+              [name]: {
+                title: name,
+                initiater,
+                progress: isNaN(perc) ? 0 : perc,
+              }
+            }))
           }
 
-          if (parsed && parsed.status === "success") {
+          if (parsed && parsed?.status === "success") {
+            const title = initiater === "embedder" ? "RAG setup" : name
+            toast.success(title, {
+              closeButton: true,
+              richColors: true,
+              description: "Downloaded successfully",
+              position: "top-center",
+              duration: 1000,
+              id: name,
+            })
+            setDownloads(p => {
+              const rest = { ...p }
+              delete rest[name]
+              return rest
+            })
             onSuccess?.()
-            // queryClient.invalidateQueries({ queryKey: ["ollama-tags"] })
-            // toast({ title: "Dowload completed" })
-            // updateContext({ is_downloading: false, name: "" })
             break
           }
         }
       }
 
     } catch (err) {
+      setDownloads(p => {
+        const rest = { ...p }
+        delete rest[name]
+        return rest
+      })
       onError?.()
-      // setData(0)
-      // updateContext({ is_downloading: false, name: "" })
     }
   }
-
-  const startDownload = (id: string) => {
-    // setDownloads(prev => ({ ...prev, [id]: { progress: 0, status: 'downloading' } }))
-    // setVisibleToasts(prev => ({ ...prev, [id]: true }))
-  }
-
-  const updateProgress = (id: string, progress: number) => {
-    // setDownloads(prev => ({ ...prev, [id]: { ...prev[id], progress } }))
-  }
-
-  const showAllPendingDownloads = () => {
-    // Object.entries(downloads).forEach(([id, { status }]) => {
-    //   if (status === 'downloading') {
-    //     setVisibleToasts(prev => ({ ...prev, [id]: true }))
-    //   }
-    // })
-  }
-
-  // useEffect(() => {
-  //   Object.entries(downloads).forEach(([id, { progress, status }]) => {
-  //     if (status === 'downloading' && visibleToasts[id]) {
-  //       toast.success(`Downloading ${id}`, {
-  //         description: `Progress: ${progress.toFixed(0)}%`,
-  //         duration: Infinity,
-  //         id: `download-${id}`,
-  //         onDismiss: () => setVisibleToasts(prev => ({ ...prev, [id]: false })),
-  //       })
-  //     } else if (status === 'completed') {
-  //       toast.success(`${id} downloaded successfully`, {
-  //         id: `download-${id}`,
-  //       })
-  //       setVisibleToasts(prev => ({ ...prev, [id]: false }))
-  //     }
-  //   })
-  // }, [downloads, visibleToasts])
 
   return (
     <DownloadContext.Provider
@@ -125,8 +117,6 @@ export function DownloadProvider({ children }: props) {
         downloads,
         isDownloading: Object.keys(downloads).length > 0,
         downloadModel,
-        startDownload,
-        showAllPendingDownloads,
       }}
     >
       {children}
