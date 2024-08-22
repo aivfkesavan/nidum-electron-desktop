@@ -25,7 +25,7 @@ function NativeProvider({ disabled, postData }: props) {
     formData.append('audio', wavBlob, 'recording.wav')
 
     try {
-      const response = await fetch(`${constants.backendUrl}/whisper/transcribe/audio`, {
+      const response = await fetch(`${constants.backendUrl}/whisper/transcribe/audio/${nativeSttModel}`, {
         method: 'POST',
         body: formData,
       })
