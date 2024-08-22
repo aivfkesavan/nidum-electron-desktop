@@ -29,7 +29,6 @@ function Chat() {
     tokenLimit: "",
   })
 
-  console.log(details)
   const onChange = (key: string, val: any) => {
     setDetails(pr => ({
       ...pr,
@@ -42,7 +41,6 @@ function Chat() {
   }
 
   function onSelectProject(val: string) {
-    console.log(val)
     setSelected(val)
     setDetails(projectMap[val])
   }

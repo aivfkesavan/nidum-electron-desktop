@@ -1,4 +1,3 @@
-import { useState } from "react";
 import { MdOutlineRecordVoiceOver } from "react-icons/md";
 import { HiCubeTransparent } from "react-icons/hi2";
 import { GoProjectRoadmap } from "react-icons/go";
@@ -83,14 +82,16 @@ const list = [
 
 function Settings() {
   const update = useUIStore(s => s.update)
+  const selected = useUIStore(s => s.data || "General")
   const open = useUIStore(s => s.open)
 
-  const [selected, setSelected] = useState("General")
   const isSupported = useSttValidCheck()
 
   function onOpenChange(val: boolean) {
-    update({ open: val ? "settings" : "" })
-    if (!val) setSelected("General")
+    update({
+      open: val ? "settings" : "",
+      data: "General"
+    })
   }
 
   return (
@@ -112,7 +113,7 @@ function Settings() {
               .map(l => (
                 <button
                   key={l.id}
-                  onClick={() => setSelected(l.title)}
+                  onClick={() => update({ data: l.title })}
                   className={`df w-full text-nowrap text-xs text-left hover:bg-input ${selected === l.title ? "bg-input text-white [&_svg]:stroke-white" : " text-white/60 [&_svg]:stroke-white/60"}`}
                 >
                   {l.logo}
