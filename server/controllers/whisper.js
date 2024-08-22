@@ -1,4 +1,5 @@
 import express from 'express';
+
 import {
   downloadWhisperModel,
   installWhisperCpp,
@@ -51,14 +52,16 @@ router.post("/download", async (req, res) => {
   }
 })
 
-router.post("/transcribe/:folderName", upload.single('audio'), async (req, res) => {
+router.post("/transcribe/:folderName/:model", upload.single('audio'), async (req, res) => {
   try {
+    const { model } = req.params
+
     const whisperPath = getWhisperPath()
     const { transcription } = await transcribe({
       tokenLevelTimestamps: true,
       inputPath: req.file.path,
-      model: "medium.en",
       whisperPath,
+      model,
     })
 
     const { captions } = convertToCaptions({
