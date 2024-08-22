@@ -1,7 +1,7 @@
 import useContextStore from "@/store/context";
 
 import SelectModel from "./select-model";
-import Ollama from "./ollama";
+import Ollama from "./ollama/index-old";
 
 function Embedder() {
   const embedding_type = useContextStore(s => s.embedding_type)
