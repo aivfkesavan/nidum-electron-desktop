@@ -1,8 +1,8 @@
 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import Configurations from "./configurations";
-import Instructions from "../../model/ollama/instructions";
-import Manage from "../../model/ollama/manage";
+import Instructions from "../../llm/ollama/instructions";
+import Manage from "../../llm/ollama/manage";
 
 const tabs = ["Configurations", "Manage Models", "Instructions"]
 

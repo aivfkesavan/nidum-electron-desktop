@@ -8,6 +8,7 @@ import { RiVoiceprintFill } from "react-icons/ri";
 import { FaLinode } from "react-icons/fa";
 
 import useSttValidCheck from "@/hooks/use-stt-valid-check";
+import useUIStore from "@store/ui";
 
 import {
   Dialog,
@@ -25,10 +26,9 @@ import SettingIcon from '@/assets/svg/settings.svg';
 import Transcribe from "./transcribe";
 import Embedder from "./embedder";
 import General from "./general";
-import Model from "./model";
+import Project from "./project";
 import Voice from "./voice";
-import Chat from "./chat";
-import useUIStore from "@store/ui";
+import LLM from "./llm";
 
 const list = [
   {
@@ -41,13 +41,13 @@ const list = [
     id: "2",
     title: "Project",
     logo: <GoProjectRoadmap className="text-base" />,
-    child: <Chat />,
+    child: <Project />,
   },
   {
     id: "3",
     title: "LLM",
     logo: <FaLinode className="text-base" />,
-    child: <Model />,
+    child: <LLM />,
   },
   // {
   //   id: "4",
