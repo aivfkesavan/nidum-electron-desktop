@@ -5,15 +5,11 @@ import Ollama from "./ollama";
 // import Nidum from "./nidum";
 import Groq from "./groq";
 
-type props = {
-  onOpenChange: (v: boolean) => void
-}
-
-function Model({ onOpenChange }: props) {
+function Model() {
   const modelType = useContextStore(s => s.model_type)
 
   return (
-    <div>
+    <>
       <SelectModel />
 
       {
@@ -27,7 +23,7 @@ function Model({ onOpenChange }: props) {
       {/* {
         modelType === "Nidum" && <Nidum />
       } */}
-    </div>
+    </>
   )
 }
 

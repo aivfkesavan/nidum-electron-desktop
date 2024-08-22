@@ -3,7 +3,6 @@ import { useState } from "react";
 import useContextStore from "@/store/context";
 import useVoices from "./use-voices";
 
-import { Switch } from "@/components/ui/switch";
 import {
   Select,
   SelectContent,
@@ -11,12 +10,10 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Switch } from "@/components/ui/switch";
+import Footer from "../common/footer";
 
-type props = {
-  onOpenChange: (v: boolean) => void
-}
-
-function General({ onOpenChange }: props) {
+function General() {
   const voices = useVoices()
 
   const updateContext = useContextStore(s => s.updateContext)
@@ -37,9 +34,8 @@ function General({ onOpenChange }: props) {
     }))
   }
 
-  function onSubmit() {
+  function onSave() {
     updateContext(details)
-    onOpenChange(false)
   }
 
   return (
@@ -83,7 +79,7 @@ function General({ onOpenChange }: props) {
         </Select>
       </div>
 
-      <div className="df mb-12">
+      <div className="df">
         <label htmlFor="" className="mb-0.5 text-xs opacity-70">Web Search</label>
         <Switch
           checked={details.webEnabled}
@@ -92,21 +88,7 @@ function General({ onOpenChange }: props) {
         />
       </div>
 
-      <div className="df justify-between">
-        <button
-          onClick={() => onOpenChange(false)}
-          className="w-20 py-1.5 text-[13px] text-white/70 border hover:text-white hover:bg-input"
-        >
-          Cancel
-        </button>
-
-        <button
-          className="w-20 py-1.5 text-[13px] bg-black/60 hover:bg-input"
-          onClick={onSubmit}
-        >
-          Save
-        </button>
-      </div>
+      <Footer onSave={onSave} />
     </>
   )
 }

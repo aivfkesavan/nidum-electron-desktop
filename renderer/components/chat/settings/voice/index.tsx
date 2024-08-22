@@ -2,15 +2,11 @@ import useContextStore from "@/store/context";
 
 import SelectModel from "./select-model";
 
-type props = {
-  onOpenChange: (v: boolean) => void
-}
-
-function Voice({ onOpenChange }: props) {
+function Voice() {
   const tts_type = useContextStore(s => s.tts_type)
 
   return (
-    <div>
+    <>
       <div className="mb-0.5 text-xs text-gray-500">Text to Speech Provider</div>
       <SelectModel />
 
@@ -20,7 +16,7 @@ function Voice({ onOpenChange }: props) {
           There is no configuration needed for this provider.
         </div>
       }
-    </div>
+    </>
   )
 }
 

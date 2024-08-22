@@ -3,15 +3,11 @@ import useContextStore from "@/store/context";
 import SelectModel from "./select-model";
 import Ollama from "./ollama";
 
-type props = {
-  onOpenChange: (v: boolean) => void
-}
-
-function Embedder({ onOpenChange }: props) {
+function Embedder() {
   const embedding_type = useContextStore(s => s.embedding_type)
 
   return (
-    <div>
+    <>
       <SelectModel />
 
       {
@@ -25,7 +21,7 @@ function Embedder({ onOpenChange }: props) {
           There is no configuration needed for this provider.
         </div>
       } */}
-    </div>
+    </>
   )
 }
 

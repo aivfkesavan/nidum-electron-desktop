@@ -1,12 +1,19 @@
+import { useState } from "react";
 import useContextStore from "@store/context";
 
 import { useToast } from "@components/ui/use-toast";
-import ModelSelect from "./model-select";
+import ModelSelect from "../../common/model-select";
+import Footer from "../../common/footer";
 
 function Configurations() {
   const updateContext = useContextStore(s => s.updateContext)
   const ollamaModel = useContextStore(s => s.ollamaModel)
   const ollamaUrl = useContextStore(s => s.ollamaUrl)
+
+  const [details, setDetails] = useState({
+    ollamaModel,
+    ollamaUrl,
+  })
 
   const { toast } = useToast()
 
@@ -17,10 +24,12 @@ function Configurations() {
 
       if (txt === "Ollama is running") {
         toast({ title: "Ollama detected" })
-        updateContext({
+        let payload = {
           ollamaUrl: "http://localhost:11434",
           ollamaModel: "",
-        })
+        }
+        setDetails(payload)
+        updateContext(payload)
       }
 
     } catch (error) {
@@ -28,6 +37,17 @@ function Configurations() {
 
       console.log(error)
     }
+  }
+
+  function onChange(payload: Record<string, any>) {
+    setDetails(pr => ({
+      ...pr,
+      ...payload,
+    }))
+  }
+
+  function onSave() {
+    updateContext(details)
   }
 
   return (
@@ -48,8 +68,8 @@ function Configurations() {
           type="text"
           className="text-sm px-2 py-1.5 bg-transparent border"
           placeholder="http://localhost:11434"
-          value={ollamaUrl}
-          onChange={e => updateContext({ ollamaUrl: e.target.value })}
+          value={details.ollamaUrl}
+          onChange={e => onChange({ ollamaUrl: e.target.value })}
         />
       </div>
 
@@ -58,11 +78,13 @@ function Configurations() {
 
         <ModelSelect
           ollamaUrl={ollamaUrl}
-          val={ollamaModel}
-          onChange={v => updateContext({ ollamaModel: v })}
+          val={details.ollamaModel}
+          onChange={v => onChange({ ollamaModel: v })}
           filterFn={m => !m?.details?.family?.includes("bert")}
         />
       </div>
+
+      <Footer onSave={onSave} />
     </>
   )
 }

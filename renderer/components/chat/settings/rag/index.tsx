@@ -1,15 +1,28 @@
+import { useState } from "react";
 import useContextStore from "@/store/context";
+import Footer from "../common/footer";
 
-type props = {
-  onOpenChange: (v: boolean) => void
-}
-
-function Rag({ onOpenChange }: props) {
+function Rag() {
   const updateContext = useContextStore(s => s.updateContext)
   const ragRetrieval = useContextStore(s => s.ragRetrieval)
 
+  const [details, setDetails] = useState({
+    ragRetrieval,
+  })
+
+  function onChange(payload: Record<string, any>) {
+    setDetails(pr => ({
+      ...pr,
+      ...payload,
+    }))
+  }
+
+  function onSave() {
+    updateContext(details)
+  }
+
   return (
-    <div>
+    <>
       <div className="mb-4">
         <label htmlFor="" className="mb-0.5 text-xs">RAG Retrieval Limit</label>
 
@@ -19,8 +32,8 @@ function Rag({ onOpenChange }: props) {
           type="number"
           className="no-number-arrows text-sm px-2 py-1.5 bg-transparent border"
           placeholder="10"
-          value={ragRetrieval}
-          onChange={e => updateContext({ ragRetrieval: e.target.valueAsNumber })}
+          value={details.ragRetrieval}
+          onChange={e => onChange({ ragRetrieval: e.target.valueAsNumber })}
         />
       </div>
 
@@ -34,8 +47,8 @@ function Rag({ onOpenChange }: props) {
           className="no-number-arrows text-sm px-2 py-1.5 bg-transparent border"
           placeholder="100"
           defaultValue={100}
-        // value={ragRetrieval}
-        // onChange={e => updateContext({ ragRetrieval: e.target.valueAsNumber })}
+        // value={details.ragRetrieval}
+        // onChange={e => onChange({ ragRetrieval: e.target.valueAsNumber })}
         />
       </div>
 
@@ -49,11 +62,13 @@ function Rag({ onOpenChange }: props) {
           className="no-number-arrows text-sm px-2 py-1.5 bg-transparent border"
           placeholder="20"
           defaultValue={20}
-        // value={ragRetrieval}
-        // onChange={e => updateContext({ ragRetrieval: e.target.valueAsNumber })}
+        // value={details.ragRetrieval}
+        // onChange={e => onChange({ ragRetrieval: e.target.valueAsNumber })}
         />
       </div>
-    </div>
+
+      <Footer onSave={onSave} />
+    </>
   )
 }
 

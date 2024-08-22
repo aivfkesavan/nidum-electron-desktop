@@ -10,6 +10,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import Footer from "../common/footer";
 
 const models = ["medium.en", "tiny", "tiny.en", "base", "base.en", "small", "small.en", "medium", "large-v1", "large-v2", "large-v3"]
 const modelSizes = {
@@ -36,7 +37,6 @@ function Native() {
 
   async function download() {
     try {
-      console.log(downloaded, selected)
       const response = await fetch(`${constants.backendUrl}/whisper/download`, {
         method: "POST",
         cache: "no-store",
@@ -50,12 +50,11 @@ function Native() {
       while (true) {
         const { done, value } = await reader.read()
         if (done) {
-          console.log("at done")
           setDownloading(null)
-          updateContext({
-            nativeSttModelsDownloaded: [...downloaded, selected].join(","),
-            nativeSttModel: selected,
-          })
+          // updateContext({
+          //   nativeSttModelsDownloaded: [...downloaded, selected].join(","),
+          //   nativeSttModel: selected,
+          // })
           break
         }
 
@@ -65,7 +64,6 @@ function Native() {
         lines?.forEach(line => {
           if (line.startsWith('data: ')) {
             const data = JSON?.parse(line?.slice(6))
-            console.log(data)
             if (data) {
               setDownloading(data)
             }
@@ -79,11 +77,17 @@ function Native() {
   }
 
   function onChange(model: string) {
-    if (downloaded.includes(model)) {
-      updateContext({ nativeSttModel: model })
-    }
     setSelected(model)
     setDownloading(null)
+  }
+
+  function onSave() {
+    if (downloaded.includes(selected)) {
+      updateContext({
+        nativeSttModel: selected,
+        nativeSttModelsDownloaded: Array.from(new Set([...downloaded, selected])).filter(Boolean).join(",")
+      })
+    }
   }
 
   return (
@@ -133,6 +137,8 @@ function Native() {
           <p>{modelSizes[downloading?.name] ? Math.round((downloading?.progress / modelSizes[downloading?.name]) * 100) || 0 : 0}%</p>
         </div>
       }
+
+      <Footer onSave={onSave} />
     </>
   )
 }

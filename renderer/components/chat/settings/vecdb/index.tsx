@@ -3,15 +3,11 @@ import useContextStore from "@/store/context";
 import SelectModel from "./select-model";
 import Qdrant from "./qdrant";
 
-type props = {
-  onOpenChange: (v: boolean) => void
-}
-
-function VecDB({ onOpenChange }: props) {
+function VecDB() {
   const vb_type = useContextStore(s => s.vb_type)
 
   return (
-    <div>
+    <>
       <SelectModel />
 
       {
@@ -25,7 +21,7 @@ function VecDB({ onOpenChange }: props) {
           There is no configuration needed for this provider.
         </div>
       } */}
-    </div>
+    </>
   )
 }
 
