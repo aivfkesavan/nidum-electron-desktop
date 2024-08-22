@@ -8,12 +8,12 @@ import useContextStore from '@store/context';
 import useConvoStore from '@store/conversations';
 import constants from '@utils/constants';
 
-import Settings from "./settings";
+// import Settings from "./settings";
 
 function Upload() {
   const [loading, setLoading] = useState(false)
   const project_id = useContextStore(s => s.project_id)
-  const chat_id = useContextStore(s => s.chat_id)
+  // const chat_id = useContextStore(s => s.chat_id)
   const addFile = useConvoStore(s => s.addFile)
 
   const [files, setFiles] = useState<File[]>([])
@@ -111,10 +111,10 @@ function Upload() {
         Upload
       </button>
 
-      {
+      {/* {
         chat_id &&
         <Settings />
-      }
+      } */}
     </div>
   );
 }

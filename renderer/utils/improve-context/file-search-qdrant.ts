@@ -6,7 +6,7 @@ import useContextStore from '@/store/context';
 async function fileSearchQdrant(text: string, collectionName: string) {
   const vector = await getEmbeddings(text)
 
-  const { qdrantDBApiKey, qdrantDBUrl, vb_type, ragRetrieval } = useContextStore.getState()
+  const { qdrantDBApiKey, qdrantDBUrl, vb_type } = useContextStore.getState()
   const nidum_url = "https://c69b-164-52-211-150.ngrok-free.app"
   const nidum_apiKey = "admin123"
 
@@ -16,7 +16,7 @@ async function fileSearchQdrant(text: string, collectionName: string) {
   // })
   const url = vb_type === "Nidum" ? nidum_url : qdrantDBUrl
   const apiKey = vb_type === "Nidum" ? nidum_apiKey : qdrantDBApiKey
-  const limit = ragRetrieval ? Number(ragRetrieval) : 8
+  const limit = 12
 
   const response = await fetch(`${url}/collections/${collectionName}/points/search`, {
     method: "POST",

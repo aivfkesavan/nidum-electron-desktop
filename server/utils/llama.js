@@ -5,9 +5,9 @@ import {
   VectorIndexRetriever,
   SimpleDirectoryReader,
   storageContextFromDefaults,
-} from "llamaindex"
+} from "llamaindex";
 
-import { getRagPath, createPath } from "./path-helper"
+import { getRagPath, createPath } from "./path-helper";
 
 export async function indexFolder({ folderName }) {
   Settings.embedModel = new OllamaEmbedding({ model: "mxbai-embed-large" })
@@ -29,6 +29,6 @@ export async function queryIndex(query, folderName) {
 
   const loadedIndex = await VectorStoreIndex.init({ storageContext })
 
-  const retriever = new VectorIndexRetriever({ similarityTopK: 6, index: loadedIndex })
+  const retriever = new VectorIndexRetriever({ similarityTopK: 12, index: loadedIndex })
   return (await retriever.retrieve({ query }))?.map(doc => ({ text: doc?.node?.text, score: doc?.score }))
 }
