@@ -2,7 +2,7 @@ import { useState } from "react";
 
 import useContextStore from "@/store/context";
 import useConvoStore from "@/store/conversations";
-// import useUIStore from "@store/ui";
+import useUIStore from "@store/ui";
 
 import {
   Select,
@@ -18,9 +18,9 @@ import Footer from "../common/footer";
 
 function Chat() {
   const editProject = useConvoStore(s => s.editProject)
-  // const updateTab = useUIStore(s => s.update)
+  const updateTab = useUIStore(s => s.update)
 
-  // const ollamaEmbeddingModel = useContextStore(s => s.ollamaEmbeddingModel)
+  const ollamaEmbeddingModel = useContextStore(s => s.ollamaEmbeddingModel)
   const project_id = useContextStore(s => s.project_id)
 
   const projectMap = useConvoStore(s => s.projects)
@@ -53,10 +53,10 @@ function Chat() {
     setDetails(projectMap[val])
   }
 
-  // function onChangeRag(val: boolean) {
-  //   onChange("rag_enabled", val)
-  //   if (val) updateTab({ data: "RAG" })
-  // }
+  function onChangeRag(val: boolean) {
+    onChange("rag_enabled", val)
+    // if (val) updateTab({ data: "RAG" })
+  }
 
   return (
     <>
@@ -180,7 +180,7 @@ function Chat() {
           />
         </div>
 
-        {/* <div className="p-3 border rounded-md">
+        <div className="p-3 border rounded-md">
           <label htmlFor="" className="mb-0.5 text-xs opacity-80">RAG Search</label>
           <p className="text-[10px] text-white/60">Search from documents oyu provided and will use the result in qustioning</p>
           <Switch
@@ -190,7 +190,7 @@ function Chat() {
             className="ml-auto"
             disabled={!selected}
           />
-        </div> */}
+        </div>
       </div>
 
       {/* <div className="text-[10px] text-white/60">Note: Embedding is not setuped yet. If you enable RAG, you will be navigated to embedding setup. Please complete the setup to use RAG</div> */}
