@@ -33,7 +33,7 @@ const list = [
   {
     id: "1",
     title: "General",
-    logo: <SettingIcon className=" stroke-white" />,
+    logo: <SettingIcon />,
     child: General,
   },
   {
@@ -98,8 +98,8 @@ function Settings() {
         <SettingIcon />
       </DialogTrigger>
 
-      <DialogContent className="">
-        <DialogHeader className="pb-2 md:pb-5 mb-2 border-b">
+      <DialogContent>
+        <DialogHeader className="pb-2 md:pb-4 mb-2 border-b">
           <DialogTitle>Settings</DialogTitle>
           <DialogDescription></DialogDescription>
         </DialogHeader>
@@ -112,7 +112,7 @@ function Settings() {
                 <button
                   key={l.id}
                   onClick={() => setSelected(l.title)}
-                  className={`df w-full text-nowrap text-xs text-left ${selected === l.title ? "bg-input" : ""}`}
+                  className={`df w-full text-nowrap text-xs text-left hover:bg-input ${selected === l.title ? "bg-input text-white [&_svg]:stroke-white" : " text-white/60 [&_svg]:stroke-white/60"}`}
                 >
                   {l.logo}
                   {l.title}
@@ -122,7 +122,10 @@ function Settings() {
         </div>
 
         <div className="h-96 -mr-6 pr-6 overflow-y-auto">
-          <Comp onOpenChange={onOpenChange} />
+          {
+            open &&
+            <Comp onOpenChange={onOpenChange} />
+          }
         </div>
       </DialogContent>
     </Dialog>
