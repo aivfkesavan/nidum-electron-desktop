@@ -23,7 +23,8 @@ function Manage({ filterFn }: props) {
 
   const { data, isLoading } = useQuery({
     queryKey: ["ollama-tags", ollamaUrl],
-    queryFn: getOllamaTags,
+    queryFn: () => getOllamaTags(ollamaUrl),
+    enabled: !!ollamaUrl,
   })
 
   const updateModel = (v: string = "") => setModel(v)
