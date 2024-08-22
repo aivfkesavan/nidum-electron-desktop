@@ -1,6 +1,7 @@
 import useContextStore from "@/store/context";
 
 import SelectModel from "./select-model";
+import Native from "./native";
 
 function Voice() {
   const tts_type = useContextStore(s => s.tts_type)
@@ -12,9 +13,7 @@ function Voice() {
 
       {
         tts_type === "System native" &&
-        <div className="mt-6 text-xs text-white/60">
-          There is no configuration needed for this provider.
-        </div>
+        <Native />
       }
     </>
   )

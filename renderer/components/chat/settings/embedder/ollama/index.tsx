@@ -1,41 +1,114 @@
+import { useState } from "react";
 
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import Configurations from "./configurations";
+import useContextStore from "@/store/context";
+
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion"
+import { useToast } from "@components/ui/use-toast";
 import Instructions from "../../llm/ollama/instructions";
-import Manage from "../../llm/ollama/manage";
 
-const tabs = ["Configurations", "Manage Models", "Instructions"]
+function Ollama() {
+  const updateContext = useContextStore(s => s.updateContext)
+  const ollamaEmbeddingModel = useContextStore(s => s.ollamaEmbeddingModel)
+  const ollamEmbeddingUrl = useContextStore(s => s.ollamEmbeddingUrl)
 
-function index() {
-  return (
-    <Tabs defaultValue="Configurations" className="mt-6">
-      <TabsList className="mb-2 bg-transparent">
-        {
-          tabs.map(tab => (
-            <TabsTrigger
-              value={tab}
-              key={tab}
-              className="px-3.5 rounded-none text-white/70 border-b-2 data-[state=active]:text-white data-[state=active]:border-white/80"
-            >
-              {tab}
-            </TabsTrigger>
-          ))
+  const [autodetectFailed, setAutoDetectFailed] = useState(false)
+  const [details, setDetails] = useState({
+    ollamaEmbeddingModel,
+    ollamEmbeddingUrl,
+  })
+
+  const { toast } = useToast()
+
+  async function checkAutoDetect() {
+    try {
+      const res = await fetch("http://localhost:11434")
+      const txt = await res.text()
+
+      if (txt === "Ollama is running") {
+        toast({ title: "Ollama detected" })
+        let payload = {
+          ollamEmbeddingUrl: "http://localhost:11434",
+          ollamaEmbeddingModel: "",
         }
-      </TabsList>
+        setDetails(payload)
+        updateContext(payload)
+        setAutoDetectFailed(false)
+      } else {
+        setAutoDetectFailed(true)
+      }
 
-      <TabsContent value="Configurations">
-        <Configurations />
-      </TabsContent>
+    } catch (error) {
+      toast({ title: "Cannot auto detect ollama" })
+      setAutoDetectFailed(true)
+      console.log(error)
+    }
+  }
 
-      <TabsContent value="Manage Models">
-        <Manage filterFn={m => m?.details?.family?.includes("bert")} />
-      </TabsContent>
+  function onChange(payload: Record<string, any>) {
+    setDetails(pr => ({
+      ...pr,
+      ...payload,
+    }))
+  }
 
-      <TabsContent value="Instructions">
-        <Instructions />
-      </TabsContent>
-    </Tabs>
+  function onSave() {
+    updateContext(details)
+  }
+
+  return (
+    <>
+      <div className="my-4">
+        <div className="df justify-between mb-0.5">
+          <label htmlFor="" className="text-xs opacity-70">Ollama Embedding url</label>
+
+          <button
+            className="px-2 py-0.5 text-xs bg-input hover:bg-input/50"
+            onClick={checkAutoDetect}
+          >
+            Auto detect
+          </button>
+        </div>
+        <input
+          type="text"
+          className="text-sm px-2 py-1.5 bg-transparent border"
+          placeholder="http://localhost:11434"
+          value={details.ollamEmbeddingUrl}
+          onChange={e => onChange({ ollamEmbeddingUrl: e.target.value })}
+        />
+      </div>
+
+      {
+        autodetectFailed &&
+        <div className="mb-4">
+          <div className="mb-2 text-xs text-white/60">Auto detect failed. If you are not setuped the ollama, please follow the instructions to setup. Or Iy you already setuped ollama, please manually provide the link.</div>
+
+          <Accordion type="single" collapsible>
+            <AccordionItem value="item-1">
+              <AccordionTrigger className="py-1 pl-0 text-sm text-white/80 hover:text-white hover:no-underline">Instructions</AccordionTrigger>
+              <AccordionContent>
+                <Instructions />
+              </AccordionContent>
+            </AccordionItem>
+          </Accordion>
+        </div>
+      }
+
+      {
+        !ollamaEmbeddingModel && details.ollamEmbeddingUrl &&
+        <div className="text-xs">
+          <p className="mb-0.5 text-white/60">It's seem you don't downloaded model, would you like to download,</p>
+          <button className="px-3 py-1.5 bg-input">
+            Download and setup
+          </button>
+        </div>
+      }
+    </>
   )
 }
 
-export default index
+export default Ollama

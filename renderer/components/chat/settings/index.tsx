@@ -24,18 +24,18 @@ import SettingIcon from '@/assets/svg/settings.svg';
 // import Rag from "./rag";
 import Transcribe from "./transcribe";
 import Embedder from "./embedder";
-import General from "./general";
+// import General from "./general";
 import Project from "./project";
 import Voice from "./voice";
 import LLM from "./llm";
 
 const list = [
-  {
-    id: "1",
-    title: "General",
-    logo: <SettingIcon />,
-    child: <General />,
-  },
+  // {
+  //   id: "1",
+  //   title: "General",
+  //   logo: <SettingIcon />,
+  //   child: <General />,
+  // },
   {
     id: "2",
     title: "Project",
@@ -82,7 +82,7 @@ const list = [
 
 function Settings() {
   const update = useUIStore(s => s.update)
-  const selected = useUIStore(s => s.data || "General")
+  const selected = useUIStore(s => s.data || "Project")
   const open = useUIStore(s => s.open)
 
   const isSupported = useSttValidCheck()
@@ -90,7 +90,7 @@ function Settings() {
   function onOpenChange(val: boolean) {
     update({
       open: val ? "settings" : "",
-      data: "General"
+      data: "Project"
     })
   }
 
