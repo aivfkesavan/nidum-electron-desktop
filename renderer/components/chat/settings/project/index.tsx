@@ -170,7 +170,7 @@ function Chat() {
       <div className="grid grid-cols-2 gap-4 mb-4">
         <div className="p-3 border rounded-md">
           <label htmlFor="" className="mb-0.5 text-xs opacity-80">Web Search</label>
-          <p className="text-[10px] text-white/60">Search from web and will use the result in qustioning</p>
+          <p className="text-[10px] text-white/60">Enable and retrieve an answer from the web.</p>
           <Switch
             checked={details.web_enabled}
             onCheckedChange={val => onChange("web_enabled", val)}
@@ -182,7 +182,7 @@ function Chat() {
 
         <div className="p-3 border rounded-md">
           <label htmlFor="" className="mb-0.5 text-xs opacity-80">RAG Search</label>
-          <p className="text-[10px] text-white/60">Search from documents oyu provided and will use the result in qustioning</p>
+          <p className="text-[10px] text-white/60">Enable and retrieve answers from the uploaded document.</p>
           <Switch
             checked={details.rag_enabled}
             onCheckedChange={onChangeRag}
