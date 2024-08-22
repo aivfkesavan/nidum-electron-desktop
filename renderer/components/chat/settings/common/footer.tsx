@@ -13,7 +13,7 @@ function Footer({ onSave }: props) {
   }
 
   return (
-    <div className="df justify-between mt-12">
+    <div className="df justify-between mt-12 mb-4">
       <button
         onClick={close}
         className="w-20 py-1.5 text-[13px] text-white/70 border hover:text-white hover:bg-input"

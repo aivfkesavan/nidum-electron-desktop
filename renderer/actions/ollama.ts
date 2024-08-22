@@ -1,8 +1,7 @@
 import useContextStore from "@store/context";
 import axios from "axios";
 
-export async function getOllamaTags() {
-  const ollamaUrl = useContextStore.getState().ollamaUrl
+export async function getOllamaTags(ollamaUrl: string) {
   return await axios.get(`${ollamaUrl}/api/tags`).then(r => r.data.models)
 }
 

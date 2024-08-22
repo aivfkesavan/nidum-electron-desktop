@@ -12,7 +12,6 @@ type Message = {
 type Chat = {
   id: string;
   title: string;
-  rag_enabled: boolean;
 }
 
 type Project = {
@@ -28,13 +27,15 @@ type Project = {
   max_tokens: number;
   top_p: number;
   n: number;
+  web_enabled: boolean;
+  rag_enabled: boolean;
 }
 
 type FileT = {
-  id: string
-  name: string
-  size: number
-  type: string
+  id: string;
+  name: string;
+  size: number;
+  type: string;
 }
 
 type state = {
@@ -59,7 +60,7 @@ type actions = {
   editProject: (project_id: string, obj: Partial<Project>) => void;
   deleteProject: (project_id: string) => void;
 
-  addChat: (projectId: string, chat: Omit<Chat, "rag_enabled">) => void;
+  addChat: (projectId: string, chat: Chat) => void;
   editChat: (projectId: string, chat: Partial<Chat>) => void;
   deleteChat: (project_id: string, chat_id: string) => void;
 
@@ -85,13 +86,14 @@ const createDefaultProject = (): [string, Project] => {
     max_tokens: 500,
     top_p: 1,
     n: 1,
+    web_enabled: false,
+    rag_enabled: false,
   }];
 }
 
 const createDefaultChat = (): Chat => ({
   id: nanoid(10),
   title: "Default Chat",
-  rag_enabled: false,
 })
 
 const useConvoStore = create<state & actions>()(persist(immer(set => ({
@@ -124,12 +126,13 @@ const useConvoStore = create<state & actions>()(persist(immer(set => ({
       max_tokens: 500,
       top_p: 1,
       n: 1,
+      web_enabled: false,
+      rag_enabled: false,
     }
 
     state.chats[id] = [{
       id: nanoid(10),
       title: "New Chat",
-      rag_enabled: false,
     }]
   }),
 
@@ -151,10 +154,7 @@ const useConvoStore = create<state & actions>()(persist(immer(set => ({
     if (!state.chats[projectId]) {
       state.chats[projectId] = []
     }
-    state.chats[projectId].unshift({
-      ...chat,
-      rag_enabled: false,
-    })
+    state.chats[projectId].unshift(chat)
   }),
 
   editChat: (projectId, chat) => set(state => {

@@ -2,6 +2,7 @@ import { useState } from "react";
 
 import useContextStore from "@/store/context";
 import useConvoStore from "@/store/conversations";
+import useUIStore from "@store/ui";
 
 import {
   Select,
@@ -10,15 +11,20 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Switch } from "@/components/ui/switch";
 
 import Info from "@/components/common/info";
 import Footer from "../common/footer";
 
 function Chat() {
+  const editProject = useConvoStore(s => s.editProject)
+  const updateTab = useUIStore(s => s.update)
+
+  const ollamaEmbeddingModel = useContextStore(s => s.ollamaEmbeddingModel)
   const project_id = useContextStore(s => s.project_id)
+
   const projectMap = useConvoStore(s => s.projects)
   const projects = useConvoStore(s => Object.values(s.projects))
-  const editProject = useConvoStore(s => s.editProject)
 
   const [selected, setSelected] = useState(project_id || "")
   const [details, setDetails] = useState(projectMap[project_id] || {
@@ -27,6 +33,8 @@ function Chat() {
     frequency_penalty: "",
     top_p: "",
     tokenLimit: "",
+    web_enabled: false,
+    rag_enabled: false,
   })
 
   const onChange = (key: string, val: any) => {
@@ -43,6 +51,11 @@ function Chat() {
   function onSelectProject(val: string) {
     setSelected(val)
     setDetails(projectMap[val])
+  }
+
+  function onChangeRag(val: boolean) {
+    onChange("rag_enabled", val)
+    if (val) updateTab({ data: "RAG" })
   }
 
   return (
@@ -154,6 +167,33 @@ function Chat() {
         />
       </div>
 
+      <div className="grid grid-cols-2 gap-4 mb-4">
+        <div className="p-3 border rounded-md">
+          <label htmlFor="" className="mb-0.5 text-xs opacity-80">Web Search</label>
+          <p className="text-[10px] text-white/60">Search from web and will use the result in qustioning</p>
+          <Switch
+            checked={details.web_enabled}
+            onCheckedChange={val => onChange("web_enabled", val)}
+            title="Enable web search"
+            className="ml-auto"
+            disabled={!selected}
+          />
+        </div>
+
+        <div className="p-3 border rounded-md">
+          <label htmlFor="" className="mb-0.5 text-xs opacity-80">RAG Search</label>
+          <p className="text-[10px] text-white/60">Search from documents oyu provided and will use the result in qustioning</p>
+          <Switch
+            checked={details.rag_enabled}
+            onCheckedChange={onChangeRag}
+            title="Enable web search"
+            className="ml-auto"
+            disabled={!selected}
+          />
+        </div>
+      </div>
+
+      <div className="text-[10px] text-white/60">Note: Embedding is not setuped yet. If you enable RAG, you will be navigated to embedding setup. Please complete the setup to use RAG</div>
       <Footer onSave={onSave} />
     </>
   )

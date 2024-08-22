@@ -31,7 +31,7 @@ function Messages() {
   const { toast } = useToast()
 
   const {
-    updateContext, project_id, chat_id: id, webEnabled,
+    updateContext, project_id, chat_id: id,
     model_type, groqApiKey, groqModel, ollamaUrl, ollamaModel,
     embedding_type, ollamEmbeddingUrl, ollamaEmbeddingModel,
     // vb_type, qdrantDBUrl,
@@ -41,11 +41,13 @@ function Messages() {
   const projectdetails = useConvoStore(s => s.projects[project_id] || null)
   const pushIntoMessages = useConvoStore(s => s.pushIntoMessages)
   const deleteMessage = useConvoStore(s => s.deleteMessage)
+  const editProject = useConvoStore(s => s.editProject)
   const editChat = useConvoStore(s => s.editChat)
   const addChat = useConvoStore(s => s.addChat)
   const init = useConvoStore(s => s.init)
 
-  const ragEnabled = useConvoStore(s => s.chats?.[project_id]?.find(c => c.id === id)?.rag_enabled)
+  const webEnabled = useConvoStore(s => s.projects[project_id]?.web_enabled)
+  const ragEnabled = useConvoStore(s => s.projects[project_id]?.rag_enabled)
 
   const [reachedLimit, setReachedLimit] = useState(false)
   const [tempData, setTempData] = useState<msg[]>([])
@@ -382,7 +384,7 @@ function Messages() {
 
             <button
               className="shrink-0 p-1 hover:bg-red-400 mr-1"
-              onClick={() => editChat(project_id, { id, rag_enabled: false })}
+              onClick={() => editProject(project_id, { rag_enabled: false })}
             >
               <LuX />
             </button>

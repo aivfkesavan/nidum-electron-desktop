@@ -5,8 +5,6 @@ type state = {
   project_id: string;
   chat_id: string;
 
-  webEnabled: boolean
-
   model_type: "Groq" | "Ollama" | "Nidum";
   groqApiKey: string;
   groqModel: string;
@@ -28,8 +26,6 @@ type state = {
   sttGroqApiKey: string;
 
   tts_type: "System native";
-
-  ragRetrieval: number;
 }
 
 type actions = {
@@ -39,8 +35,6 @@ type actions = {
 const useContextStore = create<state & actions>()(persist(set => ({
   project_id: "",
   chat_id: "",
-
-  webEnabled: false,
 
   model_type: "Groq",
   groqApiKey: "",
@@ -65,25 +59,10 @@ const useContextStore = create<state & actions>()(persist(set => ({
 
   tts_type: "System native",
 
-  ragRetrieval: 8,
-
   updateContext: val => set(val),
 }),
   {
     name: 'context-storage',
-    version: 1,
-    migrate: (persistedState: any, version) => {
-      if (version === 0) {
-        return {
-          ...persistedState,
-          model_type: "Groq",
-          embedding_type: "Ollama",
-          vb_type: "Qdrant",
-        }
-      }
-
-      return persistedState
-    },
   })
 );
 

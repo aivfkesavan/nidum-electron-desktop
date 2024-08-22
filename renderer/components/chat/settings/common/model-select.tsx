@@ -20,7 +20,8 @@ type props = {
 function ModelSelect({ ollamaUrl, val, filterFn, onChange }: props) {
   const { data, isLoading } = useQuery({
     queryKey: ["ollama-tags", ollamaUrl],
-    queryFn: getOllamaTags,
+    queryFn: () => getOllamaTags(ollamaUrl),
+    enabled: !!ollamaUrl,
   })
 
   return (
