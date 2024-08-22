@@ -15,7 +15,13 @@ function ClientWrapper({ children }: props) {
       <QueryClientProvider client={queryClient}>
         {children}
         <Toaster />
-        <SonnerToaster />
+        <SonnerToaster
+          toastOptions={{
+            style: {
+              width: "250px"
+            }
+          }}
+        />
       </QueryClientProvider>
     </>
   )

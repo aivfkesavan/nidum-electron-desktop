@@ -51,10 +51,10 @@ function Native() {
         const { done, value } = await reader.read()
         if (done) {
           setDownloading(null)
-          // updateContext({
-          //   nativeSttModelsDownloaded: [...downloaded, selected].join(","),
-          //   nativeSttModel: selected,
-          // })
+          updateContext({
+            nativeSttModelsDownloaded: [...downloaded, selected].join(","),
+            nativeSttModel: selected,
+          })
           break
         }
 

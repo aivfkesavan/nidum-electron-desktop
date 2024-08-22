@@ -10,11 +10,10 @@ import isWithinTokenLimit from "@/utils/is-within-token-limit";
 import { useAudio } from "./use-speech";
 import { useToast } from "@/components/ui/use-toast";
 
+import { useDownloads } from "../download-manager/provider";
 import useContextStore from "@/store/context";
 import useConvoStore from "@/store/conversations";
-import useModelStore from "@store/model";
 
-import ModelProgress from "../model-progress";
 import SpeechToText from "./speech-to-text";
 import FileUpload from "./file-upload";
 import Settings from "../settings";
@@ -37,7 +36,7 @@ function Messages() {
     // vb_type, qdrantDBUrl,
   } = useContextStore()
 
-  const isModelDownloading = useModelStore(s => s.is_downloading)
+  const { isDownloading } = useDownloads()
   const projectdetails = useConvoStore(s => s.projects[project_id] || null)
   const pushIntoMessages = useConvoStore(s => s.pushIntoMessages)
   const deleteMessage = useConvoStore(s => s.deleteMessage)
@@ -433,11 +432,6 @@ function Messages() {
         />
 
         <FileUpload />
-
-        {
-          isModelDownloading &&
-          <ModelProgress />
-        }
       </div>
     </div>
   )

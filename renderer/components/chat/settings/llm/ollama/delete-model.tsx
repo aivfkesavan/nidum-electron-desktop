@@ -10,6 +10,7 @@ import {
   DialogTitle,
   DialogFooter,
 } from "@/components/ui/dialog";
+import { useToast } from "@components/ui/use-toast";
 
 type props = {
   id: string
@@ -18,10 +19,12 @@ type props = {
 
 function DeleteModel({ id, closeModel }: props) {
   const quryClient = useQueryClient()
+  const { toast } = useToast()
 
   const { mutate, isPending } = useMutation({
     mutationFn: () => deleteModel(id),
     onSuccess() {
+      toast({ title: "Model deleted successfully" })
       quryClient.invalidateQueries({ queryKey: ["ollama-tags"] })
       closeModel()
     },
