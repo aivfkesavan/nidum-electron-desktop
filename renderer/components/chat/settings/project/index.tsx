@@ -55,7 +55,7 @@ function Chat() {
 
   function onChangeRag(val: boolean) {
     onChange("rag_enabled", val)
-    // if (val) updateTab({ data: "RAG" })
+    if (val) updateTab({ data: "RAG" })
   }
 
   return (
@@ -193,7 +193,11 @@ function Chat() {
         </div>
       </div>
 
-      {/* <div className="text-[10px] text-white/60">Note: Embedding is not setuped yet. If you enable RAG, you will be navigated to embedding setup. Please complete the setup to use RAG</div> */}
+      {
+        ollamaEmbeddingModel &&
+        <div className="text-[10px] text-white/60">Note: Embedding is not setuped yet. If you enable RAG, you will be navigated to embedding setup. Please complete the setup to use RAG</div>
+      }
+
       <Footer onSave={onSave} />
     </>
   )

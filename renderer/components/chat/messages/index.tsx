@@ -15,7 +15,7 @@ import useConvoStore from "@/store/conversations";
 import useModelStore from "@store/model";
 
 import ModelProgress from "../model-progress";
-// import SpeechToText from "./speech-to-text";
+import SpeechToText from "./speech-to-text";
 import FileUpload from "./file-upload";
 import Settings from "../settings";
 import Header from "./header";
@@ -427,10 +427,10 @@ function Messages() {
           }
         </div>
 
-        {/* <SpeechToText
+        <SpeechToText
           postData={postData}
           disabled={isChatInputDisabled}
-        /> */}
+        />
 
         <FileUpload />
 

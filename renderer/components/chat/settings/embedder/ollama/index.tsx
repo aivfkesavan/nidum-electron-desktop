@@ -1,5 +1,6 @@
 import { useState } from "react";
 
+import { useDownloads } from "@components/chat/download-manager/provider";
 import useContextStore from "@/store/context";
 
 import {
@@ -22,6 +23,7 @@ function Ollama() {
     ollamEmbeddingUrl,
   })
 
+  const { startDownload } = useDownloads()
   const { toast } = useToast()
 
   async function checkAutoDetect() {
@@ -102,7 +104,10 @@ function Ollama() {
         !ollamaEmbeddingModel && details.ollamEmbeddingUrl &&
         <div className="text-xs">
           <p className="mb-0.5 text-white/60">It's seem you don't downloaded model, would you like to download,</p>
-          <button className="px-3 py-1.5 bg-input">
+          <button
+            className="px-3 py-1.5 bg-input"
+            onClick={() => startDownload("file1")}
+          >
             Download and setup
           </button>
         </div>
