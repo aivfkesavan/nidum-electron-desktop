@@ -1,6 +1,9 @@
 import { useState } from "react";
 import { IoSearch } from "react-icons/io5";
 
+import type { Project } from "@/store/conversations";
+
+import { relativeDateFormat } from "@utils/date-helper";
 import useContextStore from "@/store/context";
 import useConvoStore from "@/store/conversations";
 import { cn } from "@/lib/utils";
@@ -11,14 +14,27 @@ import DeleteProject from "./delete-project";
 import ProjectCard from "./project-card";
 import Model from "@/components/project/model";
 
+type groupedPrpjectT = Record<string, Project[]>
+
 function Projects() {
   const updateContext = useContextStore(s => s.updateContext)
-  const projects = useConvoStore(s => Object.values(s.projects))
   const project_id = useContextStore(s => s.project_id)
 
   const [searchBy, setSearchBy] = useState("")
   const [modal, setModal] = useState<{ state: string, data: any }>({ state: "", data: null })
   const [open, setOpen] = useState(false)
+
+  const groupedProjects: groupedPrpjectT = useConvoStore(s =>
+    Object.values(s.projects)?.reduce((prev, curr) => {
+      if (curr?.name?.toLowerCase()?.includes(searchBy?.toLowerCase())) {
+        const dateGroup = relativeDateFormat(curr.at)
+        if (!prev[dateGroup]) prev[dateGroup] = []
+        prev[dateGroup].push(curr)
+        return prev
+      }
+      return prev
+    }, {}) || {}
+  )
 
   const updateModal = (state: string, data: any = null) => setModal({ state, data })
 
@@ -55,10 +71,11 @@ function Projects() {
       </div>
 
       <div className="scroll-y p-2">
-        {
-          projects
-            .filter(p => p.name?.toLowerCase()?.includes(searchBy?.toLowerCase()))
-            .map(p => (
+        {Object.entries(groupedProjects).map(([dateGroup, groupChats]) => (
+          <div key={dateGroup} className="mb-5">
+            <h2 className="mb-0.5 pl-2.5 text-xs font-semibold text-white/40">{dateGroup}</h2>
+
+            {groupChats?.map((p) => (
               <ProjectCard
                 key={p.id}
                 name={p.name}
@@ -66,8 +83,9 @@ function Projects() {
                 onDelete={() => updateModal("delete", p.id)}
                 onNavigate={() => updateContext({ project_id: p.id, chat_id: "" })}
               />
-            ))
-        }
+            ))}
+          </div>
+        ))}
       </div>
 
       {
