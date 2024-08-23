@@ -8,15 +8,16 @@ import useUIStore from "@store/ui";
 
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
+import { deleteWhisperFolder } from "@actions/whisper";
 
 const models = [
-  { name: "tiny", size: "75 MB", required: "390 MB" },
+  // { name: "tiny", size: "75 MB", required: "390 MB" },
   { name: "tiny.en", size: "75 MB", required: "390 MB" },
-  { name: "base", size: "142 MB", required: "500 MB" },
+  // { name: "base", size: "142 MB", required: "500 MB" },
   { name: "base.en", size: "142 MB", required: "500 MB" },
-  { name: "small", size: "466 MB", required: "1.0 GB" },
+  // { name: "small", size: "466 MB", required: "1.0 GB" },
   { name: "small.en", size: "466 MB", required: "1.0 GB" },
-  { name: "medium", size: "1.5 GB", required: "2.6 GB" },
+  // { name: "medium", size: "1.5 GB", required: "2.6 GB" },
   { name: "medium.en", size: "1.5 GB", required: "2.6 GB" },
   { name: "large-v1", size: "2.9 GB", required: "4.7 GB" },
   { name: "large-v2", size: "2.9 GB", required: "4.7 GB" },
@@ -60,9 +61,20 @@ function Native() {
     }
   }
 
+  function reset() {
+    try {
+      deleteWhisperFolder()
+      setSelected("")
+      updateContext({ nativeSttModelsDownloaded: "", nativeSttModel: "" })
+      toast({ title: "Whisper setup reseted" })
+    } catch (error) {
+      console.log(error)
+    }
+  }
+
   return (
     <>
-      <RadioGroup value={selected} onValueChange={setSelected} className="grid grid-cols-2 gap-4 mt-4">
+      <RadioGroup value={selected} onValueChange={setSelected} className="grid grid-cols-2 gap-4 my-4">
         {
           models.map(m => (
             <div
@@ -100,9 +112,19 @@ function Native() {
         }
       </RadioGroup>
 
-      <button onClick={() => updateContext({ nativeSttModelsDownloaded: "", nativeSttModel: "" })}>
-        clear
-      </button>
+      {
+        nativeSttModel &&
+        <div className="df">
+          <p className="text-xs text-white/70">Note: If you face any problem, reset the setup</p>
+          <button
+            onClick={reset}
+            className="px-3 text-xs bg-red-500/50 hover:bg-red-500"
+          >
+            Reset
+          </button>
+        </div>
+      }
+
       <div className="df justify-between mt-12 mb-4">
         <button
           onClick={close}
