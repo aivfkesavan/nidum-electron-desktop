@@ -1,4 +1,5 @@
 import express from 'express';
+import { promises as fsPromise } from 'fs';
 
 import {
   downloadWhisperModel,
@@ -100,5 +101,17 @@ router.post("/transcribe/:folderName/:model", upload.single('audio'), async (req
     })
   }
 })
+
+router.delete("/", async (req, res) => {
+  try {
+    const whisperPath = getWhisperPath()
+    await fsPromise.rm(whisperPath, { recursive: true, force: true })
+    return res.json({ msg: "Whisper folder deleted successfully" })
+
+  } catch (error) {
+    return res.status(400).json({ error })
+  }
+})
+
 
 export default router
