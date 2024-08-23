@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { IoSearch } from "react-icons/io5";
 import { nanoid } from "nanoid";
 
@@ -20,6 +20,15 @@ function Histories() {
 
   const [searchBy, setSearchBy] = useState("")
   const [modal, setModal] = useState<{ state: string, data: any }>({ state: "", data: null })
+
+  useEffect(() => {
+    if (!chat_id) {
+      const isFirstChatNew = chats?.[0]?.title === "New Chat"
+      if (isFirstChatNew) {
+        updateContext({ chat_id: chats[0]?.id })
+      }
+    }
+  }, [chats, chat_id])
 
   const updateModal = (state: string, data: any = null) => setModal({ state, data })
 
