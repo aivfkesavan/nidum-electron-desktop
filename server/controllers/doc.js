@@ -2,9 +2,9 @@ import express from 'express';
 import { promises as fs } from 'fs';
 import 'dotenv/config';
 
-const { queryIndex, indexFolder } = require("../utils/llama")
-const { createPath, getRagPath } = require("../utils/path-helper")
-const { upload } = require("../middleawres/upload")
+import { queryIndex, indexFolder } from "../utils/llama";
+import { createPath, getRagPath } from "../utils/path-helper";
+import { upload } from "../middleawres/upload";
 
 const router = express.Router()
 
