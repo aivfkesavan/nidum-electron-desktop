@@ -113,7 +113,7 @@ function Ollama() {
       {
         !ollamaEmbeddingModel && details.ollamEmbeddingUrl && !downloads?.["mxbai-embed-large:latest"] &&
         <div className="text-xs">
-          <p className="mb-0.5 text-white/60">It's seem you don't downloaded model, would you like to download,</p>
+          <p className="mb-0.5 text-white/60">It appears the model hasn't been downloaded yet. Would you like to download it?</p>
           <button
             className="px-3 py-1.5 bg-input"
             onClick={() => downloadModel({

@@ -63,50 +63,62 @@ export function DownloadProvider({ children }: props) {
       const reader = response.body.getReader()
       const decoder = new TextDecoder()
 
-      while (true) {
-        const { value } = await reader.read()
+      let shouldBreak = false;
+
+      while (!shouldBreak) {
+        const { value, done } = await reader.read()
+        if (done) break;
+
         const chunk = decoder?.decode(value)
 
         if (chunk) {
-          const parsed = JSON?.parse(chunk)
-          if (parsed && parsed.status?.startsWith("pulling")) {
-            const perc = Math.round((Number(parsed.completed) / Number(parsed.total)) * 100)
-            const title = initiater === "embedder" ? "RAG setup" : name
-            toast.loading(title, {
-              className: "py-2",
-              description: `Progress: ${isNaN(perc) ? 0 : perc}%`,
-              richColors: false,
-              position: "top-center",
-              duration: Infinity,
-              id: name,
-            })
-            setDownloads(p => ({
-              ...p,
-              [name]: {
-                title: name,
-                initiater,
-                progress: isNaN(perc) ? 0 : perc,
+          const lines = chunk.split('\n').filter(line => line.trim() !== '')
+          for (const line of lines) {
+            try {
+              const parsed = JSON?.parse(line)
+              if (parsed && parsed?.status?.startsWith("pulling")) {
+                const perc = Math.round((Number(parsed.completed) / Number(parsed.total)) * 100)
+                const title = initiater === "embedder" ? "RAG setup" : name
+                toast.loading(title, {
+                  className: "py-2",
+                  description: `Progress: ${isNaN(perc) ? 0 : perc}%`,
+                  richColors: false,
+                  position: "top-center",
+                  duration: Infinity,
+                  id: name,
+                })
+                setDownloads(p => ({
+                  ...p,
+                  [name]: {
+                    title: name,
+                    initiater,
+                    progress: isNaN(perc) ? 0 : perc,
+                  }
+                }))
               }
-            }))
-          }
 
-          if (parsed && parsed?.status === "success") {
-            const title = initiater === "embedder" ? "RAG setup" : name
-            toast.success(title, {
-              className: "py-2",
-              richColors: true,
-              description: "Downloaded successfully",
-              position: "top-center",
-              duration: 1000,
-              id: name,
-            })
-            setDownloads(p => {
-              const rest = { ...p }
-              delete rest[name]
-              return rest
-            })
-            onSuccess?.()
-            break
+              if (parsed && parsed?.status === "success") {
+                const title = initiater === "embedder" ? "RAG setup" : name
+                toast.success(title, {
+                  className: "py-2",
+                  richColors: true,
+                  description: "Downloaded successfully",
+                  position: "top-center",
+                  duration: 1000,
+                  id: name,
+                })
+                setDownloads(p => {
+                  const rest = { ...p }
+                  delete rest[name]
+                  return rest
+                })
+                onSuccess?.()
+                shouldBreak = true;
+                break;
+              }
+            } catch (error) {
+              console.error("Error parsing JSON:", error)
+            }
           }
         }
       }
