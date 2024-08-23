@@ -31,8 +31,8 @@ function NativeProvider({ disabled, postData }: props) {
       })
       const res = await response.json()
 
-      if (res.transcriped) {
-        postData(res.transcriped, true)
+      if (res.transcribed) {
+        postData(res.transcribed, true)
       }
 
     } catch (error) {
