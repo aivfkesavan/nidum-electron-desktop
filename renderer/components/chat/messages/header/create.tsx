@@ -13,7 +13,7 @@ import {
   TooltipTrigger,
   TooltipPortal,
 } from "@/components/ui/tooltip";
-import Model from "@/components/project/model";
+import ProjectModel from "../../project-model";
 
 function Create() {
   const [open, setOpen] = useState(false)
@@ -52,7 +52,7 @@ function Create() {
         </Tooltip>
       </TooltipProvider>
 
-      <Model
+      <ProjectModel
         open={open}
         closeModel={() => setOpen(false)}
       />
