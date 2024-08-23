@@ -3,7 +3,7 @@ import { IoSearch } from "react-icons/io5";
 
 import type { Project } from "@/store/conversations";
 
-import { relativeDateFormat } from "@utils/date-helper";
+import { relativeDateFormat } from "@utils/date-helper"; // generateSampleProjects, 
 import useContextStore from "@/store/context";
 import useConvoStore from "@/store/conversations";
 import { cn } from "@/lib/utils";
@@ -23,6 +23,8 @@ function Projects() {
   const [searchBy, setSearchBy] = useState("")
   const [modal, setModal] = useState<{ state: string, data: any }>({ state: "", data: null })
   const [open, setOpen] = useState(false)
+
+  // const addRandomProjects = useConvoStore(s => s.addRandomProjects)
 
   const groupedProjects: groupedPrpjectT = useConvoStore(s =>
     Object.values(s.projects)?.reduce((prev, curr) => {
@@ -47,6 +49,8 @@ function Projects() {
       <div className="df p-2 pl-9 text-[11px] mt-[5px] font-medium">
         Projects
       </div>
+
+      {/* <button onClick={() => addRandomProjects(generateSampleProjects())}>Generate</button> */}
 
       <div className="df gap-1 mx-3 mt-2 pl-2 rounded-md border bg-secondary/60">
         <IoSearch className="text-white/30" />
