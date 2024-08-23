@@ -1,6 +1,4 @@
-import { useQuery } from "@tanstack/react-query";
-
-import { getOllamaTags } from "@actions/ollama";
+import { useOllamaModels } from "@hooks/use-ollama";
 
 import {
   Select,
@@ -18,11 +16,7 @@ type props = {
 }
 
 function ModelSelect({ ollamaUrl, val, filterFn, onChange }: props) {
-  const { data, isLoading } = useQuery({
-    queryKey: ["ollama-tags", ollamaUrl],
-    queryFn: () => getOllamaTags(ollamaUrl),
-    enabled: !!ollamaUrl,
-  })
+  const { data, isLoading } = useOllamaModels(ollamaUrl)
 
   return (
     <Select value={val} onValueChange={onChange}>

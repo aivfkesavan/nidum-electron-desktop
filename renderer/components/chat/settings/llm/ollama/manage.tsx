@@ -1,7 +1,7 @@
 import { useState } from "react";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQueryClient } from "@tanstack/react-query";
 
-import { getOllamaTags } from "@actions/ollama";
+import { useOllamaModels } from "@hooks/use-ollama";
 import { useDownloads } from "@components/chat/download-manager/provider";
 import useContextStore from "@store/context";
 import { useToast } from "@components/ui/use-toast";
@@ -24,11 +24,7 @@ function Manage({ filterFn }: props) {
   const ollamaUrl = useContextStore(s => s.ollamaUrl)
 
   const queryClient = useQueryClient()
-  const { data, isLoading } = useQuery({
-    queryKey: ["ollama-tags", ollamaUrl],
-    queryFn: () => getOllamaTags(ollamaUrl),
-    enabled: !!ollamaUrl,
-  })
+  const { data, isLoading } = useOllamaModels(ollamaUrl)
 
   const updateModel = (v: string = "") => setModel(v)
 

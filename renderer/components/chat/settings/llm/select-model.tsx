@@ -9,6 +9,7 @@ import {
   DialogContent,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import OllmaStatusCheck from "@components/common/ollma-status-check";
 
 type listT = {
   id: string
@@ -41,6 +42,7 @@ const list: listT[] = [
 function SelectModel() {
   const updateContext = useContextStore(s => s.updateContext)
   const model_type = useContextStore(s => s.model_type)
+  const ollamaUrl = useContextStore(s => s.ollamaUrl)
 
   const [open, setOpen] = useState(false)
 
@@ -50,8 +52,12 @@ function SelectModel() {
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger className="text-sm border" asChild>
         <div className="df gap-4 px-4 py-2.5 rounded-md cursor-pointer hover:bg-input/30">
-          <div className="dc size-8 shrink-0">
+          <div className="dc size-8 shrink-0 relative">
             <img className={`${found?.title === "Ollama" ? "invert h-10 -mt-1.5" : "w-8"}`} src={found?.logo} alt="" />
+            {
+              found.title === "Ollama" &&
+              <OllmaStatusCheck ollamaUrl={ollamaUrl} className="absolute top-0 -right-2" />
+            }
           </div>
 
           <div className="text-left">
@@ -77,7 +83,7 @@ function SelectModel() {
                   setOpen(false)
                 }}
               >
-                <div className="dc size-8">
+                <div className="dc size-8 relative">
                   <img
                     className={cn({
                       "invert h-10 -mt-1.5": l.title === "Ollama",
@@ -86,6 +92,10 @@ function SelectModel() {
                     src={l.logo}
                     alt={l.title}
                   />
+                  {
+                    l.title === "Ollama" &&
+                    <OllmaStatusCheck ollamaUrl={ollamaUrl} className="absolute top-0 -right-2" />
+                  }
                 </div>
 
                 <div className="">
