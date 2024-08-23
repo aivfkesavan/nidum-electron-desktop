@@ -26,6 +26,7 @@ function Projects() {
 
   // const addRandomProjects = useConvoStore(s => s.addRandomProjects)
 
+  const chatsMap = useConvoStore(s => s.chats)
   const groupedProjects: groupedPrpjectT = useConvoStore(s =>
     Object.values(s.projects)?.reduce((prev, curr) => {
       if (curr?.name?.toLowerCase()?.includes(searchBy?.toLowerCase())) {
@@ -39,6 +40,13 @@ function Projects() {
   )
 
   const updateModal = (state: string, data: any = null) => setModal({ state, data })
+
+  function onNavigate(id: string) {
+    updateContext({
+      project_id: id,
+      chat_id: chatsMap?.[id]?.[0]?.id || ""
+    })
+  }
 
   return (
     <div
@@ -75,17 +83,17 @@ function Projects() {
       </div>
 
       <div className="scroll-y p-2">
-        {Object.entries(groupedProjects).map(([dateGroup, groupChats]) => (
+        {Object.entries(groupedProjects).map(([dateGroup, groupProjects]) => (
           <div key={dateGroup} className="mb-5">
             <h2 className="mb-0.5 pl-2.5 text-xs font-semibold text-white/40">{dateGroup}</h2>
 
-            {groupChats?.map((p) => (
+            {groupProjects?.map((p) => (
               <ProjectCard
                 key={p.id}
                 name={p.name}
                 onEdit={() => updateModal("edit", p)}
                 onDelete={() => updateModal("delete", p.id)}
-                onNavigate={() => updateContext({ project_id: p.id, chat_id: "" })}
+                onNavigate={() => onNavigate(p.id)}
               />
             ))}
           </div>
