@@ -12,7 +12,7 @@ import Message from '@/assets/svg/message.svg';
 
 import DeleteProject from "./delete-project";
 import ProjectCard from "./project-card";
-import Model from "@/components/project/model";
+import ProjectModel from "../project-model";
 
 type groupedPrpjectT = Record<string, Project[]>
 
@@ -102,7 +102,7 @@ function Projects() {
 
       {
         modal.state === "edit" &&
-        <Model
+        <ProjectModel
           open
           closeModel={() => updateModal("")}
           id={modal.data.id}
@@ -118,7 +118,7 @@ function Projects() {
         />
       }
 
-      <Model
+      <ProjectModel
         open={open}
         closeModel={() => setOpen(false)}
       />

@@ -45,7 +45,7 @@ type props = {
   }
 }
 
-function Model({ data, id, open, closeModel }: props) {
+function ProjectModel({ data, id, open, closeModel }: props) {
   const { register, control, formState: { errors }, reset, handleSubmit } = useForm({
     defaultValues: {
       name: data?.name || "",
@@ -206,4 +206,4 @@ function Model({ data, id, open, closeModel }: props) {
   )
 }
 
-export default Model
+export default ProjectModel
