@@ -6,7 +6,7 @@ import {
   installWhisperCpp,
   transcribe,
   convertToCaptions,
-} from "@remotion/install-whisper-cpp";
+} from "../whisper";
 
 import { getWhisperPath } from '../utils/path-helper.js';
 import { upload } from "../middleawres/upload.js";
