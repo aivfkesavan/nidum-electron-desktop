@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { LuChevronRight } from "react-icons/lu";
 
 import useContextStore from "@/store/context";
@@ -8,7 +9,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { useState } from "react";
+import OllmaStatusCheck from "@components/common/ollma-status-check";
 
 type listT = {
   id: string
@@ -35,6 +36,7 @@ const list: listT[] = [
 function ModelSelect() {
   const updateContext = useContextStore(s => s.updateContext)
   const model_type = useContextStore(s => s.model_type)
+  const ollamaUrl = useContextStore(s => s.ollamaUrl)
 
   const [open, setOpen] = useState(false)
 
@@ -57,7 +59,7 @@ function ModelSelect() {
                 setOpen(false)
               }}
             >
-              <div className="dc size-8">
+              <div className="dc size-8 relative">
                 <img
                   className={cn({
                     "invert h-8 -mt-1": l.title === "Ollama",
@@ -66,6 +68,10 @@ function ModelSelect() {
                   src={l.logo}
                   alt={l.title}
                 />
+                {
+                  model_type === "Ollama" && l.title === "Ollama" &&
+                  <OllmaStatusCheck ollamaUrl={ollamaUrl} className="absolute top-0 -right-0.5" />
+                }
               </div>
 
               <div className="">
