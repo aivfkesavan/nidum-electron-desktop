@@ -1,5 +1,7 @@
-import { createContext, useContext, useEffect, useState } from "react";
+import { createContext, useContext, useState } from "react";
 import { toast } from 'sonner';
+
+import constants from "@utils/constants";
 
 type Downloads = {
   [id: string]: {
@@ -17,10 +19,17 @@ type downloadModelProps = {
   onError: () => void
 }
 
+type downloadWhisperModelProps = {
+  model: string
+  onSuccess: () => void
+  onError: () => void
+}
+
 type DownloadContextType = {
   downloads: Downloads
   isDownloading: boolean
   downloadModel: (v: downloadModelProps) => void
+  downloadWhisperModel: (v: downloadWhisperModelProps) => void
 }
 
 type props = {
@@ -111,12 +120,83 @@ export function DownloadProvider({ children }: props) {
     }
   }
 
+  async function downloadWhisperModel({ model, onSuccess, onError }: downloadWhisperModelProps) {
+    try {
+      const response = await fetch(`${constants.backendUrl}/whisper/download`, {
+        method: "POST",
+        cache: "no-store",
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ model }),
+      })
+
+      const reader = response.body.getReader()
+      const decoder = new TextDecoder()
+
+      while (true) {
+        const { done, value } = await reader.read()
+        if (done) {
+          // console.log("at done")
+          toast.success(model, {
+            closeButton: true,
+            richColors: true,
+            description: "Downloaded successfully",
+            position: "top-center",
+            duration: 1000,
+            id: model,
+          })
+          setDownloads(p => {
+            const rest = { ...p }
+            delete rest[model]
+            return rest
+          })
+          onSuccess?.()
+          break
+        }
+
+        const chunk = decoder?.decode(value)
+        // console.log("chunk", chunk)
+        const lines = chunk?.split('\n\n')
+        // console.log("lines", lines)
+        lines?.forEach(line => {
+          if (line?.startsWith('data: ')) {
+            // console.log("line?.slice(6)", line?.slice(6))
+            const data = JSON?.parse(line?.slice(6))
+            // console.log("data", data)
+            if (data) {
+              let title = data?.name === "Whisper" ? "Setting up Whisper" : data?.name
+              toast.loading(title, {
+                description: data?.name === "Whisper" ? "" : `Progress: ${data?.progress || 0}%`,
+                richColors: false,
+                position: "top-center",
+                duration: Infinity,
+                id: model,
+              })
+              setDownloads(p => ({
+                ...p,
+                [model]: {
+                  title: data?.name,
+                  initiater: "whisper",
+                  progress: data?.progress || 0,
+                }
+              }))
+            }
+          }
+        })
+      }
+
+    } catch (error) {
+      console.log(error)
+      onError?.()
+    }
+  }
+
   return (
     <DownloadContext.Provider
       value={{
         downloads,
         isDownloading: Object.keys(downloads).length > 0,
         downloadModel,
+        downloadWhisperModel,
       }}
     >
       {children}
