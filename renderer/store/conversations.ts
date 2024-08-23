@@ -229,11 +229,11 @@ const useConvoStore = create<state & actions>()(persist(immer(set => ({
   //   projects.forEach(pro => {
   //     state.projects[pro.id] = pro
   //   })
-  // })
+  // }),
 
   // addRandomChats: (project_id, chats) => set(state => {
   //   state.chats[project_id] = chats
-  // })
+  // }),
 })),
   {
     name: 'convo-storage',

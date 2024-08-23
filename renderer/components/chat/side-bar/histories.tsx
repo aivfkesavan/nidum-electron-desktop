@@ -4,7 +4,7 @@ import { nanoid } from "nanoid";
 
 import type { Chat } from '@/store/conversations';
 
-import { relativeDateFormat } from "@utils/date-helper";
+import { relativeDateFormat } from "@utils/date-helper"; // generateSampleChats,
 import useContextStore from "@/store/context";
 import useConvoStore from "@/store/conversations";
 import { cn } from "@/lib/utils";
@@ -24,6 +24,8 @@ function Histories() {
 
   const [searchBy, setSearchBy] = useState("")
   const [modal, setModal] = useState<{ state: string, data: any }>({ state: "", data: null })
+
+  // const addRandomChats = useConvoStore(s => s.addRandomChats)
 
   const groupedChats: groupedChatsT = useConvoStore(s =>
     s.chats?.[project_id]?.reduce((prev, curr) => {
@@ -65,6 +67,8 @@ function Histories() {
 
         <GoToProject />
       </div>
+
+      {/* <button onClick={() => addRandomChats(project_id, generateSampleChats())}>Generate</button> */}
 
       <div className="df gap-1 mx-3 mt-2 pl-2 rounded-md border bg-secondary/60">
         <IoSearch className="text-white/30" />

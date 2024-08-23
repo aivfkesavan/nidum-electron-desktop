@@ -50,37 +50,45 @@ export function relativeDateFormat(date: string) {
 
 
 // export const generateSampleProjects = (count: number = 100) => {
-//   const chats = [];
+//   const projects = [];
 //   const today = dayjs();
 
 //   for (let i = 0; i < count; i++) {
-//     let chatDate;
+//     let projectDate;
 
 //     if (i < 7) {
 //       // First week: one chat per day
-//       chatDate = today.subtract(i, 'day');
+//       projectDate = today.subtract(i, 'day');
 //     } else if (i < 14) {
 //       // Second week: one chat every other day
-//       chatDate = today.subtract(7 + (i - 7) * 2, 'day');
+//       projectDate = today.subtract(7 + (i - 7) * 2, 'day');
 //     } else if (i < 30) {
 //       // Rest of the first month: one chat every 3 days
-//       chatDate = today.subtract(14 + (i - 14) * 3, 'day');
+//       projectDate = today.subtract(14 + (i - 14) * 3, 'day');
 //     } else {
 //       // Previous months: one chat every week
-//       chatDate = today.subtract(44 + (i - 30) * 7, 'day');
+//       projectDate = today.subtract(44 + (i - 30) * 7, 'day');
 //     }
 
-//     chats.push({
-//       id: `chat-${i + 1}`,
-//       name: `Chat from ${chatDate.format('MMMM D, YYYY')}`,
+//     projects.push({
+//       id: `project-${i + 1}`,
+//       name: `Project from ${projectDate.format('MMMM D, YYYY')}`,
 //       other: "",
 //       category: "General",
 //       description: "This is a default project",
 //       systemPrompt: "You are a helpful assistant.",
-//       at: chatDate.toISOString()
+//       tokenLimit: 8000,
+//       frequency_penalty: 0,
+//       temperature: 0.1,
+//       max_tokens: 500,
+//       top_p: 1,
+//       n: 1,
+//       web_enabled: false,
+//       rag_enabled: false,
+//       at: projectDate.toISOString()
 //     });
 //   }
 
-//   return chats.sort((a, b) => dayjs(b.at).diff(dayjs(a.at)));
+//   return projects.sort((a, b) => dayjs(b.at).diff(dayjs(a.at)));
 // }
 
