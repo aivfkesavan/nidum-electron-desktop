@@ -25,7 +25,7 @@ function Ollama() {
     ollamEmbeddingUrl,
   })
 
-  const { downloadModel } = useDownloads()
+  const { downloads, downloadModel } = useDownloads()
   const queryClient = useQueryClient()
   const { toast } = useToast()
 
@@ -104,7 +104,14 @@ function Ollama() {
       }
 
       {
-        !ollamaEmbeddingModel && details.ollamEmbeddingUrl &&
+        downloads?.["mxbai-embed-large:latest"] &&
+        <div className="text-xs text-white/70">
+          RAG setup progress: {downloads?.["mxbai-embed-large:latest"]?.progress}%
+        </div>
+      }
+
+      {
+        !ollamaEmbeddingModel && details.ollamEmbeddingUrl && !downloads?.["mxbai-embed-large:latest"] &&
         <div className="text-xs">
           <p className="mb-0.5 text-white/60">It's seem you don't downloaded model, would you like to download,</p>
           <button

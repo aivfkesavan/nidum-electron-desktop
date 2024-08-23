@@ -73,6 +73,7 @@ export function DownloadProvider({ children }: props) {
             const perc = Math.round((Number(parsed.completed) / Number(parsed.total)) * 100)
             const title = initiater === "embedder" ? "RAG setup" : name
             toast.loading(title, {
+              className: "py-2",
               description: `Progress: ${isNaN(perc) ? 0 : perc}%`,
               richColors: false,
               position: "top-center",
@@ -92,7 +93,7 @@ export function DownloadProvider({ children }: props) {
           if (parsed && parsed?.status === "success") {
             const title = initiater === "embedder" ? "RAG setup" : name
             toast.success(title, {
-              closeButton: true,
+              className: "py-2",
               richColors: true,
               description: "Downloaded successfully",
               position: "top-center",
@@ -137,7 +138,7 @@ export function DownloadProvider({ children }: props) {
         if (done) {
           // console.log("at done")
           toast.success(model, {
-            closeButton: true,
+            className: "py-2",
             richColors: true,
             description: "Downloaded successfully",
             position: "top-center",
@@ -165,6 +166,7 @@ export function DownloadProvider({ children }: props) {
             if (data) {
               let title = data?.name === "Whisper" ? "Setting up Whisper" : data?.name
               toast.loading(title, {
+                className: "py-2",
                 description: data?.name === "Whisper" ? "" : `Progress: ${data?.progress || 0}%`,
                 richColors: false,
                 position: "top-center",
