@@ -6,6 +6,14 @@ import { useDownloads } from "@components/chat/download-manager/provider";
 import useContextStore from "@store/context";
 import { useToast } from "@components/ui/use-toast";
 
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+
 import DeleteModel from "./delete-model";
 import ModelInfo from "./model-info";
 import useUIStore from "@store/ui";
@@ -13,6 +21,54 @@ import useUIStore from "@store/ui";
 type props = {
   filterFn: (m: any) => boolean;
 }
+
+const trendingModels = [
+  {
+    name: "mistral",
+    size: "4.10 GB",
+    quantizisation: "",
+  },
+  {
+    name: "gemma2",
+    size: "5.40 GB",
+    quantizisation: "",
+  },
+  {
+    name: "phi3",
+    size: "2.20 GB",
+    quantizisation: "",
+  },
+  {
+    name: "llama3.1",
+    size: "4.70 GB",
+    quantizisation: "",
+  },
+  {
+    name: "nidumai/nidum-limitless-gemma-2b",
+    size: "2.70 GB",
+    quantizisation: "Q8_0",
+  },
+  {
+    name: "nidumai/nidum-limitless-gemma-2b:F16",
+    size: "5.00 GB",
+    quantizisation: "F16",
+  },
+  {
+    name: "codegemma",
+    size: "5.00 GB",
+    quantizisation: "",
+  },
+  {
+    name: "zephyr",
+    size: "4.10 GB",
+    quantizisation: "",
+  },
+  {
+    name: "dolphin-mistral",
+    size: "4.10 GB",
+    quantizisation: "",
+  },
+]
 
 function Manage({ filterFn }: props) {
   const [modelName, setModelName] = useState("")
@@ -26,6 +82,7 @@ function Manage({ filterFn }: props) {
   const queryClient = useQueryClient()
   const { data, isLoading } = useOllamaModels(ollamaUrl)
 
+  const filtered = isLoading ? [] : trendingModels?.filter(m => !data?.some(d => d.name?.includes(m?.name)))
   const updateModel = (v: string = "") => setModel(v)
 
   function startDownloading() {
@@ -68,13 +125,36 @@ function Manage({ filterFn }: props) {
 
       <h6 className="mb-0.5 text-[11px] text-white/70">Kindly enter your Ollama model ID here to proceed with the download</h6>
       <div className="df mb-4">
-        <input
+        {/* <input
           type="text"
           className="text-sm px-3 py-1.5 bg-transparent border"
           placeholder="nidum_ai_2b"
           value={modelName}
           onChange={e => setModelName(e.target.value)}
-        />
+        /> */}
+
+        {
+          filtered.length > 0 &&
+          <Select value={modelName} onValueChange={setModelName}>
+            <SelectTrigger className="h-8">
+              <SelectValue placeholder="Model" />
+            </SelectTrigger>
+
+            <SelectContent>
+              {
+                filtered.map(m => (
+                  <SelectItem
+                    value={m.name}
+                    key={m.name}
+                    className="pl-2 [&_svg]:hidden"
+                  >
+                    {m.name} <span className="ml-2 text-xs text-white/60">{`(${m.size})`}</span>
+                  </SelectItem>
+                ))
+              }
+            </SelectContent>
+          </Select>
+        }
 
         <button
           disabled={!modelName}
