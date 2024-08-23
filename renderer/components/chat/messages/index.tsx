@@ -10,7 +10,7 @@ import isWithinTokenLimit from "@/utils/is-within-token-limit";
 import { useAudio } from "./use-speech";
 import { useToast } from "@/components/ui/use-toast";
 
-import { useDownloads } from "../download-manager/provider";
+// import { useDownloads } from "../download-manager/provider";
 import useContextStore from "@/store/context";
 import useConvoStore from "@/store/conversations";
 
@@ -36,7 +36,7 @@ function Messages() {
     // vb_type, qdrantDBUrl,
   } = useContextStore()
 
-  const { isDownloading } = useDownloads()
+  // const { isDownloading } = useDownloads()
   const projectdetails = useConvoStore(s => s.projects[project_id] || null)
   const pushIntoMessages = useConvoStore(s => s.pushIntoMessages)
   const deleteMessage = useConvoStore(s => s.deleteMessage)
@@ -249,7 +249,7 @@ function Messages() {
           }
           setTempData([])
           setLoading(false)
-          pushIntoMessages(currContextId, [
+          pushIntoMessages(project_id, currContextId, [
             user,
             botReply
           ])
@@ -271,7 +271,7 @@ function Messages() {
                 }
                 setTempData([])
                 setLoading(false)
-                pushIntoMessages(currContextId, [
+                pushIntoMessages(project_id, currContextId, [
                   user,
                   botReply
                 ])
@@ -320,7 +320,7 @@ function Messages() {
     try {
       abortController?.current?.abort()
       abortController.current = new AbortController()
-      pushIntoMessages(id, tempData.filter(f => f.role !== "loading"))
+      pushIntoMessages(project_id, id, tempData.filter(f => f.role !== "loading"))
       setLoading(false)
       setTempData([])
     } catch (error) { }

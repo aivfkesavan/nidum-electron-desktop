@@ -2,6 +2,9 @@ import { useEffect, useState } from "react";
 import { IoSearch } from "react-icons/io5";
 import { nanoid } from "nanoid";
 
+import type { Chat } from '@/store/conversations';
+
+import { relativeDateFormat } from "@utils/date-helper";
 import useContextStore from "@/store/context";
 import useConvoStore from "@/store/conversations";
 import { cn } from "@/lib/utils";
@@ -13,22 +16,35 @@ import GoToProject from "./go-to-project";
 import DeleteChat from "./delete-chat";
 import ChatCard from "./chat-card";
 
+type groupedChatsT = Record<string, Chat[]>
+
 function Histories() {
   const { chat_id, project_id, updateContext } = useContextStore()
-  const chats = useConvoStore(s => s.chats?.[project_id] || [])
   const addChat = useConvoStore(s => s.addChat)
 
   const [searchBy, setSearchBy] = useState("")
   const [modal, setModal] = useState<{ state: string, data: any }>({ state: "", data: null })
 
-  useEffect(() => {
-    if (!chat_id) {
-      const isFirstChatNew = chats?.[0]?.title === "New Chat"
-      if (isFirstChatNew) {
-        updateContext({ chat_id: chats[0]?.id })
+  const groupedChats: groupedChatsT = useConvoStore(s =>
+    s.chats?.[project_id]?.reduce((prev, curr) => {
+      if (curr?.title?.toLowerCase()?.includes(searchBy?.toLowerCase())) {
+        const dateGroup = relativeDateFormat(curr.at)
+        if (!prev[dateGroup]) prev[dateGroup] = []
+        prev[dateGroup].push(curr)
+        return prev
       }
-    }
-  }, [chats, chat_id])
+      return prev
+    }, {}) || {}
+  )
+
+  // useEffect(() => {
+  //   if (!chat_id) {
+  //     const isFirstChatNew = chats?.[0]?.title === "New Chat"
+  //     if (isFirstChatNew) {
+  //       updateContext({ chat_id: chats[0]?.id })
+  //     }
+  //   }
+  // }, [chats, chat_id])
 
   const updateModal = (state: string, data: any = null) => setModal({ state, data })
 
@@ -73,10 +89,11 @@ function Histories() {
       </div>
 
       <div className="scroll-y p-2 border-b">
-        {
-          chats
-            ?.filter(p => p.title?.toLowerCase()?.includes(searchBy?.toLowerCase()))
-            ?.map(c => (
+        {Object.entries(groupedChats).map(([dateGroup, groupChats]) => (
+          <div key={dateGroup} className="mb-5">
+            <h2 className="mb-0.5 pl-2.5 text-xs font-semibold text-white/40">{dateGroup}</h2>
+
+            {groupChats?.map((c) => (
               <ChatCard
                 key={c.id}
                 name={c.title}
@@ -84,8 +101,9 @@ function Histories() {
                 onDelete={() => updateModal("delete", c.id)}
                 onNavigate={() => updateContext({ chat_id: c.id })}
               />
-            ))
-        }
+            ))}
+          </div>
+        ))}
       </div>
 
       <SystemPrompt />

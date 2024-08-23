@@ -2,6 +2,7 @@ import { nanoid } from 'nanoid';
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import { immer } from 'zustand/middleware/immer';
+import dayjs from 'dayjs';
 
 type Message = {
   id: string;
@@ -9,12 +10,13 @@ type Message = {
   content: string;
 }
 
-type Chat = {
+export type Chat = {
   id: string;
   title: string;
+  at: string;
 }
 
-type Project = {
+export type Project = {
   id: string;
   name: string;
   description: string;
@@ -29,6 +31,7 @@ type Project = {
   n: number;
   web_enabled: boolean;
   rag_enabled: boolean;
+  at: string;
 }
 
 type FileT = {
@@ -60,15 +63,18 @@ type actions = {
   editProject: (project_id: string, obj: Partial<Project>) => void;
   deleteProject: (project_id: string) => void;
 
-  addChat: (projectId: string, chat: Chat) => void;
+  addChat: (projectId: string, chat: Omit<Chat, "at">) => void;
   editChat: (projectId: string, chat: Partial<Chat>) => void;
   deleteChat: (project_id: string, chat_id: string) => void;
 
-  pushIntoMessages: (id: string, payload: Message | Message[]) => void
+  pushIntoMessages: (project_id: string, chat_id: string, payload: Message | Message[]) => void
   deleteMessage: (chat_id: string, msg_id: string) => void;
 
   addFile: (projectId: string, file: FileT) => void;
   deleteFile: (project_id: string, file_id: string) => void;
+
+  // addRandomProjects: (chat: Project[]) => void;
+  // addRandomChats: (projectId: string, chat: Chat[]) => void;
 }
 
 const createDefaultProject = (): [string, Project] => {
@@ -88,12 +94,14 @@ const createDefaultProject = (): [string, Project] => {
     n: 1,
     web_enabled: false,
     rag_enabled: false,
+    at: dayjs().toISOString(),
   }];
 }
 
 const createDefaultChat = (): Chat => ({
   id: nanoid(10),
   title: "Default Chat",
+  at: dayjs().toISOString(),
 })
 
 const useConvoStore = create<state & actions>()(persist(immer(set => ({
@@ -128,16 +136,21 @@ const useConvoStore = create<state & actions>()(persist(immer(set => ({
       n: 1,
       web_enabled: false,
       rag_enabled: false,
+      at: dayjs().toISOString(),
     }
 
     state.chats[id] = [{
       id: nanoid(10),
       title: "New Chat",
+      at: dayjs().toISOString(),
     }]
   }),
 
   editProject: (project_id, details) => set(state => {
-    state.projects[project_id] = Object.assign(state.projects[project_id], details)
+    state.projects[project_id] = Object.assign(state.projects[project_id], {
+      ...details,
+      at: dayjs().toISOString(),
+    })
   }),
 
   deleteProject: (project_id) => set(state => {
@@ -151,17 +164,25 @@ const useConvoStore = create<state & actions>()(persist(immer(set => ({
   }),
 
   addChat: (projectId, chat) => set(state => {
+    state.projects[projectId].at = dayjs().toISOString()
     if (!state.chats[projectId]) {
       state.chats[projectId] = []
     }
-    state.chats[projectId].unshift(chat)
+    state.chats[projectId].unshift({
+      ...chat,
+      at: dayjs().toISOString(),
+    })
   }),
 
   editChat: (projectId, chat) => set(state => {
     if (state.chats[projectId]) {
+      state.projects[projectId].at = dayjs().toISOString()
       const chatIndex = state.chats[projectId].findIndex(c => c.id === chat.id)
       if (chatIndex !== -1) {
-        state.chats[projectId][chatIndex] = Object.assign(state.chats[projectId][chatIndex], chat)
+        state.chats[projectId][chatIndex] = Object.assign(state.chats[projectId][chatIndex], {
+          ...chat,
+          at: dayjs().toISOString(),
+        })
       }
     }
   }),
@@ -171,7 +192,7 @@ const useConvoStore = create<state & actions>()(persist(immer(set => ({
     state.chats[project_id] = state.chats[project_id].filter(c => c.id !== chat_id)
   }),
 
-  pushIntoMessages: (chat_id, msg) => set(state => {
+  pushIntoMessages: (project_id, chat_id, msg) => set(state => {
     if (!state.messages[chat_id]) {
       state.messages[chat_id] = []
     }
@@ -180,6 +201,12 @@ const useConvoStore = create<state & actions>()(persist(immer(set => ({
       state.messages[chat_id].push(...msg)
     } else {
       state.messages[chat_id].push(msg)
+    }
+
+    state.projects[project_id].at = dayjs().toISOString()
+    let chatIndex = state.chats[project_id].findIndex(c => c.id === chat_id)
+    if (chatIndex > -1) {
+      state.chats[project_id][chatIndex].at = dayjs().toISOString()
     }
   }),
 
@@ -197,6 +224,16 @@ const useConvoStore = create<state & actions>()(persist(immer(set => ({
   deleteFile: (project_id, file_id) => set(state => {
     state.files[project_id] = state.files[project_id].filter(c => c.id !== file_id)
   }),
+
+  // addRandomProjects: (projects) => set(state => {
+  //   projects.forEach(pro => {
+  //     state.projects[pro.id] = pro
+  //   })
+  // })
+
+  // addRandomChats: (project_id, chats) => set(state => {
+  //   state.chats[project_id] = chats
+  // })
 })),
   {
     name: 'convo-storage',
