@@ -1,8 +1,9 @@
 import { spawn } from 'node:child_process';
 import fs, { existsSync } from 'node:fs';
-import path from 'node:path';
-import { getModelPath } from './download-whisper-model';
-import { getWhisperExecutablePath } from './install-whisper-cpp';
+
+import { getWhisperExecutablePath } from './install-whisper-cpp.js';
+import { getModelPath } from './download-whisper-model.js';
+import { createPath } from '../utils/path-helper.js';
 
 const isWavFile = (inputPath) => {
   const splitted = inputPath.split('.');
@@ -142,7 +143,7 @@ export const transcribe = async ({
   if (!isWavFile(inputPath)) {
     throw new Error('Invalid inputFile type. The provided file is not a wav file!');
   }
-  const tmpJSONDir = path.join(process.cwd(), 'tmp');
+  const tmpJSONDir = createPath(["temp"])
   const { outputPath: tmpJSONPath } = await transcribeToTemporaryFile({
     fileToTranscribe: inputPath,
     whisperPath,
