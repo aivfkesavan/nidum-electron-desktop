@@ -19,13 +19,13 @@ function Configurations() {
 
   async function checkAutoDetect() {
     try {
-      const res = await fetch("http://localhost:11434")
+      const res = await fetch("http://localhost:11490")
       const txt = await res.text()
 
       if (txt === "Ollama is running") {
         toast({ title: "Ollama detected" })
         let payload = {
-          ollamaUrl: "http://localhost:11434",
+          ollamaUrl: "http://localhost:11490",
           ollamaModel: "",
         }
         setDetails(payload)
@@ -67,7 +67,7 @@ function Configurations() {
         <input
           type="text"
           className="text-sm px-2 py-1.5 bg-transparent border"
-          placeholder="http://localhost:11434"
+          placeholder="http://localhost:11490"
           value={details.ollamaUrl}
           onChange={e => onChange({ ollamaUrl: e.target.value })}
         />
