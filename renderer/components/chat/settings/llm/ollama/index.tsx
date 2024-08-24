@@ -58,6 +58,11 @@ const models = [
     size: "4.10 GB",
     id: "dolphin-mistral",
   },
+  // {
+  //   name: "mxbai-embed-large",
+  //   size: "650 MB",
+  //   id: "mxbai-embed-large",
+  // },
 ]
 
 function Ollama() {

@@ -20,16 +20,18 @@ function useInitSetup() {
 
   useEffect(() => {
     if (data && !ollamaEmbeddingModel) {
-      downloadModel({
-        name: "mxbai-embed-large:latest",
-        ollamaUrl: ollamEmbeddingUrl,
-        initiater: "embedder",
-        onSuccess() {
-          queryClient.invalidateQueries({ queryKey: ["ollama-tags"] })
-          updateContext({ ollamaEmbeddingModel: "mxbai-embed-large:latest" })
-        },
-        onError() { },
-      })
+      setTimeout(() => {
+        downloadModel({
+          name: "mxbai-embed-large:latest",
+          ollamaUrl: ollamEmbeddingUrl,
+          initiater: "embedder",
+          onSuccess() {
+            queryClient.invalidateQueries({ queryKey: ["ollama-tags"] })
+            updateContext({ ollamaEmbeddingModel: "mxbai-embed-large:latest" })
+          },
+          onError() { },
+        })
+      }, 2000)
     }
   }, [data, ollamaEmbeddingModel, ollamEmbeddingUrl])
 }

@@ -10,7 +10,6 @@ import isWithinTokenLimit from "@/utils/is-within-token-limit";
 import { useAudio } from "./use-speech";
 import { useToast } from "@/components/ui/use-toast";
 
-// import { useDownloads } from "../download-manager/provider";
 import useContextStore from "@/store/context";
 import useConvoStore from "@/store/conversations";
 
@@ -33,11 +32,10 @@ function Messages() {
     updateContext, project_id, chat_id: id,
     model_type, groqApiKey, groqModel, ollamaUrl, ollamaModel,
     embedding_type, ollamEmbeddingUrl, ollamaEmbeddingModel,
-    // vb_type, qdrantDBUrl,
   } = useContextStore()
 
-  // const { isDownloading } = useDownloads()
   const projectdetails = useConvoStore(s => s.projects[project_id] || null)
+  const filesLen = useConvoStore(s => s.files[project_id]?.length)
   const pushIntoMessages = useConvoStore(s => s.pushIntoMessages)
   const deleteMessage = useConvoStore(s => s.deleteMessage)
   const editProject = useConvoStore(s => s.editProject)
@@ -100,7 +98,6 @@ function Messages() {
 
         if (ragEnabled) {
           if (embedding_type === "Ollama" && (!ollamEmbeddingUrl || !ollamaEmbeddingModel)) return toast({ title: "Please Check your Ollama embedding configurations in settings" })
-          // if (vb_type === "Qdrant" && !qdrantDBUrl) return toast({ title: "Please Check your Qdrant db configurations in settings" })
         }
 
         setMessage('')
@@ -155,7 +152,7 @@ function Messages() {
           })
         }
 
-        if (ragEnabled) {
+        if (ragEnabled && filesLen > 0) {
           const searchReult = await ragSearch(msg)
           systemPrompt = createContext({
             base: duckDuckGoPrompt,
