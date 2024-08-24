@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { cn } from "@/lib/utils";
 
 import Copy from "../../common/copy";
@@ -27,6 +27,17 @@ const res = `
 
 function Instructions() {
   const [selected, setSelected] = useState("macos")
+
+  useEffect(() => {
+    // @ts-ignore
+    const platform = window?.electronAPI?.getOS();
+    const platformMap = {
+      win32: "windows",
+      darwin: "macos",
+      linux: "linux",
+    }
+    setSelected(platformMap?.[platform] || "macos")
+  }, [])
 
   return (
     <>
