@@ -55,7 +55,7 @@ function Chat() {
 
   function onChangeRag(val: boolean) {
     onChange("rag_enabled", val)
-    if (val) updateTab({ data: "RAG" })
+    if (val && !ollamaEmbeddingModel) updateTab({ data: "RAG" })
   }
 
   return (
