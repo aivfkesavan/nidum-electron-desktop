@@ -16,6 +16,9 @@ function ClientWrapper({ children }: props) {
         {children}
         <Toaster />
         <SonnerToaster
+          style={{
+            width: "250px"
+          }}
           toastOptions={{
             style: {
               width: "250px"

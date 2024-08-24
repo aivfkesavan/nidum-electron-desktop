@@ -18,6 +18,14 @@ type props = {
 function ModelSelect({ ollamaUrl, val, filterFn, onChange }: props) {
   const { data, isLoading } = useOllamaModels(ollamaUrl)
 
+  if (isLoading) {
+    return <div className="text-xs text-white/60">Loading...</div>
+  }
+
+  if (!isLoading && data?.length === 0) {
+    return <div className="text-xs text-white/60">No model available</div>
+  }
+
   return (
     <Select value={val} onValueChange={onChange}>
       <SelectTrigger className="h-9 px-2 py-1.5 text-sm bg-transparent border focus:ring-0">
