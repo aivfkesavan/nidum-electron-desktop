@@ -14,10 +14,11 @@ import { useToast } from "@components/ui/use-toast";
 
 type props = {
   id: string
-  closeModel: () => void
+  closeModel: (i: string) => void
+  cancelModel: () => void
 }
 
-function DeleteModel({ id, closeModel }: props) {
+function DeleteModel({ id, cancelModel, closeModel }: props) {
   const quryClient = useQueryClient()
   const { toast } = useToast()
 
@@ -26,7 +27,7 @@ function DeleteModel({ id, closeModel }: props) {
     onSuccess() {
       toast({ title: "Model deleted successfully" })
       quryClient.invalidateQueries({ queryKey: ["ollama-tags"] })
-      closeModel()
+      closeModel(id)
     },
     onError(err) {
       console.log(err)
@@ -34,7 +35,7 @@ function DeleteModel({ id, closeModel }: props) {
   })
 
   return (
-    <Dialog open onOpenChange={closeModel}>
+    <Dialog open onOpenChange={cancelModel}>
       <DialogContent className="max-w-sm">
         <DialogHeader>
           <DialogTitle>Delete Model</DialogTitle>
@@ -46,7 +47,7 @@ function DeleteModel({ id, closeModel }: props) {
         <DialogFooter>
           <button
             className="px-3 py-1.5 text-sm bg-input hover:bg-input/70"
-            onClick={closeModel}
+            onClick={cancelModel}
             disabled={isPending}
           >
             Cancel
