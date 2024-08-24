@@ -5,28 +5,30 @@ import { queryClient } from "@/lib/query-client";
 import { Toaster as SonnerToaster } from "@/components/ui/sonner";
 import { Toaster } from "@/components/ui/toaster";
 
+import { DownloadProvider } from './download-manager';
+
 type props = Readonly<{
   children: React.ReactNode;
 }>
 
+const style = {
+  width: "250px"
+}
+
 function ClientWrapper({ children }: props) {
   return (
-    <>
-      <QueryClientProvider client={queryClient}>
+    <QueryClientProvider client={queryClient}>
+      <DownloadProvider>
         {children}
-        <Toaster />
-        <SonnerToaster
-          style={{
-            width: "250px"
-          }}
-          toastOptions={{
-            style: {
-              width: "250px"
-            }
-          }}
-        />
-      </QueryClientProvider>
-    </>
+      </DownloadProvider>
+
+      <Toaster />
+
+      <SonnerToaster
+        style={style}
+        toastOptions={{ style }}
+      />
+    </QueryClientProvider>
   )
 }
 

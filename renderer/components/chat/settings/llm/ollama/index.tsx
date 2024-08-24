@@ -3,7 +3,7 @@ import { MdOutlineFileDownload, MdOutlineDeleteOutline } from "react-icons/md";
 import { useQueryClient } from "@tanstack/react-query";
 
 import { useOllamaModels } from "@hooks/use-ollama";
-import { useDownloads } from "@components/chat/download-manager/provider";
+import { useDownloads } from "@components/common/download-manager";
 import useContextStore from "@store/context";
 import { useToast } from "@components/ui/use-toast";
 import useUIStore from "@store/ui";
