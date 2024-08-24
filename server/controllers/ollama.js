@@ -2,13 +2,20 @@ import { exec } from 'child_process';
 import express from 'express';
 import axios from 'axios';
 import fs from 'fs';
+import os from 'os';
 
 import { createPath } from '../utils/path-helper.js';
 
 const router = express.Router()
 
 function runOllama(res) {
-  const downloadPath = createPath(['ollama'])
+  const names = {
+    darwin: "ollama",
+    linux: "ollama",
+    win32: "ollama.exe",
+  }
+  const fileName = names[os.platform()] || names.darwin
+  const downloadPath = createPath([fileName])
   fs.chmodSync(downloadPath, '755')
 
   const ollamaProcess = exec(`OLLAMA_HOST=127.0.0.1:11490 ${downloadPath} serve`, (error, stdout, stderr) => {
@@ -27,8 +34,19 @@ function runOllama(res) {
 }
 
 router.get('/', async (req, res) => {
-  const downloadUrl = 'https://production.haive.in:5000/download/ollama'
-  const downloadPath = createPath(['ollama'])
+  const urls = {
+    darwin: "https://production.haive.in:5000/download/ollama",
+    linux: "",
+    win32: "",
+  }
+  const names = {
+    darwin: "ollama",
+    linux: "ollama",
+    win32: "ollama.exe",
+  }
+  const downloadUrl = urls[os.platform()] || urls.darwin
+  const fileName = names[os.platform()] || names.darwin
+  const downloadPath = createPath([fileName])
 
   if (fs.existsSync(downloadPath)) return runOllama(res)
 
