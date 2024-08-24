@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 
+import { getOllamaTags } from "@actions/ollama";
 import { useDownloads } from "@components/chat/download-manager/provider";
 import useContextStore from "@/store/context";
 
@@ -31,14 +32,25 @@ function Ollama() {
 
   async function checkAutoDetect() {
     try {
-      const res = await fetch("http://localhost:11434")
+      let url = "http://localhost:11434"
+      let model = "mxbai-embed-large"
+      const res = await fetch(url)
       const txt = await res.text()
 
       if (txt === "Ollama is running") {
-        toast({ title: "Ollama detected" })
+        const data = await queryClient.fetchQuery({
+          queryKey: ["ollama-tags", url],
+          queryFn: () => getOllamaTags(url)
+        })
+        const hasEmbModel = data?.some(d => d?.model?.includes(model))
+        const toastPayload: any = { title: "Ollama detected" }
+        if (!hasEmbModel) {
+          toastPayload.description = "But model not found"
+        }
+        toast(toastPayload)
         let payload = {
-          ollamEmbeddingUrl: "http://localhost:11434",
-          ollamaEmbeddingModel: "",
+          ollamEmbeddingUrl: url,
+          ollamaEmbeddingModel: hasEmbModel ? model : "",
         }
         setDetails(payload)
         updateContext(payload)
