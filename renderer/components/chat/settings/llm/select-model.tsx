@@ -21,7 +21,7 @@ type listT = {
 const list: listT[] = [
   {
     id: "1",
-    logo: "/ollama.png",
+    logo: "/logo.png",
     title: "Ollama",
     para: "Run LLMs locally on your machine"
   },
@@ -53,7 +53,12 @@ function SelectModel() {
       <DialogTrigger className="text-sm border" asChild>
         <div className="df gap-4 px-4 py-2.5 rounded-md cursor-pointer hover:bg-input/30">
           <div className="dc size-8 shrink-0 relative">
-            <img className={`${found?.title === "Ollama" ? "invert h-10 -mt-1.5" : "w-8"}`} src={found?.logo} alt="" />
+            <img
+              className="w-8"
+              // className={`${found?.title === "Ollama" ? "invert h-10 -mt-1.5" : "w-8"}`} 
+              src={found?.logo}
+              alt=""
+            />
             {
               found.title === "Ollama" &&
               <OllmaStatusCheck ollamaUrl={ollamaUrl} className="absolute top-0 -right-2" />
@@ -61,7 +66,7 @@ function SelectModel() {
           </div>
 
           <div className="text-left">
-            <p className="text-sm group-hover:underline">{found?.title}</p>
+            <p className="text-sm group-hover:underline">{found.title === "Ollama" ? "LLM Server" : found.title}</p>
             <p className="text-xs text-white/70">{found?.para}</p>
           </div>
 
@@ -85,10 +90,11 @@ function SelectModel() {
               >
                 <div className="dc size-8 relative">
                   <img
-                    className={cn({
-                      "invert h-10 -mt-1.5": l.title === "Ollama",
-                      "w-8": l.title !== "Ollama"
-                    })}
+                    className="w-8"
+                    // className={cn({
+                    //   "invert h-10 -mt-1.5": l.title === "Ollama",
+                    //   "w-8": l.title !== "Ollama"
+                    // })}
                     src={l.logo}
                     alt={l.title}
                   />
@@ -99,7 +105,7 @@ function SelectModel() {
                 </div>
 
                 <div className="">
-                  <p className="text-sm group-hover:underline">{l.title}</p>
+                  <p className="text-sm group-hover:underline">{l.title === "Ollama" ? "LLM Server" : l.title}</p>
                   <p className="text-xs text-white/70">{l.para}</p>
                 </div>
               </div>

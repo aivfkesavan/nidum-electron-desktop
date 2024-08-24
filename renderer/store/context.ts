@@ -39,13 +39,13 @@ const useContextStore = create<state & actions>()(persist(set => ({
   model_type: "Groq",
   groqApiKey: "",
   groqModel: "",
-  ollamaUrl: "",
+  ollamaUrl: "http://localhost:11490",
   ollamaModel: "",
 
   voice: "Google UK English Female",
 
   embedding_type: "Ollama",
-  ollamEmbeddingUrl: "",
+  ollamEmbeddingUrl: "http://localhost:11490",
   ollamaEmbeddingModel: "",
 
   vb_type: "Qdrant",
@@ -63,6 +63,18 @@ const useContextStore = create<state & actions>()(persist(set => ({
 }),
   {
     name: 'context-storage',
+    version: 1,
+    migrate(state: any, version) {
+      if (version !== 1) {
+        return {
+          ...state,
+          ollamEmbeddingUrl: "http://localhost:11490",
+          ollamaUrl: "http://localhost:11490",
+        }
+      }
+
+      return state
+    },
   })
 );
 

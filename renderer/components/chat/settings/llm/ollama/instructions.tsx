@@ -69,7 +69,7 @@ function Instructions() {
           <li className="mb-4">Open <span className="font-medium text-white">TWO Terminals</span></li>
           <li className="mb-4 space-y-2">
             <div>In the first, start the ollama server</div>
-            <Copy val="OLLAMA_ORIGINS='*' OLLAMA_HOST=localhost:11434 ollama serve" />
+            <Copy val="OLLAMA_ORIGINS='*' OLLAMA_HOST=localhost:11490 ollama serve" />
           </li>
           <li className="mb-4 space-y-2">
             <div>In the second, run the ollama CLI (using the nidumai/nidum-limitless-gemma-2b model)</div>
