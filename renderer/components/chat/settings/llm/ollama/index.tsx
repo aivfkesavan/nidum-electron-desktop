@@ -119,7 +119,7 @@ function Ollama() {
                       :
                       <button
                         className="-mt-1 -mr-1 p-0.5 text-base hover:bg-input"
-                        onClick={() => download(m.name)}
+                        onClick={() => download(m.id)}
                         disabled={isLoading}
                       >
                         <MdOutlineFileDownload />
