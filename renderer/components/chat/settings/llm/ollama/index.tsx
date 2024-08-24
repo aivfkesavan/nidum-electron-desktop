@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { MdDownloadDone, MdOutlineFileDownload } from "react-icons/md";
+import { MdOutlineFileDownload, MdOutlineDeleteOutline } from "react-icons/md";
 import { useQueryClient } from "@tanstack/react-query";
 
 import { useOllamaModels } from "@hooks/use-ollama";
@@ -10,6 +10,7 @@ import useUIStore from "@store/ui";
 
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
+import DeleteModel from "./delete-model";
 
 const models = [
   {
@@ -71,6 +72,9 @@ function Ollama() {
   const queryClient = useQueryClient()
 
   const [selected, setSelected] = useState(ollamaModel || "")
+  const [model, setModel] = useState("")
+
+  const updateModel = (v: string = "") => setModel(v)
 
   async function download(name: string) {
     downloadModel({
@@ -96,6 +100,14 @@ function Ollama() {
     }
   }
 
+  function closeModel(id: string) {
+    if (selected === id) {
+      setSelected("")
+      updateContext({ ollamaModel: "" })
+    }
+    setModel("")
+  }
+
   return (
     <>
       <RadioGroup value={selected} onValueChange={setSelected} className="grid grid-cols-2 gap-4 my-4">
@@ -110,8 +122,14 @@ function Ollama() {
                 <Label htmlFor={m.name} className="mr-auto cursor-pointer">{m.name}</Label>
                 {
                   downloaded?.some(d => d?.name?.includes(m.name))
-                    ? <MdDownloadDone title="Model downloaded" />
-                    :
+                    ? (
+                      <button
+                        className="-mt-1 -mr-1 p-0.5 text-base hover:bg-input"
+                        onClick={() => updateModel(m.id)}
+                      >
+                        <MdOutlineDeleteOutline />
+                      </button>
+                    ) :
                     downloads[m.name] ?
                       <p className="shrink-0 text-[11px] text-white/70">
                         {downloads[m.name]?.progress}%
@@ -150,6 +168,15 @@ function Ollama() {
           Save
         </button>
       </div>
+
+      {
+        model &&
+        <DeleteModel
+          id={model}
+          closeModel={closeModel}
+          cancelModel={updateModel}
+        />
+      }
     </>
   )
 }
