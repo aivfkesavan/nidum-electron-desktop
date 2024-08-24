@@ -105,34 +105,33 @@ function Manage({ filterFn }: props) {
   return (
     <>
       <h6 className="mb-0.5 text-[11px] text-white/70">Available Models</h6>
-      <div className="mini-scroll-bar p-2 pr-4 -mr-4 mb-8 max-h-40 overflow-y-auto rounded border">
-        {
-          !isLoading &&
-          data
-            ?.filter(filterFn)
-            ?.map(m => (
-              <ModelInfo
-                key={m?.model}
-                size={m?.size}
-                name={m?.name}
-                model={m?.model}
-                quantization_level={m?.details?.quantization_level}
-                updateModel={updateModel}
-              />
-            ))
-        }
-      </div>
+      {
+        !isLoading && data?.length > 0 &&
+        <div className="mini-scroll-bar p-2 pr-4 -mr-4 mb-8 max-h-40 overflow-y-auto rounded border">
+          {
+            data
+              ?.filter(filterFn)
+              ?.map(m => (
+                <ModelInfo
+                  key={m?.model}
+                  size={m?.size}
+                  name={m?.name}
+                  model={m?.model}
+                  quantization_level={m?.details?.quantization_level}
+                  updateModel={updateModel}
+                />
+              ))
+          }
+        </div>
+      }
+
+      {
+        !isLoading && data?.length === 0 &&
+        <div className="text-xs text-white/60">No model available</div>
+      }
 
       <h6 className="mb-0.5 text-[11px] text-white/70">Kindly enter your Ollama model ID here to proceed with the download</h6>
       <div className="df mb-4">
-        {/* <input
-          type="text"
-          className="text-sm px-3 py-1.5 bg-transparent border"
-          placeholder="nidum_ai_2b"
-          value={modelName}
-          onChange={e => setModelName(e.target.value)}
-        /> */}
-
         {
           filtered.length > 0 &&
           <Select value={modelName} onValueChange={setModelName}>
