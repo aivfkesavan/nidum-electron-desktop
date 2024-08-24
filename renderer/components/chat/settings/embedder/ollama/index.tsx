@@ -1,6 +1,6 @@
 import { useQueryClient } from "@tanstack/react-query";
 
-import { useDownloads } from "@components/chat/download-manager/provider";
+import { useDownloads } from "@components/common/download-manager";
 import useContextStore from "@/store/context";
 
 function Ollama() {

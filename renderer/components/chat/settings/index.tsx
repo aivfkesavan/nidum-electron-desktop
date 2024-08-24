@@ -1,9 +1,6 @@
 import { MdOutlineRecordVoiceOver } from "react-icons/md";
-import { HiCubeTransparent } from "react-icons/hi2";
 import { GoProjectRoadmap } from "react-icons/go";
 import { RiVoiceprintFill } from "react-icons/ri";
-// import { BsTextParagraph } from "react-icons/bs";
-// import { LuDatabase } from "react-icons/lu";
 import { FaLinode } from "react-icons/fa";
 
 import useSttValidCheck from "@/hooks/use-stt-valid-check";
@@ -20,60 +17,32 @@ import {
 
 import SettingIcon from '@/assets/svg/settings.svg';
 
-// import VecDB from "./vecdb";
-// import Rag from "./rag";
 import Transcribe from "./transcribe";
-import Embedder from "./embedder";
-// import General from "./general";
 import Project from "./project";
 import Voice from "./voice";
 import LLM from "./llm";
 
 const list = [
-  // {
-  //   id: "1",
-  //   title: "General",
-  //   logo: <SettingIcon />,
-  //   child: <General />,
-  // },
   {
-    id: "2",
+    id: "1",
     title: "Project",
     logo: <GoProjectRoadmap className="text-base" />,
     child: <Project />,
   },
   {
-    id: "3",
+    id: "2",
     title: "LLM",
     logo: <FaLinode className="text-base" />,
     child: <LLM />,
   },
-  // {
-  //   id: "4",
-  //   title: "Vector Database",
-  //   logo: <LuDatabase className="text-base" />,
-  //   child: <VecDB />,
-  // },
   {
-    id: "5",
-    title: "RAG",
-    logo: <HiCubeTransparent className="text-base" />,
-    child: <Embedder />,
-  },
-  // {
-  //   id: "6",
-  //   title: "RAG",
-  //   logo: <BsTextParagraph className="text-base" />,
-  //   child: <Rag />,
-  // },
-  {
-    id: "7",
+    id: "3",
     title: "Voice & Speech",
     logo: <RiVoiceprintFill className="text-base" />,
     child: <Voice />,
   },
   {
-    id: "8",
+    id: "4",
     title: "Transcription",
     logo: <MdOutlineRecordVoiceOver className="text-base" />,
     child: <Transcribe />,
@@ -114,7 +83,7 @@ function Settings() {
                 <button
                   key={l.id}
                   onClick={() => update({ data: l.title })}
-                  className={`df w-full text-nowrap text-xs text-left hover:bg-input ${selected === l.title ? "bg-input text-white [&_svg]:stroke-white" : " text-white/60 [&_svg]:stroke-white/60"}`}
+                  className={`df text-nowrap text-xs text-left hover:bg-input ${selected === l.title ? "bg-input text-white [&_svg]:stroke-white" : " text-white/60 [&_svg]:stroke-white/60"}`}
                 >
                   {l.logo}
                   {l.title}
