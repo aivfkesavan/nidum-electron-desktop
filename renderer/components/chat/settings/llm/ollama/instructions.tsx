@@ -21,7 +21,7 @@ const list: any = {
 
 const res = `
 ### Getting Started with Ollama
-1. *Open Terminal:* Launch the terminal and enter the command ollama serve or simply open the Ollama application on your desktop.
+1. *Open Terminal:* Launch the terminal and enter the command <br /> \`ollama serve\` or simply open the Ollama application on your desktop.
 2. *Get Model ID:* Visit the Ollama website catalog at [ollama.com/library](https://ollama.com/library) to obtain the model ID or download the default model. Then, go to the Model Management section to start chatting.
 `
 

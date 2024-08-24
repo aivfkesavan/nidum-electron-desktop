@@ -57,12 +57,20 @@ function Ollama() {
         setAutoDetectFailed(false)
       } else {
         setAutoDetectFailed(true)
+        updateContext({
+          ollamEmbeddingUrl: "",
+          ollamaEmbeddingModel: "",
+        })
       }
 
     } catch (error) {
       toast({ title: "Cannot auto detect ollama" })
       setAutoDetectFailed(true)
       console.log(error)
+      updateContext({
+        ollamEmbeddingUrl: "",
+        ollamaEmbeddingModel: "",
+      })
     }
   }
 
@@ -141,6 +149,13 @@ function Ollama() {
           >
             Download and setup
           </button>
+        </div>
+      }
+
+      {
+        ollamEmbeddingUrl && ollamaEmbeddingModel && !downloads?.["mxbai-embed-large:latest"] &&
+        <div className="text-[10px] text-white/60">
+          You are all set to use RAG. You can enable RAG under project section.
         </div>
       }
 
