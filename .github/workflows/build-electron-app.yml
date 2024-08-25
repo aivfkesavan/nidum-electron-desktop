@@ -3,10 +3,10 @@ name: Build and Release Electron App
 on:
   push:
     branches:
-      - main
+      - main  # Triggers the action on push to main branch
   pull_request:
     branches:
-      - main
+      - main  # Also triggers on pull requests to main branch
 
 permissions:
   contents: write
@@ -30,14 +30,9 @@ jobs:
       - name: Build the application
         run: npm run build
 
-      - name: Print working directory
-        run: pwd  # This will print the current working directory to the logs
-
-      - name: List all files
-        run: ls -Rla  # This will list all files recursively to check where 'dist' is and what it contains
-
       - name: Verify build artifacts
         run: |
+          ls -la dist  # Check the dist directory to verify artifacts
           if [ ! -f dist/RAGDrive-1.0.0-arm64.dmg ]; then
             echo "Build artifact 'dist/RAGDrive-1.0.0-arm64.dmg' not found!"
             exit 1
@@ -82,13 +77,13 @@ jobs:
           draft: false
           prerelease: false
 
-      - name: Upload Release Assets
+      - name: Upload DMG Release Asset
         uses: actions/upload-release-asset@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: dist/RAGDrive-1.0.0-arm64.dmg
+          asset_path: ./dist/RAGDrive-1.0.0-arm64.dmg  # Using an absolute path reference from repo root
           asset_name: RAGDrive-1.0.0-arm64.dmg
           asset_content_type: application/octet-stream
 
@@ -98,6 +93,6 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: dist/RAGDrive-1.0.0-arm64-mac.zip
+          asset_path: ./dist/RAGDrive-1.0.0-arm64-mac.zip  # Using an absolute path reference from repo root
           asset_name: RAGDrive-1.0.0-arm64-mac.zip
           asset_content_type: application/zip
