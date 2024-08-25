@@ -1,5 +1,4 @@
-name: Build, Sign, and Notarize Electron App
-
+name: Build, Sign, and Release Electron App
 on:
   push:
     branches:
@@ -7,14 +6,11 @@ on:
   pull_request:
     branches:
       - main
-
 permissions:
   contents: write
-
 jobs:
-  build-sign-notarize:
+  build-sign-and-release:
     runs-on: macos-latest
-
     steps:
       - name: Check out the repository
         uses: actions/checkout@v3
@@ -27,52 +23,58 @@ jobs:
       - name: Install dependencies
         run: npm install
 
-      - name: Build the application
-        run: npm run build
-
-      - name: Set up signing certificate
+      - name: Import Apple Certificate
         env:
           APPLE_CERTIFICATE: ${{ secrets.APPLE_CERTIFICATE }}
           APPLE_CERTIFICATE_PASSWORD: ${{ secrets.APPLE_CERTIFICATE_PASSWORD }}
         run: |
-          echo "$APPLE_CERTIFICATE" | base64 --decode > certificate.p12
-          security create-keychain -p actions build.keychain
-          security import certificate.p12 -k ~/Library/Keychains/build.keychain -P "$APPLE_CERTIFICATE_PASSWORD" -T /usr/bin/codesign
-          security set-key-partition-list -S apple-tool:,apple: -s -k actions build.keychain
-          security unlock-keychain -p actions ~/Library/Keychains/build.keychain
+          echo $APPLE_CERTIFICATE | base64 --decode > certificate.p12
+          security create-keychain -p "" build.keychain
+          security default-keychain -s build.keychain
+          security unlock-keychain -p "" build.keychain
+          security import certificate.p12 -k build.keychain -P $APPLE_CERTIFICATE_PASSWORD -T /usr/bin/codesign
+          security set-key-partition-list -S apple-tool:,apple:,codesign: -s -k "" build.keychain
 
-      - name: Verify signing identity
-        run: |
-          echo "Listing identities in the keychain:"
-          security find-identity -v -p codesigning ~/Library/Keychains/build.keychain
-
-      - name: Sign the application
-        run: |
-          IDENTITY=$(security find-identity -v -p codesigning ~/Library/Keychains/build.keychain | grep "Developer ID Application" | awk '{print $2}')
-          if [ -z "$IDENTITY" ]; then
-            echo "Error: No valid signing identity found."
-            exit 1
-          fi
-          echo "Using identity: $IDENTITY"
-          codesign --deep --force --verbose --sign "$IDENTITY" "dist/RAGDrive-1.0.0-arm64.dmg" --options runtime --timestamp --keychain ~/Library/Keychains/build.keychain
-
-      - name: Notarize the application
+      - name: Build the application
         env:
-          APPLE_APP_SPECIFIC_PASSWORD: ${{ secrets.APPLE_APP_SPECIFIC_PASSWORD }}
           APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
         run: |
-          xcrun altool --notarize-app -f "dist/RAGDrive-1.0.0-arm64.dmg" --primary-bundle-id "com.yourcompany.yourapp" --username "your-apple-id@example.com" --password "$APPLE_APP_SPECIFIC_PASSWORD" --team-id "$APPLE_TEAM_ID"
-          sleep 60  # Wait a bit for the notarization to be processed
-          xcrun altool --notarization-info "$APPLE_APP_SPECIFIC_PASSWORD" -u "your-apple-id@example.com" -p "$APPLE_APP_SPECIFIC_PASSWORD" --output-format xml
+          npm run build
+          # Assuming your build script handles code signing. If not, add codesign commands here.
 
-      - name: Staple Notarization Ticket
+      - name: Get current version
+        id: get_version
+        run: echo "VERSION=$(node -p -e "require('./package.json').version")" >> $GITHUB_ENV
+
+      - name: Verify and prepare build artifacts
+        id: verify_artifacts
         run: |
-          xcrun stapler staple "dist/RAGDrive-1.0.0-arm64.dmg"
+          echo "Listing dist directory contents..."
+          ls -la dist
+          if [ ! -f dist/RAGDrive-${{ env.VERSION }}-arm64.dmg ]; then
+            echo "Build artifact 'dist/RAGDrive-${{ env.VERSION }}-arm64.dmg' not found!"
+            exit 1
+          fi
+          echo "DMG_PATH=$(pwd)/dist/RAGDrive-${{ env.VERSION }}-arm64.dmg" >> $GITHUB_ENV
 
-      - name: Check Release
+      - name: Notarize
+        env:
+          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+          APPLE_APP_SPECIFIC_PASSWORD: ${{ secrets.APPLE_APP_SPECIFIC_PASSWORD }}
+        run: |
+          xcrun notarytool submit "${{ env.DMG_PATH }}" \
+            --apple-id "${{ secrets.APPLE_ID }}" \
+            --password "${{ secrets.APPLE_APP_SPECIFIC_PASSWORD }}" \
+            --team-id "${{ secrets.APPLE_TEAM_ID }}" \
+            --wait
+
+      - name: Staple notarization ticket
+        run: xcrun stapler staple "${{ env.DMG_PATH }}"
+
+      - name: Check if Release Exists
         id: check_release
         run: |
-          TAG_NAME="v1.0.0"  # Replace with your versioning logic if necessary
+          TAG_NAME="v${{ env.VERSION }}"
           echo "Checking for existing release with tag: $TAG_NAME"
           RELEASE_ID=$(curl -sL -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
             "https://api.github.com/repos/${{ github.repository }}/releases/tags/$TAG_NAME" \
@@ -88,17 +90,17 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: https://uploads.github.com/repos/${{ github.repository }}/releases/${{ steps.check_release.outputs.RELEASE_ID }}/assets{?name,label}
-          asset_path: dist/RAGDrive-1.0.0-arm64.dmg  # Ensure this path matches your built file
-          asset_name: RAGDrive-1.0.0-arm64.dmg
+          asset_path: ${{ env.DMG_PATH }}
+          asset_name: RAGDrive-${{ env.VERSION }}-arm64.dmg
           asset_content_type: application/x-apple-diskimage
 
       - name: Create Release
         if: steps.check_release.outputs.RELEASE_ID == 'null'
         uses: softprops/action-gh-release@v1
         with:
-          files: dist/RAGDrive-1.0.0-arm64.dmg  # Ensure this path matches your built file
-          tag_name: v1.0.0  # Adjust your tag naming as needed
-          name: Release v1.0.0
+          files: ${{ env.DMG_PATH }}
+          tag_name: v${{ env.VERSION }}
+          name: Release v${{ env.VERSION }}
           draft: false
           prerelease: false
           generate_release_notes: true
