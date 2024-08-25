@@ -69,12 +69,16 @@
   },
   "build": {
     "appId": "com.nidum.ragdrive",
+    "productName": "RAGDrive",
     "mac": {
       "category": "public.app-category.utilities",
       "hardenedRuntime": true,
-      "gatekeeperAssess": false,
       "entitlements": "build/entitlements.mac.plist",
-      "entitlementsInherit": "build/entitlements.mac.plist"
+      "entitlementsInherit": "build/entitlements.mac.plist",
+      "target": [
+        "dmg",
+        "zip"
+      ]
     }
   }
 }

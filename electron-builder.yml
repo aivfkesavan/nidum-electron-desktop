@@ -19,3 +19,7 @@ mac:
   target:
     - dmg
     - zip
+notarize:
+  appleId: $APPLE_ID
+  appleIdPassword: $APPLE_APP_SPECIFIC_PASSWORD
+  teamId: $APPLE_TEAM_ID
