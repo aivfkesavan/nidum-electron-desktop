@@ -36,6 +36,13 @@ jobs:
       with:
         python-version: '3.x'
 
+    - name: Verify custom icon exists
+      run: |
+        if [ ! -f "path/to/your/icon.icns" ]; then
+          echo "Error: Custom icon not found at path/to/your/icon.icns"
+          exit 1
+        fi
+
     - name: Create build directory and entitlements file
       run: |
         mkdir -p build
@@ -85,7 +92,7 @@ jobs:
     - name: Build Electron App
       run: |
         echo "Building Electron app..."
-        npm run build
+        electron-builder --config electron-builder.yml  # Explicitly specify the config file if using YAML
         echo "Build completed."
 
     - name: Get app version
