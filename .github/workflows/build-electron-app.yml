@@ -1,4 +1,4 @@
-name: Build and Release Electron App
+name: Build, Sign, and Notarize Electron App
 
 on:
   push:
@@ -12,7 +12,7 @@ permissions:
   contents: write
 
 jobs:
-  build-and-release:
+  build-sign-notarize:
     runs-on: macos-latest
 
     steps:
@@ -30,56 +30,41 @@ jobs:
       - name: Build the application
         run: npm run build
 
-      - name: Get current version
-        id: get_version
-        run: echo "VERSION=$(node -p -e "require('./package.json').version")" >> $GITHUB_ENV
-
-      - name: Verify and prepare build artifacts
-        id: verify_artifacts
-        run: |
-          echo "Listing dist directory contents..."
-          ls -la dist  # Check the dist directory to verify artifacts
-          if [ ! -f dist/RAGDrive-1.0.0-arm64.dmg ]; then
-            echo "Build artifact 'dist/RAGDrive-1.0.0-arm64.dmg' not found!"
-            exit 1
-          fi
-          if [ ! -f dist/RAGDrive-1.0.0-arm64-mac.zip ]; then
-            echo "Build artifact 'dist/RAGDrive-1.0.0-arm64-mac.zip' not found!"
-            exit 1
-          fi
-          echo "DMG_PATH=$(pwd)/dist/RAGDrive-1.0.0-arm64.dmg" >> $GITHUB_ENV
-          echo "ZIP_PATH=$(pwd)/dist/RAGDrive-1.0.0-arm64-mac.zip" >> $GITHUB_ENV
-
-      - name: Check if Release Exists
-        id: check_release
-        run: |
-          TAG_NAME="v${{ env.VERSION }}"  # Ensure this matches your versioning strategy
-          echo "Checking for existing release with tag: $TAG_NAME"
-          RELEASE_ID=$(curl -sL -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
-            "https://api.github.com/repos/${{ github.repository }}/releases/tags/$TAG_NAME" \
-            | jq -r '.id')
-          echo "RELEASE_ID=$RELEASE_ID" >> $GITHUB_OUTPUT
+      - name: Set up signing certificate
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          APPLE_CERTIFICATE: ${{ secrets.APPLE_CERTIFICATE }}
+          APPLE_CERTIFICATE_PASSWORD: ${{ secrets.APPLE_CERTIFICATE_PASSWORD }}
+        run: |
+          echo $APPLE_CERTIFICATE | base64 --decode > certificate.p12
+          security create-keychain -p actions build.keychain
+          security import certificate.p12 -k ~/Library/Keychains/build.keychain -P "$APPLE_CERTIFICATE_PASSWORD" -T /usr/bin/codesign
+          security set-key-partition-list -S apple-tool:,apple: -s -k actions build.keychain
+          security unlock-keychain -p actions ~/Library/Keychains/build.keychain
 
-      - name: Update Release
-        if: steps.check_release.outputs.RELEASE_ID != 'null'
-        uses: actions/upload-release-asset@v1
+      - name: Sign the application
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: https://uploads.github.com/repos/${{ github.repository }}/releases/${{ steps.check_release.outputs.RELEASE_ID }}/assets{?name,label}
-          asset_path: ${{ env.DMG_PATH }}  # Use absolute path for the DMG file
-          asset_name: RAGDrive-1.0.0-arm64.dmg
-          asset_content_type: application/x-apple-diskimage
+          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+        run: |
+          codesign --deep --force --verbose --sign "Developer ID Application" "dist/RAGDrive-1.0.0-arm64.dmg" --options runtime --timestamp --keychain ~/Library/Keychains/build.keychain
 
-      - name: Create Release
-        if: steps.check_release.outputs.RELEASE_ID == 'null'
+      - name: Notarize the application
+        env:
+          APPLE_APP_SPECIFIC_PASSWORD: ${{ secrets.APPLE_APP_SPECIFIC_PASSWORD }}
+          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+        run: |
+          xcrun altool --notarize-app -f "dist/RAGDrive-1.0.0-arm64.dmg" --primary-bundle-id "com.yourcompany.yourapp" --username "your-apple-id@example.com" --password "$APPLE_APP_SPECIFIC_PASSWORD" --team-id "$APPLE_TEAM_ID"
+          xcrun altool --notarization-info "$APPLE_APP_SPECIFIC_PASSWORD" -u "your-apple-id@example.com" -p "$APPLE_APP_SPECIFIC_PASSWORD" --output-format xml
+
+      - name: Staple Notarization Ticket
+        run: |
+          xcrun stapler staple "dist/RAGDrive-1.0.0-arm64.dmg"
+
+      - name: Create GitHub Release
         uses: softprops/action-gh-release@v1
         with:
-          files: ${{ env.DMG_PATH }}  # Use absolute path for the DMG file
-          tag_name: v${{ env.VERSION }}  # Using a proper version tag
-          name: Release v${{ env.VERSION }}
+          files: dist/RAGDrive-1.0.0-arm64.dmg
+          tag_name: v1.0.0  # Adjust your tag naming as needed
+          name: Release v1.0.0
           draft: false
           prerelease: false
           generate_release_notes: true
