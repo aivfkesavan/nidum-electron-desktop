@@ -4,9 +4,9 @@ import express from 'express';
 import axios from 'axios';
 import path from 'path';
 import fs from 'fs';
-// import os from 'os';
+import os from 'os';
 
-// import { createPath, getRoot } from '../utils/path-helper.js';
+import { executableNames } from '../utils/executables.js';
 
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
@@ -22,24 +22,16 @@ async function checkOllamaRunning(port) {
     return false
   }
 }
-function runOllama(res) {
-  // const names = {
-  //   darwin: "ollama",
-  //   linux: "ollama",
-  //   win32: "ollama.exe",
-  // }
-  // const fileName = names[os.platform()] || names.darwin
-  // const downloadPath = createPath([fileName])
-  // fs.chmodSync(downloadPath, '755')
 
-  const relativePath = path.join('..', 'bin', "ollama")
+function runOllama(res) {
+  const executable = executableNames[os.platform()] || executableNames.darwin
+  const relativePath = path.join('..', 'bin', executable)
   const fullPath = path.resolve(__dirname, relativePath)
   fs.chmodSync(fullPath, '755')
 
-  const ollamaProcess = exec(`OLLAMA_HOST=127.0.0.1:11490 ${fullPath} serve`, (error, stdout, stderr) => {
+  const ollamaProcess = exec(`OLLAMA_HOST=127.0.0.1:11490 ${fullPath} serve`, (error) => {
     if (error) {
       console.error('Execution error:', error)
-      // return res.status(500).json({ error: 'Execution failed' })
       res.write(`data: ${JSON.stringify({ error })}\n\n`)
       res.end()
     }
