@@ -1,9 +1,10 @@
 import { useState } from "react";
 import { MdOutlineFileDownload, MdOutlineDeleteOutline } from "react-icons/md";
-import { useQueryClient } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 
 import { useOllamaModels } from "@hooks/use-ollama";
 import { useDownloads } from "@components/common/download-manager";
+import { getLLMModels } from "@actions/ollama";
 import useContextStore from "@store/context";
 import { useToast } from "@components/ui/use-toast";
 import useUIStore from "@store/ui";
@@ -11,59 +12,6 @@ import useUIStore from "@store/ui";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
 import DeleteModel from "./delete-model";
-
-const models = [
-  {
-    name: "mistral",
-    size: "4.10 GB",
-    id: "mistral",
-  },
-  {
-    name: "gemma2",
-    size: "5.40 GB",
-    id: "gemma2",
-  },
-  {
-    name: "phi3",
-    size: "2.20 GB",
-    id: "phi3",
-  },
-  {
-    name: "llama3.1",
-    size: "4.70 GB",
-    id: "llama3.1",
-  },
-  {
-    name: "nidumai:Q8_0",
-    size: "2.70 GB",
-    id: "nidumai/nidum-limitless-gemma-2bQ8_0",
-  },
-  {
-    name: "nidumai:F16",
-    size: "5.00 GB",
-    id: "nidumai/nidum-limitless-gemma-2b:F16F16",
-  },
-  {
-    name: "codegemma",
-    size: "5.00 GB",
-    id: "codegemma",
-  },
-  {
-    name: "zephyr",
-    size: "4.10 GB",
-    id: "zephyr",
-  },
-  {
-    name: "dolphin-mistral",
-    size: "4.10 GB",
-    id: "dolphin-mistral",
-  },
-  // {
-  //   name: "mxbai-embed-large",
-  //   size: "650 MB",
-  //   id: "mxbai-embed-large",
-  // },
-]
 
 function Ollama() {
   const { downloads, downloadModel } = useDownloads()
@@ -74,6 +22,11 @@ function Ollama() {
   const { toast } = useToast()
 
   const { data: downloaded, isLoading } = useOllamaModels(ollamaUrl)
+  const { data: models, isLoading: isLoading2 } = useQuery({
+    queryKey: ["llm-models"],
+    queryFn: getLLMModels,
+  })
+
   const queryClient = useQueryClient()
 
   const [selected, setSelected] = useState(ollamaModel || "")
@@ -113,11 +66,15 @@ function Ollama() {
     setModel("")
   }
 
+  if (isLoading2) {
+    return <div className="dc h-80"><span className="loader-2"></span></div>
+  }
+
   return (
     <>
       <RadioGroup value={selected} onValueChange={setSelected} className="grid grid-cols-2 gap-4 my-4">
         {
-          models.map(m => (
+          models?.map(m => (
             <div
               key={m.name}
               className="p-4 text-xs border rounded-md"
@@ -152,6 +109,8 @@ function Ollama() {
 
               <div className="text-[10px] text-white/70">
                 <p>Size: {m.size}</p>
+
+                <p className="w-fit mt-1.5 px-2 py-0.5 rounded-full bg-input capitalize">{m.category}</p>
               </div>
             </div>
           ))

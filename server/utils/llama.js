@@ -10,7 +10,7 @@ import {
 import { getRagPath, createPath } from "./path-helper";
 
 export async function indexFolder({ folderName }) {
-  Settings.embedModel = new OllamaEmbedding({ model: "mxbai-embed-large" })
+  Settings.embedModel = new OllamaEmbedding({ model: "mxbai-embed-large", config: { host: "http://localhost:11490" } })
 
   const directoryPath = createPath([folderName])
   const documents = await new SimpleDirectoryReader().loadData({ directoryPath })

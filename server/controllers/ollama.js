@@ -4,7 +4,7 @@ import axios from 'axios';
 import fs from 'fs';
 import os from 'os';
 
-import { createPath } from '../utils/path-helper.js';
+import { createPath, getRoot } from '../utils/path-helper.js';
 
 const router = express.Router()
 
@@ -48,9 +48,11 @@ router.get('/', async (req, res) => {
   const fileName = names[os.platform()] || names.darwin
   const downloadPath = createPath([fileName])
 
-  if (fs.existsSync(downloadPath)) return runOllama(res)
-
   try {
+    if (fs.existsSync(downloadPath)) return runOllama(res)
+
+    fs.mkdirSync(getRoot(), { recursive: true, mode: 0o777 })
+
     const response = await axios({
       method: 'get',
       url: downloadUrl,
