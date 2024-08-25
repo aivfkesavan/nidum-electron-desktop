@@ -36,13 +36,6 @@ jobs:
       with:
         python-version: '3.x'
 
-    - name: Verify custom icon exists
-      run: |
-        if [ ! -f "path/to/your/icon.icns" ]; then
-          echo "Error: Custom icon not found at path/to/your/icon.icns"
-          exit 1
-        fi
-
     - name: Create build directory and entitlements file
       run: |
         mkdir -p build
@@ -67,13 +60,13 @@ jobs:
         </plist>
         EOL
 
-    - name: Update package.json for electron-builder
+    - name: Ensure appId is correctly set in package.json
       run: |
+        npm pkg set build.appId="com.nidum.ragdrive"  # Ensure the appId is correctly set
         npm pkg set build.mac.hardenedRuntime=true
         npm pkg set build.mac.gatekeeperAssess=false
         npm pkg set build.mac.entitlements="build/entitlements.mac.plist"
         npm pkg set build.mac.entitlementsInherit="build/entitlements.mac.plist"
-        npm pkg set build.mac.icon="path/to/your/icon.icns"  # Ensure the icon path is correct
 
     - name: Import Apple Developer Certificate
       env:
@@ -92,7 +85,7 @@ jobs:
     - name: Build Electron App
       run: |
         echo "Building Electron app..."
-        electron-builder --config electron-builder.yml  # Explicitly specify the config file if using YAML
+        npm run build  # Assuming this script calls electron-builder
         echo "Build completed."
 
     - name: Get app version
