@@ -64,6 +64,10 @@ export async function getOllamaTags(ollamaUrl: string) {
   return axios.get(`${ollamaUrl}/api/tags`).then(r => r.data.models)
 }
 
+export async function getLLMModels() {
+  return axios.get("https://raw.githubusercontent.com/aivfkesavan/nidum-public/main/llm-models.json").then(r => r.data)
+}
+
 export async function deleteModel(name: string) {
   const ollamaUrl = useContextStore.getState().ollamaUrl
 
