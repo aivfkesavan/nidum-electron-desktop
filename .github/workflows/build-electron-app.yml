@@ -1,0 +1,35 @@
+name: Build Electron App
+
+on:
+  push:
+    branches:
+      - main  # Triggers the action on push to main branch
+  pull_request:
+    branches:
+      - main  # Also triggers on pull requests to main branch
+
+jobs:
+  build:
+    runs-on: macos-latest  # Use a macOS runner to build for macOS
+
+    steps:
+      - name: Check out the repository
+        uses: actions/checkout@v3
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '20.11.1'  # Specify the Node.js version you are using
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Build the application
+        run: npm run build
+
+      - name: Upload build artifacts
+        if: success()  # Only upload if the build is successful
+        uses: actions/upload-artifact@v3
+        with:
+          name: electron-build
+          path: dist/**  # Adjust this path if your output is elsewhere
