@@ -62,13 +62,11 @@ jobs:
 
     - name: Ensure appId is correctly set in package.json
       run: |
-        echo "Ensuring appId is correctly set..."
-        npm pkg set build.appId="com.nidum.ragdrive"
+        npm pkg set build.appId="com.nidum.ragdrive"  # Ensure the appId is correctly set
         npm pkg set build.mac.hardenedRuntime=true
         npm pkg set build.mac.gatekeeperAssess=false
         npm pkg set build.mac.entitlements="build/entitlements.mac.plist"
         npm pkg set build.mac.entitlementsInherit="build/entitlements.mac.plist"
-        echo "App ID and mac configurations set."
 
     - name: Import Apple Developer Certificate
       env:
@@ -87,7 +85,7 @@ jobs:
     - name: Build Electron App
       run: |
         echo "Building Electron app..."
-        electron-builder --mac --config electron-builder.yml  # Explicitly specify configuration file if needed
+        npm run build  # Assuming this script calls electron-builder
         echo "Build completed."
 
     - name: Get app version
