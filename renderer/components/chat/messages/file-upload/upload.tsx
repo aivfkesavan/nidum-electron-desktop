@@ -8,12 +8,10 @@ import useContextStore from '@store/context';
 import useConvoStore from '@store/conversations';
 import constants from '@utils/constants';
 
-// import Settings from "./settings";
-
 function Upload() {
   const [loading, setLoading] = useState(false)
   const project_id = useContextStore(s => s.project_id)
-  // const chat_id = useContextStore(s => s.chat_id)
+  const oldFiles = useConvoStore(s => s.files[project_id])
   const addFile = useConvoStore(s => s.addFile)
 
   const [files, setFiles] = useState<File[]>([])
@@ -50,8 +48,16 @@ function Upload() {
     if (files.length > 0) {
       try {
         setLoading(true)
+        const allowedFilenames = []
         const formData = new FormData()
-        files.forEach(file => formData.append("files", file))
+        files.forEach(file => {
+          allowedFilenames.push(file.name)
+          formData.append("files", file)
+        })
+        if (oldFiles?.length) {
+          allowedFilenames.push(...oldFiles?.map(s => s.name))
+        }
+        formData.append("allowedFilenames", JSON.stringify(allowedFilenames))
 
         await axios.post(`${constants.backendUrl}/doc/${project_id}`, formData)
 
@@ -110,11 +116,6 @@ function Upload() {
         {loading && <span className='loader-2'></span>}
         Upload
       </button>
-
-      {/* {
-        chat_id &&
-        <Settings />
-      } */}
     </div>
   );
 }

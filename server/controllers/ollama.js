@@ -1,44 +1,39 @@
+import { fileURLToPath } from 'url';
 import { exec } from 'child_process';
 import express from 'express';
 import axios from 'axios';
 import path from 'path';
 import fs from 'fs';
 // import os from 'os';
-import { fileURLToPath } from 'url';
 
 // import { createPath, getRoot } from '../utils/path-helper.js';
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
+const __filename = fileURLToPath(import.meta.url)
+const __dirname = path.dirname(__filename)
 
 const router = express.Router()
 
 async function checkOllamaRunning(port) {
   try {
-    const g = await axios.get(`http://127.0.0.1:${port}`, { timeout: 1000 });
-    console.log(g)
-    return true;
+    await axios.get(`http://127.0.0.1:${port}`, { timeout: 1000 })
+    return true
+
   } catch (error) {
-    console.log(error)
-    return false;
+    return false
   }
 }
 function runOllama(res) {
-  const names = {
-    darwin: "ollama",
-    linux: "ollama",
-    win32: "ollama.exe",
-  }
+  // const names = {
+  //   darwin: "ollama",
+  //   linux: "ollama",
+  //   win32: "ollama.exe",
+  // }
   // const fileName = names[os.platform()] || names.darwin
   // const downloadPath = createPath([fileName])
   // fs.chmodSync(downloadPath, '755')
 
-  const relativePath = path.join('..', 'bin', "ollama");
-  // console.log(relativePath)
-  // Resolve the full path
-  const fullPath = path.resolve(__dirname, relativePath);
-  // console.log(fullPath)
-  // Ensure the file has the correct permissions
+  const relativePath = path.join('..', 'bin', "ollama")
+  const fullPath = path.resolve(__dirname, relativePath)
   fs.chmodSync(fullPath, '755')
 
   const ollamaProcess = exec(`OLLAMA_HOST=127.0.0.1:11490 ${fullPath} serve`, (error, stdout, stderr) => {
@@ -73,14 +68,11 @@ router.get('/', async (req, res) => {
 
   try {
     const isRunning = await checkOllamaRunning(11490)
-    // console.log({ isRunning })
     if (isRunning) {
-      // console.log("inside isRunning")
       res.write(`data: ${JSON.stringify({ status: 'running' })}\n\n`)
       res.end()
       return
     }
-    // console.log("next list")
     return runOllama(res)
 
     // fs.mkdirSync(getRoot(), { recursive: true, mode: 0o777 })

@@ -27,6 +27,21 @@ router.get("/:folderName", async (req, res) => {
 router.post("/:folderName", upload.array('files'), async (req, res) => {
   try {
     const { folderName } = req.params
+    const { allowedFilenames } = req.body
+    const allowedFiles = JSON.parse(allowedFilenames)
+
+    const folderPath = createPath([folderName])
+    const existingFiles = await fs.readdir(folderPath)
+
+    const filesToDelete = existingFiles?.filter(file => !allowedFiles.includes(file) && file !== "index-store")
+
+    for (const file of filesToDelete) {
+      await fs.unlink(createPath([folderName, file]));
+    }
+
+    const indexStore = getRagPath(folderName)
+    await fs.rm(indexStore, { recursive: true, force: true })
+
     await indexFolder({ folderName })
 
     return res.json({ msg: "index stored" })
