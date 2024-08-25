@@ -176,7 +176,7 @@ export function DownloadProvider({ children }: props) {
             const data = JSON?.parse(line?.slice(6))
             // console.log("data", data)
             if (data) {
-              let title = data?.name === "Whisper" ? "Setting up Whisper" : data?.name
+              let title = data?.name === "Whisper" ? "Setting up Speech to Text" : data?.name
               toast.loading(title, {
                 className: "py-2",
                 description: data?.name === "Whisper" ? "" : `Progress: ${data?.progress || 0}%`,
