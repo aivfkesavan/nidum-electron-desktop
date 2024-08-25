@@ -3,17 +3,17 @@ name: Build and Release Electron App
 on:
   push:
     branches:
-      - main  # Triggers the action on push to main branch
+      - main
   pull_request:
     branches:
-      - main  # Also triggers on pull requests to main branch
+      - main
 
 permissions:
-  contents: write  # Explicitly grant write permission for contents
+  contents: write
 
 jobs:
   build:
-    runs-on: macos-latest  # Use a macOS runner to build for macOS
+    runs-on: macos-latest
 
     steps:
       - name: Check out the repository
@@ -22,7 +22,7 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: '20.11.1'  # Use the Node.js version you're using locally
+          node-version: '20.11.1'
 
       - name: Install dependencies
         run: npm install
@@ -30,8 +30,11 @@ jobs:
       - name: Build the application
         run: npm run build
 
-      - name: List dist directory contents
-        run: ls -la dist  # Check if the dist directory exists and contains expected files
+      - name: Print working directory
+        run: pwd  # This will print the current working directory to the logs
+
+      - name: List all files
+        run: ls -Rla  # This will list all files recursively to check where 'dist' is and what it contains
 
       - name: Verify build artifacts
         run: |
@@ -49,10 +52,10 @@ jobs:
         uses: actions/upload-artifact@v3
         with:
           name: electron-build
-          path: dist/**  # Upload all files from the dist directory
+          path: dist/**
 
   release:
-    needs: build  # Ensure the release job runs only after the build job completes successfully
+    needs: build
     runs-on: macos-latest
 
     steps:
@@ -74,7 +77,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          tag_name: ${{ env.VERSION }}  # Use dynamic versioning from package.json
+          tag_name: ${{ env.VERSION }}
           release_name: "Release ${{ env.VERSION }}"
           draft: false
           prerelease: false
@@ -85,7 +88,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: dist/RAGDrive-1.0.0-arm64.dmg  # Path to the .dmg file
+          asset_path: dist/RAGDrive-1.0.0-arm64.dmg
           asset_name: RAGDrive-1.0.0-arm64.dmg
           asset_content_type: application/octet-stream
 
@@ -95,6 +98,6 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: dist/RAGDrive-1.0.0-arm64-mac.zip  # Path to the .zip file
+          asset_path: dist/RAGDrive-1.0.0-arm64-mac.zip
           asset_name: RAGDrive-1.0.0-arm64-mac.zip
           asset_content_type: application/zip
