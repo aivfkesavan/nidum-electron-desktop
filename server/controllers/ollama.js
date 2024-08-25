@@ -6,7 +6,7 @@ import path from 'path';
 import fs from 'fs';
 import os from 'os';
 
-import { executableNames } from '../utils/executables.js';
+import { executabeCommand, executableNames } from '../utils/executables.js';
 
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
@@ -29,7 +29,10 @@ function runOllama(res) {
   const fullPath = path.resolve(__dirname, relativePath)
   fs.chmodSync(fullPath, '755')
 
-  const ollamaProcess = exec(`OLLAMA_HOST=127.0.0.1:11490 ${fullPath} serve`, (error) => {
+  const cmdFn = executabeCommand[os.platform()] || executabeCommand.darwin
+  const cmd = cmdFn(fullPath)
+
+  const ollamaProcess = exec(cmd, (error) => {
     if (error) {
       console.error('Execution error:', error)
       res.write(`data: ${JSON.stringify({ error })}\n\n`)
