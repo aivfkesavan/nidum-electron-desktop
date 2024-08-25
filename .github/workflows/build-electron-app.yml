@@ -8,6 +8,7 @@ on:
       - main
 permissions:
   contents: write
+
 jobs:
   build-sign-and-release:
     runs-on: macos-latest
@@ -28,58 +29,88 @@ jobs:
           APPLE_CERTIFICATE: ${{ secrets.APPLE_CERTIFICATE }}
           APPLE_CERTIFICATE_PASSWORD: ${{ secrets.APPLE_CERTIFICATE_PASSWORD }}
         run: |
+          echo "Decoding and importing Apple Certificate..."
           echo $APPLE_CERTIFICATE | base64 --decode > certificate.p12
           security create-keychain -p "" build.keychain
           security default-keychain -s build.keychain
           security unlock-keychain -p "" build.keychain
           security import certificate.p12 -k build.keychain -P $APPLE_CERTIFICATE_PASSWORD -T /usr/bin/codesign
           security set-key-partition-list -S apple-tool:,apple:,codesign: -s -k "" build.keychain
+          echo "Certificate imported successfully."
 
       - name: Build the application
         env:
           APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
         run: |
+          echo "Starting build process..."
           npm run build
-          # Assuming your build script handles code signing. If not, add codesign commands here.
+          echo "Build completed."
 
       - name: Get current version
         id: get_version
-        run: echo "VERSION=$(node -p -e "require('./package.json').version")" >> $GITHUB_ENV
+        run: |
+          echo "Extracting version from package.json..."
+          VERSION=$(node -p -e "require('./package.json').version")
+          echo "VERSION=$VERSION" >> $GITHUB_ENV
+          echo "Version extracted: $VERSION"
 
       - name: Verify and prepare build artifacts
         id: verify_artifacts
         run: |
           echo "Listing dist directory contents..."
           ls -la dist
-          if [ ! -f dist/RAGDrive-${{ env.VERSION }}-arm64.dmg ]; then
-            echo "Build artifact 'dist/RAGDrive-${{ env.VERSION }}-arm64.dmg' not found!"
+          DMG_FILE="RAGDrive-${{ env.VERSION }}-arm64.dmg"
+          if [ ! -f "dist/$DMG_FILE" ]; then
+            echo "Error: Build artifact 'dist/$DMG_FILE' not found!"
             exit 1
           fi
-          echo "DMG_PATH=$(pwd)/dist/RAGDrive-${{ env.VERSION }}-arm64.dmg" >> $GITHUB_ENV
+          echo "DMG_PATH=$(pwd)/dist/$DMG_FILE" >> $GITHUB_ENV
+          echo "Build artifact verified: $DMG_FILE"
 
       - name: Notarize
         env:
+          APPLE_ID: ${{ secrets.APPLE_ID }}
           APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
           APPLE_APP_SPECIFIC_PASSWORD: ${{ secrets.APPLE_APP_SPECIFIC_PASSWORD }}
         run: |
+          echo "Starting notarization process for ${{ env.DMG_PATH }}..."
+          echo "Apple ID: $APPLE_ID"
+          echo "Team ID: $APPLE_TEAM_ID"
+          echo "App-Specific Password: [MASKED]"
+          
           xcrun notarytool submit "${{ env.DMG_PATH }}" \
-            --apple-id "${{ secrets.APPLE_ID }}" \
-            --password "${{ secrets.APPLE_APP_SPECIFIC_PASSWORD }}" \
-            --team-id "${{ secrets.APPLE_TEAM_ID }}" \
+            --apple-id "$APPLE_ID" \
+            --password "$APPLE_APP_SPECIFIC_PASSWORD" \
+            --team-id "$APPLE_TEAM_ID" \
             --wait
+          
+          if [ $? -ne 0 ]; then
+            echo "Error: Notarization failed. Please check your credentials and try again."
+            exit 1
+          fi
+          echo "Notarization completed successfully."
 
       - name: Staple notarization ticket
-        run: xcrun stapler staple "${{ env.DMG_PATH }}"
+        run: |
+          echo "Stapling notarization ticket to ${{ env.DMG_PATH }}..."
+          xcrun stapler staple "${{ env.DMG_PATH }}"
+          if [ $? -ne 0 ]; then
+            echo "Error: Stapling failed. This might indicate an issue with the notarization process."
+            exit 1
+          fi
+          echo "Stapling completed successfully."
 
       - name: Check if Release Exists
         id: check_release
         run: |
+          echo "Checking for existing release..."
           TAG_NAME="v${{ env.VERSION }}"
-          echo "Checking for existing release with tag: $TAG_NAME"
+          echo "Checking for tag: $TAG_NAME"
           RELEASE_ID=$(curl -sL -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
             "https://api.github.com/repos/${{ github.repository }}/releases/tags/$TAG_NAME" \
             | jq -r '.id')
           echo "RELEASE_ID=$RELEASE_ID" >> $GITHUB_OUTPUT
+          echo "Release check completed. Release ID: $RELEASE_ID"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
@@ -106,3 +137,11 @@ jobs:
           generate_release_notes: true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Clean up
+        if: always()
+        run: |
+          echo "Cleaning up..."
+          security delete-keychain build.keychain || true
+          rm -f certificate.p12 || true
+          echo "Cleanup completed."
