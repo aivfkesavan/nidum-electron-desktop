@@ -1,20 +1,10 @@
 {
   "private": true,
   "name": "RAGDrive",
-  "description": "ragdrive",
+  "description": "",
   "version": "1.0.0",
-  "author": "nidum",
+  "author": "",
   "main": "app/background.js",
-  "build": {
-    "appId": "com.nidum.ragdrive",
-    "mac": {
-      "category": "public.app-category.utilities",
-      "hardenedRuntime": true,
-      "gatekeeperAssess": false,
-      "entitlements": "build/entitlements.mac.plist",
-      "entitlementsInherit": "build/entitlements.mac.plist"
-    }
-  },
   "scripts": {
     "dev": "nextron",
     "build": "nextron build",
@@ -76,5 +66,15 @@
     "react-dom": "^18.3.1",
     "tailwindcss": "^3.4.4",
     "typescript": "^5.4.5"
+  },
+  "build": {
+    "appId": "com.nidum.ragdrive",
+    "mac": {
+      "category": "public.app-category.utilities",
+      "hardenedRuntime": true,
+      "gatekeeperAssess": false,
+      "entitlements": "build/entitlements.mac.plist",
+      "entitlementsInherit": "build/entitlements.mac.plist"
+    }
   }
 }
