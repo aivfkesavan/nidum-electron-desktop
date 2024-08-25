@@ -17,15 +17,16 @@ function Upload() {
   const [files, setFiles] = useState<File[]>([])
 
   const acceptedFileTypes = {
-    'application/pdf': ['.pdf'],
     'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet': ['.xlsx'],
     'application/vnd.ms-excel': ['.xls'],
     'application/vnd.openxmlformats-officedocument.presentationml.presentation': ['.pptx'],
     'application/vnd.ms-powerpoint': ['.ppt'],
     'application/vnd.openxmlformats-officedocument.wordprocessingml.document': ['.docx'],
     'application/msword': ['.doc'],
+    // 'application/epub+zip': ['.epub'],
+    'application/pdf': ['.pdf'],
+    'text/markdown': ['.md'],
     'text/plain': ['.txt'],
-    'text/markdown': ['.md']
   }
 
   const onDrop = useCallback((acceptedFiles: File[], fileRejections: FileRejection[]) => {
