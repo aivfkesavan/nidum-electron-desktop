@@ -22,7 +22,7 @@ export async function indexFolder({ folderName }) {
 }
 
 export async function queryIndex(query, folderName) {
-  Settings.embedModel = new OllamaEmbedding({ model: "mxbai-embed-large" })
+  Settings.embedModel = new OllamaEmbedding({ model: "mxbai-embed-large", config: { host: "http://localhost:11490" } })
 
   const persistDir = getRagPath(folderName)
   const storageContext = await storageContextFromDefaults({ persistDir })
