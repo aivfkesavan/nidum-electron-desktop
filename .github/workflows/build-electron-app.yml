@@ -35,17 +35,26 @@ jobs:
           APPLE_CERTIFICATE: ${{ secrets.APPLE_CERTIFICATE }}
           APPLE_CERTIFICATE_PASSWORD: ${{ secrets.APPLE_CERTIFICATE_PASSWORD }}
         run: |
-          echo $APPLE_CERTIFICATE | base64 --decode > certificate.p12
+          echo "$APPLE_CERTIFICATE" | base64 --decode > certificate.p12
           security create-keychain -p actions build.keychain
           security import certificate.p12 -k ~/Library/Keychains/build.keychain -P "$APPLE_CERTIFICATE_PASSWORD" -T /usr/bin/codesign
           security set-key-partition-list -S apple-tool:,apple: -s -k actions build.keychain
           security unlock-keychain -p actions ~/Library/Keychains/build.keychain
 
-      - name: Sign the application
-        env:
-          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+      - name: Verify signing identity
         run: |
-          codesign --deep --force --verbose --sign "Developer ID Application" "dist/RAGDrive-1.0.0-arm64.dmg" --options runtime --timestamp --keychain ~/Library/Keychains/build.keychain
+          echo "Listing identities in the keychain:"
+          security find-identity -v -p codesigning ~/Library/Keychains/build.keychain
+
+      - name: Sign the application
+        run: |
+          IDENTITY=$(security find-identity -v -p codesigning ~/Library/Keychains/build.keychain | grep "Developer ID Application" | awk '{print $2}')
+          if [ -z "$IDENTITY" ]; then
+            echo "Error: No valid signing identity found."
+            exit 1
+          fi
+          echo "Using identity: $IDENTITY"
+          codesign --deep --force --verbose --sign "$IDENTITY" "dist/RAGDrive-1.0.0-arm64.dmg" --options runtime --timestamp --keychain ~/Library/Keychains/build.keychain
 
       - name: Notarize the application
         env:
@@ -53,16 +62,41 @@ jobs:
           APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
         run: |
           xcrun altool --notarize-app -f "dist/RAGDrive-1.0.0-arm64.dmg" --primary-bundle-id "com.yourcompany.yourapp" --username "your-apple-id@example.com" --password "$APPLE_APP_SPECIFIC_PASSWORD" --team-id "$APPLE_TEAM_ID"
+          sleep 60  # Wait a bit for the notarization to be processed
           xcrun altool --notarization-info "$APPLE_APP_SPECIFIC_PASSWORD" -u "your-apple-id@example.com" -p "$APPLE_APP_SPECIFIC_PASSWORD" --output-format xml
 
       - name: Staple Notarization Ticket
         run: |
           xcrun stapler staple "dist/RAGDrive-1.0.0-arm64.dmg"
 
-      - name: Create GitHub Release
+      - name: Check Release
+        id: check_release
+        run: |
+          TAG_NAME="v1.0.0"  # Replace with your versioning logic if necessary
+          echo "Checking for existing release with tag: $TAG_NAME"
+          RELEASE_ID=$(curl -sL -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
+            "https://api.github.com/repos/${{ github.repository }}/releases/tags/$TAG_NAME" \
+            | jq -r '.id')
+          echo "RELEASE_ID=$RELEASE_ID" >> $GITHUB_OUTPUT
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Update Release
+        if: steps.check_release.outputs.RELEASE_ID != 'null'
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: https://uploads.github.com/repos/${{ github.repository }}/releases/${{ steps.check_release.outputs.RELEASE_ID }}/assets{?name,label}
+          asset_path: dist/RAGDrive-1.0.0-arm64.dmg  # Ensure this path matches your built file
+          asset_name: RAGDrive-1.0.0-arm64.dmg
+          asset_content_type: application/x-apple-diskimage
+
+      - name: Create Release
+        if: steps.check_release.outputs.RELEASE_ID == 'null'
         uses: softprops/action-gh-release@v1
         with:
-          files: dist/RAGDrive-1.0.0-arm64.dmg
+          files: dist/RAGDrive-1.0.0-arm64.dmg  # Ensure this path matches your built file
           tag_name: v1.0.0  # Adjust your tag naming as needed
           name: Release v1.0.0
           draft: false
