@@ -3,17 +3,17 @@ name: Build and Release Electron App
 on:
   push:
     branches:
-      - main
+      - main  # Triggers the action on push to main branch
   pull_request:
     branches:
-      - main
+      - main  # Also triggers on pull requests to main branch
 
 permissions:
   contents: write  # Explicitly grant write permission for contents
 
 jobs:
   build:
-    runs-on: macos-latest
+    runs-on: macos-latest  # Use a macOS runner to build for macOS
 
     steps:
       - name: Check out the repository
@@ -22,7 +22,7 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: '20.11.1'
+          node-version: '20.11.1'  # Use the Node.js version you're using locally
 
       - name: Install dependencies
         run: npm install
@@ -30,15 +30,29 @@ jobs:
       - name: Build the application
         run: npm run build
 
+      - name: List dist directory contents
+        run: ls -la dist  # Check if the dist directory exists and contains expected files
+
+      - name: Verify build artifacts
+        run: |
+          if [ ! -f dist/RAGDrive-1.0.0-arm64.dmg ]; then
+            echo "Build artifact 'dist/RAGDrive-1.0.0-arm64.dmg' not found!"
+            exit 1
+          fi
+          if [ ! -f dist/RAGDrive-1.0.0-arm64-mac.zip ]; then
+            echo "Build artifact 'dist/RAGDrive-1.0.0-arm64-mac.zip' not found!"
+            exit 1
+          fi
+
       - name: Upload build artifacts
         if: success()
         uses: actions/upload-artifact@v3
         with:
           name: electron-build
-          path: dist/**
+          path: dist/**  # Upload all files from the dist directory
 
   release:
-    needs: build
+    needs: build  # Ensure the release job runs only after the build job completes successfully
     runs-on: macos-latest
 
     steps:
@@ -50,14 +64,18 @@ jobs:
         with:
           node-version: '20.11.1'
 
+      - name: Get current version
+        id: get_version
+        run: echo "VERSION=$(node -p -e "require('./package.json').version")" >> $GITHUB_ENV
+
       - name: Create GitHub Release
         id: create_release
         uses: actions/create-release@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          tag_name: v1.0.0  # Replace with dynamic versioning as needed
-          release_name: "Release v1.0.0"  # Replace with dynamic versioning as needed
+          tag_name: ${{ env.VERSION }}  # Use dynamic versioning from package.json
+          release_name: "Release ${{ env.VERSION }}"
           draft: false
           prerelease: false
 
@@ -67,6 +85,16 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: dist/RAGDrive-1.0.0-arm64.dmg  # Adjust paths as needed
+          asset_path: dist/RAGDrive-1.0.0-arm64.dmg  # Path to the .dmg file
           asset_name: RAGDrive-1.0.0-arm64.dmg
           asset_content_type: application/octet-stream
+
+      - name: Upload ZIP Release Asset
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: dist/RAGDrive-1.0.0-arm64-mac.zip  # Path to the .zip file
+          asset_name: RAGDrive-1.0.0-arm64-mac.zip
+          asset_content_type: application/zip
