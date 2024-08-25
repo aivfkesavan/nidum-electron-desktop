@@ -3,14 +3,17 @@ name: Build and Release Electron App
 on:
   push:
     branches:
-      - main  # Triggers the action on push to main branch
+      - main
   pull_request:
     branches:
-      - main  # Also triggers on pull requests to main branch
+      - main
+
+permissions:
+  contents: write  # Explicitly grant write permission for contents
 
 jobs:
   build:
-    runs-on: macos-latest  # Use a macOS runner to build for macOS
+    runs-on: macos-latest
 
     steps:
       - name: Check out the repository
@@ -19,7 +22,7 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: '20.11.1'  # Specify the Node.js version you are using
+          node-version: '20.11.1'
 
       - name: Install dependencies
         run: npm install
@@ -28,14 +31,14 @@ jobs:
         run: npm run build
 
       - name: Upload build artifacts
-        if: success()  # Only upload if the build is successful
+        if: success()
         uses: actions/upload-artifact@v3
         with:
           name: electron-build
-          path: dist/**  # Adjust this path if your output is elsewhere
+          path: dist/**
 
   release:
-    needs: build  # Ensure release job runs only after build job
+    needs: build
     runs-on: macos-latest
 
     steps:
@@ -51,10 +54,10 @@ jobs:
         id: create_release
         uses: actions/create-release@v1
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Automatically provided by GitHub Actions
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          tag_name: v1.0.0  # Replace with your versioning scheme
-          release_name: "Release v1.0.0"  # Replace with your release name
+          tag_name: v1.0.0  # Replace with dynamic versioning as needed
+          release_name: "Release v1.0.0"  # Replace with dynamic versioning as needed
           draft: false
           prerelease: false
 
@@ -64,6 +67,6 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: dist/RAGDrive-1.0.0-arm64.dmg  # Replace with the actual path to your artifact
-          asset_name: RAGDrive-1.0.0-arm64.dmg  # Replace with the actual name of your artifact
+          asset_path: dist/RAGDrive-1.0.0-arm64.dmg  # Adjust paths as needed
+          asset_name: RAGDrive-1.0.0-arm64.dmg
           asset_content_type: application/octet-stream
