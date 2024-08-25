@@ -13,6 +13,9 @@ jobs:
       APPLE_ID: ${{ secrets.APPLE_ID }}
       APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
       APPLE_APP_SPECIFIC_PASSWORD: ${{ secrets.APPLE_APP_SPECIFIC_PASSWORD }}
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      CSC_LINK: ${{ secrets.APPLE_CERTIFICATE }}
+      CSC_KEY_PASSWORD: ${{ secrets.APPLE_CERTIFICATE_PASSWORD }}
 
     steps:
     - name: Checkout repository
@@ -63,6 +66,7 @@ jobs:
         npm pkg set build.mac.gatekeeperAssess=false
         npm pkg set build.mac.entitlements="build/entitlements.mac.plist"
         npm pkg set build.mac.entitlementsInherit="build/entitlements.mac.plist"
+        npm pkg set build.mac.icon="path/to/your/icon.icns"  # Ensure the icon path is correct
 
     - name: Import Apple Developer Certificate
       env:
@@ -79,9 +83,6 @@ jobs:
         echo "Certificate imported successfully."
 
     - name: Build Electron App
-      env:
-        CSC_LINK: ${{ secrets.APPLE_CERTIFICATE }}
-        CSC_KEY_PASSWORD: ${{ secrets.APPLE_CERTIFICATE_PASSWORD }}
       run: |
         echo "Building Electron app..."
         npm run build
@@ -149,8 +150,6 @@ jobs:
         draft: false
         prerelease: false
         generate_release_notes: true
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
     - name: Clean up
       if: always()

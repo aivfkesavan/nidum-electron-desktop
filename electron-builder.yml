@@ -1,6 +1,6 @@
-appId: com.example.nextron
+appId: "com.nidum.ragdrive"
 productName: RAGDrive
-copyright: Copyright © 2018 Yoshihide Shiono
+copyright: Copyright © 2024 nidum.ai
 directories:
   output: dist
   buildResources: resources
@@ -11,4 +11,8 @@ files:
       - app
 publish: null
 mac:
-  identity: null
+  category: public.app-category.utilities
+  hardenedRuntime: true
+  gatekeeperAssess: false
+  entitlements: build/entitlements.mac.plist
+  entitlementsInherit: build/entitlements.mac.plist

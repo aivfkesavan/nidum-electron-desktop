@@ -5,6 +5,14 @@
   "version": "1.0.0",
   "author": "",
   "main": "app/background.js",
+  "appId": "com.nidum.ragdrive",
+  "mac": {
+    "category": "public.app-category.utilities",
+    "hardenedRuntime": true,
+    "gatekeeperAssess": false,
+    "entitlements": "build/entitlements.mac.plist",
+    "entitlementsInherit": "build/entitlements.mac.plist"
+  },
   "scripts": {
     "dev": "nextron",
     "build": "nextron build",
