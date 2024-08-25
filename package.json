@@ -1,14 +1,26 @@
 {
-  "private": true,
   "name": "RAGDrive",
-  "description": "",
   "version": "1.0.0",
-  "author": "",
-  "main": "app/background.js",
+  "description": "ragdrive",
+  "main": "main/background.js",
   "scripts": {
-    "dev": "nextron",
-    "build": "nextron build",
-    "postinstall": "electron-builder install-app-deps"
+    "build": "nextron build"
+  },
+  "build": {
+    "appId": "com.nidum.ragdrive",
+    "productName": "RAGDrive",
+    "copyright": "Copyright © 2024 nidum",
+    "mac": {
+      "category": "public.app-category.productivity",
+      "hardenedRuntime": true,
+      "gatekeeperAssess": false,
+      "entitlements": "build/entitlements.mac.plist",
+      "entitlementsInherit": "build/entitlements.mac.plist"
+    },
+    "dmg": {
+      "sign": false
+    },
+    "afterSign": "notarize.js"
   },
   "dependencies": {
     "@babel/runtime-corejs3": "^7.25.0",
@@ -59,6 +71,7 @@
     "autoprefixer": "^10.4.19",
     "electron": "^31.0.1",
     "electron-builder": "^24.13.3",
+    "electron-notarize": "^1.2.2",
     "next": "^14.2.4",
     "nextron": "^9.0.0",
     "postcss": "^8.4.38",
@@ -66,19 +79,5 @@
     "react-dom": "^18.3.1",
     "tailwindcss": "^3.4.4",
     "typescript": "^5.4.5"
-  },
-  "build": {
-    "appId": "com.nidum.ragdrive",
-    "productName": "RAGDrive",
-    "mac": {
-      "category": "public.app-category.utilities",
-      "hardenedRuntime": true,
-      "entitlements": "build/entitlements.mac.plist",
-      "entitlementsInherit": "build/entitlements.mac.plist",
-      "target": [
-        "dmg",
-        "zip"
-      ]
-    }
   }
 }
