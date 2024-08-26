@@ -27,6 +27,12 @@ function runOllama(res) {
   const executable = executableNames[os.platform()] || executableNames.darwin
   const relativePath = path.join('..', 'bin', executable)
   const fullPath = path.resolve(__dirname, relativePath)
+
+  if (!fs.existsSync(fullPath)) {
+    res.write(`data: ${JSON.stringify({ error: 'nidum not found' })}\n\n`)
+    return res.end()
+  }
+
   fs.chmodSync(fullPath, '755')
 
   const cmdFn = executabeCommand[os.platform()] || executabeCommand.darwin
