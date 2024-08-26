@@ -1,4 +1,4 @@
-appId: com.nidum.ragdrive
+appId: com.nidum.ai.ragdrive
 productName: RAGDrive
 copyright: Copyright © 2024 nidum.ai
 directories:
@@ -9,6 +9,9 @@ files:
     filter:
       - package.json
       - app
-publish: null
+publish:
+  provider: github
+  private: true
+  releaseType: release
 mac:
   identity: null
