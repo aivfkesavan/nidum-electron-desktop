@@ -5,107 +5,69 @@ import axios from 'axios';
 import path from 'path';
 import fs from 'fs';
 import os from 'os';
+import { app } from 'electron'; // Import Electron's app module
 
 import { executabeCommand, executableNames } from '../utils/executables.js';
 
-const __filename = fileURLToPath(import.meta.url)
-const __dirname = path.dirname(__filename)
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
-const router = express.Router()
+const router = express.Router();
 
 async function checkOllamaRunning(port) {
   try {
-    await axios.get(`http://127.0.0.1:${port}`, { timeout: 1000 })
-    return true
-
+    await axios.get(`http://127.0.0.1:${port}`, { timeout: 1000 });
+    return true;
   } catch (error) {
-    return false
+    return false;
   }
 }
 
 function runOllama(res) {
-  const executable = executableNames[os.platform()] || executableNames.darwin
-  const relativePath = path.join('..', 'bin', executable)
-  const fullPath = path.resolve(__dirname, relativePath)
+  const executable = executableNames[os.platform()] || executableNames.darwin;
+
+  // Determine the base path dynamically depending on environment
+  const basePath = app.isPackaged ? process.resourcesPath : path.join(__dirname, '..');
+  const fullPath = path.join(basePath, 'bin', executable);
 
   if (!fs.existsSync(fullPath)) {
-    res.write(`data: ${JSON.stringify({ error: 'nidum not found' })}\n\n`)
-    return res.end()
+    res.write(`data: ${JSON.stringify({ error: 'nidum not found at path ' + fullPath })}\n\n`);
+    return res.end();
   }
 
-  fs.chmodSync(fullPath, '755')
+  fs.chmodSync(fullPath, '755');
 
-  const cmdFn = executabeCommand[os.platform()] || executabeCommand.darwin
-  const cmd = cmdFn(fullPath)
+  const cmdFn = executabeCommand[os.platform()] || executabeCommand.darwin;
+  const cmd = cmdFn(fullPath);
 
   const ollamaProcess = exec(cmd, (error) => {
     if (error) {
-      console.error('Execution error:', error)
-      res.write(`data: ${JSON.stringify({ error })}\n\n`)
-      res.end()
+      console.error('Execution error:', error);
+      res.write(`data: ${JSON.stringify({ error: error.message })}\n\n`);
+      res.end();
     }
-  })
+  });
 
   ollamaProcess.on('spawn', () => {
-    res.write(`data: ${JSON.stringify({ status: 'running' })}\n\n`)
-    res.end()
-  })
+    res.write(`data: ${JSON.stringify({ status: 'running' })}\n\n`);
+    res.end();
+  });
 }
 
 router.get('/', async (req, res) => {
-  // const urls = {
-  //   darwin: "https://production.haive.in:5000/download/ollama",
-  //   linux: "",
-  //   win32: "",
-  // }
-  // const names = {
-  //   darwin: "ollama",
-  //   linux: "ollama",
-  //   win32: "ollama.exe",
-  // }
-  // const downloadUrl = urls[os.platform()] || urls.darwin
-  // const fileName = names[os.platform()] || names.darwin
-  // const downloadPath = createPath([fileName])
-
   try {
-    const isRunning = await checkOllamaRunning(11490)
+    const isRunning = await checkOllamaRunning(11490);
     if (isRunning) {
-      res.write(`data: ${JSON.stringify({ status: 'running' })}\n\n`)
-      res.end()
-      return
+      res.write(`data: ${JSON.stringify({ status: 'running' })}\n\n`);
+      res.end();
+      return;
     }
-    return runOllama(res)
-
-    // fs.mkdirSync(getRoot(), { recursive: true, mode: 0o777 })
-
-    // const response = await axios({
-    //   method: 'get',
-    //   url: downloadUrl,
-    //   responseType: 'stream',
-    //   onDownloadProgress: (progressEvent) => {
-    //     const percentage = Math.round((progressEvent.loaded * 100) / progressEvent.total)
-    //     res.write(`data: ${JSON.stringify({ progress: percentage })}\n\n`)
-    //   }
-    // })
-    // const writer = fs.createWriteStream(downloadPath)
-
-    // response.data.pipe(writer)
-
-    // writer.on('finish', () => {
-    //   runOllama(res)
-    // })
-
-    // writer.on('error', (err) => {
-    //   console.error('Write error:', err)
-    //   res.write(`data: ${JSON.stringify({ error: 'Download failed' })}\n\n`)
-    //   res.end()
-    // })
-
+    return runOllama(res);
   } catch (error) {
-    console.error('Download failed:', error)
-    res.write(`data: ${JSON.stringify({ error: 'Download failed' })}\n\n`)
-    res.end()
+    console.error('Download failed:', error);
+    res.write(`data: ${JSON.stringify({ error: 'Download failed' })}\n\n`);
+    res.end();
   }
-})
+});
 
-export default router
+export default router;
