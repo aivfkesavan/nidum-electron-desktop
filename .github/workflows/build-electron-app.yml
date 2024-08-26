@@ -61,7 +61,7 @@ jobs:
 
       - name: Code Sign the Application
         run: |
-          codesign --deep --force --verify --verbose --sign "Developer ID Application: Your Name (${APPLE_TEAM_ID})" "$APP_PATH"
+          codesign --deep --force --verify --verbose --sign "Developer ID Application: Pritam Cristpin (${APPLE_TEAM_ID})" "$APP_PATH"
         env:
           APP_PATH: ${{ env.APP_PATH }}
           APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
