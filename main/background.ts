@@ -1,6 +1,9 @@
-import path from 'path'
+import { updateElectronApp, UpdateSourceType } from 'update-electron-app'
 import { app, ipcMain } from 'electron'
+import logger from 'electron-log'
 import serve from 'electron-serve'
+import path from 'path'
+
 import { createWindow } from './helpers'
 import startServer from '../server'
 
@@ -30,6 +33,15 @@ if (isProd) {
     await mainWindow.loadURL(`http://localhost:${port}/home`)
     mainWindow.webContents.openDevTools()
   }
+
+  updateElectronApp({
+    updateSource: {
+      type: UpdateSourceType.ElectronPublicUpdateService,
+      repo: "https://github.com/aivfkesavan/nidum-electron-desktop.git",
+    },
+    updateInterval: "1 day",
+    logger,
+  })
 
   startServer()
 })()
