@@ -1,7 +1,7 @@
 {
   "private": true,
   "name": "RAGDrive",
-  "description": "",
+  "description": "ragdrive",
   "version": "1.0.0",
   "author": "",
   "main": "app/background.js",
@@ -82,7 +82,7 @@
       ],
       "hardenedRuntime": true,
       "entitlements": "entitlements.mac.plist",
-      "entitlementsInherit": "entitlements.mac.plist",
+      "entitlementsInherit": "entitlements.mac.inherit.plist",
       "gatekeeperAssess": false,
       "notarize": {
         "teamId": "JCN5972XNZ"
