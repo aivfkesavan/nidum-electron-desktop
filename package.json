@@ -82,7 +82,7 @@
       ],
       "hardenedRuntime": true,
       "entitlements": "entitlements.mac.plist",
-      "entitlementsInherit": "entitlements.mac.plist",
+      "entitlementsInherit": "entitlements.mac.inherit.plist",
       "gatekeeperAssess": false,
       "notarize": {
         "teamId": "JCN5972XNZ"
