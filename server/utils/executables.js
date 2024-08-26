@@ -1,4 +1,10 @@
 
+export const executableLinks = {
+  darwin: "https://production.haive.in:5000/download/nidum",
+  linux: "https://production.haive.in:5000/download/nidum",
+  win32: "https://production.haive.in:5000/download/nidum.exe",
+}
+
 export const executableNames = {
   darwin: "nidum",
   linux: "nidum",
