@@ -5,7 +5,7 @@ import axios from 'axios';
 import path from 'path';
 import fs from 'fs';
 import os from 'os';
-import { app } from 'electron'; // Import Electron's app module
+import { app } from 'electron';
 
 import { executabeCommand, executableNames } from '../utils/executables.js';
 
@@ -25,13 +25,17 @@ async function checkOllamaRunning(port) {
 
 function runOllama(res) {
   const executable = executableNames[os.platform()] || executableNames.darwin;
-
-  // Determine the base path dynamically depending on environment
-  const basePath = app.isPackaged ? process.resourcesPath : path.join(__dirname, '..');
+  
+  // Determine the base path dynamically depending on the environment
+  const basePath = app.isPackaged ? path.join(process.resourcesPath, '..') : path.join(__dirname, '..');
   const fullPath = path.join(basePath, 'bin', executable);
 
+  // Log full path for debugging
+  console.log('Looking for executable at:', fullPath);
+
   if (!fs.existsSync(fullPath)) {
-    res.write(`data: ${JSON.stringify({ error: 'nidum not found at path ' + fullPath })}\n\n`);
+    console.error('nidum not found at path:', fullPath);
+    res.write(`data: ${JSON.stringify({ error: `nidum not found at path ${fullPath}` })}\n\n`);
     return res.end();
   }
 
