@@ -22,13 +22,13 @@ jobs:
         with:
           node-version: '18'
 
-      - name: Install pnpm
-        uses: pnpm/action-setup@v2
+      - name: Install npm
+        uses: npm/action-setup@v2
         with:
           version: 8
 
       - name: Install dependencies
-        run: pnpm install
+        run: npm install
 
       - name: Get version
         id: get_version
@@ -56,7 +56,7 @@ jobs:
           security set-key-partition-list -S apple-tool:,apple:,codesign: -s -k "$KEYCHAIN_PASSWORD" build.keychain
           
           # Build the Electron app
-          pnpm run build
+          npm run build
 
           # Locate the built DMG file
           DMG_PATH=$(find "$PWD/dist" -name "*.dmg" -type f | head -n 1)
