@@ -12,9 +12,10 @@ jobs:
       contents: write  # Ensure the token has write permissions to contents
 
     steps:
-      - uses: actions/checkout@v3
+      - name: Check out the repository
+        uses: actions/checkout@v3
 
-      - name: Setup Node
+      - name: Setup Node.js
         uses: actions/setup-node@v3
         with:
           node-version: '18'
@@ -34,19 +35,9 @@ jobs:
           echo "VERSION=$VERSION" >> $GITHUB_OUTPUT
         shell: bash
 
-      - name: Check GitHub Token Validity
-        id: check_token
-        run: |
-          TOKEN_VALID=$(curl -o /dev/null -s -w "%{http_code}\n" -H "Authorization: token ${{ secrets.GH_TOKEN }}" https://api.github.com/repos/${{ github.repository }})
-          if [ "$TOKEN_VALID" -ne 200 ]; then
-            echo "Invalid GitHub Token or insufficient permissions."
-            exit 1
-          fi
-
       - name: Build Electron App
-        if: steps.check_token.outputs.TOKEN_VALID == '200'
         env:
-          GH_TOKEN: ${{ secrets.GH_TOKEN }}  # Ensure this is correctly referenced
+          GH_TOKEN: ${{ secrets.GH_TOKEN }}
           APPLE_CERTIFICATE: ${{ secrets.APPLE_CERTIFICATE }}
           APPLE_CERTIFICATE_PASSWORD: ${{ secrets.APPLE_CERTIFICATE_PASSWORD }}
           APPLE_ID: ${{ secrets.APPLE_ID }}
@@ -54,7 +45,7 @@ jobs:
           APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
           KEYCHAIN_PASSWORD: ${{ secrets.KEYCHAIN_PASSWORD }}
         run: |
-          # Set up Apple certificate and keychain
+          # Decode and import the Apple certificate
           echo $APPLE_CERTIFICATE | base64 --decode > certificate.p12
           security create-keychain -p "$KEYCHAIN_PASSWORD" build.keychain
           security default-keychain -s build.keychain
@@ -67,11 +58,11 @@ jobs:
 
           # Locate the built DMG file
           DMG_PATH=$(find "$PWD/dist" -name "*.dmg" -type f | head -n 1)
-          echo "DMG_PATH=$DMG_PATH" >> $GITHUB_ENV
-          if [ ! -f "$DMG_PATH" ]; then
-            echo "Error: DMG file not found at $DMG_PATH"
+          if [ -z "$DMG_PATH" ]; then
+            echo "Error: DMG file not found."
             exit 1
           fi
+          echo "DMG_PATH=$DMG_PATH" >> $GITHUB_ENV
 
           # Notarize the DMG
           xcrun notarytool submit "$DMG_PATH" --wait --apple-id "$APPLE_ID" --password "$APPLE_APP_SPECIFIC_PASSWORD" --team-id "$APPLE_TEAM_ID"
@@ -80,18 +71,24 @@ jobs:
           xcrun stapler staple "$DMG_PATH"
 
       - name: Check Release
-        if: steps.check_token.outputs.TOKEN_VALID == '200' && startsWith(github.ref, 'refs/tags/')
+        if: startsWith(github.ref, 'refs/tags/')
         id: check_release
         run: |
           RELEASE_ID=$(curl -sL -H "Authorization: token ${{ secrets.GH_TOKEN }}" \
             "https://api.github.com/repos/${{ github.repository }}/releases/tags/${{ github.ref_name }}" \
             | jq -r '.id')
-          echo "RELEASE_ID=$RELEASE_ID" >> $GITHUB_OUTPUT
+          if [ "$RELEASE_ID" == "null" ] || [ -z "$RELEASE_ID" ]; then
+            echo "Release does not exist. A new one will be created."
+            echo "RELEASE_ID=null" >> $GITHUB_OUTPUT
+          else
+            echo "Release already exists with ID: $RELEASE_ID"
+            echo "RELEASE_ID=$RELEASE_ID" >> $GITHUB_OUTPUT
+          fi
         env:
           GH_TOKEN: ${{ secrets.GH_TOKEN }}
 
       - name: Update Release
-        if: steps.check_token.outputs.TOKEN_VALID == '200' && startsWith(github.ref, 'refs/tags/') && steps.check_release.outputs.RELEASE_ID != 'null'
+        if: startsWith(github.ref, 'refs/tags/') && steps.check_release.outputs.RELEASE_ID != 'null'
         uses: actions/upload-release-asset@v1
         env:
           GH_TOKEN: ${{ secrets.GH_TOKEN }}
@@ -102,7 +99,7 @@ jobs:
           asset_content_type: application/x-apple-diskimage
 
       - name: Create Release
-        if: steps.check_token.outputs.TOKEN_VALID == '200' && startsWith(github.ref, 'refs/tags/') && steps.check_release.outputs.RELEASE_ID == 'null'
+        if: startsWith(github.ref, 'refs/tags/') && steps.check_release.outputs.RELEASE_ID == 'null'
         uses: softprops/action-gh-release@v1
         with:
           files: ${{ env.DMG_PATH }}
