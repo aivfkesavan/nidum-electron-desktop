@@ -3,7 +3,7 @@ name: Build, Sign, and Notarize Electron App
 on:
   push:
     branches:
-      - main  # or your desired branch
+      - main
 
 permissions:
   contents: write
@@ -19,20 +19,19 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: '20.11.1'  # Use the version you need
+          node-version: '20.11.1'
 
       - name: Install dependencies
         run: npm install
 
       - name: Build the application
         env:
-          GH_TOKEN: ${{ secrets.GH_TOKEN }}  # Use the GitHub token
+          GH_TOKEN: ${{ secrets.GH_TOKEN }}
         run: npm run build
 
       - name: Find Built DMG Path
         id: find_dmg_path
         run: |
-          # Find the .dmg file in the "dist" folder
           DMG_PATH=$(find "$PWD/dist" -name "*.dmg" -type f | head -n 1)
           echo "DMG_PATH=$DMG_PATH" >> $GITHUB_ENV
           echo "DMG path found: $DMG_PATH"
@@ -42,33 +41,24 @@ jobs:
 
       - name: Set up keychain and import certificate
         run: |
-          # Create a temporary keychain
           security create-keychain -p "$KEYCHAIN_PASSWORD" build.keychain
           security default-keychain -s build.keychain
           security unlock-keychain -p "$KEYCHAIN_PASSWORD" build.keychain
           security set-keychain-settings -t 3600 -u build.keychain
-
-          # Import the certificate
           echo $APPLE_CERTIFICATE | base64 --decode > signing_certificate.p12
           security import signing_certificate.p12 -k build.keychain -P "$APPLE_CERTIFICATE_PASSWORD" -T /usr/bin/codesign
-          
-          # Allow codesign to access keychain
           security set-key-partition-list -S apple-tool:,apple: -s -k "$KEYCHAIN_PASSWORD" build.keychain
         env:
           APPLE_CERTIFICATE: ${{ secrets.APPLE_CERTIFICATE }}
           APPLE_CERTIFICATE_PASSWORD: ${{ secrets.APPLE_CERTIFICATE_PASSWORD }}
-          KEYCHAIN_PASSWORD: "12345678"  # Choose a secure temporary keychain password
+          KEYCHAIN_PASSWORD: "your_keychain_password"
 
       - name: Code Sign All Components
         run: |
-          # Sign the main DMG
-          codesign --deep --force --verify --verbose --options runtime --timestamp --sign "Developer ID Application: Pritam Cristpin (${APPLE_TEAM_ID})" "$DMG_PATH"
-          
-          # Sign all helper apps and libraries
-          find "$APP_PATH" -type f \( -name "*.dylib" -or -name "*.node" -or -name "*.app" \) -exec codesign --deep --force --verify --verbose --options runtime --timestamp --sign "Developer ID Application: Pritam Cristpin (${APPLE_TEAM_ID})" {} \;
+          # Sign all binaries and libraries in the app bundle
+          APP_PATH=$(find "$PWD/dist" -name "*.app" -type d | head -n 1)
+          find "$APP_PATH" -type f \( -name "*.dylib" -or -name "*.node" -or -name "*.app" -or -name "*.framework" -or -executable \) -exec codesign --deep --force --verify --verbose --options runtime --timestamp --sign "Developer ID Application: Pritam Cristpin (${APPLE_TEAM_ID})" {} \;
         env:
-          DMG_PATH: ${{ env.DMG_PATH }}
-          APP_PATH: "/Users/runner/work/nidum-electron-desktop/nidum-electron-desktop/dist/mac-arm64/RAGDrive.app"
           APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
 
       - name: Notarize the DMG
@@ -83,7 +73,8 @@ jobs:
       - name: Fetch Notarization Log
         if: always()
         run: |
-          xcrun notarytool log --apple-id "$APPLE_ID" --team-id "$APPLE_TEAM_ID" --password "$APPLE_APP_SPECIFIC_PASSWORD" --output-format json cf0892af-419b-4d10-bd4e-60b179f1aa7b > notarization_log.json
+          SUBMISSION_ID=$(xcrun notarytool history --apple-id "$APPLE_ID" --team-id "$APPLE_TEAM_ID" --password "$APPLE_APP_SPECIFIC_PASSWORD" --output-format json | jq -r '.notarization-history[0].id')
+          xcrun notarytool log --apple-id "$APPLE_ID" --team-id "$APPLE_TEAM_ID" --password "$APPLE_APP_SPECIFIC_PASSWORD" --output-format json $SUBMISSION_ID > notarization_log.json
           cat notarization_log.json
         env:
           APPLE_ID: ${{ secrets.APPLE_ID }}
@@ -91,7 +82,7 @@ jobs:
           APPLE_APP_SPECIFIC_PASSWORD: ${{ secrets.APPLE_APP_SPECIFIC_PASSWORD }}
 
       - name: Staple Notarization Ticket
-        if: success()  # Only run this step if the notarization was successful
+        if: success()
         run: |
           xcrun stapler staple "$DMG_PATH"
         env:
