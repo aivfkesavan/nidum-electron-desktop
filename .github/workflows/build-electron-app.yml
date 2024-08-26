@@ -38,6 +38,7 @@ jobs:
 
       - name: Build Electron App
         env:
+          GH_TOKEN: ${{ secrets.GH_TOKEN }}
           APPLE_CERTIFICATE: ${{ secrets.APPLE_CERTIFICATE }}
           APPLE_CERTIFICATE_PASSWORD: ${{ secrets.APPLE_CERTIFICATE_PASSWORD }}
           APPLE_ID: ${{ secrets.APPLE_ID }}
@@ -74,16 +75,18 @@ jobs:
         if: startsWith(github.ref, 'refs/tags/')
         id: check_release
         run: |
-          RELEASE_ID=$(curl -sL -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
+          RELEASE_ID=$(curl -sL -H "Authorization: token ${{ secrets.GH_TOKEN }}" \
             "https://api.github.com/repos/${{ github.repository }}/releases/tags/${{ github.ref_name }}" \
             | jq -r '.id')
           echo "RELEASE_ID=$RELEASE_ID" >> $GITHUB_OUTPUT
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ secrets.GH_TOKEN }}
 
       - name: Update Release
         if: startsWith(github.ref, 'refs/tags/') && steps.check_release.outputs.RELEASE_ID != 'null'
         uses: actions/upload-release-asset@v1
+        env:
+          GH_TOKEN: ${{ secrets.GH_TOKEN }}
         with:
           upload_url: https://uploads.github.com/repos/${{ github.repository }}/releases/${{ steps.check_release.outputs.RELEASE_ID }}/assets{?name,label}
           asset_path: ${{ env.DMG_PATH }}
@@ -101,4 +104,4 @@ jobs:
           prerelease: false
           generate_release_notes: true
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ secrets.GH_TOKEN }}
