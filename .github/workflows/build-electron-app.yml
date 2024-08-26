@@ -1,118 +1,107 @@
-name: Build, Sign, and Notarize Electron App
+name: "Nidum.ai macOS Build and Release"
 
 on:
   push:
     branches:
       - main
-
-permissions:
-  contents: write
+    tags:
+      - 'v*'
 
 jobs:
-  build-sign-notarize:
+  create-release:
     runs-on: macos-latest
+    permissions:
+      contents: write
 
     steps:
-      - name: Check out the repository
-        uses: actions/checkout@v3
+      - uses: actions/checkout@v3
 
-      - name: Set up Node.js
+      - name: Setup Node
         uses: actions/setup-node@v3
         with:
-          node-version: '20.11.1'
+          node-version: '18'
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: 8
 
       - name: Install dependencies
-        run: npm install
+        run: pnpm install
 
-      - name: Build the application
+      - name: Get version
+        id: get_version
+        run: |
+          VERSION=$(node -p "require('./package.json').version.replace(/^v/, '')")
+          echo "VERSION=$VERSION" >> $GITHUB_OUTPUT
+        shell: bash
+
+      - name: Build Electron App
         env:
-          GH_TOKEN: ${{ secrets.GH_TOKEN }}
-        run: npm run build
-
-      - name: Find Built DMG Path
-        id: find_dmg_path
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          APPLE_CERTIFICATE: ${{ secrets.APPLE_CERTIFICATE }}
+          APPLE_CERTIFICATE_PASSWORD: ${{ secrets.APPLE_CERTIFICATE_PASSWORD }}
+          APPLE_SIGNING_IDENTITY: ${{ secrets.APPLE_SIGNING_IDENTITY }}
+          APPLE_ID: ${{ secrets.APPLE_ID }}
+          APPLE_PASSWORD: ${{ secrets.APPLE_PASSWORD }}
+          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+          KEYCHAIN_PASSWORD: ${{ secrets.KEYCHAIN_PASSWORD }}
         run: |
-          DMG_PATH=$(find "$PWD/dist" -name "*.dmg" -type f | head -n 1)
-          echo "DMG_PATH=$DMG_PATH" >> $GITHUB_ENV
-          echo "DMG path found: $DMG_PATH"
-
-      - name: Install Xcode Command Line Tools
-        run: sudo xcode-select --install || echo "Command Line Tools already installed"
-
-      - name: Set up keychain and import certificate
-        run: |
+          # Set up Apple certificate and keychain
+          echo $APPLE_CERTIFICATE | base64 --decode > certificate.p12
           security create-keychain -p "$KEYCHAIN_PASSWORD" build.keychain
           security default-keychain -s build.keychain
           security unlock-keychain -p "$KEYCHAIN_PASSWORD" build.keychain
-          security set-keychain-settings -t 3600 -u build.keychain
-          echo $APPLE_CERTIFICATE | base64 --decode > signing_certificate.p12
-          security import signing_certificate.p12 -k build.keychain -P "$APPLE_CERTIFICATE_PASSWORD" -T /usr/bin/codesign
-          security set-key-partition-list -S apple-tool:,apple: -s -k "$KEYCHAIN_PASSWORD" build.keychain
-        env:
-          APPLE_CERTIFICATE: ${{ secrets.APPLE_CERTIFICATE }}
-          APPLE_CERTIFICATE_PASSWORD: ${{ secrets.APPLE_CERTIFICATE_PASSWORD }}
-          KEYCHAIN_PASSWORD: ${{ secrets.KEYCHAIN_PASSWORD }}  # Changed to use GitHub Secrets
-
-      - name: Code Sign All Components
-        run: |
-          # Find all app bundles
-          APP_PATH=$(find "$PWD/dist" -name "*.app" -type d | head -n 1)
+          security import certificate.p12 -k build.keychain -P "$APPLE_CERTIFICATE_PASSWORD" -T /usr/bin/codesign
+          security set-key-partition-list -S apple-tool:,apple:,codesign: -s -k "$KEYCHAIN_PASSWORD" build.keychain
           
-          # Find and sign all relevant files
-          find "$APP_PATH" -type f \( -name "*.dylib" -or -name "*.node" -or -name "*.app" -or -name "*.framework" \) -exec codesign --deep --force --verify --verbose --options runtime --timestamp --sign "Developer ID Application: Pritam Cristpin (${APPLE_TEAM_ID})" {} \;
-          
-          # Find and sign all executable files
-          find "$APP_PATH" -type f -perm /111 -exec codesign --deep --force --verify --verbose --options runtime --timestamp --sign "Developer ID Application: Pritam Cristpin (${APPLE_TEAM_ID})" {} \;
-        env:
-          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+          # Build the Electron app
+          pnpm run build
 
-      - name: Notarize the DMG
-        run: |
-          xcrun notarytool submit "$DMG_PATH" --apple-id "$APPLE_ID" --team-id "$APPLE_TEAM_ID" --password "$APPLE_APP_SPECIFIC_PASSWORD" --wait
-        env:
-          DMG_PATH: ${{ env.DMG_PATH }}
-          APPLE_ID: ${{ secrets.APPLE_ID }}
-          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
-          APPLE_APP_SPECIFIC_PASSWORD: ${{ secrets.APPLE_APP_SPECIFIC_PASSWORD }}
-
-      - name: Fetch Notarization Log
-        if: always()
-        run: |
-          # Fetch the notarization status
-          NOTARY_HISTORY=$(xcrun notarytool history --apple-id "$APPLE_ID" --team-id "$APPLE_TEAM_ID" --password "$APPLE_APP_SPECIFIC_PASSWORD" --output-format json)
-          NOTARY_STATUS=$(echo "$NOTARY_HISTORY" | jq -r '.notarization-history[0].status')
-
-          if [[ "$NOTARY_STATUS" == "Invalid" ]]; then
-            echo "Notarization failed. Fetching log..."
-            SUBMISSION_ID=$(echo "$NOTARY_HISTORY" | jq -r '.notarization-history[0]?.id')
-
-            if [[ -z "$SUBMISSION_ID" || "$SUBMISSION_ID" == "null" ]]; then
-              echo "No notarization submissions found or submission ID is invalid."
-              exit 1
-            else
-              echo "Found submission ID: $SUBMISSION_ID"
-              xcrun notarytool log --apple-id "$APPLE_ID" --team-id "$APPLE_TEAM_ID" --password "$APPLE_APP_SPECIFIC_PASSWORD" --output-format json $SUBMISSION_ID > notarization_log.json
-              cat notarization_log.json
-              exit 1
-            fi
-          else
-            echo "Notarization was successful or no valid status returned."
+          # Locate the built DMG file
+          DMG_PATH=$(find "$PWD/dist" -name "*.dmg" -type f | head -n 1)
+          echo "DMG_PATH=$DMG_PATH" >> $GITHUB_ENV
+          if [ ! -f "$DMG_PATH" ]; then
+            echo "Error: DMG file not found at $DMG_PATH"
+            exit 1
           fi
-        env:
-          APPLE_ID: ${{ secrets.APPLE_ID }}
-          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
-          APPLE_APP_SPECIFIC_PASSWORD: ${{ secrets.APPLE_APP_SPECIFIC_PASSWORD }}
 
-      - name: Staple Notarization Ticket
-        if: success() && steps.fetch_notarization_log.outputs.NOTARY_STATUS != 'Invalid'
-        run: |
+          # Notarize the DMG
+          xcrun notarytool submit "$DMG_PATH" --wait --apple-id "$APPLE_ID" --password "$APPLE_PASSWORD" --team-id "$APPLE_TEAM_ID"
+
+          # Staple the notarization ticket
           xcrun stapler staple "$DMG_PATH"
-        env:
-          DMG_PATH: ${{ env.DMG_PATH }}
 
-      - name: Upload Notarization Log
-        if: always()
-        uses: actions/upload-artifact@v3
+      - name: Check Release
+        id: check_release
+        run: |
+          RELEASE_ID=$(curl -sL -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
+            "https://api.github.com/repos/${{ github.repository }}/releases/tags/${{ github.ref_name }}" \
+            | jq -r '.id')
+          echo "RELEASE_ID=$RELEASE_ID" >> $GITHUB_OUTPUT
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Update Release
+        if: steps.check_release.outputs.RELEASE_ID != 'null'
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          name: notarization-log
-          path: notarization_log.json
+          upload_url: https://uploads.github.com/repos/${{ github.repository }}/releases/${{ steps.check_release.outputs.RELEASE_ID }}/assets{?name,label}
+          asset_path: ${{ env.DMG_PATH }}
+          asset_name: Nidum.ai_${{ steps.get_version.outputs.VERSION }}_aarch64.dmg
+          asset_content_type: application/x-apple-diskimage
+
+      - name: Create Release
+        if: steps.check_release.outputs.RELEASE_ID == 'null'
+        uses: softprops/action-gh-release@v1
+        with:
+          files: ${{ env.DMG_PATH }}
+          tag_name: ${{ github.ref }}
+          name: Release ${{ github.ref_name }}
+          draft: false
+          prerelease: false
+          generate_release_notes: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
