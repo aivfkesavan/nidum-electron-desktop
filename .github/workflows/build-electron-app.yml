@@ -3,7 +3,7 @@ name: "Nidum.ai macOS Build and Release"
 on:
   push:
     branches:
-      - main
+      - v0
     tags:
       - 'v*'
 
