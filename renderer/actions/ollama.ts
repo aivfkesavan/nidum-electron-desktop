@@ -47,7 +47,16 @@ export async function initSetup() {
                 })
               }
             }
-
+            if (jsonData?.error) {
+              toast.error("Initial setup on process", {
+                className: "py-2",
+                description: jsonData?.error,
+                richColors: true,
+                position: "top-center",
+                duration: 1000,
+                id: "init-setup",
+              })
+            }
           } catch (err) { }
         }
       }
