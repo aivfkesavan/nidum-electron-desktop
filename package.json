@@ -74,6 +74,12 @@
       "output": "dist",
       "buildResources": "resources"
     },
+    "extraFiles": [
+      {
+        "from": "server/bin",
+        "to": "bin"
+      }
+    ],
     "mac": {
       "category": "public.app-category.productivity",
       "target": [
