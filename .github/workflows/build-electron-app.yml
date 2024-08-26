@@ -59,11 +59,16 @@ jobs:
           APPLE_CERTIFICATE_PASSWORD: ${{ secrets.APPLE_CERTIFICATE_PASSWORD }}
           KEYCHAIN_PASSWORD: "12345678"  # Choose a secure temporary keychain password
 
-      - name: Code Sign the DMG
+      - name: Code Sign All Components
         run: |
-          codesign --deep --force --verify --verbose --sign "Developer ID Application: Pritam Cristpin (${APPLE_TEAM_ID})" "$DMG_PATH"
+          # Sign the main DMG
+          codesign --deep --force --verify --verbose --options runtime --timestamp --sign "Developer ID Application: Pritam Cristpin (${APPLE_TEAM_ID})" "$DMG_PATH"
+          
+          # Sign all helper apps and libraries
+          find "$APP_PATH" -type f \( -name "*.dylib" -or -name "*.node" -or -name "*.app" \) -exec codesign --deep --force --verify --verbose --options runtime --timestamp --sign "Developer ID Application: Pritam Cristpin (${APPLE_TEAM_ID})" {} \;
         env:
           DMG_PATH: ${{ env.DMG_PATH }}
+          APP_PATH: "/Users/runner/work/nidum-electron-desktop/nidum-electron-desktop/dist/mac-arm64/RAGDrive.app"
           APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
 
       - name: Notarize the DMG
@@ -78,7 +83,7 @@ jobs:
       - name: Fetch Notarization Log
         if: always()
         run: |
-          xcrun notarytool log --apple-id "$APPLE_ID" --team-id "$APPLE_TEAM_ID" --password "$APPLE_APP_SPECIFIC_PASSWORD" --output-format json b0c03ecf-087b-4933-954f-896172f621cb > notarization_log.json
+          xcrun notarytool log --apple-id "$APPLE_ID" --team-id "$APPLE_TEAM_ID" --password "$APPLE_APP_SPECIFIC_PASSWORD" --output-format json cf0892af-419b-4d10-bd4e-60b179f1aa7b > notarization_log.json
           cat notarization_log.json
         env:
           APPLE_ID: ${{ secrets.APPLE_ID }}
