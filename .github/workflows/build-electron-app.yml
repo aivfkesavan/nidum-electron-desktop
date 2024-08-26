@@ -51,7 +51,7 @@ jobs:
         env:
           APPLE_CERTIFICATE: ${{ secrets.APPLE_CERTIFICATE }}
           APPLE_CERTIFICATE_PASSWORD: ${{ secrets.APPLE_CERTIFICATE_PASSWORD }}
-          KEYCHAIN_PASSWORD: "12345678"
+          KEYCHAIN_PASSWORD: ${{ secrets.KEYCHAIN_PASSWORD }}  # Changed to use GitHub Secrets
 
       - name: Code Sign All Components
         run: |
@@ -62,7 +62,7 @@ jobs:
           find "$APP_PATH" -type f \( -name "*.dylib" -or -name "*.node" -or -name "*.app" -or -name "*.framework" \) -exec codesign --deep --force --verify --verbose --options runtime --timestamp --sign "Developer ID Application: Pritam Cristpin (${APPLE_TEAM_ID})" {} \;
           
           # Find and sign all executable files
-          find "$APP_PATH" -type f -perm +111 -exec codesign --deep --force --verify --verbose --options runtime --timestamp --sign "Developer ID Application: Pritam Cristpin (${APPLE_TEAM_ID})" {} \;
+          find "$APP_PATH" -type f -perm /111 -exec codesign --deep --force --verify --verbose --options runtime --timestamp --sign "Developer ID Application: Pritam Cristpin (${APPLE_TEAM_ID})" {} \;
         env:
           APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
 
@@ -78,16 +78,25 @@ jobs:
       - name: Fetch Notarization Log
         if: always()
         run: |
-          # Get the latest submission ID
-          SUBMISSION_ID=$(xcrun notarytool history --apple-id "$APPLE_ID" --team-id "$APPLE_TEAM_ID" --password "$APPLE_APP_SPECIFIC_PASSWORD" --output-format json | jq -r '.notarization-history[0]?.id')
+          # Fetch the notarization status
+          NOTARY_HISTORY=$(xcrun notarytool history --apple-id "$APPLE_ID" --team-id "$APPLE_TEAM_ID" --password "$APPLE_APP_SPECIFIC_PASSWORD" --output-format json)
+          NOTARY_STATUS=$(echo "$NOTARY_HISTORY" | jq -r '.notarization-history[0].status')
 
-          if [[ -z "$SUBMISSION_ID" || "$SUBMISSION_ID" == "null" ]]; then
-            echo "No notarization submissions found."
-            exit 0
+          if [[ "$NOTARY_STATUS" == "Invalid" ]]; then
+            echo "Notarization failed. Fetching log..."
+            SUBMISSION_ID=$(echo "$NOTARY_HISTORY" | jq -r '.notarization-history[0]?.id')
+
+            if [[ -z "$SUBMISSION_ID" || "$SUBMISSION_ID" == "null" ]]; then
+              echo "No notarization submissions found or submission ID is invalid."
+              exit 1
+            else
+              echo "Found submission ID: $SUBMISSION_ID"
+              xcrun notarytool log --apple-id "$APPLE_ID" --team-id "$APPLE_TEAM_ID" --password "$APPLE_APP_SPECIFIC_PASSWORD" --output-format json $SUBMISSION_ID > notarization_log.json
+              cat notarization_log.json
+              exit 1
+            fi
           else
-            echo "Found submission ID: $SUBMISSION_ID"
-            xcrun notarytool log --apple-id "$APPLE_ID" --team-id "$APPLE_TEAM_ID" --password "$APPLE_APP_SPECIFIC_PASSWORD" --output-format json $SUBMISSION_ID > notarization_log.json
-            cat notarization_log.json
+            echo "Notarization was successful or no valid status returned."
           fi
         env:
           APPLE_ID: ${{ secrets.APPLE_ID }}
@@ -95,8 +104,15 @@ jobs:
           APPLE_APP_SPECIFIC_PASSWORD: ${{ secrets.APPLE_APP_SPECIFIC_PASSWORD }}
 
       - name: Staple Notarization Ticket
-        if: success()
+        if: success() && steps.fetch_notarization_log.outputs.NOTARY_STATUS != 'Invalid'
         run: |
           xcrun stapler staple "$DMG_PATH"
         env:
           DMG_PATH: ${{ env.DMG_PATH }}
+
+      - name: Upload Notarization Log
+        if: always()
+        uses: actions/upload-artifact@v3
+        with:
+          name: notarization-log
+          path: notarization_log.json
