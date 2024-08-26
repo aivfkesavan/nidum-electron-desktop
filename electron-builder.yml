@@ -5,10 +5,19 @@ directories:
   output: dist
   buildResources: resources
 files:
-  - from: .
+  - from: "server/bin"
+    to: "resources/bin"
     filter:
-      - package.json
-      - app
+      - "**/*"
+  - from: "."
+    filter:
+      - "package.json"
+      - "app/**/*"
+extraResources:
+  - from: "server/bin"
+    to: "bin"
+    filter:
+      - "**/*"
 publish:
   provider: github
   private: true
