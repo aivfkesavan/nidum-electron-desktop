@@ -1,0 +1,14 @@
+appId: com.nidum.ragdrive
+productName: RAGDrive
+copyright: Copyright © 2024 nidum.ai
+directories:
+  output: dist
+  buildResources: resources
+files:
+  - from: .
+    filter:
+      - package.json
+      - app
+publish: null
+mac:
+  identity: null
