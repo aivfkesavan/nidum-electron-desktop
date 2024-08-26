@@ -51,7 +51,7 @@ jobs:
         env:
           APPLE_CERTIFICATE: ${{ secrets.APPLE_CERTIFICATE }}
           APPLE_CERTIFICATE_PASSWORD: ${{ secrets.APPLE_CERTIFICATE_PASSWORD }}
-          KEYCHAIN_PASSWORD: "your_keychain_password"
+          KEYCHAIN_PASSWORD: "12345678"
 
       - name: Code Sign All Components
         run: |
