@@ -9,7 +9,7 @@ jobs:
   create-release:
     runs-on: macos-latest
     permissions:
-      contents: write  # Ensure the token has write permissions to contents
+      contents: write
 
     steps:
       - name: Check out the repository
@@ -37,7 +37,7 @@ jobs:
 
       - name: Build Electron App
         env:
-          GH_TOKEN: ${{ secrets.GH_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           APPLE_CERTIFICATE: ${{ secrets.APPLE_CERTIFICATE }}
           APPLE_CERTIFICATE_PASSWORD: ${{ secrets.APPLE_CERTIFICATE_PASSWORD }}
           APPLE_ID: ${{ secrets.APPLE_ID }}
@@ -70,43 +70,10 @@ jobs:
           # Staple the notarization ticket
           xcrun stapler staple "$DMG_PATH"
 
-      - name: Check Release
-        if: startsWith(github.ref, 'refs/tags/')
-        id: check_release
+      - name: Create Release and Upload Asset
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          RELEASE_ID=$(curl -sL -H "Authorization: token ${{ secrets.GH_TOKEN }}" \
-            "https://api.github.com/repos/${{ github.repository }}/releases/tags/${{ github.ref_name }}" \
-            | jq -r '.id')
-          if [ "$RELEASE_ID" == "null" ] || [ -z "$RELEASE_ID" ]; then
-            echo "Release does not exist. A new one will be created."
-            echo "RELEASE_ID=null" >> $GITHUB_OUTPUT
-          else
-            echo "Release already exists with ID: $RELEASE_ID"
-            echo "RELEASE_ID=$RELEASE_ID" >> $GITHUB_OUTPUT
-          fi
-        env:
-          GH_TOKEN: ${{ secrets.GH_TOKEN }}
-
-      - name: Update Release
-        if: startsWith(github.ref, 'refs/tags/') && steps.check_release.outputs.RELEASE_ID != 'null'
-        uses: actions/upload-release-asset@v1
-        env:
-          GH_TOKEN: ${{ secrets.GH_TOKEN }}
-        with:
-          upload_url: https://uploads.github.com/repos/${{ github.repository }}/releases/${{ steps.check_release.outputs.RELEASE_ID }}/assets{?name,label}
-          asset_path: ${{ env.DMG_PATH }}
-          asset_name: Nidum.ai_${{ steps.get_version.outputs.VERSION }}_aarch64.dmg
-          asset_content_type: application/x-apple-diskimage
-
-      - name: Create Release
-        if: startsWith(github.ref, 'refs/tags/') && steps.check_release.outputs.RELEASE_ID == 'null'
-        uses: softprops/action-gh-release@v1
-        with:
-          files: ${{ env.DMG_PATH }}
-          tag_name: ${{ github.ref_name }}
-          name: Release ${{ github.ref_name }}
-          draft: false
-          prerelease: false
-          generate_release_notes: true
-        env:
-          GH_TOKEN: ${{ secrets.GH_TOKEN }}
+          gh release create ${{ github.ref_name }} "${{ env.DMG_PATH }}" \
+            --title "Release ${{ github.ref_name }}" \
+            --generate-notes
