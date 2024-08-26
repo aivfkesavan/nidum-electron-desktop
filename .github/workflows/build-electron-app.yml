@@ -51,13 +51,18 @@ jobs:
         env:
           APPLE_CERTIFICATE: ${{ secrets.APPLE_CERTIFICATE }}
           APPLE_CERTIFICATE_PASSWORD: ${{ secrets.APPLE_CERTIFICATE_PASSWORD }}
-          KEYCHAIN_PASSWORD: "12345678"
+          KEYCHAIN_PASSWORD: "your_keychain_password"
 
       - name: Code Sign All Components
         run: |
-          # Sign all binaries and libraries in the app bundle
+          # Find all app bundles
           APP_PATH=$(find "$PWD/dist" -name "*.app" -type d | head -n 1)
-          find "$APP_PATH" -type f \( -name "*.dylib" -or -name "*.node" -or -name "*.app" -or -name "*.framework" -or -executable \) -exec codesign --deep --force --verify --verbose --options runtime --timestamp --sign "Developer ID Application: Pritam Cristpin (${APPLE_TEAM_ID})" {} \;
+          
+          # Find and sign all relevant files
+          find "$APP_PATH" -type f \( -name "*.dylib" -or -name "*.node" -or -name "*.app" -or -name "*.framework" \) -exec codesign --deep --force --verify --verbose --options runtime --timestamp --sign "Developer ID Application: Pritam Cristpin (${APPLE_TEAM_ID})" {} \;
+          
+          # Find and sign all executable files
+          find "$APP_PATH" -type f -perm +111 -exec codesign --deep --force --verify --verbose --options runtime --timestamp --sign "Developer ID Application: Pritam Cristpin (${APPLE_TEAM_ID})" {} \;
         env:
           APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
 
@@ -73,9 +78,17 @@ jobs:
       - name: Fetch Notarization Log
         if: always()
         run: |
-          SUBMISSION_ID=$(xcrun notarytool history --apple-id "$APPLE_ID" --team-id "$APPLE_TEAM_ID" --password "$APPLE_APP_SPECIFIC_PASSWORD" --output-format json | jq -r '.notarization-history[0].id')
-          xcrun notarytool log --apple-id "$APPLE_ID" --team-id "$APPLE_TEAM_ID" --password "$APPLE_APP_SPECIFIC_PASSWORD" --output-format json $SUBMISSION_ID > notarization_log.json
-          cat notarization_log.json
+          # Get the latest submission ID
+          SUBMISSION_ID=$(xcrun notarytool history --apple-id "$APPLE_ID" --team-id "$APPLE_TEAM_ID" --password "$APPLE_APP_SPECIFIC_PASSWORD" --output-format json | jq -r '.notarization-history[0]?.id')
+
+          if [[ -z "$SUBMISSION_ID" || "$SUBMISSION_ID" == "null" ]]; then
+            echo "No notarization submissions found."
+            exit 0
+          else
+            echo "Found submission ID: $SUBMISSION_ID"
+            xcrun notarytool log --apple-id "$APPLE_ID" --team-id "$APPLE_TEAM_ID" --password "$APPLE_APP_SPECIFIC_PASSWORD" --output-format json $SUBMISSION_ID > notarization_log.json
+            cat notarization_log.json
+          fi
         env:
           APPLE_ID: ${{ secrets.APPLE_ID }}
           APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
