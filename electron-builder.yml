@@ -6,7 +6,7 @@ directories:
   buildResources: resources
 files:
   - from: "server/bin"
-    to: "resources/bin"
+    to: "bin"
     filter:
       - "**/*"
   - from: "."
