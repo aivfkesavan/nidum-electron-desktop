@@ -72,7 +72,7 @@
     "appId": "com.nidum.ragdrive",
     "productName": "RAGDrive",
     "mac": {
-      "bundleId": "com.nidum.ragdrive",
+      "appId": "com.nidum.ragdrive",
       "category": "public.app-category.utilities",
       "hardenedRuntime": true,
       "entitlements": "build/entitlements.mac.plist",
