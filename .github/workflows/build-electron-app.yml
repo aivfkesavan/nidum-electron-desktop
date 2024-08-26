@@ -1,136 +1,87 @@
-name: Build, Sign, Notarize, and Release Electron App
+name: Build, Sign, and Notarize Electron App
 
 on:
   push:
-    branches: [main]
-  pull_request:
-    branches: [main]
+    branches:
+      - main
+
+permissions:
+  contents: write
 
 jobs:
-  build-sign-notarize-release:
+  build-sign-notarize:
     runs-on: macos-latest
-    env:
-      APPLE_ID: ${{ secrets.APPLE_ID }}
-      APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
-      APPLE_APP_SPECIFIC_PASSWORD: ${{ secrets.APPLE_APP_SPECIFIC_PASSWORD }}
-      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      CSC_LINK: ${{ secrets.APPLE_CERTIFICATE }}
-      CSC_KEY_PASSWORD: ${{ secrets.APPLE_CERTIFICATE_PASSWORD }}
 
     steps:
-    - name: Checkout repository
-      uses: actions/checkout@v3
+      - name: Check out the repository
+        uses: actions/checkout@v3
 
-    - name: Setup Node.js
-      uses: actions/setup-node@v3
-      with:
-        node-version: '20.11.1'
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '20.11.1'  # Use the version you need
 
-    - name: Install dependencies
-      run: |
-        npm install
+      - name: Install dependencies
+        run: npm install
 
-    - name: Setup Python for node-gyp
-      uses: actions/setup-python@v4
-      with:
-        python-version: '3.x'
+      - name: Build the application
+        run: npm run build
 
-    - name: Create build directory and entitlements file
-      run: |
-        mkdir -p build
-        cat > build/entitlements.mac.plist << EOL
-        <?xml version="1.0" encoding="UTF-8"?>
-        <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
-        <plist version="1.0">
-        <dict>
-            <key>com.apple.security.cs.allow-jit</key>
-            <true/>
-            <key>com.apple.security.cs.allow-unsigned-executable-memory</key>
-            <true/>
-            <key>com.apple.security.cs.allow-dyld-environment-variables</key>
-            <true/>
-            <key>com.apple.security.network.client</key>
-            <true/>
-            <key>com.apple.security.network.server</key>
-            <true/>
-            <key>com.apple.security.files.user-selected.read-write</key>
-            <true/>
-        </dict>
-        </plist>
-        EOL
+      - name: Find Built App Path
+        id: find_app_path
+        run: |
+          # Assuming your build output is under the "dist" directory, adjust as needed
+          APP_PATH=$(find "$PWD/dist" -name "*.app" -type d)
+          echo "APP_PATH=$APP_PATH" >> $GITHUB_ENV
+          echo "App path found: $APP_PATH"
 
-    - name: Ensure appId is correctly set in package.json
-      run: |
-        npm pkg set build.appId="com.nidum.ragdrive"
-        npm pkg set build.mac.hardenedRuntime=true
-        npm pkg set build.mac.gatekeeperAssess=false
-        npm pkg set build.mac.entitlements="build/entitlements.mac.plist"
-        npm pkg set build.mac.entitlementsInherit="build/entitlements.mac.plist"
+      - name: Install Xcode Command Line Tools
+        run: sudo xcode-select --install || echo "Command Line Tools already installed"
 
-    - name: Import Apple Developer Certificate
-      if: github.event_name == 'push'
-      env:
-        APPLE_CERTIFICATE: ${{ secrets.APPLE_CERTIFICATE }}
-        APPLE_CERTIFICATE_PASSWORD: ${{ secrets.APPLE_CERTIFICATE_PASSWORD }}
-      run: |
-        echo "$APPLE_CERTIFICATE" | base64 --decode > certificate.p12
-        security create-keychain -p "" build.keychain
-        security default-keychain -s build.keychain
-        security unlock-keychain -p "" build.keychain
-        security import certificate.p12 -k build.keychain -P "$APPLE_CERTIFICATE_PASSWORD" -T /usr/bin/codesign
-        security set-key-partition-list -S apple-tool:,apple:,codesign: -s -k "" build.keychain
+      - name: Set up keychain and import certificate
+        run: |
+          # Create a temporary keychain
+          security create-keychain -p "$KEYCHAIN_PASSWORD" build.keychain
+          security default-keychain -s build.keychain
+          security unlock-keychain -p "$KEYCHAIN_PASSWORD" build.keychain
+          security set-keychain-settings -t 3600 -u build.keychain
 
-    - name: Build Electron App
-      run: npm run build
+          # Import the certificate
+          echo $APPLE_CERTIFICATE | base64 --decode > signing_certificate.p12
+          security import signing_certificate.p12 -k build.keychain -P "$APPLE_CERTIFICATE_PASSWORD" -T /usr/bin/codesign
+          
+          # Allow codesign to access keychain
+          security set-key-partition-list -S apple-tool:,apple: -s -k "$KEYCHAIN_PASSWORD" build.keychain
+        env:
+          APPLE_CERTIFICATE: ${{ secrets.APPLE_CERTIFICATE }}
+          APPLE_CERTIFICATE_PASSWORD: ${{ secrets.APPLE_CERTIFICATE_PASSWORD }}
+          KEYCHAIN_PASSWORD: "your_keychain_password"  # Choose a secure temporary keychain password
 
-    - name: Get app version
-      id: get_version
-      run: |
-        APP_VERSION=$(node -p "require('./package.json').version")
-        echo "APP_VERSION=$APP_VERSION" >> $GITHUB_ENV
+      - name: Code Sign the Application
+        run: |
+          codesign --deep --force --verify --verbose --sign "Developer ID Application: Your Name (${APPLE_TEAM_ID})" "$APP_PATH"
+        env:
+          APP_PATH: ${{ env.APP_PATH }}
+          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
 
-    - name: Verify built artifacts
-      run: |
-        DMG_PATH=$(find dist -name "*.dmg" | head -n 1)
-        if [ -z "$DMG_PATH" ]; then
-          echo "Error: DMG file not found!"
-          exit 1
-        fi
-        echo "DMG_PATH=$DMG_PATH" >> $GITHUB_ENV
+      - name: Notarize the Application
+        run: |
+          xcrun altool --notarize-app -f "$APP_PATH.zip" --primary-bundle-id "com.nidum.ragdrive" -u "$APPLE_ID" -p "$APPLE_APP_SPECIFIC_PASSWORD"
+        env:
+          APP_PATH: ${{ env.APP_PATH }}
+          APPLE_ID: ${{ secrets.APPLE_ID }}
+          APPLE_APP_SPECIFIC_PASSWORD: ${{ secrets.APPLE_APP_SPECIFIC_PASSWORD }}
 
-    - name: Notarize app
-      if: github.event_name == 'push'
-      run: |
-        xcrun notarytool submit "$DMG_PATH" \
-          --apple-id "$APPLE_ID" \
-          --password "$APPLE_APP_SPECIFIC_PASSWORD" \
-          --team-id "$APPLE_TEAM_ID" \
-          --wait
+      - name: Wait for Notarization
+        run: |
+          # Wait and check for notarization status, replace YOUR_REQUEST_UUID dynamically
+          xcrun altool --notarization-info YOUR_REQUEST_UUID -u "$APPLE_ID" -p "$APPLE_APP_SPECIFIC_PASSWORD"
+        env:
+          APPLE_ID: ${{ secrets.APPLE_ID }}
+          APPLE_APP_SPECIFIC_PASSWORD: ${{ secrets.APPLE_APP_SPECIFIC_PASSWORD }}
 
-    - name: Staple notarization ticket
-      if: github.event_name == 'push'
-      run: |
-        xcrun stapler staple "$DMG_PATH"
-
-    - name: Verify signing and notarization
-      if: github.event_name == 'push'
-      run: |
-        codesign -dv --verbose=4 "$DMG_PATH"
-        spctl -a -vv -t install "$DMG_PATH"
-
-    - name: Create GitHub Release
-      if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-      uses: softprops/action-gh-release@v1
-      with:
-        files: ${{ env.DMG_PATH }}
-        tag_name: v${{ env.APP_VERSION }}
-        name: Release v${{ env.APP_VERSION }}
-        draft: false
-        prerelease: false
-        generate_release_notes: true
-
-    - name: Clean up
-      if: always()
-      run: |
-        security delete-keychain build.keychain || true
-        rm -f certificate.p12 || true
+      - name: Staple Notarization Ticket
+        run: |
+          xcrun stapler staple "$APP_PATH"
+        env:
+          APP_PATH: ${{ env.APP_PATH }}
