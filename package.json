@@ -70,6 +70,10 @@
   },
   "build": {
     "appId": "com.nidum.ragdrive",
+    "directories": {
+      "output": "dist",
+      "buildResources": "resources"
+    },
     "mac": {
       "category": "public.app-category.productivity",
       "target": [
@@ -86,6 +90,3 @@
     }
   }
 }
-
-
-
