@@ -4,6 +4,7 @@ import { queryClient } from "@/lib/query-client";
 
 import { Toaster as SonnerToaster } from "@/components/ui/sonner";
 import { Toaster } from "@/components/ui/toaster";
+import GoogleAnalytics from "@/components/common/google-analytics";
 
 import { DownloadProvider } from './download-manager';
 
@@ -28,6 +29,8 @@ function ClientWrapper({ children }: props) {
         style={style}
         toastOptions={{ style }}
       />
+
+      <GoogleAnalytics />
     </QueryClientProvider>
   )
 }

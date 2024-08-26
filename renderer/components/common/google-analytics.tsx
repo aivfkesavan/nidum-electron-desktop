@@ -1,11 +1,12 @@
 import Script from 'next/script';
 
 function GoogleAnalytics() {
+  let gId = "G-98PNYYVMV9"
   return (
     <>
       <Script
         strategy='lazyOnload'
-        src={`https://www.googletagmanager.com/gtag/js?id=${process.env.NEXT_PUBLIC_MEASUREMENT_ID}`}
+        src={`https://www.googletagmanager.com/gtag/js?id=${gId}`}
       />
 
       <Script id='' strategy='lazyOnload'>
@@ -13,7 +14,7 @@ function GoogleAnalytics() {
           window.dataLayer = window.dataLayer || [];
           function gtag(){dataLayer.push(arguments);}
           gtag('js', new Date());
-          gtag('config', '${process.env.NEXT_PUBLIC_MEASUREMENT_ID}', {
+          gtag('config', '${gId}', {
           page_path: window.location.pathname,
           });
         `}
