@@ -3,7 +3,7 @@ name: Build, Sign, and Notarize Electron App
 on:
   push:
     branches:
-      - main
+      - main  # or your desired branch
 
 permissions:
   contents: write
@@ -30,7 +30,6 @@ jobs:
       - name: Find Built App Path
         id: find_app_path
         run: |
-          # Assuming your build output is under the "dist" directory, adjust as needed
           APP_PATH=$(find "$PWD/dist" -name "*.app" -type d)
           echo "APP_PATH=$APP_PATH" >> $GITHUB_ENV
           echo "App path found: $APP_PATH"
@@ -55,7 +54,7 @@ jobs:
         env:
           APPLE_CERTIFICATE: ${{ secrets.APPLE_CERTIFICATE }}
           APPLE_CERTIFICATE_PASSWORD: ${{ secrets.APPLE_CERTIFICATE_PASSWORD }}
-          KEYCHAIN_PASSWORD: "your_keychain_password"  # Choose a secure temporary keychain password
+          KEYCHAIN_PASSWORD: "12345678"  # Choose a secure temporary keychain password
 
       - name: Code Sign the Application
         run: |
@@ -66,18 +65,11 @@ jobs:
 
       - name: Notarize the Application
         run: |
-          xcrun altool --notarize-app -f "$APP_PATH.zip" --primary-bundle-id "com.nidum.ragdrive" -u "$APPLE_ID" -p "$APPLE_APP_SPECIFIC_PASSWORD"
+          xcrun notarytool submit "$APP_PATH.zip" --apple-id "$APPLE_ID" --team-id "$APPLE_TEAM_ID" --password "$APPLE_APP_SPECIFIC_PASSWORD" --wait
         env:
           APP_PATH: ${{ env.APP_PATH }}
           APPLE_ID: ${{ secrets.APPLE_ID }}
-          APPLE_APP_SPECIFIC_PASSWORD: ${{ secrets.APPLE_APP_SPECIFIC_PASSWORD }}
-
-      - name: Wait for Notarization
-        run: |
-          # Wait and check for notarization status, replace YOUR_REQUEST_UUID dynamically
-          xcrun altool --notarization-info YOUR_REQUEST_UUID -u "$APPLE_ID" -p "$APPLE_APP_SPECIFIC_PASSWORD"
-        env:
-          APPLE_ID: ${{ secrets.APPLE_ID }}
+          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
           APPLE_APP_SPECIFIC_PASSWORD: ${{ secrets.APPLE_APP_SPECIFIC_PASSWORD }}
 
       - name: Staple Notarization Ticket
