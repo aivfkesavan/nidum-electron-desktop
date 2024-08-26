@@ -25,6 +25,8 @@ jobs:
         run: npm install
 
       - name: Build the application
+        env:
+          GH_TOKEN: ${{ secrets.GH_TOKEN }}  # Use the GitHub token
         run: npm run build
 
       - name: Find Built App Path
@@ -54,7 +56,7 @@ jobs:
         env:
           APPLE_CERTIFICATE: ${{ secrets.APPLE_CERTIFICATE }}
           APPLE_CERTIFICATE_PASSWORD: ${{ secrets.APPLE_CERTIFICATE_PASSWORD }}
-          KEYCHAIN_PASSWORD: "12345678"  # Choose a secure temporary keychain password
+          KEYCHAIN_PASSWORD: "123456789"  # Choose a secure temporary keychain password
 
       - name: Code Sign the Application
         run: |
