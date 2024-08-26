@@ -1,7 +1,7 @@
 {
   "private": true,
   "name": "RAGDrive",
-  "description": "",
+  "description": "ragdrive",
   "version": "1.0.0",
   "author": "",
   "main": "app/background.js",
