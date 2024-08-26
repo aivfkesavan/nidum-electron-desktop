@@ -64,7 +64,7 @@ function Histories() {
       })}
     >
       <div className="df p-2 pl-9 text-[11px] mt-[5px] font-medium relative">
-        <p className="flex-1">Chat history</p>
+        <p className="flex-1">Chat historyyy</p>
 
         <GoToProject />
       </div>
