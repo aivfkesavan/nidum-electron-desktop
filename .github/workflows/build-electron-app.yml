@@ -59,17 +59,44 @@ jobs:
           fi
           echo "DMG_PATH=$DMG_PATH" >> $GITHUB_ENV
 
-          # Notarize the DMG
-          xcrun notarytool submit "$DMG_PATH" --wait --apple-id "$APPLE_ID" --password "$APPLE_APP_SPECIFIC_PASSWORD" --team-id "$APPLE_TEAM_ID"
+          # Locate the built .app bundle
+          APP_PATH=$(find "$PWD/dist" -name "*.app" -type d | head -n 1)
+          if [ -z "$APP_PATH" ]; then
+            echo "Error: App bundle not found."
+            exit 1
+          fi
+          echo "APP_PATH=$APP_PATH" >> $GITHUB_ENV
+
+          # Notarize the app bundle
+          xcrun notarytool submit "$APP_PATH" --wait --apple-id "$APPLE_ID" --password "$APPLE_APP_SPECIFIC_PASSWORD" --team-id "$APPLE_TEAM_ID"
           if [ $? -ne 0 ]; then
-            echo "Error: Notarization failed."
+            echo "Error: Notarization failed for app bundle."
             exit 1
           fi
 
-          # Staple the notarization ticket
+          # Staple the notarization ticket to the .app bundle
+          xcrun stapler staple "$APP_PATH"
+          if [ $? -ne 0 ]; then
+            echo "Error: Stapling notarization ticket failed for app bundle."
+            exit 1
+          fi
+
+          # Create a ZIP archive of the notarized app bundle
+          ZIP_PATH="${APP_PATH}.zip"
+          zip -r "$ZIP_PATH" "$APP_PATH"
+          echo "ZIP_PATH=$ZIP_PATH" >> $GITHUB_ENV
+
+          # Notarize the DMG
+          xcrun notarytool submit "$DMG_PATH" --wait --apple-id "$APPLE_ID" --password "$APPLE_APP_SPECIFIC_PASSWORD" --team-id "$APPLE_TEAM_ID"
+          if [ $? -ne 0 ]; then
+            echo "Error: Notarization failed for DMG."
+            exit 1
+          fi
+
+          # Staple the notarization ticket to the DMG
           xcrun stapler staple "$DMG_PATH"
           if [ $? -ne 0 ]; then
-            echo "Error: Stapling notarization ticket failed."
+            echo "Error: Stapling notarization ticket failed for DMG."
             exit 1
           fi
 
@@ -90,10 +117,10 @@ jobs:
         run: |
           if [ "${{ env.RELEASE_EXISTS }}" = "true" ]; then
             echo "Updating existing release for version v${{ env.VERSION }}"
-            gh release upload "v${{ env.VERSION }}" "${{ env.DMG_PATH }}" --clobber
+            gh release upload "v${{ env.VERSION }}" "${{ env.DMG_PATH }}" "${{ env.ZIP_PATH }}" --clobber
           else
             echo "Creating new release for version v${{ env.VERSION }}"
-            gh release create "v${{ env.VERSION }}" "${{ env.DMG_PATH }}" \
+            gh release create "v${{ env.VERSION }}" "${{ env.DMG_PATH }}" "${{ env.ZIP_PATH }}" \
               --title "Release v${{ env.VERSION }}" \
               --generate-notes
           fi
