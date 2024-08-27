@@ -51,13 +51,29 @@ jobs:
           # Build the Electron app
           npm run build
 
-          # Locate the built DMG file
+          # Locate the built ZIP and DMG files
+          ZIP_PATH=$(find "$PWD/dist" -name "*.zip" -type f | head -n 1)
           DMG_PATH=$(find "$PWD/dist" -name "*.dmg" -type f | head -n 1)
+          LATEST_MAC_YML_PATH=$(find "$PWD/dist" -name "latest-mac.yml" -type f | head -n 1)
+
+          if [ -z "$ZIP_PATH" ]; then
+            echo "Error: ZIP file not found."
+            exit 1
+          fi
+
           if [ -z "$DMG_PATH" ]; then
             echo "Error: DMG file not found."
             exit 1
           fi
+
+          if [ -z "$LATEST_MAC_YML_PATH" ]; then
+            echo "Error: latest-mac.yml file not found."
+            exit 1
+          fi
+
+          echo "ZIP_PATH=$ZIP_PATH" >> $GITHUB_ENV
           echo "DMG_PATH=$DMG_PATH" >> $GITHUB_ENV
+          echo "LATEST_MAC_YML_PATH=$LATEST_MAC_YML_PATH" >> $GITHUB_ENV
 
           # Notarize the DMG
           xcrun notarytool submit "$DMG_PATH" --wait --apple-id "$APPLE_ID" --password "$APPLE_APP_SPECIFIC_PASSWORD" --team-id "$APPLE_TEAM_ID"
@@ -90,10 +106,18 @@ jobs:
         run: |
           if [ "${{ env.RELEASE_EXISTS }}" = "true" ]; then
             echo "Updating existing release for version v${{ env.VERSION }}"
-            gh release upload "v${{ env.VERSION }}" "${{ env.DMG_PATH }}" --clobber
+            gh release upload "v${{ env.VERSION }}" "${{ env.ZIP_PATH }}" "${{ env.DMG_PATH }}" --clobber
           else
             echo "Creating new release for version v${{ env.VERSION }}"
-            gh release create "v${{ env.VERSION }}" "${{ env.DMG_PATH }}" \
+            gh release create "v${{ env.VERSION }}" "${{ env.ZIP_PATH }}" "${{ env.DMG_PATH }}" \
               --title "Release v${{ env.VERSION }}" \
               --generate-notes
           fi
+
+      - name: Create Separate Release for latest-mac.yml
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh release create "latest-mac-${{ env.VERSION }}" "${{ env.LATEST_MAC_YML_PATH }}" \
+            --title "Latest Mac Configuration v${{ env.VERSION }}" \
+            --notes "This release contains the latest-mac.yml configuration file for version v${{ env.VERSION }}."
