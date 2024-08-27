@@ -8,7 +8,7 @@ function Voice() {
 
   return (
     <>
-      <div className="mb-0.5 text-xs text-gray-500">Text to Speech Provider</div>
+      {/* <div className="mb-0.5 text-xs text-gray-500">Text to Speech Provider</div> */}
       <SelectModel />
 
       {
