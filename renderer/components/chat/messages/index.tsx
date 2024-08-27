@@ -405,7 +405,7 @@ function Messages() {
           {
             loading &&
             <button
-              className={`p-2 animate-in border border-foreground/20 absolute top-1 right-2 bg-input hover:bg-red-200 transition-colors text-red-500`}
+              className="p-1.5 animate-in border border-foreground/20 absolute top-1.5 right-2 rounded-full bg-white/80 text-black/80 hover:bg-red-200 transition-colors"
               onClick={stopListening}
             >
               <FaSquare />

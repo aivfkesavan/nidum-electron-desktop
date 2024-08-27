@@ -54,7 +54,7 @@ function Projects() {
         "-translate-x-full": !!project_id
       })}
     >
-      <div className="df p-2 pl-9 text-[11px] mt-[5px] font-medium">
+      <div className="df p-2 pt-2.5 pl-[102px] text-[11px] mt-[5px] font-medium text-white/60">
         Projects
       </div>
 

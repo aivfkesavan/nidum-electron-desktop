@@ -1,6 +1,7 @@
 import express from 'express';
 import cors from "cors";
 
+import duckduckgo from "./controllers/duckduckgo";
 import whisper from "./controllers/whisper";
 import ollama from "./controllers/ollama";
 import doc from "./controllers/doc";
@@ -16,6 +17,7 @@ function startServer() {
   app.use("/doc", doc)
   app.use("/ollama", ollama)
   app.use("/whisper", whisper)
+  app.use("/duckduckgo", duckduckgo)
 
   app.listen(port, () => {
     console.log(`Server running at http://localhost:${port}`)

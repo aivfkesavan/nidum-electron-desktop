@@ -163,11 +163,11 @@
   }
 
   .side-nav-toggle {
-    @apply bg-background;
+    @apply bg-background hover:bg-input;
   }
 
   body.open .side-nav-toggle {
-    @apply bg-[#171717];
+    @apply bg-[#171717] hover:bg-input;
   }
 
   .mic-bg-animation {

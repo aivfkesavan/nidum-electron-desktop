@@ -72,12 +72,12 @@ function Ollama() {
 
   return (
     <>
-      <RadioGroup value={selected} onValueChange={setSelected} className="grid grid-cols-2 gap-4 my-4">
+      <RadioGroup value={selected} onValueChange={setSelected} className="my-4">
         {
           models?.map(m => (
             <div
               key={m.name}
-              className="p-4 text-xs border rounded-md"
+              className="p-4 mb-2 text-xs border rounded-md"
             >
               <div className="df mb-2">
                 <RadioGroupItem value={m.name} id={m.name} />
@@ -107,10 +107,16 @@ function Ollama() {
                 }
               </div>
 
-              <div className="text-[10px] text-white/70">
-                <p>Size: {m.size}</p>
+              <div className="text-[10px] text-white/80">
+                <div className="df justify-between my-1.5">
+                  <p>Size: {m.size}</p>
 
-                <p className="w-fit mt-1.5 px-2 py-0.5 rounded-full bg-input capitalize">{m.category}</p>
+                  <p className="w-fit px-2 py-0.5 rounded-full bg-input capitalize">{m.category}</p>
+                </div>
+
+                <div className="text-[11px] text-white/60 line-clamp-2">
+                  Lorem ipsum dolor, sit amet consectetur adipisicing elit. Totam cumque quis quod iusto. Fuga quasi eius tempora itaque blanditiis totam cupiditate error dolor? Provident amet eligendi at excepturi quos nulla!
+                </div>
               </div>
             </div>
           ))
