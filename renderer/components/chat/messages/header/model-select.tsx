@@ -43,7 +43,7 @@ function ModelSelect() {
   return (
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger className="pl-6 [.open_&]:pl-0 df gap-px text-sm">
-        {model_type === "Ollama" ? "LLM Server" : model_type} <LuChevronRight className="opacity-50" />
+        {model_type === "Ollama" ? "Local Server" : model_type} <LuChevronRight className="opacity-50" />
       </PopoverTrigger>
 
       <PopoverContent className="p-1 space-y-1 data-[state=open]:duration-300 data-[state=closed]:duration-300">
@@ -76,7 +76,7 @@ function ModelSelect() {
               </div>
 
               <div className="">
-                <p className="text-sm group-hover:underline">{l.title === "Ollama" ? "LLM Server" : l.title}</p>
+                <p className="text-sm group-hover:underline">{l.title === "Ollama" ? "Local Server" : l.title}</p>
                 <p className="text-[10px] text-white/70">{l.para}</p>
               </div>
             </div>

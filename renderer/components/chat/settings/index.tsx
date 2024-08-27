@@ -31,21 +31,21 @@ const list = [
   },
   {
     id: "2",
-    title: "LLM",
+    title: "AI Model",
     logo: <FaLinode className="text-base" />,
     child: <LLM />,
   },
   {
-    id: "3",
-    title: "Voice & Speech",
-    logo: <RiVoiceprintFill className="text-base" />,
-    child: <Voice />,
-  },
-  {
     id: "4",
-    title: "Transcription",
+    title: "Speech to Text",
     logo: <MdOutlineRecordVoiceOver className="text-base" />,
     child: <Transcribe />,
+  },
+  {
+    id: "3",
+    title: "Text to Speech",
+    logo: <RiVoiceprintFill className="text-base" />,
+    child: <Voice />,
   },
 ]
 

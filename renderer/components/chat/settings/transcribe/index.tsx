@@ -9,7 +9,7 @@ function Transcribe() {
 
   return (
     <>
-      <div className="mb-0.5 text-xs text-gray-500">Speech to Text Provider</div>
+      {/* <div className="mb-0.5 text-xs text-gray-500">Speech to Text Provider</div> */}
       <SelectModel />
 
       {
