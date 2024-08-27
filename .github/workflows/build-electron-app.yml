@@ -67,10 +67,15 @@ jobs:
           fi
           echo "APP_PATH=$APP_PATH" >> $GITHUB_ENV
 
-          # Notarize the app bundle
-          xcrun notarytool submit "$APP_PATH" --wait --apple-id "$APPLE_ID" --password "$APPLE_APP_SPECIFIC_PASSWORD" --team-id "$APPLE_TEAM_ID"
+          # Create a ZIP archive of the app bundle for notarization
+          ZIP_PATH="${APP_PATH}.zip"
+          ditto -c -k --sequesterRsrc --keepParent "$APP_PATH" "$ZIP_PATH"
+          echo "ZIP_PATH=$ZIP_PATH" >> $GITHUB_ENV
+
+          # Notarize the ZIP file
+          xcrun notarytool submit "$ZIP_PATH" --wait --apple-id "$APPLE_ID" --password "$APPLE_APP_SPECIFIC_PASSWORD" --team-id "$APPLE_TEAM_ID"
           if [ $? -ne 0 ]; then
-            echo "Error: Notarization failed for app bundle."
+            echo "Error: Notarization failed for ZIP file."
             exit 1
           fi
 
@@ -78,18 +83,6 @@ jobs:
           xcrun stapler staple "$APP_PATH"
           if [ $? -ne 0 ]; then
             echo "Error: Stapling notarization ticket failed for app bundle."
-            exit 1
-          fi
-
-          # Create a ZIP archive of the notarized app bundle
-          ZIP_PATH="${APP_PATH}.zip"
-          zip -r "$ZIP_PATH" "$APP_PATH"
-          echo "ZIP_PATH=$ZIP_PATH" >> $GITHUB_ENV
-
-          # Notarize the DMG
-          xcrun notarytool submit "$DMG_PATH" --wait --apple-id "$APPLE_ID" --password "$APPLE_APP_SPECIFIC_PASSWORD" --team-id "$APPLE_TEAM_ID"
-          if [ $? -ne 0 ]; then
-            echo "Error: Notarization failed for DMG."
             exit 1
           fi
 
