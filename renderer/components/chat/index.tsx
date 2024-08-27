@@ -9,6 +9,7 @@ function Chat() {
 
   useEffect(() => {
     document.body.classList.add("open")
+    document.documentElement.style.setProperty('--sidebar-width', '240px')
   }, [])
 
   return (

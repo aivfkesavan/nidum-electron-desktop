@@ -66,7 +66,7 @@ function SelectModel() {
           </div>
 
           <div className="text-left">
-            <p className="text-sm group-hover:underline">{found.title === "Ollama" ? "LLM Server" : found.title}</p>
+            <p className="text-sm group-hover:underline">{found.title === "Ollama" ? "Local Server" : found.title}</p>
             <p className="text-xs text-white/70">{found?.para}</p>
           </div>
 
@@ -105,7 +105,7 @@ function SelectModel() {
                 </div>
 
                 <div className="">
-                  <p className="text-sm group-hover:underline">{l.title === "Ollama" ? "LLM Server" : l.title}</p>
+                  <p className="text-sm group-hover:underline">{l.title === "Ollama" ? "Local Server" : l.title}</p>
                   <p className="text-xs text-white/70">{l.para}</p>
                 </div>
               </div>
