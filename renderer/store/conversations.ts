@@ -4,6 +4,8 @@ import { persist } from 'zustand/middleware';
 import { immer } from 'zustand/middleware/immer';
 import dayjs from 'dayjs';
 
+import { duckDuckGoPrompt } from '@utils/improve-context';
+
 type Message = {
   id: string;
   role: "user" | "assistant" | "loading"
@@ -23,6 +25,7 @@ export type Project = {
   category: string;
   other: string
   systemPrompt: string;
+  ragPrompt: string;
   frequency_penalty: number;
   temperature: number;
   tokenLimit: number;
@@ -86,6 +89,7 @@ const createDefaultProject = (): [string, Project] => {
     category: "General",
     other: "",
     systemPrompt: "You are a helpful assistant.",
+    ragPrompt: duckDuckGoPrompt,
     frequency_penalty: 0,
     temperature: 0.1,
     tokenLimit: 8000,
@@ -128,6 +132,7 @@ const useConvoStore = create<state & actions>()(persist(immer(set => ({
     state.projects[id] = {
       id,
       ...project,
+      ragPrompt: duckDuckGoPrompt,
       tokenLimit: 8000,
       frequency_penalty: 0,
       temperature: 0.1,

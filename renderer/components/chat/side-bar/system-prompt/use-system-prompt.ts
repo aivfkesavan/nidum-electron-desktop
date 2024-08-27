@@ -4,14 +4,17 @@ import useConvoStore from "@/store/conversations";
 function useSystemPrompt() {
   const project_id = useContextStore(s => s.project_id)
   const systemPrompt = useConvoStore(s => s.projects[project_id]?.systemPrompt || "")
+  const ragEnabled = useConvoStore(s => s.projects[project_id]?.rag_enabled || "")
+  const ragPrompt = useConvoStore(s => s.projects[project_id]?.ragPrompt || "")
   const editProject = useConvoStore(s => s.editProject)
 
   const onChange = (v: string) => {
-    editProject(project_id, { systemPrompt: v })
+    let key = ragEnabled ? "ragPrompt" : "systemPrompt"
+    editProject(project_id, { [key]: v })
   }
 
   return {
-    systemPrompt,
+    prompt: ragEnabled ? ragPrompt : systemPrompt,
     onChange,
   }
 }

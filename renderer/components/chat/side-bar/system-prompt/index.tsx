@@ -12,7 +12,7 @@ import {
 import Model from "./model";
 
 function SystemPrompt() {
-  const { systemPrompt, onChange } = useSystemPrompt()
+  const { prompt, onChange } = useSystemPrompt()
   const [open, setOpen] = useState(false)
 
   const updateOpen = (e: any) => {
@@ -36,7 +36,7 @@ function SystemPrompt() {
           <AccordionContent className="px-4 py-2">
             <textarea
               className="p-2 mb-2 text-xs bg-input/50 resize-none"
-              value={systemPrompt}
+              value={prompt}
               onChange={e => onChange(e.target.value)}
             ></textarea>
           </AccordionContent>
