@@ -376,7 +376,7 @@ function Messages() {
           ragEnabled &&
           <div className="df py-1 pl-2 text-xs absolute bottom-full left-4 sm:left-[68px] text-white/80 bg-border rounded-sm">
             <FaFileAlt className="shrink-0 text-base text-white/50" />
-            <p className="w-24 truncate">Rag enabled</p>
+            <p className="w-24 truncate">RAG enabled</p>
 
             <button
               className="shrink-0 p-1 hover:bg-red-400 mr-1"

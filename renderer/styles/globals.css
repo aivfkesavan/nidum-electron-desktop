@@ -159,7 +159,7 @@
   }
 
   body.open .app-wrapper {
-    @apply md:pl-[240px];
+    @apply md:pl-[var(--sidebar-width)];
   }
 
   .side-nav-toggle {
