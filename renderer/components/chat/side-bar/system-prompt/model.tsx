@@ -13,7 +13,7 @@ type props = {
 }
 
 function Model({ closeModel }: props) {
-  const { systemPrompt, onChange } = useSystemPrompt()
+  const { prompt, onChange } = useSystemPrompt()
 
   return (
     <Dialog open onOpenChange={closeModel}>
@@ -26,7 +26,7 @@ function Model({ closeModel }: props) {
           <DialogDescription>
             <textarea
               className="min-h-40 p-2 mb-2 text-[13px] bg-input/60 resize-none"
-              value={systemPrompt}
+              value={prompt}
               onChange={e => onChange(e.target.value)}
             ></textarea>
           </DialogDescription>

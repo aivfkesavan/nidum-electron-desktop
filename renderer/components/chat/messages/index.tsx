@@ -155,7 +155,7 @@ function Messages() {
         if (ragEnabled && filesLen > 0) {
           const searchReult = await ragSearch(msg)
           systemPrompt = createContext({
-            base: duckDuckGoPrompt,
+            base: projectdetails?.ragPrompt || duckDuckGoPrompt,
             context: searchReult,
           })
         }
