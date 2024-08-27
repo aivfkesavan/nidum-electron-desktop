@@ -59,12 +59,12 @@ function Histories() {
 
   return (
     <div
-      className={cn("mini-scroll-bar dfc gap-0 shrink-0 w-full h-screen overflow-hidden transition-transform", {
+      className={cn("mini-scroll-bar dfc gap-0 shrink-0 w-full h-screen pt-0 overflow-hidden transition-transform", {
         "-translate-x-full": !!project_id
       })}
     >
-      <div className="df p-2 pl-9 text-[11px] mt-[5px] font-medium relative">
-        <p className="flex-1">Chat history</p>
+      <div className="df p-2 pt-2.5 pl-[102px] text-[11px] mt-[5px] font-medium relative text-white/60">
+        <p className="flex-1">Chats</p>
 
         <GoToProject />
       </div>
