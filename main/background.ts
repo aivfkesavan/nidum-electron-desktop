@@ -1,8 +1,10 @@
-import path from 'path'
-import { app, ipcMain } from 'electron'
-import serve from 'electron-serve'
-import { createWindow } from './helpers'
-import startServer from '../server'
+import { app, ipcMain, dialog } from 'electron';
+import { autoUpdater } from 'electron-updater';
+import serve from 'electron-serve';
+import path from 'path';
+
+import { createWindow } from './helpers';
+import startServer from '../server';
 
 const isProd = process.env.NODE_ENV === 'production'
 
@@ -33,6 +35,77 @@ if (isProd) {
 
   startServer()
 })()
+
+autoUpdater.setFeedURL({
+  provider: 'generic',
+  url: 'https://production.haive.in:5000/download/nidum_executables/',
+});
+
+// autoUpdater.on('checking-for-update', () => {
+//   console.log('Checking for updates...');
+// });
+
+autoUpdater.on('update-available', (info) => {
+  // console.log('Update available.');
+  // console.log(`Latest version available: ${info.version}`);
+  // console.log('Prompting user to download the update...');
+
+  dialog.showMessageBox({
+    type: 'info',
+    title: 'Update Available',
+    message: 'A new version is available. Do you want to download it now?',
+    buttons: ['Download', 'Cancel']
+  }).then((result) => {
+    const buttonIndex = result.response;
+
+    if (buttonIndex === 0) {
+      // console.log('User chose to download the update.');
+      autoUpdater.downloadUpdate()
+    } else {
+      console.log('User canceled the update download.');
+    }
+  });
+});
+
+// autoUpdater.on('update-not-available', (info) => {
+//   console.log('No updates available.');
+//   console.log(`Checked version: ${info.version}`);
+// });
+
+autoUpdater.on('error', (err) => {
+  console.log('Error in auto-updater:', err);
+});
+
+autoUpdater.on('download-progress', (progressObj) => {
+  console.log(`Download speed: ${progressObj.bytesPerSecond} B/s`);
+  console.log(`Downloaded ${progressObj.percent}%`);
+  console.log(`${progressObj.transferred} bytes out of ${progressObj.total} bytes.`);
+});
+
+autoUpdater.on('update-downloaded', (info) => {
+  console.log('Update downloaded.');
+  console.log(`Downloaded version: ${info.version}`);
+  console.log('Prompting user to restart the application...');
+
+  dialog.showMessageBox({
+    type: 'info',
+    title: 'Update Ready',
+    message: 'A new version has been downloaded. Restart the application to apply the updates.',
+    buttons: ['Restart', 'Later']
+  }).then((returnValue) => {
+    if (returnValue.response === 0) {
+      console.log('User chose to restart the application to install the update.');
+      autoUpdater.quitAndInstall(false, true);
+    } else {
+      console.log('User chose to install the update later.');
+    }
+  });
+});
+
+app.on('ready', () => {
+  console.log('App ready event triggered.');
+  autoUpdater.checkForUpdatesAndNotify();
+});
 
 app.on('window-all-closed', () => {
   app.quit()
