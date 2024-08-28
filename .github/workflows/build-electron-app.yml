@@ -11,18 +11,22 @@ jobs:
     steps:
       - name: Check out the repository
         uses: actions/checkout@v3
+
       - name: Setup Node.js
         uses: actions/setup-node@v3
         with:
           node-version: '20.16.0'
+
       - name: Install dependencies
         run: npm ci
+
       - name: Get version from package.json
         id: get_version
         run: |
           VERSION=$(node -p "require('./package.json').version")
           echo "VERSION=$VERSION" >> $GITHUB_ENV
         shell: bash
+
       - name: Build Electron App
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -40,45 +44,49 @@ jobs:
           security unlock-keychain -p "$KEYCHAIN_PASSWORD" build.keychain
           security import certificate.p12 -k build.keychain -P "$APPLE_CERTIFICATE_PASSWORD" -T /usr/bin/codesign
           security set-key-partition-list -S apple-tool:,apple:,codesign: -s -k "$KEYCHAIN_PASSWORD" build.keychain
-          
+
           # Build the Electron app
           npm run build
-          
-          # Find and process the built files
+
+          # Locate the built DMG file
           DMG_PATH=$(find "$PWD/dist" -name "*.dmg" -type f | head -n 1)
-          ZIP_PATH=$(find "$PWD/dist" -name "RAGDrive-*-arm64-mac.zip" -type f | head -n 1)
-          YML_PATH=$(find "$PWW/dist" -name "latest-mac.yml" -type f | head -n 1)
-          
-          if [ -z "$DMG_PATH" ] || [ -z "$ZIP_PATH" ] || [ -z "$YML_PATH" ]; then
-            echo "Error: One or more required files not found."
+          if [ -z "$DMG_PATH" ]; then
+            echo "Error: DMG file not found."
             exit 1
           fi
-          
           echo "DMG_PATH=$DMG_PATH" >> $GITHUB_ENV
-          echo "ZIP_PATH=$ZIP_PATH" >> $GITHUB_ENV
-          echo "YML_PATH=$YML_PATH" >> $GITHUB_ENV
-          
-          # Notarize the DMG and ZIP
-          for FILE in "$DMG_PATH" "$ZIP_PATH"; do
-            xcrun notarytool submit "$FILE" --wait --apple-id "$APPLE_ID" --password "$APPLE_APP_SPECIFIC_PASSWORD" --team-id "$APPLE_TEAM_ID"
-            if [ $? -ne 0 ]; then
-              echo "Error: Notarization failed for $FILE"
-              exit 1
-            fi
-            # Staple the notarization ticket
-            xcrun stapler staple "$FILE"
-            if [ $? -ne 0 ]; then
-              echo "Error: Stapling notarization ticket failed for $FILE"
-              exit 1
-            fi
-          done
-          
-          # Sign the YML file
-          codesign --sign "$APPLE_TEAM_ID" "$YML_PATH"
+
+          # Notarize the DMG
+          xcrun notarytool submit "$DMG_PATH" --wait --apple-id "$APPLE_ID" --password "$APPLE_APP_SPECIFIC_PASSWORD" --team-id "$APPLE_TEAM_ID"
           if [ $? -ne 0 ]; then
-            echo "Error: Signing YML file failed."
+            echo "Error: Notarization failed."
             exit 1
           fi
+
+          # Staple the notarization ticket
+          xcrun stapler staple "$DMG_PATH"
+          if [ $? -ne 0 ]; then
+            echo "Error: Stapling notarization ticket failed."
+            exit 1
+          fi
+
+      - name: Create Signed ZIP File
+        run: |
+          # Create a signed ZIP file of the Electron app
+          ZIP_PATH="$PWD/dist/Nidum-ai-v${{ env.VERSION }}.zip"
+          appPath=$(find "$PWD/dist" -name "*.app" -type d | head -n 1)
+          if [ -z "$appPath" ]; then
+            echo "Error: .app file not found."
+            exit 1
+          fi
+          /usr/bin/codesign --force --deep --sign "$APPLE_CERTIFICATE" "$appPath"
+          ditto -c -k --sequesterRsrc --keepParent "$appPath" "$ZIP_PATH"
+          if [ $? -ne 0 ]; then
+            echo "Error: Failed to create signed ZIP file."
+            exit 1
+          fi
+          echo "ZIP_PATH=$ZIP_PATH" >> $GITHUB_ENV
+
       - name: Check if Release Exists
         id: check_release
         env:
@@ -89,6 +97,17 @@ jobs:
           else
             echo "RELEASE_EXISTS=false" >> $GITHUB_ENV
           fi
+
+      - name: Upload Latest .yml File
+        id: upload_yml
+        run: |
+          YML_PATH=$(find "$PWD/dist" -name "*.yml" -type f | head -n 1)
+          if [ -z "$YML_PATH" ]; then
+            echo "Error: .yml file not found."
+            exit 1
+          fi
+          echo "YML_PATH=$YML_PATH" >> $GITHUB_ENV
+
       - name: Create or Update Release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
