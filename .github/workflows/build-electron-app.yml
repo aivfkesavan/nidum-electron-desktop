@@ -1,39 +1,37 @@
 name: "Nidum.ai macOS Build and Release"
-
 on:
   push:
     branches:
       - main
-
 jobs:
-  build-and-release:
+  create-release:
     runs-on: macos-latest
     permissions:
       contents: write
     steps:
       - name: Check out the repository
         uses: actions/checkout@v3
-
       - name: Setup Node.js
         uses: actions/setup-node@v3
         with:
           node-version: '20.16.0'
-
       - name: Install dependencies
         run: npm ci
-
       - name: Get version from package.json
         id: get_version
         run: |
           VERSION=$(node -p "require('./package.json').version")
           echo "VERSION=$VERSION" >> $GITHUB_ENV
         shell: bash
-
-      - name: Setup macOS Keychain
+      - name: Build Electron App
         env:
-          KEYCHAIN_PASSWORD: ${{ secrets.KEYCHAIN_PASSWORD }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           APPLE_CERTIFICATE: ${{ secrets.APPLE_CERTIFICATE }}
           APPLE_CERTIFICATE_PASSWORD: ${{ secrets.APPLE_CERTIFICATE_PASSWORD }}
+          APPLE_ID: ${{ secrets.APPLE_ID }}
+          APPLE_APP_SPECIFIC_PASSWORD: ${{ secrets.APPLE_APP_SPECIFIC_PASSWORD }}
+          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+          KEYCHAIN_PASSWORD: ${{ secrets.KEYCHAIN_PASSWORD }}
         run: |
           # Decode and import the Apple certificate
           echo $APPLE_CERTIFICATE | base64 --decode > certificate.p12
@@ -42,52 +40,65 @@ jobs:
           security unlock-keychain -p "$KEYCHAIN_PASSWORD" build.keychain
           security import certificate.p12 -k build.keychain -P "$APPLE_CERTIFICATE_PASSWORD" -T /usr/bin/codesign
           security set-key-partition-list -S apple-tool:,apple:,codesign: -s -k "$KEYCHAIN_PASSWORD" build.keychain
-
-      - name: Build Electron App
-        env:
-          CSC_LINK: ${{ secrets.APPLE_CERTIFICATE }},
-          CSC_KEY_PASSWORD: ${{ secrets.APPLE_CERTIFICATE_PASSWORD }},
-          APPLE_ID: ${{ secrets.APPLE_ID }}
-          APPLE_APP_SPECIFIC_PASSWORD: ${{ secrets.APPLE_APP_SPECIFIC_PASSWORD }}
-          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
-        run: npm run build
-
-      - name: Notarize and Staple the DMG
-        env:
-          APPLE_ID: ${{ secrets.APPLE_ID }}
-          APPLE_APP_SPECIFIC_PASSWORD: ${{ secrets.APPLE_APP_SPECIFIC_PASSWORD }}
-          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
-        run: |
-          # Sign the DMG and ZIP files
+          
+          # Build the Electron app
+          npm run build
+          
+          # Find and process the built files
           DMG_PATH=$(find "$PWD/dist" -name "*.dmg" -type f | head -n 1)
-          ZIP_PATH=$(find "$PWD/dist" -name "*.zip" -type f | head -n 1)
-
-          if [ -z "$DMG_PATH" ] || [ -z "$ZIP_PATH" ]; then
-            echo "Error: DMG or ZIP file not found."
+          ZIP_PATH=$(find "$PWD/dist" -name "RAGDrive-*-arm64-mac.zip" -type f | head -n 1)
+          YML_PATH=$(find "$PWW/dist" -name "latest-mac.yml" -type f | head -n 1)
+          
+          if [ -z "$DMG_PATH" ] || [ -z "$ZIP_PATH" ] || [ -z "$YML_PATH" ]; then
+            echo "Error: One or more required files not found."
             exit 1
           fi
-
-          echo "Signing DMG and ZIP files..."
-          codesign --deep --force --verbose --sign "Developer ID Application: Your Name (TEAMID)" "$DMG_PATH"
-          codesign --deep --force --verbose --sign "Developer ID Application: Your Name (TEAMID)" "$ZIP_PATH"
-
-          # Notarize the DMG
-          xcrun notarytool submit "$DMG_PATH" --wait --apple-id "$APPLE_ID" --password "$APPLE_APP_SPECIFIC_PASSWORD" --team-id "$APPLE_TEAM_ID"
-          xcrun stapler staple "$DMG_PATH"
-          xcrun stapler staple "$ZIP_PATH"
-
-      - name: Create or Update GitHub Release
+          
+          echo "DMG_PATH=$DMG_PATH" >> $GITHUB_ENV
+          echo "ZIP_PATH=$ZIP_PATH" >> $GITHUB_ENV
+          echo "YML_PATH=$YML_PATH" >> $GITHUB_ENV
+          
+          # Notarize the DMG and ZIP
+          for FILE in "$DMG_PATH" "$ZIP_PATH"; do
+            xcrun notarytool submit "$FILE" --wait --apple-id "$APPLE_ID" --password "$APPLE_APP_SPECIFIC_PASSWORD" --team-id "$APPLE_TEAM_ID"
+            if [ $? -ne 0 ]; then
+              echo "Error: Notarization failed for $FILE"
+              exit 1
+            fi
+            # Staple the notarization ticket
+            xcrun stapler staple "$FILE"
+            if [ $? -ne 0 ]; then
+              echo "Error: Stapling notarization ticket failed for $FILE"
+              exit 1
+            fi
+          done
+          
+          # Sign the YML file
+          codesign --sign "$APPLE_TEAM_ID" "$YML_PATH"
+          if [ $? -ne 0 ]; then
+            echo "Error: Signing YML file failed."
+            exit 1
+          fi
+      - name: Check if Release Exists
+        id: check_release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          RELEASE_NAME="v${{ env.VERSION }}"
-          if gh release view "$RELEASE_NAME" > /dev/null 2>&1; then
-            echo "Updating existing release for version $RELEASE_NAME"
-            gh release upload "$RELEASE_NAME" "dist/*.dmg" "dist/*.zip" "dist/*.blockmap" "dist/*.yml" --clobber
+          if gh release view "v${{ env.VERSION }}" > /dev/null 2>&1; then
+            echo "RELEASE_EXISTS=true" >> $GITHUB_ENV
           else
-            echo "Creating new release for version $RELEASE_NAME"
-            gh release create "$RELEASE_NAME" "dist/*.dmg" "dist/*.zip" "dist/*.blockmap" "dist/*.yml" \
-              --title "Release $RELEASE_NAME" \
-              --notes "Auto-generated release for version $RELEASE_NAME" \
+            echo "RELEASE_EXISTS=false" >> $GITHUB_ENV
+          fi
+      - name: Create or Update Release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          if [ "${{ env.RELEASE_EXISTS }}" = "true" ]; then
+            echo "Updating existing release for version v${{ env.VERSION }}"
+            gh release upload "v${{ env.VERSION }}" "${{ env.DMG_PATH }}" "${{ env.ZIP_PATH }}" "${{ env.YML_PATH }}" --clobber
+          else
+            echo "Creating new release for version v${{ env.VERSION }}"
+            gh release create "v${{ env.VERSION }}" "${{ env.DMG_PATH }}" "${{ env.ZIP_PATH }}" "${{ env.YML_PATH }}" \
+              --title "Release v${{ env.VERSION }}" \
               --generate-notes
           fi
