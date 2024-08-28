@@ -11,23 +11,19 @@ jobs:
     steps:
       - name: Check out the repository
         uses: actions/checkout@v3
-
       - name: Setup Node.js
         uses: actions/setup-node@v3
         with:
           node-version: '20.16.0'
-
       - name: Install dependencies
         run: npm ci
-
       - name: Get version from package.json
         id: get_version
         run: |
           VERSION=$(node -p "require('./package.json').version")
           echo "VERSION=$VERSION" >> $GITHUB_ENV
         shell: bash
-
-      - name: Build Electron App
+      - name: Build and Sign Electron App
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           APPLE_CERTIFICATE: ${{ secrets.APPLE_CERTIFICATE }}
@@ -36,6 +32,8 @@ jobs:
           APPLE_APP_SPECIFIC_PASSWORD: ${{ secrets.APPLE_APP_SPECIFIC_PASSWORD }}
           APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
           KEYCHAIN_PASSWORD: ${{ secrets.KEYCHAIN_PASSWORD }}
+          CSC_LINK: ${{ secrets.APPLE_CERTIFICATE }}
+          CSC_KEY_PASSWORD: ${{ secrets.APPLE_CERTIFICATE_PASSWORD }}
         run: |
           # Decode and import the Apple certificate
           echo $APPLE_CERTIFICATE | base64 --decode > certificate.p12
@@ -44,49 +42,39 @@ jobs:
           security unlock-keychain -p "$KEYCHAIN_PASSWORD" build.keychain
           security import certificate.p12 -k build.keychain -P "$APPLE_CERTIFICATE_PASSWORD" -T /usr/bin/codesign
           security set-key-partition-list -S apple-tool:,apple:,codesign: -s -k "$KEYCHAIN_PASSWORD" build.keychain
-
-          # Build the Electron app
+          
+          # Build the Electron app with electron-builder
           npm run build
-
-          # Locate the built DMG file
-          DMG_PATH=$(find "$PWD/dist" -name "*.dmg" -type f | head -n 1)
-          if [ -z "$DMG_PATH" ]; then
-            echo "Error: DMG file not found."
-            exit 1
-          fi
-          echo "DMG_PATH=$DMG_PATH" >> $GITHUB_ENV
-
-          # Notarize the DMG
-          xcrun notarytool submit "$DMG_PATH" --wait --apple-id "$APPLE_ID" --password "$APPLE_APP_SPECIFIC_PASSWORD" --team-id "$APPLE_TEAM_ID"
-          if [ $? -ne 0 ]; then
-            echo "Error: Notarization failed."
-            exit 1
-          fi
-
-          # Staple the notarization ticket
-          xcrun stapler staple "$DMG_PATH"
-          if [ $? -ne 0 ]; then
-            echo "Error: Stapling notarization ticket failed."
-            exit 1
-          fi
-
-      - name: Create Signed ZIP File
+          
+          # Find all generated files
+          BUILD_FILES=$(find "$PWD/dist" -type f)
+          echo "BUILD_FILES<<EOF" >> $GITHUB_ENV
+          echo "$BUILD_FILES" >> $GITHUB_ENV
+          echo "EOF" >> $GITHUB_ENV
+          
+      - name: Notarize and Staple
+        env:
+          APPLE_ID: ${{ secrets.APPLE_ID }}
+          APPLE_APP_SPECIFIC_PASSWORD: ${{ secrets.APPLE_APP_SPECIFIC_PASSWORD }}
+          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
         run: |
-          # Create a signed ZIP file of the Electron app
-          ZIP_PATH="$PWD/dist/Nidum-ai-v${{ env.VERSION }}.zip"
-          appPath=$(find "$PWD/dist" -name "*.app" -type d | head -n 1)
-          if [ -z "$appPath" ]; then
-            echo "Error: .app file not found."
-            exit 1
-          fi
-          /usr/bin/codesign --force --deep --sign "$APPLE_CERTIFICATE" "$appPath"
-          ditto -c -k --sequesterRsrc --keepParent "$appPath" "$ZIP_PATH"
-          if [ $? -ne 0 ]; then
-            echo "Error: Failed to create signed ZIP file."
-            exit 1
-          fi
-          echo "ZIP_PATH=$ZIP_PATH" >> $GITHUB_ENV
-
+          for file in $BUILD_FILES; do
+            if [[ "$file" == *.app ]] || [[ "$file" == *.dmg ]]; then
+              echo "Notarizing $file"
+              xcrun notarytool submit "$file" --wait --apple-id "$APPLE_ID" --password "$APPLE_APP_SPECIFIC_PASSWORD" --team-id "$APPLE_TEAM_ID"
+              if [ $? -ne 0 ]; then
+                echo "Error: Notarization failed for $file"
+                exit 1
+              fi
+              echo "Stapling $file"
+              xcrun stapler staple "$file"
+              if [ $? -ne 0 ]; then
+                echo "Error: Stapling notarization ticket failed for $file"
+                exit 1
+              fi
+            fi
+          done
+      
       - name: Check if Release Exists
         id: check_release
         env:
@@ -97,27 +85,19 @@ jobs:
           else
             echo "RELEASE_EXISTS=false" >> $GITHUB_ENV
           fi
-
-      - name: Upload Latest .yml File
-        id: upload_yml
-        run: |
-          YML_PATH=$(find "$PWD/dist" -name "*.yml" -type f | head -n 1)
-          if [ -z "$YML_PATH" ]; then
-            echo "Error: .yml file not found."
-            exit 1
-          fi
-          echo "YML_PATH=$YML_PATH" >> $GITHUB_ENV
-
+      
       - name: Create or Update Release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           if [ "${{ env.RELEASE_EXISTS }}" = "true" ]; then
             echo "Updating existing release for version v${{ env.VERSION }}"
-            gh release upload "v${{ env.VERSION }}" "${{ env.DMG_PATH }}" "${{ env.ZIP_PATH }}" "${{ env.YML_PATH }}" --clobber
+            for file in $BUILD_FILES; do
+              gh release upload "v${{ env.VERSION }}" "$file" --clobber
+            done
           else
             echo "Creating new release for version v${{ env.VERSION }}"
-            gh release create "v${{ env.VERSION }}" "${{ env.DMG_PATH }}" "${{ env.ZIP_PATH }}" "${{ env.YML_PATH }}" \
+            gh release create "v${{ env.VERSION }}" $BUILD_FILES \
               --title "Release v${{ env.VERSION }}" \
               --generate-notes
           fi
