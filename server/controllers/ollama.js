@@ -8,6 +8,7 @@ import os from 'os';
 import { app } from 'electron';
 
 import { executabeCommand, executableNames } from '../utils/executables.js';
+import isLatestSemantic from '../utils/is-latest-semantic.js'
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -25,16 +26,16 @@ async function checkOllamaRunning(port) {
 
 function runOllama(res) {
   const executable = executableNames[os.platform()] || executableNames.darwin;
-  
+
   // Determine the base path dynamically depending on the environment
   const basePath = app.isPackaged ? path.join(process.resourcesPath, '..') : path.join(__dirname, '..');
   const fullPath = path.join(basePath, 'bin', executable);
 
   // Log full path for debugging
-  console.log('Looking for executable at:', fullPath);
+  // console.log('Looking for executable at:', fullPath);
 
   if (!fs.existsSync(fullPath)) {
-    console.error('nidum not found at path:', fullPath);
+    // console.error('nidum not found at path:', fullPath);
     res.write(`data: ${JSON.stringify({ error: `nidum not found at path ${fullPath}` })}\n\n`);
     return res.end();
   }
@@ -73,5 +74,28 @@ router.get('/', async (req, res) => {
     res.end();
   }
 });
+
+router.get('/is-latest-version-available', async (req, res) => {
+  try {
+    const currentVersion = "1.0.0"
+    const { data } = await axios.get("https://raw.githubusercontent.com/aivfkesavan/nidum-public/main/versions.json")
+    const latestVersion = data?.[os.platform()] || data?.darwin
+
+    if (!latestVersion) return res.json({ hasLatest: false })
+
+    let payload = {
+      hasLatest: isLatestSemantic(currentVersion, latestVersion),
+    }
+
+    if (payload.hasLatest) {
+      payload.url = data?.[`${os.platform()}Url`] || data?.darwinUrl
+    }
+
+    return res.json(payload)
+
+  } catch (error) {
+    return res.status(400).json({ error })
+  }
+})
 
 export default router;

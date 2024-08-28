@@ -16,7 +16,7 @@ router.get("/", async (req, res) => {
     return res.json(results?.filter((_, i) => i < 20))
 
   } catch (error) {
-    res.status(500).send(error);
+    return res.status(400).json({ error })
   }
 })
 
