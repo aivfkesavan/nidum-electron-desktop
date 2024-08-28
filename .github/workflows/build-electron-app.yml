@@ -75,6 +75,12 @@ jobs:
           echo "DMG_PATH=$DMG_PATH" >> $GITHUB_ENV
           echo "LATEST_MAC_YML_PATH=$LATEST_MAC_YML_PATH" >> $GITHUB_ENV
 
+      - name: Notarize DMG and ZIP Files
+        env:
+          APPLE_ID: ${{ secrets.APPLE_ID }}
+          APPLE_APP_SPECIFIC_PASSWORD: ${{ secrets.APPLE_APP_SPECIFIC_PASSWORD }}
+          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+        run: |
           # Notarize the DMG
           xcrun notarytool submit "$DMG_PATH" --wait --apple-id "$APPLE_ID" --password "$APPLE_APP_SPECIFIC_PASSWORD" --team-id "$APPLE_TEAM_ID"
           if [ $? -ne 0 ]; then
@@ -89,17 +95,10 @@ jobs:
             exit 1
           fi
 
-          # Notarize the ZIP file
+          # Notarize the ZIP file (do not staple as ZIPs cannot be stapled)
           xcrun notarytool submit "$ZIP_PATH" --wait --apple-id "$APPLE_ID" --password "$APPLE_APP_SPECIFIC_PASSWORD" --team-id "$APPLE_TEAM_ID"
           if [ $? -ne 0 ]; then
             echo "Error: ZIP notarization failed."
-            exit 1
-          fi
-
-          # Staple the notarization ticket to ZIP
-          xcrun stapler staple "$ZIP_PATH"
-          if [ $? -ne 0 ]; then
-            echo "Error: Stapling notarization ticket to ZIP failed."
             exit 1
           fi
 
