@@ -1,31 +1,45 @@
 import { useState } from "react";
-import { MdDownloadDone, MdOutlineFileDownload } from "react-icons/md";
+// import { MdDownloadDone, MdOutlineFileDownload } from "react-icons/md";
 
 import { useDownloads } from "@components/common/download-manager";
 import useContextStore from "@store/context";
 import { useToast } from "@components/ui/use-toast";
 import useUIStore from "@store/ui";
 
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { Label } from "@/components/ui/label";
-import { deleteWhisperFolder } from "@actions/whisper";
+// import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+// import { Label } from "@/components/ui/label";
+// import { deleteWhisperFolder } from "@actions/whisper";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
-const models = [
-  // { name: "tiny", size: "75 MB", required: "390 MB" },
-  { name: "tiny.en", size: "75 MB", required: "390 MB" },
-  // { name: "base", size: "142 MB", required: "500 MB" },
-  { name: "base.en", size: "142 MB", required: "500 MB" },
-  // { name: "small", size: "466 MB", required: "1.0 GB" },
-  { name: "small.en", size: "466 MB", required: "1.0 GB" },
-  // { name: "medium", size: "1.5 GB", required: "2.6 GB" },
-  { name: "medium.en", size: "1.5 GB", required: "2.6 GB" },
-  { name: "large-v1", size: "2.9 GB", required: "4.7 GB" },
-  { name: "large-v2", size: "2.9 GB", required: "4.7 GB" },
-  { name: "large-v3", size: "2.9 GB", required: "4.7 GB" },
+// const models = [
+//   // { name: "tiny", size: "75 MB", required: "390 MB" },
+//   { name: "tiny.en", size: "75 MB", required: "390 MB" },
+//   // { name: "base", size: "142 MB", required: "500 MB" },
+//   { name: "base.en", size: "142 MB", required: "500 MB" },
+//   // { name: "small", size: "466 MB", required: "1.0 GB" },
+//   { name: "small.en", size: "466 MB", required: "1.0 GB" },
+//   // { name: "medium", size: "1.5 GB", required: "2.6 GB" },
+//   { name: "medium.en", size: "1.5 GB", required: "2.6 GB" },
+//   { name: "large-v1", size: "2.9 GB", required: "4.7 GB" },
+//   { name: "large-v2", size: "2.9 GB", required: "4.7 GB" },
+//   { name: "large-v3", size: "2.9 GB", required: "4.7 GB" },
+// ]
+
+const STT_MODELS = [
+  'Xenova/whisper-tiny.en',
+  'Xenova/whisper-base.en',
+  'Xenova/whisper-small.en',
+  'Xenova/whisper-medium.en'
 ]
 
 function Native() {
-  const { downloads, downloadWhisperModel } = useDownloads()
+  const { downloads, downloadXenovaModels } = useDownloads() // downloadWhisperModel, 
   const downloaded = useContextStore(s => s?.nativeSttModelsDownloaded?.split(","))
   const nativeSttModel = useContextStore(s => s.nativeSttModel)
   const updateContext = useContextStore(s => s.updateContext)
@@ -34,17 +48,17 @@ function Native() {
 
   const [selected, setSelected] = useState(nativeSttModel || "")
 
-  async function download(model: string) {
-    downloadWhisperModel({
-      model,
-      onSuccess() {
-        updateContext({
-          nativeSttModelsDownloaded: [...downloaded, model].join(","),
-        })
-      },
-      onError() { },
-    })
-  }
+  // async function download(model: string) {
+  //   downloadWhisperModel({
+  //     model,
+  //     onSuccess() {
+  //       updateContext({
+  //         nativeSttModelsDownloaded: [...downloaded, model].join(","),
+  //       })
+  //     },
+  //     onError() { },
+  //   })
+  // }
 
   function onSave() {
     if (downloaded.includes(selected)) {
@@ -61,20 +75,70 @@ function Native() {
     }
   }
 
-  function reset() {
+  async function reset() {
     try {
-      deleteWhisperFolder()
       setSelected("")
       updateContext({ nativeSttModelsDownloaded: "", nativeSttModel: "" })
-      toast({ title: "Whisper setup reseted" })
+      toast({ title: "Speech to text setup reseted" })
+
     } catch (error) {
       console.log(error)
     }
   }
 
+  function downloadIt() {
+    downloadXenovaModels({
+      ollamaUrl: "",
+      name: selected,
+      initiater: "xenova",
+      onSuccess() {
+        updateContext({
+          nativeSttModelsDownloaded: [...downloaded, selected].join(","),
+        })
+      },
+      onError() {
+      }
+    })
+  }
+
   return (
     <>
-      <RadioGroup value={selected} onValueChange={setSelected} className="grid grid-cols-2 gap-4 my-4">
+      <label htmlFor="" className="block mb-0.5 mt-6 text-xs text-white/70">Choose a model</label>
+      <Select value={selected} onValueChange={setSelected}>
+        <SelectTrigger className="mb-4">
+          <SelectValue placeholder="Select Model" />
+        </SelectTrigger>
+        <SelectContent>
+          {
+            STT_MODELS.map(s => (
+              <SelectItem value={s} key={s}>{s}</SelectItem>
+            ))
+          }
+        </SelectContent>
+      </Select>
+
+      {
+        !downloaded.includes(selected) &&
+        <>
+          <p className="mb-1 text-xs text-white/60">It seems model not downloaded yet. Do you like to download it?</p>
+
+          {
+            downloads[selected] ?
+              <p className="w-full shrink-0 flex-1 text-[11px] text-white/70">
+                {downloads[selected]?.progress}%
+              </p>
+              :
+              <button
+                onClick={downloadIt}
+                className=" text-xs bg-input hover:bg-input/60"
+              >
+                Download
+              </button>
+          }
+        </>
+      }
+
+      {/* <RadioGroup value={selected} onValueChange={setSelected} className="grid grid-cols-2 gap-4 my-4">
         {
           models.map(m => (
             <div
@@ -111,10 +175,11 @@ function Native() {
           ))
         }
       </RadioGroup>
+*/}
 
       {
-        nativeSttModel &&
-        <div className="df">
+        nativeSttModel && downloaded.includes(selected) &&
+        <div className="df mt-4">
           <p className="text-xs text-white/70">Note: If you face any problem, reset the setup</p>
           <button
             onClick={reset}

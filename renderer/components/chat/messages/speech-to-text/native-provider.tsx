@@ -1,4 +1,5 @@
 import { LuSendHorizonal } from "react-icons/lu";
+import { pipeline } from '@xenova/transformers';
 import { IoMdMic } from "react-icons/io";
 import { LuX } from "react-icons/lu";
 
@@ -6,7 +7,6 @@ import { convertToWav } from "@utils/audio-help";
 import useContextStore from "@store/context";
 import { useToast } from "@components/ui/use-toast";
 import useRecord from "./use-record";
-import constants from "@utils/constants";
 
 type props = {
   disabled: boolean
@@ -25,14 +25,18 @@ function NativeProvider({ disabled, postData }: props) {
     formData.append('audio', wavBlob, 'recording.wav')
 
     try {
-      const response = await fetch(`${constants.backendUrl}/whisper/transcribe/audio/${nativeSttModel}`, {
-        method: 'POST',
-        body: formData,
-      })
-      const res = await response.json()
+      const transcriber = await pipeline('automatic-speech-recognition', nativeSttModel);
+      const url = URL.createObjectURL(audioBlob)
+      const output: any = await transcriber(url);
 
-      if (res.transcribed) {
-        postData(res.transcribed, true)
+      // const response = await fetch(`${constants.backendUrl}/whisper/transcribe/audio/${nativeSttModel}`, {
+      //   method: 'POST',
+      //   body: formData,
+      // })
+      // const res = await response.json()
+
+      if (output?.text) {
+        postData(output.text, true)
       }
 
     } catch (error) {
