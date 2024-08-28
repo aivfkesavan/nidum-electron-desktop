@@ -247,7 +247,7 @@ export function DownloadProvider({ children }: props) {
 
       setTimeout(() => {
         toast.success("New version downloaded", {
-          description: "After downloading the latest .dmg file, simply drag and drop it into the application to install and start using the newest version.",
+          description: "After downloading the latest .dmg file, the file needs to be dragged and dropped into the application to install and use the newest version.",
           descriptionClassName: "mt-1 text-xs",
           richColors: true,
           position: "top-center",
