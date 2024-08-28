@@ -17,10 +17,10 @@ function Upload() {
   const [files, setFiles] = useState<File[]>([])
 
   const acceptedFileTypes = {
-    'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet': ['.xlsx'],
-    'application/vnd.ms-excel': ['.xls'],
-    'application/vnd.openxmlformats-officedocument.presentationml.presentation': ['.pptx'],
-    'application/vnd.ms-powerpoint': ['.ppt'],
+    // 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet': ['.xlsx'],
+    // 'application/vnd.ms-excel': ['.xls'],
+    // 'application/vnd.openxmlformats-officedocument.presentationml.presentation': ['.pptx'],
+    // 'application/vnd.ms-powerpoint': ['.ppt'],
     'application/vnd.openxmlformats-officedocument.wordprocessingml.document': ['.docx'],
     'application/msword': ['.doc'],
     // 'application/epub+zip': ['.epub'],
@@ -92,7 +92,7 @@ function Upload() {
       >
         <input {...getInputProps()} />
 
-        <p>{isDragActive ? "Drop a files here..." : "Upload files (max 4): PDF, PPT, Excel, Word, text. Drag and Drop or Click to Upload"}</p>
+        <p>{isDragActive ? "Drop a files here..." : "Upload files (max 4): PDF, Word, text. Drag and Drop or Click to Upload"}</p>
       </div>
 
       {files.map((file, index) => (
