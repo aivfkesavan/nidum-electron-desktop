@@ -51,7 +51,7 @@ jobs:
           # Build the Electron app
           npm run build
 
-          # Locate the built ZIP and DMG files
+          # Locate the built ZIP, DMG, and latest-mac.yml files
           ZIP_PATH=$(find "$PWD/dist" -name "*.zip" -type f | head -n 1)
           DMG_PATH=$(find "$PWD/dist" -name "*.dmg" -type f | head -n 1)
           LATEST_MAC_YML_PATH=$(find "$PWD/dist" -name "latest-mac.yml" -type f | head -n 1)
@@ -78,14 +78,28 @@ jobs:
           # Notarize the DMG
           xcrun notarytool submit "$DMG_PATH" --wait --apple-id "$APPLE_ID" --password "$APPLE_APP_SPECIFIC_PASSWORD" --team-id "$APPLE_TEAM_ID"
           if [ $? -ne 0 ]; then
-            echo "Error: Notarization failed."
+            echo "Error: DMG notarization failed."
             exit 1
           fi
 
-          # Staple the notarization ticket
+          # Staple the notarization ticket to DMG
           xcrun stapler staple "$DMG_PATH"
           if [ $? -ne 0 ]; then
-            echo "Error: Stapling notarization ticket failed."
+            echo "Error: Stapling notarization ticket to DMG failed."
+            exit 1
+          fi
+
+          # Notarize the ZIP file
+          xcrun notarytool submit "$ZIP_PATH" --wait --apple-id "$APPLE_ID" --password "$APPLE_APP_SPECIFIC_PASSWORD" --team-id "$APPLE_TEAM_ID"
+          if [ $? -ne 0 ]; then
+            echo "Error: ZIP notarization failed."
+            exit 1
+          fi
+
+          # Staple the notarization ticket to ZIP
+          xcrun stapler staple "$ZIP_PATH"
+          if [ $? -ne 0 ]; then
+            echo "Error: Stapling notarization ticket to ZIP failed."
             exit 1
           fi
 
@@ -106,18 +120,10 @@ jobs:
         run: |
           if [ "${{ env.RELEASE_EXISTS }}" = "true" ]; then
             echo "Updating existing release for version v${{ env.VERSION }}"
-            gh release upload "v${{ env.VERSION }}" "${{ env.ZIP_PATH }}" "${{ env.DMG_PATH }}" --clobber
+            gh release upload "v${{ env.VERSION }}" "${{ env.ZIP_PATH }}" "${{ env.DMG_PATH }}" "${{ env.LATEST_MAC_YML_PATH }}" --clobber
           else
             echo "Creating new release for version v${{ env.VERSION }}"
-            gh release create "v${{ env.VERSION }}" "${{ env.ZIP_PATH }}" "${{ env.DMG_PATH }}" \
+            gh release create "v${{ env.VERSION }}" "${{ env.ZIP_PATH }}" "${{ env.DMG_PATH }}" "${{ env.LATEST_MAC_YML_PATH }}" \
               --title "Release v${{ env.VERSION }}" \
               --generate-notes
           fi
-
-      - name: Create Separate Release for latest-mac.yml
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          gh release create "latest-mac-${{ env.VERSION }}" "${{ env.LATEST_MAC_YML_PATH }}" \
-            --title "Latest Mac Configuration v${{ env.VERSION }}" \
-            --notes "This release contains the latest-mac.yml configuration file for version v${{ env.VERSION }}."
