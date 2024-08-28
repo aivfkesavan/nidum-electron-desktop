@@ -245,6 +245,17 @@ export function DownloadProvider({ children }: props) {
         id: "latest-v",
       })
 
+      setTimeout(() => {
+        toast.success("New version downloaded", {
+          description: "After downloading the latest .dmg file, simply drag and drop it into the application to install and start using the newest version.",
+          descriptionClassName: "mt-1 text-xs",
+          richColors: true,
+          position: "top-center",
+          duration: 5000,
+          className: "py-2.5"
+        })
+      }, 1000)
+
     } catch (error) {
       console.log(error)
       toast.error("Downloading latest version", {
