@@ -1,5 +1,6 @@
 import { createContext, useContext, useState } from "react";
 import { toast } from 'sonner';
+import axios from "axios";
 
 import constants from "@utils/constants";
 
@@ -29,6 +30,7 @@ type DownloadContextType = {
   downloads: Downloads
   isDownloading: boolean
   downloadModel: (v: downloadModelProps) => void
+  downloadLatestExec: (link: string) => void
   downloadWhisperModel: (v: downloadWhisperModelProps) => void
 }
 
@@ -204,6 +206,56 @@ export function DownloadProvider({ children }: props) {
     }
   }
 
+  async function downloadLatestExec(downloadUrl: string) {
+    try {
+      const response = await axios({
+        url: downloadUrl,
+        method: 'GET',
+        responseType: 'blob',
+        onDownloadProgress: (progressEvent) => {
+          const percentCompleted = Math.round((progressEvent.loaded * 100) / progressEvent.total);
+          toast.loading("Downloading latest version", {
+            className: "py-2",
+            description: `Progress: ${percentCompleted || 0}%`,
+            richColors: false,
+            position: "top-center",
+            duration: Infinity,
+            id: "latest-v",
+          })
+        },
+      })
+
+      const url = window.URL.createObjectURL(new Blob([response.data]))
+
+      const link = document.createElement('a')
+      link.href = url
+      link.setAttribute('download', 'RAGDrive.dmg')
+      document.body.appendChild(link)
+      link.click()
+
+      link.parentNode.removeChild(link)
+      window.URL.revokeObjectURL(url)
+      toast.success("Downloading latest version", {
+        className: "py-2",
+        richColors: true,
+        position: "top-center",
+        duration: 1000,
+        id: "latest-v",
+      })
+
+    } catch (error) {
+      console.log(error)
+      toast.error("Downloading latest version", {
+        description: "Cannot complete download, please try again later",
+        className: "py-2",
+        richColors: false,
+        position: "top-center",
+        duration: 1000,
+        id: "latest-v",
+      })
+    }
+  }
+
   return (
     <DownloadContext.Provider
       value={{
@@ -211,6 +263,7 @@ export function DownloadProvider({ children }: props) {
         isDownloading: Object.keys(downloads).length > 0,
         downloadModel,
         downloadWhisperModel,
+        downloadLatestExec,
       }}
     >
       {children}

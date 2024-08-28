@@ -3,6 +3,7 @@ import Messages from "./messages";
 import SideBar from "./side-bar";
 
 import useInitSetup from "@hooks/use-init-setup";
+import CheckForUpdate from "./check-for-update";
 
 function Chat() {
   useInitSetup()
@@ -16,6 +17,8 @@ function Chat() {
     <main className="app-wrapper transition-all">
       <SideBar />
       <Messages />
+
+      <CheckForUpdate />
     </main>
   )
 }

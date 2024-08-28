@@ -6,7 +6,7 @@ import constants from "@utils/constants";
 
 export async function initSetup() {
   try {
-    const response = await fetch(`${constants.backendUrl}/ollama`)
+    const response = await fetch(`${constants.backendUrl}/nidum`)
     const reader = response.body.getReader()
     const decoder = new TextDecoder()
 
@@ -71,6 +71,10 @@ export async function initSetup() {
 
 export async function getOllamaTags(ollamaUrl: string) {
   return axios.get(`${ollamaUrl}/api/tags`).then(r => r.data.models)
+}
+
+export async function isLatestVersionAvailable() {
+  return axios.get(`${constants.backendUrl}/nidum/is-latest-version-available`).then(r => r.data)
 }
 
 export async function getLLMModels() {

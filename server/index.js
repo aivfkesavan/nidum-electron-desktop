@@ -15,7 +15,7 @@ function startServer() {
   app.use(express.json())
 
   app.use("/doc", doc)
-  app.use("/ollama", ollama)
+  app.use("/nidum", ollama)
   app.use("/whisper", whisper)
   app.use("/duckduckgo", duckduckgo)
 
