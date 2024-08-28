@@ -82,10 +82,10 @@ function Ollama() {
               className="p-4 mb-2 text-xs border rounded-md"
             >
               <div className="df mb-2">
-                <RadioGroupItem value={m.name} id={m.name} />
-                <Label htmlFor={m.name} className="mr-auto cursor-pointer">{m.name}</Label>
+                <RadioGroupItem value={m.id} id={m.name} />
+                <Label htmlFor={m.id} className="mr-auto cursor-pointer">{m.name}</Label>
                 {
-                  downloaded?.some(d => d?.name?.includes(m.name))
+                  downloaded?.some(d => d?.name?.includes(m.id))
                     ? (
                       <button
                         className="-mt-1 -mr-1 p-0.5 text-base hover:bg-input"
@@ -94,9 +94,9 @@ function Ollama() {
                         <MdOutlineDeleteOutline />
                       </button>
                     ) :
-                    downloads[m.name] ?
+                    downloads[m.id] ?
                       <p className="shrink-0 text-[11px] text-white/70">
-                        {downloads[m.name]?.progress}%
+                        {downloads[m.id]?.progress}%
                       </p>
                       :
                       <button
