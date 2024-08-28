@@ -17,8 +17,10 @@ function Ollama() {
   const { downloads, downloadModel } = useDownloads()
   const ollamaModel = useContextStore(s => s.ollamaModel)
   const ollamaUrl = useContextStore(s => s.ollamaUrl)
+
   const updateContext = useContextStore(s => s.updateContext)
   const close = useUIStore(s => s.close)
+
   const { toast } = useToast()
 
   const { data: downloaded, isLoading } = useOllamaModels(ollamaUrl)
@@ -115,7 +117,7 @@ function Ollama() {
                 </div>
 
                 <div className="text-[11px] text-white/60 line-clamp-2">
-                  Lorem ipsum dolor, sit amet consectetur adipisicing elit. Totam cumque quis quod iusto. Fuga quasi eius tempora itaque blanditiis totam cupiditate error dolor? Provident amet eligendi at excepturi quos nulla!
+                  {m.description}
                 </div>
               </div>
             </div>
