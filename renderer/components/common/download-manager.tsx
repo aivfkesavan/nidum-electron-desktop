@@ -1,13 +1,14 @@
 import { createContext, useContext, useState } from "react";
 import { toast } from 'sonner';
 import axios from "axios";
+import { pipeline } from '@xenova/transformers';
 
 import constants from "@utils/constants";
 
 type Downloads = {
   [id: string]: {
     title: string
-    progress: number
+    progress: number | string
     initiater: string
   }
 }
@@ -31,6 +32,7 @@ type DownloadContextType = {
   isDownloading: boolean
   downloadModel: (v: downloadModelProps) => void
   downloadLatestExec: (link: string) => void
+  downloadXenovaModels: (v: downloadModelProps) => void
   downloadWhisperModel: (v: downloadWhisperModelProps) => void
 }
 
@@ -256,6 +258,60 @@ export function DownloadProvider({ children }: props) {
     }
   }
 
+  async function downloadXenovaModels({ name, initiater, onSuccess, onError }: downloadModelProps) {
+    try {
+      await pipeline('automatic-speech-recognition', name, {
+        progress_callback: (progress: any) => {
+          let perc = progress?.progress ? Math.ceil(progress?.progress) : 0
+          let txt = progress?.name ? `${progress?.name} ${perc}` : perc
+          toast.loading(name, {
+            className: "py-2",
+            description: `Progress: ${txt}%`,
+            richColors: false,
+            position: "top-center",
+            duration: Infinity,
+            id: name,
+          })
+          setDownloads(p => ({
+            ...p,
+            [name]: {
+              title: name,
+              initiater,
+              progress: txt,
+            }
+          }))
+        },
+      })
+
+      toast.success(name, {
+        className: "py-2",
+        richColors: true,
+        description: "Downloaded successfully",
+        position: "top-center",
+        duration: 1000,
+        id: name,
+      })
+      setDownloads(p => {
+        const rest = { ...p }
+        delete rest[name]
+        return rest
+      })
+      onSuccess?.()
+
+    } catch (error) {
+      console.error('Error loading model:', error);
+      toast.error(`${name} model download failed`, {
+        className: "py-2",
+        richColors: true,
+        description: "Please try again later",
+        position: "top-center",
+        duration: 1000,
+        id: name,
+      })
+      onError?.()
+    }
+  }
+
   return (
     <DownloadContext.Provider
       value={{
@@ -264,6 +320,7 @@ export function DownloadProvider({ children }: props) {
         downloadModel,
         downloadWhisperModel,
         downloadLatestExec,
+        downloadXenovaModels,
       }}
     >
       {children}
