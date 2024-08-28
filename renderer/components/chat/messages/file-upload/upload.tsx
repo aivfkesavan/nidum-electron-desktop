@@ -25,7 +25,7 @@ function Upload() {
     'application/msword': ['.doc'],
     // 'application/epub+zip': ['.epub'],
     'application/pdf': ['.pdf'],
-    'text/markdown': ['.md'],
+    // 'text/markdown': ['.md'],
     'text/plain': ['.txt'],
   }
 
@@ -92,7 +92,7 @@ function Upload() {
       >
         <input {...getInputProps()} />
 
-        <p>{isDragActive ? "Drop PDF files here..." : "Drag and drop up to 4 PDF files here, or click to select files"}</p>
+        <p>{isDragActive ? "Drop a files here..." : "Upload files (max 4): PDF, PPT, Excel, Word, text. Drag and Drop or Click to Upload"}</p>
       </div>
 
       {files.map((file, index) => (

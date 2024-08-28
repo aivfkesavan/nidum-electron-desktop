@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { LuSendHorizonal } from "react-icons/lu";
 import { pipeline } from '@xenova/transformers';
 import { IoMdMic } from "react-icons/io";
@@ -14,6 +15,7 @@ type props = {
 }
 
 function NativeProvider({ disabled, postData }: props) {
+  const [loading, setLoading] = useState(false)
   const nativeSttModel = useContextStore(s => s.nativeSttModel)
 
   const { isRecording, isSupported, onClk, stopRecording } = useRecord()
@@ -25,6 +27,7 @@ function NativeProvider({ disabled, postData }: props) {
     formData.append('audio', wavBlob, 'recording.wav')
 
     try {
+      setLoading(true)
       const transcriber = await pipeline('automatic-speech-recognition', nativeSttModel);
       const url = URL.createObjectURL(audioBlob)
       const output: any = await transcriber(url);
@@ -38,9 +41,11 @@ function NativeProvider({ disabled, postData }: props) {
       if (output?.text) {
         postData(output.text, true)
       }
+      setLoading(false)
 
     } catch (error) {
       console.error('Error uploading audio:', error);
+      setLoading(false)
     }
   }
 
@@ -51,10 +56,16 @@ function NativeProvider({ disabled, postData }: props) {
 
   if (!isSupported) return null
 
+  if (loading) return (
+    <div className="dc size-10">
+      <span className="loader-2 opacity-75"></span>
+    </div>
+  )
+
   return (
     <div className='relative'>
       <button
-        className={`dc w-10 h-10 p-0 shrink-0 text-xl rounded-full cursor-pointer hover:bg-input z-[1] ${isRecording ? "text-primary-darker" : ""}`}
+        className={`dc size-10 p-0 shrink-0 text-xl rounded-full cursor-pointer hover:bg-input z-[1] ${isRecording ? "text-primary-darker" : ""}`}
         onClick={onClick}
         disabled={disabled}
       >
