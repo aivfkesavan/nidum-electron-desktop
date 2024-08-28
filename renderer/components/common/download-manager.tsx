@@ -263,7 +263,7 @@ export function DownloadProvider({ children }: props) {
       await pipeline('automatic-speech-recognition', name, {
         progress_callback: (progress: any) => {
           let perc = progress?.progress ? Math.ceil(progress?.progress) : 0
-          let txt = progress?.name ? `${progress?.name} ${perc}` : perc
+          let txt = progress?.file ? `${progress?.file} ${perc}` : perc
           toast.loading(name, {
             className: "py-2",
             description: `Progress: ${txt}%`,
@@ -271,6 +271,7 @@ export function DownloadProvider({ children }: props) {
             position: "top-center",
             duration: Infinity,
             id: name,
+            descriptionClassName: "text-xs"
           })
           setDownloads(p => ({
             ...p,
