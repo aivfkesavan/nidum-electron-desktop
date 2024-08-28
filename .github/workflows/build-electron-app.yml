@@ -44,10 +44,9 @@ jobs:
           security unlock-keychain -p "$KEYCHAIN_PASSWORD" build.keychain
           security import certificate.p12 -k build.keychain -P "$APPLE_CERTIFICATE_PASSWORD" -T /usr/bin/codesign
           security set-key-partition-list -S apple-tool:,apple:,codesign: -s -k "$KEYCHAIN_PASSWORD" build.keychain
-
+          
           # Build the Electron app
           npm run build
-
           # Locate the built DMG file
           DMG_PATH=$(find "$PWD/dist" -name "*.dmg" -type f | head -n 1)
           if [ -z "$DMG_PATH" ]; then
@@ -55,44 +54,18 @@ jobs:
             exit 1
           fi
           echo "DMG_PATH=$DMG_PATH" >> $GITHUB_ENV
-
           # Notarize the DMG
           xcrun notarytool submit "$DMG_PATH" --wait --apple-id "$APPLE_ID" --password "$APPLE_APP_SPECIFIC_PASSWORD" --team-id "$APPLE_TEAM_ID"
           if [ $? -ne 0 ]; then
             echo "Error: Notarization failed."
             exit 1
           fi
-
           # Staple the notarization ticket
           xcrun stapler staple "$DMG_PATH"
           if [ $? -ne 0 ]; then
             echo "Error: Stapling notarization ticket failed."
             exit 1
           fi
-
-      - name: Create Signed ZIP File
-        run: |
-          # Create a signed ZIP file of the Electron app
-          ZIP_PATH="$PWD/dist/Nidum-ai-v${{ env.VERSION }}.zip"
-          appPath=$(find "$PWD/dist" -name "*.app" -type d | head -n 1)
-          if [ -z "$appPath" ]; then
-            echo "Error: .app file not found."
-            exit 1
-          fi
-          /usr/bin/codesign --force --deep --sign "$APPLE_CERTIFICATE" "$appPath"
-          ditto -c -k --sequesterRsrc --keepParent "$appPath" "$ZIP_PATH"
-          if [ $? -ne 0 ]; then
-            echo "Error: Failed to create signed ZIP file."
-            exit 1
-          fi
-          echo "ZIP_PATH=$ZIP_PATH" >> $GITHUB_ENV
-
-      - name: Find Files for Release
-        id: find_files
-        run: |
-          # Find all necessary files for the release
-          BUILD_FILES=$(find "$PWD/dist" -type f \( -name "*.dmg" -o -name "*.zip" -o -name "*.yml" -o -name "*.blockmap" \))
-          echo "BUILD_FILES=$BUILD_FILES" >> $GITHUB_ENV
 
       - name: Check if Release Exists
         id: check_release
@@ -105,18 +78,29 @@ jobs:
             echo "RELEASE_EXISTS=false" >> $GITHUB_ENV
           fi
 
+      - name: Locate Additional Files
+        id: locate_files
+        run: |
+          # Locate the ZIP and YAML files
+          ZIP_PATH=$(find "$PWD/dist" -name "*.zip" -type f | head -n 1)
+          YAML_PATH=$(find "$PWD/dist" -name "*.yml" -type f | head -n 1)
+          if [ -z "$ZIP_PATH" ] || [ -z "$YAML_PATH" ]; then
+            echo "Error: ZIP or YAML file not found."
+            exit 1
+          fi
+          echo "ZIP_PATH=$ZIP_PATH" >> $GITHUB_ENV
+          echo "YAML_PATH=$YAML_PATH" >> $GITHUB_ENV
+
       - name: Create or Update Release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           if [ "${{ env.RELEASE_EXISTS }}" = "true" ]; then
             echo "Updating existing release for version v${{ env.VERSION }}"
-            for file in $BUILD_FILES; do
-              gh release upload "v${{ env.VERSION }}" "$file" --clobber
-            done
+            gh release upload "v${{ env.VERSION }}" "${{ env.DMG_PATH }}" "${{ env.ZIP_PATH }}" "${{ env.YAML_PATH }}" --clobber
           else
             echo "Creating new release for version v${{ env.VERSION }}"
-            gh release create "v${{ env.VERSION }}" $BUILD_FILES \
+            gh release create "v${{ env.VERSION }}" "${{ env.DMG_PATH }}" "${{ env.ZIP_PATH }}" "${{ env.YAML_PATH }}" \
               --title "Release v${{ env.VERSION }}" \
               --generate-notes
           fi
