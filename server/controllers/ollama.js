@@ -77,7 +77,7 @@ router.get('/', async (req, res) => {
 
 router.get('/is-latest-version-available', async (req, res) => {
   try {
-    const currentVersion = "1.0.0"
+    const currentVersion = "1.0.1"
     const { data } = await axios.get("https://raw.githubusercontent.com/aivfkesavan/nidum-public/main/versions.json")
     const latestVersion = data?.[os.platform()] || data?.darwin
 
