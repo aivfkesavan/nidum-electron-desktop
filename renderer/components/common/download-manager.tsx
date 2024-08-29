@@ -247,12 +247,13 @@ export function DownloadProvider({ children }: props) {
 
       setTimeout(() => {
         toast.success("New version downloaded", {
-          description: "After downloading the latest .dmg file, the file needs to be dragged and dropped into the application to install and use the newest version.",
+          description: "After downloading the latest .dmg file, close the current application. Then, drag and drop the file into the application to install and use the newest version.",
           descriptionClassName: "mt-1 text-xs",
+          closeButton: true,
           richColors: true,
+          className: "py-2.5",
           position: "top-center",
-          duration: 5000,
-          className: "py-2.5"
+          duration: 10000,
         })
       }, 1000)
 
@@ -270,19 +271,20 @@ export function DownloadProvider({ children }: props) {
   }
 
   async function downloadXenovaModels({ name, initiater, onSuccess, onError }: downloadModelProps) {
+    let modelName = name?.replace(/^Xenova\//, '').replace(/\.en$/, '').replace(/-/g, ' ').split(' ').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ')
     try {
       await pipeline('automatic-speech-recognition', name, {
         progress_callback: (progress: any) => {
           let perc = progress?.progress ? Math.ceil(progress?.progress) : 0
           let txt = progress?.file ? `${progress?.file} ${perc}` : perc
-          toast.loading(name, {
+          toast.loading(modelName, {
             className: "py-2",
             description: `Progress: ${txt}%`,
+            descriptionClassName: "text-xs",
             richColors: false,
             position: "top-center",
             duration: Infinity,
             id: name,
-            descriptionClassName: "text-xs"
           })
           setDownloads(p => ({
             ...p,
@@ -295,7 +297,7 @@ export function DownloadProvider({ children }: props) {
         },
       })
 
-      toast.success(name, {
+      toast.success(modelName, {
         className: "py-2",
         richColors: true,
         description: "Downloaded successfully",
@@ -312,7 +314,7 @@ export function DownloadProvider({ children }: props) {
 
     } catch (error) {
       console.error('Error loading model:', error);
-      toast.error(`${name} model download failed`, {
+      toast.error(`${modelName} model download failed`, {
         className: "py-2",
         richColors: true,
         description: "Please try again later",
