@@ -24,6 +24,7 @@ function Chat() {
   const project_id = useContextStore(s => s.project_id)
 
   const projectMap = useConvoStore(s => s.projects)
+  const hasFiles = useConvoStore(s => s.files[project_id]?.length)
   const projects = useConvoStore(s => Object.values(s.projects))
 
   const [selected, setSelected] = useState(project_id || "")
@@ -53,9 +54,13 @@ function Chat() {
     setDetails(projectMap[val])
   }
 
-  function onChangeRag(val: boolean) {
-    onChange("rag_enabled", val)
-    if (val && !ollamaEmbeddingModel) updateTab({ data: "RAG" })
+  function onChangeRag(key: "rag_enabled" | "web_enabled", val: boolean) {
+    let alterKey = key === "rag_enabled" ? "web_enabled" : "rag_enabled"
+    setDetails(pr => ({
+      ...pr,
+      [key]: val,
+      [alterKey]: false,
+    }))
   }
 
   return (
@@ -173,7 +178,7 @@ function Chat() {
           <p className="text-[10px] text-white/60">Enable and retrieve an answer from the web.</p>
           <Switch
             checked={details.web_enabled}
-            onCheckedChange={val => onChange("web_enabled", val)}
+            onCheckedChange={val => onChangeRag("web_enabled", val)}
             title="Enable web search"
             className="ml-auto"
             disabled={!selected}
@@ -185,17 +190,19 @@ function Chat() {
           <p className="text-[10px] text-white/60">Enable and retrieve answers from the uploaded document.</p>
           <Switch
             checked={details.rag_enabled}
-            onCheckedChange={onChangeRag}
-            title="Enable web search"
+            onCheckedChange={val => onChangeRag("rag_enabled", val)}
+            title={!hasFiles ? "Upload files to enable RAG search" : "Enable RAG search"}
             className="ml-auto"
-            disabled={!selected}
+            disabled={!selected || !hasFiles}
           />
         </div>
       </div>
 
       {
-        ollamaEmbeddingModel &&
-        <div className="text-[10px] text-white/60">Note: Embedding is not setuped yet. If you enable RAG, you will be navigated to embedding setup. Please complete the setup to use RAG</div>
+        !hasFiles &&
+        <div className="text-[10px] text-white/60">
+          Note: For RAG, no file is currently uploaded. Please upload a file and enable RAG to proceed.
+        </div>
       }
 
       <Footer onSave={onSave} />
