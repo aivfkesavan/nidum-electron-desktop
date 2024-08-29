@@ -35,10 +35,10 @@ const models = [
     name: "Gemma 2 9B",
     id: "gemma2-9b-it",
   },
-  {
-    name: "Whisper",
-    id: "whisper-large-v3",
-  },
+  // {
+  //   name: "Whisper",
+  //   id: "whisper-large-v3",
+  // },
 ]
 
 function Groq() {
