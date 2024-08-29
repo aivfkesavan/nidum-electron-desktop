@@ -1,21 +1,21 @@
 import { useState } from "react";
-// import { MdDownloadDone, MdOutlineFileDownload } from "react-icons/md";
+import { MdDownloadDone, MdOutlineFileDownload } from "react-icons/md";
 
 import { useDownloads } from "@components/common/download-manager";
 import useContextStore from "@store/context";
 import { useToast } from "@components/ui/use-toast";
 import useUIStore from "@store/ui";
 
-// import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-// import { Label } from "@/components/ui/label";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Label } from "@/components/ui/label";
 // import { deleteWhisperFolder } from "@actions/whisper";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+// import {
+//   Select,
+//   SelectContent,
+//   SelectItem,
+//   SelectTrigger,
+//   SelectValue,
+// } from "@/components/ui/select";
 
 // const models = [
 //   // { name: "tiny", size: "75 MB", required: "390 MB" },
@@ -31,11 +31,21 @@ import {
 //   { name: "large-v3", size: "2.9 GB", required: "4.7 GB" },
 // ]
 
-const STT_MODELS = [
-  'Xenova/whisper-tiny.en',
-  'Xenova/whisper-base.en',
-  'Xenova/whisper-small.en',
-  'Xenova/whisper-medium.en'
+const models = [
+  {
+    name: "Xenova/whisper-tiny.en",
+    lable: "Whisper Tiny",
+    size: "75 MB",
+    required: "4 GB",
+    description: "",
+  },
+  {
+    name: "Xenova/whisper-small.en",
+    lable: "Whisper Small",
+    size: "466 MB",
+    required: "4 GB",
+    description: "",
+  },
 ]
 
 function Native() {
@@ -86,14 +96,14 @@ function Native() {
     }
   }
 
-  function downloadIt() {
+  function downloadIt(name: string) {
     downloadXenovaModels({
+      name,
       ollamaUrl: "",
-      name: selected,
       initiater: "xenova",
       onSuccess() {
         updateContext({
-          nativeSttModelsDownloaded: [...downloaded, selected].join(","),
+          nativeSttModelsDownloaded: [...downloaded, name].join(","),
         })
       },
       onError() {
@@ -103,7 +113,7 @@ function Native() {
 
   return (
     <>
-      <label htmlFor="" className="block mb-0.5 mt-6 text-xs text-white/70">Choose a model</label>
+      {/* <label htmlFor="" className="block mb-0.5 mt-6 text-xs text-white/70">Choose a model</label>
       <Select value={selected} onValueChange={setSelected}>
         <SelectTrigger className="mb-4">
           <SelectValue placeholder="Select Model" />
@@ -115,9 +125,9 @@ function Native() {
             ))
           }
         </SelectContent>
-      </Select>
+      </Select> */}
 
-      {
+      {/* {
         !downloaded.includes(selected) &&
         <>
           <p className="mb-1 text-xs text-white/60">It seems model not downloaded yet. Do you like to download it?</p>
@@ -136,30 +146,30 @@ function Native() {
               </button>
           }
         </>
-      }
+      } */}
 
-      {/* <RadioGroup value={selected} onValueChange={setSelected} className="grid grid-cols-2 gap-4 my-4">
+      <RadioGroup value={selected} onValueChange={setSelected} className="mt-4">
         {
           models.map(m => (
             <div
               key={m.name}
-              className="p-4 text-xs border rounded-md"
+              className="p-4 mb-4 text-xs border rounded-md"
             >
               <div className="df mb-2">
                 <RadioGroupItem value={m.name} id={m.name} />
-                <Label htmlFor={m.name} className="mr-auto cursor-pointer">{m.name}</Label>
+                <Label htmlFor={m.name} className="mr-auto cursor-pointer">{m.lable}</Label>
                 {
                   downloaded.includes(m.name)
                     ? <MdDownloadDone title="Model downloaded" />
                     :
                     downloads[m.name] ?
                       <p className="shrink-0 text-[11px] text-white/70">
-                        {downloads[m.name]?.title === "Whisper" ? <span className="loader-2 block size-3 border"></span> : `${downloads[m.name]?.progress}%`}
+                        {downloads[m.name]?.progress}%
                       </p>
                       :
                       <button
                         className="-mt-1 -mr-1 p-0.5 text-base hover:bg-input"
-                        onClick={() => download(m.name)}
+                        onClick={() => downloadIt(m.name)}
                       >
                         <MdOutlineFileDownload />
                       </button>
@@ -175,7 +185,7 @@ function Native() {
           ))
         }
       </RadioGroup>
-*/}
+
 
       {
         nativeSttModel && downloaded.includes(selected) &&

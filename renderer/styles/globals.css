@@ -181,6 +181,14 @@
       l20-1 0.8s infinite linear alternate,
       l20-2 1.6s infinite linear;
   }
+
+  .sidebar-content::before {
+    content: "Open Sidebar";
+  }
+
+  body.open .sidebar-content::before {
+    content: "Close Sidebar";
+  }
 }
 
 @keyframes mic-bg-animation {
