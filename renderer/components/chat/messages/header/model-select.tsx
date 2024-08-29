@@ -23,7 +23,7 @@ const list: listT[] = [
     id: "1",
     logo: "/logo.png",
     title: "Ollama",
-    para: "Run LLMs locally on your machine"
+    para: "Run AI models locally on your machine"
   },
   {
     id: "2",

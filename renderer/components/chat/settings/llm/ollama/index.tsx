@@ -36,9 +36,10 @@ function Ollama() {
 
   const updateModel = (v: string = "") => setModel(v)
 
-  async function download(name: string) {
+  async function download(name: string, lable: string) {
     downloadModel({
       name,
+      lable,
       ollamaUrl,
       initiater: "llm",
       onSuccess() {
@@ -101,7 +102,7 @@ function Ollama() {
                       :
                       <button
                         className="-mt-1 -mr-1 p-0.5 text-base hover:bg-input"
-                        onClick={() => download(m.id)}
+                        onClick={() => download(m.id, m.name)}
                         disabled={isLoading}
                       >
                         <MdOutlineFileDownload />
