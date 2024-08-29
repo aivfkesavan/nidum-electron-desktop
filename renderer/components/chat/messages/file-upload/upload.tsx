@@ -92,7 +92,7 @@ function Upload() {
       >
         <input {...getInputProps()} />
 
-        <p>{isDragActive ? "Drop a files here..." : "Upload files (max 4): PDF, Word, text. Drag and Drop or Click to Upload"}</p>
+        <p>{isDragActive ? "Drop a files here..." : "Upload files (max 4): PDF, Word, Text. Drag and Drop or Click to Upload"}</p>
       </div>
 
       {files.map((file, index) => (
