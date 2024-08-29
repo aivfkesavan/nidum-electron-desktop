@@ -92,12 +92,12 @@ function Messages() {
           if (!groqModel) return toast({ title: "Please choose a Groq Model" })
         }
         else if (model_type === "Ollama") {
-          if (!ollamaUrl) return toast({ title: "Please provide Ollama base url" })
-          if (!ollamaModel) return toast({ title: "Please choose a Ollama Model" })
+          if (!ollamaUrl) return toast({ title: "Please provide base url" })
+          if (!ollamaModel) return toast({ title: "Select a model to continue the chat" })
         }
 
         if (ragEnabled) {
-          if (embedding_type === "Ollama" && (!ollamEmbeddingUrl || !ollamaEmbeddingModel)) return toast({ title: "Please Check your Ollama embedding configurations in settings" })
+          if (embedding_type === "Ollama" && (!ollamEmbeddingUrl || !ollamaEmbeddingModel)) return toast({ title: "Please Check your embedding configurations in settings" })
         }
 
         setMessage('')
