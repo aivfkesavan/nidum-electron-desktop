@@ -15,6 +15,7 @@ type Downloads = {
 
 type downloadModelProps = {
   name: string
+  lable?: string
   initiater: string
   ollamaUrl: string
   onSuccess: () => void
@@ -52,7 +53,7 @@ export const useDownloads = (): DownloadContextType => {
 export function DownloadProvider({ children }: props) {
   const [downloads, setDownloads] = useState<Downloads>({})
 
-  const downloadModel = async ({ ollamaUrl, name, initiater, onSuccess, onError }: downloadModelProps) => {
+  const downloadModel = async ({ ollamaUrl, name, lable, initiater, onSuccess, onError }: downloadModelProps) => {
     try {
       const response = await fetch(`${ollamaUrl}/api/pull`, {
         method: 'POST',
@@ -82,7 +83,7 @@ export function DownloadProvider({ children }: props) {
               const parsed = JSON?.parse(line)
               if (parsed && parsed?.status?.startsWith("pulling")) {
                 const perc = Math.round((Number(parsed.completed) / Number(parsed.total)) * 100)
-                const title = initiater === "embedder" ? "RAG setup" : name
+                const title = initiater === "embedder" ? "RAG setup" : lable
                 toast.loading(title, {
                   className: "py-2",
                   description: `Progress: ${isNaN(perc) ? 0 : perc}%`,
@@ -102,7 +103,7 @@ export function DownloadProvider({ children }: props) {
               }
 
               if (parsed && parsed?.status === "success") {
-                const title = initiater === "embedder" ? "RAG setup" : name
+                const title = initiater === "embedder" ? "RAG setup" : lable
                 toast.success(title, {
                   className: "py-2",
                   richColors: true,
@@ -132,6 +133,14 @@ export function DownloadProvider({ children }: props) {
         const rest = { ...p }
         delete rest[name]
         return rest
+      })
+      toast.error(lable, {
+        className: "py-2",
+        richColors: true,
+        description: "Model download failed",
+        position: "top-center",
+        duration: 1000,
+        id: name,
       })
       onError?.()
     }
