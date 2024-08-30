@@ -1,5 +1,5 @@
-import User from "./user";
-import Bot from "./bot";
+import UserQuery from "./user-query";
+import BotReply from "./bot-reply";
 
 type props = {
   list: {
@@ -15,7 +15,7 @@ function List({ list = [], isTemp = false, deleteChat = () => { } }: props) {
   return list?.map((l: any) => {
     if (l.role === "user") {
       return (
-        <User
+        <UserQuery
           key={l.id}
           isTemp={isTemp}
           response={l.content}
@@ -48,7 +48,7 @@ function List({ list = [], isTemp = false, deleteChat = () => { } }: props) {
     }
 
     return (
-      <Bot
+      <BotReply
         key={l.id}
         id={l.id}
         isTemp={isTemp}

@@ -7,7 +7,7 @@ type props = {
   deleteChat?: () => void
 }
 
-function User({ response, isTemp = false, deleteChat = () => { } }: props) {
+function UserQuery({ response, isTemp = false, deleteChat = () => { } }: props) {
   const { copied, onCopyClk } = useClipboardCopy()
 
   const onCopy = () => onCopyClk(response)
@@ -43,4 +43,4 @@ function User({ response, isTemp = false, deleteChat = () => { } }: props) {
   )
 }
 
-export default User
+export default UserQuery

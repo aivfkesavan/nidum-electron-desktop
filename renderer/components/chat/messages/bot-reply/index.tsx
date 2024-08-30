@@ -2,7 +2,7 @@ import { PiSpeakerSimpleHighDuotone, PiSpeakerSimpleSlash } from "react-icons/pi
 import { MdDeleteOutline, MdOutlineContentCopy } from "react-icons/md";
 import { TbLoader2 } from "react-icons/tb";
 
-import { useAudioStore, useAudio } from "./use-speech";
+import { useAudioStore, useAudio } from "../use-speech";
 import useClipboardCopy from '@/hooks/use-clipboard-copy';
 
 import MarkdownParser from "./markdown-parse";
@@ -14,7 +14,7 @@ type props = {
   deleteChat?: () => void
 }
 
-function Bot({ id, response, isTemp = false, deleteChat = () => { } }: props) {
+function BotReply({ id, response, isTemp = false, deleteChat = () => { } }: props) {
   const isSpeaking = useAudioStore(s => s.isSpeaking)
   const botResId = useAudioStore(s => s.botResId)
   const loading = useAudioStore(s => s.loading)
@@ -82,4 +82,4 @@ function Bot({ id, response, isTemp = false, deleteChat = () => { } }: props) {
   )
 }
 
-export default Bot
+export default BotReply
