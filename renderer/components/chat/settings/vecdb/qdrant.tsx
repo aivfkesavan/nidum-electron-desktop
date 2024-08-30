@@ -1,7 +1,7 @@
 import { useState } from "react";
 import useContextStore from "@/store/context";
 
-import MarkdownParse from "@/components/chat/messages/markdown-parse";
+import MarkdownParse from "@components/chat/messages/bot-reply/markdown-parse";
 import Footer from "../common/footer";
 
 const markdown = `
