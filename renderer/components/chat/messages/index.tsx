@@ -4,6 +4,8 @@ import { LuSend } from "react-icons/lu";
 import { nanoid } from "nanoid";
 import { LuX } from "react-icons/lu";
 
+import type { Message } from "@/store/conversations";
+
 import { createContext, duckDuckGoPrompt, duckDuckGoSerach, ragSearch } from "../../../utils/improve-context";
 import isWithinTokenLimit from "@/utils/is-within-token-limit";
 
@@ -14,16 +16,11 @@ import useContextStore from "@/store/context";
 import useConvoStore from "@/store/conversations";
 
 import SpeechToText from "./speech-to-text";
+import ImageUpload from "./image-upload";
 import FileUpload from "./file-upload";
 import Settings from "../settings";
 import Header from "./header";
 import List from "./list";
-
-type msg = {
-  id: string
-  role: "user" | "assistant" | "loading"
-  content: string
-}
 
 function Messages() {
   const { toast } = useToast()
@@ -47,9 +44,10 @@ function Messages() {
   const ragEnabled = useConvoStore(s => s.projects[project_id]?.rag_enabled)
 
   const [reachedLimit, setReachedLimit] = useState(false)
-  const [tempData, setTempData] = useState<msg[]>([])
+  const [tempData, setTempData] = useState<Message[]>([])
   const [loading, setLoading] = useState(false)
   const [message, setMessage] = useState('')
+  const [files, setFiles] = useState<File[]>([])
 
   const abortController = useRef(new AbortController())
   const scrollableRef = useRef<HTMLDivElement>(null)
@@ -66,6 +64,7 @@ function Messages() {
   useEffect(() => {
     setTempData([])
     setLoading(false)
+    setFiles([])
   }, [id])
 
   useEffect(() => {
@@ -100,6 +99,7 @@ function Messages() {
           if (embedding_type === "Ollama" && (!ollamEmbeddingUrl || !ollamaEmbeddingModel)) return toast({ title: "Please Check your embedding configurations in settings" })
         }
 
+        setFiles([])
         setMessage('')
         setLoading(true)
         let temContextId = ""
@@ -124,10 +124,14 @@ function Messages() {
         }
 
         const currContextId = temContextId || id
-        const user: msg = {
+        const user: Message = {
           id: nanoid(10),
           role: "user",
           content: msg,
+        }
+
+        if (files?.length > 0) {
+          user.images = files.map(f => f.name)
         }
 
         setTempData(prev => [
@@ -160,16 +164,15 @@ function Messages() {
           })
         }
 
+        const { id: _, ...restUserContent } = user
+        console.log({ restUserContent })
         const prompt = [
           {
             role: "system",
             content: systemPrompt
           },
           ...dataMap,
-          {
-            role: "user",
-            content: msg,
-          },
+          restUserContent,
         ]
 
         type urlsT = Record<"Groq" | "Ollama" | "Nidum", string>
@@ -205,7 +208,8 @@ function Messages() {
         }
 
         if (model_type === "Ollama") {
-          payload.model = ollamaModel
+          // payload.model = ollamaModel
+          payload.model = "llava:7b"
         }
 
         if (!isWithinTokenLimit(JSON.stringify(prompt), projectdetails.tokenLimit)) {
@@ -239,7 +243,7 @@ function Messages() {
           const res = await response.json()
           const content = res?.choices?.[0]?.message?.content
 
-          const botReply: msg = {
+          const botReply: Message = {
             role: "assistant",
             id: nanoid(10),
             content,
@@ -261,7 +265,7 @@ function Messages() {
           reader?.read().then(function processResult(result: any): any {
             try {
               if (result.done) {
-                const botReply: msg = {
+                const botReply: Message = {
                   role: "assistant",
                   content: botRes,
                   id: nanoid(10),
@@ -285,7 +289,7 @@ function Messages() {
                 const text = model_type === "Ollama" ? json?.message?.content : json?.choices?.[0]?.delta?.content || ""
                 botRes += text
 
-                const botReply: msg = {
+                const botReply: Message = {
                   role: "assistant",
                   content: botRes,
                   id: nanoid(10),
@@ -400,6 +404,13 @@ function Messages() {
             onChange={e => setMessage(e.target.value)}
             onKeyDown={keyPress}
             disabled={isChatInputDisabled}
+          />
+
+          <ImageUpload
+            files={files}
+            loading={loading}
+            message={message}
+            setFiles={setFiles}
           />
 
           {

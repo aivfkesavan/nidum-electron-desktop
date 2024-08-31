@@ -4,6 +4,7 @@ import cors from "cors";
 import duckduckgo from "./controllers/duckduckgo";
 import whisper from "./controllers/whisper";
 import ollama from "./controllers/ollama";
+import image from "./controllers/image";
 import doc from "./controllers/doc";
 
 function startServer() {
@@ -16,6 +17,7 @@ function startServer() {
 
   app.use("/doc", doc)
   app.use("/nidum", ollama)
+  app.use("/image", image)
   app.use("/whisper", whisper)
   app.use("/duckduckgo", duckduckgo)
 
