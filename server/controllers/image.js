@@ -2,8 +2,9 @@ import express from 'express';
 import { promises as fs } from 'fs';
 import imageToBase64 from 'image-to-base64';
 
-import { createPath } from "../utils/path-helper";
-import { upload } from "../middleawres/upload";
+import { uploadMemory } from "../middleawres/upload.js";
+import { createPath } from "../utils/path-helper.js";
+import compressAndSave from '../utils/compress-img.js';
 
 const router = express.Router()
 
@@ -28,10 +29,18 @@ router.get('/to-base64/:folderName/:imageName', async (req, res) => {
   }
 })
 
-router.post("/:folderName", upload.array('images'), async (req, res) => {
+router.post("/:folderName", uploadMemory.array('images'), async (req, res) => {
   try {
+    const { folderName } = req.params
+
+    await Promise.all(
+      req.files.map(file => compressAndSave(file, folderName))
+    )
+
     return res.json({ msg: "image stored" })
+
   } catch (error) {
+    console.log(error)
     return res.status(400).json({ error })
   }
 })
