@@ -44,6 +44,7 @@
     "embla-carousel-react": "^8.2.0",
     "eventsource-parser": "^2.0.1",
     "express": "^4.19.2",
+    "image-to-base64": "^2.2.0",
     "immer": "^10.1.1",
     "llamaindex": "^0.5.19",
     "multer": "^1.4.5-lts.1",
