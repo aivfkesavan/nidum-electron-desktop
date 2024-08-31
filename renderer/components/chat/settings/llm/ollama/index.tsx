@@ -51,7 +51,9 @@ function Ollama() {
 
   function onSave() {
     if (downloaded?.some(d => d?.name?.includes(selected))) {
-      updateContext({ ollamaModel: selected })
+      const visionModels = ["llava:7b"]
+      const ollamaModeType = visionModels.includes(selected) ? "vision" : ""
+      updateContext({ ollamaModel: selected, ollamaModeType })
       close()
     } else {
       toast({
