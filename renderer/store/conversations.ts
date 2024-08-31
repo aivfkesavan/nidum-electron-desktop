@@ -6,10 +6,11 @@ import dayjs from 'dayjs';
 
 import { duckDuckGoPrompt } from '@utils/improve-context';
 
-type Message = {
+export type Message = {
   id: string;
   role: "user" | "assistant" | "loading"
   content: string;
+  images?: string[];
 }
 
 export type Chat = {

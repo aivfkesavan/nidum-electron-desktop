@@ -1,12 +1,9 @@
+import type { Message } from "@store/conversations";
 import UserQuery from "./user-query";
 import BotReply from "./bot-reply";
 
 type props = {
-  list: {
-    id: string
-    role: "user" | "assistant" | "loading"
-    content: string
-  }[]
+  list: Message[]
   isTemp?: boolean
   deleteChat?: (v: string) => void
 }
@@ -19,6 +16,7 @@ function List({ list = [], isTemp = false, deleteChat = () => { } }: props) {
           key={l.id}
           isTemp={isTemp}
           response={l.content}
+          images={l.images}
           deleteChat={() => deleteChat(l.id)}
         />
       )
