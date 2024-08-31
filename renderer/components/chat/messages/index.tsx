@@ -28,7 +28,7 @@ function Messages() {
 
   const {
     updateContext, project_id, chat_id: id,
-    model_type, groqApiKey, groqModel, ollamaUrl, ollamaModel,
+    model_type, groqApiKey, groqModel, ollamaUrl, ollamaModel, ollamaModeType,
     embedding_type, ollamEmbeddingUrl, ollamaEmbeddingModel,
   } = useContextStore()
 
@@ -40,7 +40,7 @@ function Messages() {
   const editChat = useConvoStore(s => s.editChat)
   const addChat = useConvoStore(s => s.addChat)
   const init = useConvoStore(s => s.init)
-
+  console.log(ollamaModeType)
   const webEnabled = useConvoStore(s => s.projects[project_id]?.web_enabled)
   const ragEnabled = useConvoStore(s => s.projects[project_id]?.rag_enabled)
 
@@ -166,13 +166,18 @@ function Messages() {
         let dataMap = []
 
         if (data) {
-          dataMap = await Promise.all(data?.map(async ({ id, ...rest }) => {
-            if (rest?.images?.length > 0) {
-              const base64Files = await Promise.all(rest.images.map(imgToBase64))
-              rest.images = base64Files
-            }
-            return rest
-          }))
+          if (ollamaModeType === "vision") {
+            dataMap = await Promise.all(data?.map(async ({ id, ...rest }) => {
+              if (rest?.images?.length > 0) {
+                const base64Files = await Promise.all(rest.images.map(imgToBase64))
+                rest.images = base64Files
+              }
+              return rest
+            }))
+
+          } else {
+            dataMap = data?.map(({ id, ...rest }) => rest)
+          }
         }
 
         let systemPrompt = projectdetails?.systemPrompt || "You are a helpful AI assistant"

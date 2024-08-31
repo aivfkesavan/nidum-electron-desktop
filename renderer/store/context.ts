@@ -10,6 +10,7 @@ type state = {
   groqModel: string;
   ollamaUrl: string;
   ollamaModel: string;
+  ollamaModeType: "" | "vision";
   voice: string;
 
   embedding_type: "Ollama" | "Nidum";
@@ -41,6 +42,7 @@ const useContextStore = create<state & actions>()(persist(set => ({
   groqModel: "",
   ollamaUrl: "http://localhost:11490",
   ollamaModel: "",
+  ollamaModeType: "",
 
   voice: "Google UK English Female",
 
@@ -63,18 +65,6 @@ const useContextStore = create<state & actions>()(persist(set => ({
 }),
   {
     name: 'context-storage',
-    version: 1,
-    migrate(state: any, version) {
-      if (version !== 1) {
-        return {
-          ...state,
-          ollamEmbeddingUrl: "http://localhost:11490",
-          ollamaUrl: "http://localhost:11490",
-        }
-      }
-
-      return state
-    },
   })
 );
 
