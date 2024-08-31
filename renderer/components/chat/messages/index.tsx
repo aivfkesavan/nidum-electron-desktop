@@ -7,6 +7,7 @@ import { LuX } from "react-icons/lu";
 import type { Message } from "@/store/conversations";
 
 import { createContext, duckDuckGoPrompt, duckDuckGoSerach, ragSearch } from "../../../utils/improve-context";
+import { imgToBase64, setImgToBase64Map } from "@actions/img";
 import isWithinTokenLimit from "@/utils/is-within-token-limit";
 
 import { useAudio } from "./use-speech";
@@ -83,6 +84,24 @@ function Messages() {
     return (n || n === 0) ? Number(n) : defaultVal
   }
 
+  const convertToBase64 = (file: File): Promise<string> => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader()
+      reader.readAsDataURL(file)
+      reader.onload = () => {
+        const result = reader.result
+        if (typeof result === 'string') {
+          const base64 = result.split(',')[1]
+          setImgToBase64Map(file.name, base64)
+          resolve(base64)
+        } else {
+          reject(new Error('Failed to convert file to base64'))
+        }
+      }
+      reader.onerror = error => reject(error)
+    })
+  }
+
   const postData = async (msg: string, needAutoPlay: boolean = false) => {
     try {
       if (msg) {
@@ -144,7 +163,17 @@ function Messages() {
           }
         ])
 
-        const dataMap = data ? data?.map(({ id, ...rest }: any) => rest) : []
+        let dataMap = []
+
+        if (data) {
+          dataMap = await Promise.all(data?.map(async ({ id, ...rest }) => {
+            if (rest?.images?.length > 0) {
+              const base64Files = await Promise.all(rest.images.map(imgToBase64))
+              rest.images = base64Files
+            }
+            return rest
+          }))
+        }
 
         let systemPrompt = projectdetails?.systemPrompt || "You are a helpful AI assistant"
 
@@ -165,7 +194,12 @@ function Messages() {
         }
 
         const { id: _, ...restUserContent } = user
-        console.log({ restUserContent })
+
+        if (restUserContent?.images?.length > 0) {
+          const base64Files = await Promise.all(files.map(convertToBase64))
+          restUserContent.images = base64Files
+        }
+
         const prompt = [
           {
             role: "system",
@@ -208,8 +242,7 @@ function Messages() {
         }
 
         if (model_type === "Ollama") {
-          // payload.model = ollamaModel
-          payload.model = "llava:7b"
+          payload.model = ollamaModel
         }
 
         if (!isWithinTokenLimit(JSON.stringify(prompt), projectdetails.tokenLimit)) {
