@@ -68,6 +68,14 @@ jobs:
           fi
           echo "DMG_PATH=$DMG_PATH" >> $GITHUB_ENV
 
+          # Locate the built ZIP file
+          ZIP_PATH=$(find "$PWD/dist" -name "*.zip" -type f | head -n 1)
+          if [ -z "$ZIP_PATH" ]; then
+            echo "Error: ZIP file not found."
+            exit 1
+          fi
+          echo "ZIP_PATH=$ZIP_PATH" >> $GITHUB_ENV
+
           # Notarize the DMG
           xcrun notarytool submit "$DMG_PATH" --wait --apple-id "$APPLE_ID" --password "$APPLE_APP_SPECIFIC_PASSWORD" --team-id "$APPLE_TEAM_ID"
           if [ $? -ne 0 ]; then
@@ -96,14 +104,12 @@ jobs:
       - name: Locate Additional Files
         id: locate_files
         run: |
-          # Locate the ZIP and YAML files
-          ZIP_PATH=$(find "$PWD/dist" -name "*.zip" -type f | head -n 1)
+          # Locate the YAML file
           YAML_PATH=$(find "$PWD/dist" -name "*.yml" -type f | head -n 1)
-          if [ -z "$ZIP_PATH" ] || [ -z "$YAML_PATH" ]; then
-            echo "Error: ZIP or YAML file not found."
+          if [ -z "$YAML_PATH" ]; then
+            echo "Error: YAML file not found."
             exit 1
           fi
-          echo "ZIP_PATH=$ZIP_PATH" >> $GITHUB_ENV
           echo "YAML_PATH=$YAML_PATH" >> $GITHUB_ENV
 
       - name: Create or Update Release
