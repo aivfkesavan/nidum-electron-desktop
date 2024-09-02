@@ -81,42 +81,30 @@
     "url": "https://production.haive.in:5000/download/nidum_executables/"
   },
   "build": {
-  "appId": "com.nidum.ragdrive",
-  "directories": {
-    "output": "dist",
-    "buildResources": "resources"
-  },
-  "extraFiles": [
-    {
-      "from": "server/bin",
-      "to": "bin"
-    }
-  ],
-  "mac": {
-    "category": "public.app-category.productivity",
-    "target": [
+    "appId": "com.nidum.ragdrive",
+    "directories": {
+      "output": "dist",
+      "buildResources": "resources"
+    },
+    "extraFiles": [
       {
-        "target": "dmg",
-        "arch": [
-          "x64",
-          "arm64"
-        ]
-      },
-      {
-        "target": "zip",
-        "arch": [
-          "x64",
-          "arm64"
-        ]
+        "from": "server/bin",
+        "to": "bin"
       }
     ],
-    "hardenedRuntime": true,
-    "entitlements": "entitlements.mac.plist",
-    "entitlementsInherit": "entitlements.mac.inherit.plist",
-    "gatekeeperAssess": false,
-    "notarize": {
-      "teamId": "JCN5972XNZ"
+    "mac": {
+      "category": "public.app-category.productivity",
+      "target": [
+        "dmg",
+        "zip"
+      ],
+      "hardenedRuntime": true,
+      "entitlements": "entitlements.mac.plist",
+      "entitlementsInherit": "entitlements.mac.inherit.plist",
+      "gatekeeperAssess": false,
+      "notarize": {
+        "teamId": "JCN5972XNZ"
+      }
     }
   }
-}
 }
