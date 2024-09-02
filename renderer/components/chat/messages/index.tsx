@@ -8,7 +8,7 @@ import type { Message } from "@/store/conversations";
 
 import { createContext, duckDuckGoPrompt, duckDuckGoSerach, ragSearch } from "../../../utils/improve-context";
 import { imgToBase64, setImgToBase64Map } from "@actions/img";
-import isWithinTokenLimit from "@/utils/is-within-token-limit";
+// import isWithinTokenLimit from "@/utils/is-within-token-limit";
 
 import { useAudio } from "./use-speech";
 import { useToast } from "@/components/ui/use-toast";
@@ -40,11 +40,11 @@ function Messages() {
   const editChat = useConvoStore(s => s.editChat)
   const addChat = useConvoStore(s => s.addChat)
   const init = useConvoStore(s => s.init)
-  console.log(ollamaModeType)
+
   const webEnabled = useConvoStore(s => s.projects[project_id]?.web_enabled)
   const ragEnabled = useConvoStore(s => s.projects[project_id]?.rag_enabled)
 
-  const [reachedLimit, setReachedLimit] = useState(false)
+  // const [reachedLimit, setReachedLimit] = useState(false)
   const [tempData, setTempData] = useState<Message[]>([])
   const [loading, setLoading] = useState(false)
   const [message, setMessage] = useState('')
@@ -56,7 +56,7 @@ function Messages() {
   const { speak } = useAudio()
 
   const data = useConvoStore(s => s.messages?.[id] || [])
-  const isChatInputDisabled = reachedLimit || !project_id
+  const isChatInputDisabled = !project_id // reachedLimit || 
 
   useEffect(() => {
     init()
@@ -71,13 +71,13 @@ function Messages() {
   useEffect(() => {
     scrollableRef?.current?.scrollIntoView({ behavior: "instant", block: "end" })
 
-    if (data.length > 0 && tempData.length === 0) {
-      if (!isWithinTokenLimit(JSON.stringify(data), projectdetails?.tokenLimit)) {
-        setReachedLimit(true)
-      }
-    } else {
-      setReachedLimit(false)
-    }
+    // if (data.length > 0 && tempData.length === 0) {
+    //   if (!isWithinTokenLimit(JSON.stringify(data), projectdetails?.tokenLimit)) {
+    //     setReachedLimit(true)
+    //   }
+    // } else {
+    //   setReachedLimit(false)
+    // }
   }, [data.length, tempData])
 
   function num(n: string | number, defaultVal: number) {
@@ -250,14 +250,14 @@ function Messages() {
           payload.model = ollamaModel
         }
 
-        if (!isWithinTokenLimit(JSON.stringify(prompt), projectdetails.tokenLimit)) {
-          toast({
-            title: "Token limit reached",
-            description: "Please use new chat"
-          })
-          setReachedLimit(true)
-          return
-        }
+        // if (!isWithinTokenLimit(JSON.stringify(prompt), projectdetails.tokenLimit)) {
+        //   toast({
+        //     title: "Token limit reached",
+        //     description: "Please use new chat"
+        //   })
+        //   setReachedLimit(true)
+        //   return
+        // }
 
         abortController.current = new AbortController()
 
@@ -434,9 +434,9 @@ function Messages() {
             type="text"
             className="pl-4 pr-10 bg-transparent border-2 rounded-full"
             placeholder={
-              reachedLimit ? "Token limit reached" :
-                !project_id ? "Please choose a project" :
-                  "Message"
+              // reachedLimit ? "Token limit reached" :
+              !project_id ? "Please choose a project" :
+                "Message"
             }
             value={message}
             onChange={e => setMessage(e.target.value)}

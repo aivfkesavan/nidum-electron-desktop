@@ -2,7 +2,7 @@ import { useState } from "react";
 
 import useContextStore from "@/store/context";
 import useConvoStore from "@/store/conversations";
-import useUIStore from "@store/ui";
+// import useUIStore from "@store/ui";
 
 import {
   Select,
@@ -18,9 +18,9 @@ import Footer from "../common/footer";
 
 function Chat() {
   const editProject = useConvoStore(s => s.editProject)
-  const updateTab = useUIStore(s => s.update)
+  // const updateTab = useUIStore(s => s.update)
 
-  const ollamaEmbeddingModel = useContextStore(s => s.ollamaEmbeddingModel)
+  // const ollamaEmbeddingModel = useContextStore(s => s.ollamaEmbeddingModel)
   const project_id = useContextStore(s => s.project_id)
 
   const projectMap = useConvoStore(s => s.projects)
@@ -33,7 +33,7 @@ function Chat() {
     max_tokens: "",
     frequency_penalty: "",
     top_p: "",
-    tokenLimit: "",
+    // tokenLimit: "",
     web_enabled: false,
     rag_enabled: false,
   })
@@ -156,7 +156,7 @@ function Chat() {
         />
       </div>
 
-      <div className="mb-4">
+      {/* <div className="mb-4">
         <p className="df mb-0.5 text-xs">
           <span className="opacity-70">Token Limit</span>
           <Info details="A Token Limit in a Large Language Model (LLM) refers to the maximum number of tokens (words or characters) the model can process in a single interaction. Staying within this limit ensures optimal performance and accurate responses." />
@@ -170,7 +170,7 @@ function Chat() {
           onChange={e => onChange("tokenLimit", e.target.valueAsNumber)}
           disabled={!selected}
         />
-      </div>
+      </div> */}
 
       <div className="grid grid-cols-2 gap-4 mb-4">
         <div className="p-3 border rounded-md">

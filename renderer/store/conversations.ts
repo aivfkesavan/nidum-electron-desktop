@@ -29,7 +29,7 @@ export type Project = {
   ragPrompt: string;
   frequency_penalty: number;
   temperature: number;
-  tokenLimit: number;
+  // tokenLimit: number;
   max_tokens: number;
   top_p: number;
   n: number;
@@ -93,7 +93,7 @@ const createDefaultProject = (): [string, Project] => {
     ragPrompt: duckDuckGoPrompt,
     frequency_penalty: 0,
     temperature: 0.1,
-    tokenLimit: 6000,
+    // tokenLimit: 6000,
     max_tokens: 500,
     top_p: 1,
     n: 1,
@@ -134,7 +134,7 @@ const useConvoStore = create<state & actions>()(persist(immer(set => ({
       id,
       ...project,
       ragPrompt: duckDuckGoPrompt,
-      tokenLimit: 6000,
+      // tokenLimit: 6000,
       frequency_penalty: 0,
       temperature: 0.1,
       max_tokens: 500,
