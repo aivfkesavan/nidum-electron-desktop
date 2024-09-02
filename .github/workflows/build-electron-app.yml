@@ -47,6 +47,19 @@ jobs:
           
           # Build the Electron app
           npm run build
+
+          # Verify that the app is correctly signed
+          APP_PATH=$(find "$PWD/dist" -name "*.app" -type d | head -n 1)
+          if [ -z "$APP_PATH" ]; then
+            echo "Error: App not found."
+            exit 1
+          fi
+          codesign --verify --deep --strict --verbose=2 "$APP_PATH"
+          if [ $? -ne 0 ]; then
+            echo "Error: Code signing verification failed."
+            exit 1
+          fi
+
           # Locate the built DMG file
           DMG_PATH=$(find "$PWD/dist" -name "*.dmg" -type f | head -n 1)
           if [ -z "$DMG_PATH" ]; then
@@ -54,12 +67,14 @@ jobs:
             exit 1
           fi
           echo "DMG_PATH=$DMG_PATH" >> $GITHUB_ENV
+
           # Notarize the DMG
           xcrun notarytool submit "$DMG_PATH" --wait --apple-id "$APPLE_ID" --password "$APPLE_APP_SPECIFIC_PASSWORD" --team-id "$APPLE_TEAM_ID"
           if [ $? -ne 0 ]; then
             echo "Error: Notarization failed."
             exit 1
           fi
+
           # Staple the notarization ticket
           xcrun stapler staple "$DMG_PATH"
           if [ $? -ne 0 ]; then
