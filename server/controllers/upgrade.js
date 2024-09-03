@@ -26,10 +26,34 @@ function log(message, level = 'INFO') {
 
 const execPromise = util.promisify(exec);
 
+router.get('/is-latest-version-available', async (req, res) => {
+  try {
+    const currentVersion = "1.0.2"
+    const { data } = await axios.get("https://raw.githubusercontent.com/aivfkesavan/nidum-public/main/versions.json")
+    const latestVersion = data?.[os.platform()] || data?.darwin
+
+    if (!latestVersion) return res.json({ hasLatest: false })
+
+    let payload = {
+      hasLatest: isLatestSemantic(currentVersion, latestVersion),
+    }
+
+    if (payload.hasLatest) {
+      payload.url = data?.[`${os.platform()}Url`] || data?.darwinUrl
+    }
+
+    return res.json(payload)
+
+  } catch (error) {
+    return res.status(400).json({ error })
+  }
+})
+
 router.get('/install-dmg', async (req, res) => {
   try {
+    const { fileName } = req.query
     const downloadsDir = path.join(os.homedir(), 'Downloads');
-    const filePath = path.join(downloadsDir, "RAGDrive.dmg");
+    const filePath = path.join(downloadsDir, fileName);
 
     log(`DMG file downloaded successfully to ${filePath}`);
 
@@ -75,29 +99,6 @@ router.get('/install-dmg', async (req, res) => {
   } catch (error) {
     log(`Error in install-dmg process: ${error.message}`, 'ERROR');
     res.status(500).send('Error: ' + error.message);
-  }
-})
-
-router.get('/is-latest-version-available', async (req, res) => {
-  try {
-    const currentVersion = "1.0.3"
-    const { data } = await axios.get("https://raw.githubusercontent.com/aivfkesavan/nidum-public/main/versions.json")
-    const latestVersion = data?.[os.platform()] || data?.darwin
-
-    if (!latestVersion) return res.json({ hasLatest: false })
-
-    let payload = {
-      hasLatest: isLatestSemantic(currentVersion, latestVersion),
-    }
-
-    if (payload.hasLatest) {
-      payload.url = data?.[`${os.platform()}Url`] || data?.darwinUrl
-    }
-
-    return res.json(payload)
-
-  } catch (error) {
-    return res.status(400).json({ error })
   }
 })
 

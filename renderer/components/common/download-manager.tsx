@@ -218,6 +218,11 @@ export function DownloadProvider({ children }: props) {
     }
   }
 
+  function extractFilename(url: string) {
+    const pathname = new URL(url).pathname;
+    return pathname.split('/').pop();
+  }
+
   async function downloadLatestExec(downloadUrl: string) {
     try {
       const response = await axios({
@@ -241,7 +246,8 @@ export function DownloadProvider({ children }: props) {
 
       const link = document.createElement('a')
       link.href = url
-      link.setAttribute('download', 'RAGDrive.dmg')
+      const fileName = extractFilename(downloadUrl)
+      link.setAttribute('download', fileName)
       document.body.appendChild(link)
       link.click()
 
@@ -276,7 +282,7 @@ export function DownloadProvider({ children }: props) {
           duration: 10000,
           action: {
             label: 'Restart',
-            onClick: () => restartApp()
+            onClick: () => restartApp(fileName)
           },
         })
       }, 1000)
@@ -350,9 +356,9 @@ export function DownloadProvider({ children }: props) {
     }
   }
 
-  const restartApp = async () => {
+  const restartApp = async (fileName: string) => {
     try {
-      await installLatestDMG()
+      await installLatestDMG(fileName)
       // @ts-ignore
       window?.electronAPI?.restartApp()
     } catch (error) {
