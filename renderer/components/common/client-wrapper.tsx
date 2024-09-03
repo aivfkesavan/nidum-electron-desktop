@@ -27,7 +27,7 @@ function ClientWrapper({ children }: props) {
 
       <SonnerToaster
         style={style}
-        toastOptions={{ style }}
+      // toastOptions={{ style }}
       />
 
       <GoogleAnalytics />

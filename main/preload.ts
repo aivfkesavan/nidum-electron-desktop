@@ -17,7 +17,8 @@ const handler = {
 
 contextBridge.exposeInMainWorld('ipc', handler)
 contextBridge.exposeInMainWorld('electronAPI', {
-  getOS: () => process.platform
+  getOS: () => process.platform,
+  restartApp: () => ipcRenderer.send('app:restart'),
 })
 
 export type IpcHandler = typeof handler

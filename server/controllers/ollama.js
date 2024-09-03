@@ -8,7 +8,6 @@ import os from 'os';
 import { app } from 'electron';
 
 import { executabeCommand, executableNames } from '../utils/executables.js';
-import isLatestSemantic from '../utils/is-latest-semantic.js'
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -74,28 +73,5 @@ router.get('/', async (req, res) => {
     res.end();
   }
 });
-
-router.get('/is-latest-version-available', async (req, res) => {
-  try {
-    const currentVersion = "1.0.3"
-    const { data } = await axios.get("https://raw.githubusercontent.com/aivfkesavan/nidum-public/main/versions.json")
-    const latestVersion = data?.[os.platform()] || data?.darwin
-
-    if (!latestVersion) return res.json({ hasLatest: false })
-
-    let payload = {
-      hasLatest: isLatestSemantic(currentVersion, latestVersion),
-    }
-
-    if (payload.hasLatest) {
-      payload.url = data?.[`${os.platform()}Url`] || data?.darwinUrl
-    }
-
-    return res.json(payload)
-
-  } catch (error) {
-    return res.status(400).json({ error })
-  }
-})
 
 export default router;

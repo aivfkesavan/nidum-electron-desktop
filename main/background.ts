@@ -120,3 +120,8 @@ app.on('window-all-closed', () => {
 ipcMain.on('message', async (event, arg) => {
   event.reply('message', `${arg} World!`)
 })
+
+ipcMain.on('app:restart', () => {
+  app.relaunch()
+  app.exit(0)
+})

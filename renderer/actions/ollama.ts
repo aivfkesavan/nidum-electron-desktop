@@ -73,10 +73,6 @@ export async function getOllamaTags(ollamaUrl: string) {
   return axios.get(`${ollamaUrl}/api/tags`).then(r => r.data.models)
 }
 
-export async function isLatestVersionAvailable() {
-  return axios.get(`${constants.backendUrl}/nidum/is-latest-version-available`).then(r => r.data)
-}
-
 export async function getLLMModels() {
   return axios.get("https://raw.githubusercontent.com/aivfkesavan/nidum-public/main/llm-models2.json").then(r => r.data)
 }

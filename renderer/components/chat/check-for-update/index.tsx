@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 
-import { isLatestVersionAvailable } from "@actions/ollama";
+import { isLatestVersionAvailable } from "@actions/upgrade";
 import { useDownloads } from "@components/common/download-manager";
 
 import {

@@ -3,6 +3,7 @@ import { toast } from 'sonner';
 import axios from "axios";
 import { pipeline } from '@xenova/transformers';
 
+import { installLatestDMG } from "@actions/upgrade";
 import constants from "@utils/constants";
 
 type Downloads = {
@@ -255,14 +256,28 @@ export function DownloadProvider({ children }: props) {
       })
 
       setTimeout(() => {
+        // toast.success("New version downloaded", {
+        //   description: "After downloading the latest .dmg file, close the current application. Then, drag and drop the file into the application to install and use the newest version.",
+        //   descriptionClassName: "mt-1 text-xs",
+        //   closeButton: true,
+        //   richColors: true,
+        //   className: "py-2.5",
+        //   position: "top-center",
+        //   duration: 10000,
+        // })
+
         toast.success("New version downloaded", {
-          description: "After downloading the latest .dmg file, close the current application. Then, drag and drop the file into the application to install and use the newest version.",
+          description: "Do you like to install and restart the application",
           descriptionClassName: "mt-1 text-xs",
           closeButton: true,
           richColors: true,
           className: "py-2.5",
           position: "top-center",
           duration: 10000,
+          action: {
+            label: 'Restart',
+            onClick: () => restartApp()
+          },
         })
       }, 1000)
 
@@ -332,6 +347,16 @@ export function DownloadProvider({ children }: props) {
         id: name,
       })
       onError?.()
+    }
+  }
+
+  const restartApp = async () => {
+    try {
+      await installLatestDMG()
+      // @ts-ignore
+      window?.electronAPI?.restartApp()
+    } catch (error) {
+      console.log(error)
     }
   }
 
