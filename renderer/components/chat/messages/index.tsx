@@ -176,7 +176,7 @@ function Messages() {
             }))
 
           } else {
-            dataMap = data?.map(({ id, ...rest }) => rest)
+            dataMap = data?.map(({ id, images, ...rest }) => rest)
           }
         }
 
@@ -444,12 +444,15 @@ function Messages() {
             disabled={isChatInputDisabled}
           />
 
-          <ImageUpload
-            files={files}
-            loading={loading}
-            message={message}
-            setFiles={setFiles}
-          />
+          {
+            ollamaModeType === "vision" &&
+            <ImageUpload
+              files={files}
+              loading={loading}
+              message={message}
+              setFiles={setFiles}
+            />
+          }
 
           {
             loading &&
