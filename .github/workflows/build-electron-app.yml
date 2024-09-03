@@ -22,10 +22,7 @@ jobs:
 
       - name: Get version from package.json
         id: get_version
-        run: |
-          VERSION=$(node -p "require('./package.json').version")
-          echo "VERSION=$VERSION" >> $GITHUB_ENV
-        shell: bash
+        run: echo "VERSION=$(node -p "require('./package.json').version")" >> $GITHUB_ENV
 
       - name: Build Electron App
         env:
@@ -44,7 +41,7 @@ jobs:
           security unlock-keychain -p "$KEYCHAIN_PASSWORD" build.keychain
           security import certificate.p12 -k build.keychain -P "$APPLE_CERTIFICATE_PASSWORD" -T /usr/bin/codesign
           security set-key-partition-list -S apple-tool:,apple:,codesign: -s -k "$KEYCHAIN_PASSWORD" build.keychain
-          
+
           # Build the Electron app
           npm run build
 
@@ -60,13 +57,24 @@ jobs:
             exit 1
           fi
 
-          # Locate the built DMG file
+          # Locate the built DMG and ZIP files
           DMG_PATH=$(find "$PWD/dist" -name "*.dmg" -type f | head -n 1)
-          if [ -z "$DMG_PATH" ]; then
-            echo "Error: DMG file not found."
+          ZIP_PATH=$(find "$PWD/dist" -name "*.zip" -type f | head -n 1)
+
+          if [ -z "$DMG_PATH" ] || [ -z "$ZIP_PATH" ]; then
+            echo "Error: DMG or ZIP file not found."
             exit 1
           fi
+
+          # Verify bin folder in the ZIP file
+          unzip -l "$ZIP_PATH" | grep "bin/" > /dev/null
+          if [ $? -ne 0 ]; then
+            echo "Error: bin folder not found in the ZIP file."
+            exit 1
+          fi
+
           echo "DMG_PATH=$DMG_PATH" >> $GITHUB_ENV
+          echo "ZIP_PATH=$ZIP_PATH" >> $GITHUB_ENV
 
           # Notarize the DMG
           xcrun notarytool submit "$DMG_PATH" --wait --apple-id "$APPLE_ID" --password "$APPLE_APP_SPECIFIC_PASSWORD" --team-id "$APPLE_TEAM_ID"
@@ -84,8 +92,6 @@ jobs:
 
       - name: Check if Release Exists
         id: check_release
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           if gh release view "v${{ env.VERSION }}" > /dev/null 2>&1; then
             echo "RELEASE_EXISTS=true" >> $GITHUB_ENV
@@ -93,29 +99,16 @@ jobs:
             echo "RELEASE_EXISTS=false" >> $GITHUB_ENV
           fi
 
-      - name: Locate Additional Files
-        id: locate_files
-        run: |
-          # Locate the ZIP and YAML files
-          ZIP_PATH=$(find "$PWD/dist" -name "*.zip" -type f | head -n 1)
-          YAML_PATH=$(find "$PWD/dist" -name "*.yml" -type f | head -n 1)
-          if [ -z "$ZIP_PATH" ] || [ -z "$YAML_PATH" ]; then
-            echo "Error: ZIP or YAML file not found."
-            exit 1
-          fi
-          echo "ZIP_PATH=$ZIP_PATH" >> $GITHUB_ENV
-          echo "YAML_PATH=$YAML_PATH" >> $GITHUB_ENV
-
       - name: Create or Update Release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           if [ "${{ env.RELEASE_EXISTS }}" = "true" ]; then
             echo "Updating existing release for version v${{ env.VERSION }}"
-            gh release upload "v${{ env.VERSION }}" "${{ env.DMG_PATH }}" "${{ env.ZIP_PATH }}" "${{ env.YAML_PATH }}" --clobber
+            gh release upload "v${{ env.VERSION }}" "${{ env.DMG_PATH }}" "${{ env.ZIP_PATH }}" --clobber
           else
             echo "Creating new release for version v${{ env.VERSION }}"
-            gh release create "v${{ env.VERSION }}" "${{ env.DMG_PATH }}" "${{ env.ZIP_PATH }}" "${{ env.YAML_PATH }}" \
+            gh release create "v${{ env.VERSION }}" "${{ env.DMG_PATH }}" "${{ env.ZIP_PATH }}" \
               --title "Release v${{ env.VERSION }}" \
               --generate-notes
           fi
