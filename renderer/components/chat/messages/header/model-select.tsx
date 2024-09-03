@@ -42,7 +42,7 @@ function ModelSelect() {
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
-      <PopoverTrigger className="pl-28 [.open_&]:pl-0 df gap-px text-sm transition-all">
+      <PopoverTrigger className="non-draggable pl-28 [.open_&]:pl-0 df gap-px text-sm transition-all">
         {model_type === "Ollama" ? "Local Server" : model_type} <LuChevronRight className="opacity-50" />
       </PopoverTrigger>
 

@@ -189,6 +189,14 @@
   body.open .sidebar-content::before {
     content: "Close Sidebar";
   }
+
+  .draggable {
+    -webkit-app-region: drag;
+  }
+
+  .non-draggable {
+    -webkit-app-region: no-drag;
+  }
 }
 
 @keyframes mic-bg-animation {
