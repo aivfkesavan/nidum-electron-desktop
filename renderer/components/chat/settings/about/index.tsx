@@ -11,7 +11,7 @@ const list = [
   {
     id: "2",
     icon: <MdOutlineEmail className="text-4xl" />,
-    link: "info@nidum.ai",
+    link: "mailto:info@nidum.ai",
   },
   {
     id: "3",
@@ -58,8 +58,3 @@ function About() {
 }
 
 export default About
-
-// Twitter/X: https://x.com/AiNidum
-// Email: info@nidum.ai
-// Telegram: https://t.me/nidumai 
-// LinkedIn: https://www.linkedin.com/company/nidum-ai 
