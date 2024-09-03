@@ -2,7 +2,7 @@
   "private": true,
   "name": "RAGDrive",
   "description": "ragdrive",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "author": "",
   "main": "app/background.js",
   "scripts": {
@@ -95,14 +95,8 @@
     "mac": {
       "category": "public.app-category.productivity",
       "target": [
-        {
-          "target": "dmg",
-          "arch": ["x64", "arm64"]
-        },
-        {
-          "target": "zip",
-          "arch": ["x64", "arm64"]
-        }
+        "dmg",
+        "zip"
       ],
       "hardenedRuntime": true,
       "entitlements": "entitlements.mac.plist",
