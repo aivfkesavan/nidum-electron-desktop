@@ -1,7 +1,7 @@
 import { createContext, useContext, useState } from "react";
-import { toast } from 'sonner';
-import axios from "axios";
+import { useMutation } from "@tanstack/react-query";
 import { pipeline } from '@xenova/transformers';
+import { toast } from 'sonner';
 
 import { installLatestDMG } from "@actions/upgrade";
 import constants from "@utils/constants";
@@ -53,6 +53,38 @@ export const useDownloads = (): DownloadContextType => {
 
 export function DownloadProvider({ children }: props) {
   const [downloads, setDownloads] = useState<Downloads>({})
+  const { mutate } = useMutation({
+    mutationFn: (fileName: string) => installLatestDMG(fileName),
+    onSuccess() {
+      toast.success("New version installed", {
+        description: "Restart the application to use the latest version.",
+        descriptionClassName: "mt-1 text-xs",
+        closeButton: true,
+        richColors: true,
+        className: "py-2.5",
+        position: "top-center",
+        duration: 10000,
+        id: "latest-v",
+        action: {
+          label: 'Close',
+          onClick: () => {
+            // @ts-ignore
+            window?.electronAPI?.restartApp()
+          }
+        },
+      })
+    },
+    onError() {
+      toast.error("Installing latest version", {
+        description: "Cannot install the downloaded version, please try again later",
+        className: "py-2",
+        richColors: false,
+        position: "top-center",
+        duration: 1000,
+        id: "latest-v",
+      })
+    }
+  })
 
   const downloadModel = async ({ ollamaUrl, name, lable, initiater, onSuccess, onError }: downloadModelProps) => {
     try {
@@ -239,21 +271,16 @@ export function DownloadProvider({ children }: props) {
         if (done) {
           setTimeout(() => {
             const fileName = extractFilename(downloadUrl)
-            toast.success("New version downloaded", {
-              description: "Do you like to install and restart the application",
-              descriptionClassName: "mt-1 text-xs",
-              closeButton: true,
+            toast.loading("Installing latest version", {
+              description: "",
+              className: "py-2",
               richColors: true,
-              className: "py-2.5",
               position: "top-center",
-              duration: 10000,
+              duration: Infinity,
               id: "latest-v",
-              action: {
-                label: 'Restart',
-                onClick: () => restartApp(fileName)
-              },
             })
-          }, 1000)
+            mutate(fileName)
+          }, 1500)
           break
         }
 
@@ -343,16 +370,6 @@ export function DownloadProvider({ children }: props) {
         id: name,
       })
       onError?.()
-    }
-  }
-
-  const restartApp = async (fileName: string) => {
-    try {
-      await installLatestDMG(fileName)
-      // @ts-ignore
-      window?.electronAPI?.restartApp()
-    } catch (error) {
-      console.log(error)
     }
   }
 

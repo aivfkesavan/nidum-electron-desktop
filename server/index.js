@@ -1,6 +1,7 @@
 import express from 'express';
 import cors from "cors";
 
+import { checkRootPathExists } from './utils/path-helper';
 import duckduckgo from "./controllers/duckduckgo";
 import upgrade from "./controllers/upgrade";
 import whisper from "./controllers/whisper";
@@ -11,6 +12,8 @@ import doc from "./controllers/doc";
 function startServer() {
   const app = express()
   const port = 4000
+
+  checkRootPathExists()
 
   app.use(cors())
   app.use(express.urlencoded({ extended: false }))
