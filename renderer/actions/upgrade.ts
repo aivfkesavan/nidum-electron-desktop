@@ -1,9 +1,8 @@
 import constants from "@utils/constants";
 import axios from "axios";
 
-export async function installLatestDMG() {
-  const url = "https://releases.nidum.ai/download/downloads/RAGDrive-1.0.3-arm64.dmg"
-  return axios.get(`${constants.backendUrl}/upgrade/install-dmg?url=${url}`).then(r => r.data)
+export async function installLatestDMG(fileName: string) {
+  return axios.get(`${constants.backendUrl}/upgrade/install-dmg?fileName=${fileName}`).then(r => r.data)
 }
 
 export async function isLatestVersionAvailable() {
