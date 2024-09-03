@@ -3,6 +3,7 @@ import { useDropzone, FileRejection } from 'react-dropzone';
 import { BiImageAdd, BiX } from "react-icons/bi";
 
 import { deleteImg, uploadImg } from '@actions/img';
+import { nanoid } from 'nanoid';
 
 type props = {
   files: File[]
@@ -19,7 +20,13 @@ function ImageUpload({ message, loading, files, setFiles }: props) {
   const onDrop = useCallback((acceptedFiles: File[], fileRejections: FileRejection[]) => {
     if (fileRejections.length > 0) return;
 
-    const newFiles = acceptedFiles.filter(file => Object.values(acceptedFileTypes).flat().includes(`.${file.name.split('.').pop()?.toLowerCase()}`))
+    const renameFile = (file: File): File => {
+      const fileExtension = file.name.split('.').pop()?.toLowerCase();
+      const newFileName = `${nanoid(10)}.${fileExtension}`;
+      return new File([file], newFileName, { type: file.type });
+    }
+
+    const newFiles = acceptedFiles.filter(file => Object.values(acceptedFileTypes).flat().includes(`.${file.name.split('.').pop()?.toLowerCase()}`)).map(renameFile)
     setFiles(prev => {
       const updatedFiles = [...prev]
       newFiles.forEach(newFile => {
