@@ -37,7 +37,7 @@ const useContextStore = create<state & actions>()(persist(set => ({
   project_id: "",
   chat_id: "",
 
-  model_type: "Groq",
+  model_type: "Ollama",
   groqApiKey: "",
   groqModel: "",
   ollamaUrl: "http://localhost:11490",
