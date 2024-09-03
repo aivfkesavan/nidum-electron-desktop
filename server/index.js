@@ -2,6 +2,7 @@ import express from 'express';
 import cors from "cors";
 
 import duckduckgo from "./controllers/duckduckgo";
+import upgrade from "./controllers/upgrade";
 import whisper from "./controllers/whisper";
 import ollama from "./controllers/ollama";
 import image from "./controllers/image";
@@ -19,6 +20,7 @@ function startServer() {
   app.use("/nidum", ollama)
   app.use("/image", image)
   app.use("/whisper", whisper)
+  app.use("/upgrade", upgrade)
   app.use("/duckduckgo", duckduckgo)
 
   app.listen(port, () => {
