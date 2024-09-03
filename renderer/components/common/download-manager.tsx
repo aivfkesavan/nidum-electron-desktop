@@ -225,67 +225,57 @@ export function DownloadProvider({ children }: props) {
 
   async function downloadLatestExec(downloadUrl: string) {
     try {
-      const response = await axios({
-        url: downloadUrl,
-        method: 'GET',
-        responseType: 'blob',
-        onDownloadProgress: (progressEvent) => {
-          const percentCompleted = Math.round((progressEvent.loaded * 100) / progressEvent.total);
-          toast.loading("Downloading latest version", {
-            className: "py-2",
-            description: `Progress: ${percentCompleted || 0}%`,
-            richColors: false,
-            position: "top-center",
-            duration: Infinity,
-            id: "latest-v",
-          })
-        },
+      const response = await fetch(`${constants.backendUrl}/upgrade/dowload-dmg?url=${downloadUrl}`, {
+        method: "GET",
+        cache: "no-store",
+        headers: { 'Content-Type': 'application/json' },
       })
 
-      const url = window.URL.createObjectURL(new Blob([response.data]))
+      const reader = response.body.getReader()
+      const decoder = new TextDecoder()
 
-      const link = document.createElement('a')
-      link.href = url
-      const fileName = extractFilename(downloadUrl)
-      link.setAttribute('download', fileName)
-      document.body.appendChild(link)
-      link.click()
+      while (true) {
+        const { done, value } = await reader.read()
+        if (done) {
+          setTimeout(() => {
+            const fileName = extractFilename(downloadUrl)
+            toast.success("New version downloaded", {
+              description: "Do you like to install and restart the application",
+              descriptionClassName: "mt-1 text-xs",
+              closeButton: true,
+              richColors: true,
+              className: "py-2.5",
+              position: "top-center",
+              duration: 10000,
+              id: "latest-v",
+              action: {
+                label: 'Restart',
+                onClick: () => restartApp(fileName)
+              },
+            })
+          }, 1000)
+          break
+        }
 
-      link.parentNode.removeChild(link)
-      window.URL.revokeObjectURL(url)
-      toast.success("Downloading latest version", {
-        className: "py-2",
-        richColors: true,
-        position: "top-center",
-        duration: 1000,
-        id: "latest-v",
-      })
+        const chunk = decoder?.decode(value)
+        const lines = chunk?.split('\n\n')
 
-      setTimeout(() => {
-        // toast.success("New version downloaded", {
-        //   description: "After downloading the latest .dmg file, close the current application. Then, drag and drop the file into the application to install and use the newest version.",
-        //   descriptionClassName: "mt-1 text-xs",
-        //   closeButton: true,
-        //   richColors: true,
-        //   className: "py-2.5",
-        //   position: "top-center",
-        //   duration: 10000,
-        // })
-
-        toast.success("New version downloaded", {
-          description: "Do you like to install and restart the application",
-          descriptionClassName: "mt-1 text-xs",
-          closeButton: true,
-          richColors: true,
-          className: "py-2.5",
-          position: "top-center",
-          duration: 10000,
-          action: {
-            label: 'Restart',
-            onClick: () => restartApp(fileName)
-          },
+        lines?.forEach(line => {
+          if (line?.startsWith('data: ')) {
+            const data = JSON?.parse(line?.slice(6))
+            if (data) {
+              toast.loading("Downloading latest version", {
+                className: "py-2",
+                description: `Progress: ${data?.progress || 0}%`,
+                richColors: false,
+                position: "top-center",
+                duration: Infinity,
+                id: "latest-v",
+              })
+            }
+          }
         })
-      }, 1000)
+      }
 
     } catch (error) {
       console.log(error)
