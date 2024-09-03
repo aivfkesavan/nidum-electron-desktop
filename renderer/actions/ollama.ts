@@ -74,7 +74,7 @@ export async function getOllamaTags(ollamaUrl: string) {
 }
 
 export async function getLLMModels() {
-  return axios.get("https://raw.githubusercontent.com/aivfkesavan/nidum-public/main/llm-models2.json").then(r => r.data)
+  return axios.get("https://raw.githubusercontent.com/aivfkesavan/nidum-public/main/llm-models.json").then(r => r.data)
 }
 
 export async function deleteModel(name: string) {

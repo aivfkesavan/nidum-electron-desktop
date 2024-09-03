@@ -1,3 +1,4 @@
+import { HiOutlineInformationCircle } from "react-icons/hi2";
 import { MdOutlineRecordVoiceOver } from "react-icons/md";
 import { GoProjectRoadmap } from "react-icons/go";
 import { RiVoiceprintFill } from "react-icons/ri";
@@ -20,6 +21,7 @@ import SettingIcon from '@/assets/svg/settings.svg';
 import Transcribe from "./transcribe";
 import Project from "./project";
 import Voice from "./voice";
+import About from "./about";
 import LLM from "./llm";
 
 const list = [
@@ -36,16 +38,22 @@ const list = [
     child: <LLM />,
   },
   {
-    id: "4",
+    id: "3",
     title: "Speech to Text",
     logo: <MdOutlineRecordVoiceOver className="text-base" />,
     child: <Transcribe />,
   },
   {
-    id: "3",
+    id: "4",
     title: "Text to Speech",
     logo: <RiVoiceprintFill className="text-base" />,
     child: <Voice />,
+  },
+  {
+    id: "5",
+    title: "About",
+    logo: <HiOutlineInformationCircle className="text-base" />,
+    child: <About />,
   },
 ]
 
@@ -69,7 +77,7 @@ function Settings() {
         <SettingIcon />
       </DialogTrigger>
 
-      <DialogContent>
+      <DialogContent className=" max-w-xl">
         <DialogHeader className="pb-2 md:pb-4 mb-2 border-b">
           <DialogTitle>Settings</DialogTitle>
           <DialogDescription></DialogDescription>
