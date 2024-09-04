@@ -325,6 +325,12 @@ function Messages() {
               if (res && res !== "[DONE]") {
                 const json = JSON.parse(res)
                 const text = model_type === "Ollama" ? json?.message?.content : json?.choices?.[0]?.delta?.content || ""
+                if (json?.error && !text) {
+                  setTempData([])
+                  setLoading(false)
+                  toast({ title: "Please use new chat" })
+                  return
+                }
                 botRes += text
 
                 const botReply: Message = {
