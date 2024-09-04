@@ -83,8 +83,8 @@ function Upload() {
   const removeFile = (j: number) => setFiles(p => p.filter((_, i) => i !== j))
 
   return (
-    <div className='flex-1'>
-      <h6 className="mb-6 text-sm font-medium text-center text-white/80">Add New Files</h6>
+    <div className='flex-1 text-xs'>
+      <h6 className="mb-1 font-medium text-white/80">Add New Files</h6>
 
       <div
         className="dc flex-col mb-6 py-10 px-8 border rounded-md text-center text-white/60"
@@ -96,7 +96,7 @@ function Upload() {
       </div>
 
       {files.map((file, index) => (
-        <div key={index} className='df justify-between pl-2 py-0.5 hover:bg-secondary rounded-sm'>
+        <div key={index} className='df justify-between pl-2 py-0.5 hover:bg-input rounded-sm'>
           <p>{file.name.replace(/\\/g, '/').split('/').pop() || ""}</p>
 
           <button

@@ -3,6 +3,7 @@ import { IoIosAttach } from "react-icons/io";
 import useContextStore from "@/store/context";
 import { useToast } from "@/components/ui/use-toast";
 
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   Dialog,
   DialogContent,
@@ -11,9 +12,8 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-
-import Upload from "./upload";
-import List from './list';
+import Documents from "./documents";
+import WebCrawlers from "./web-crawlers";
 
 function FileUpload() {
   const ollamaEmbeddingModel = useContextStore(s => s.ollamaEmbeddingModel)
@@ -61,17 +61,35 @@ function FileUpload() {
 
       <DialogContent className="md:max-w-3xl lg:max-w-5xl max-h-[80vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle className="mb-2 text-left">
-            Manage Files
+          <DialogTitle className="text-left">
+            Manage Resources
           </DialogTitle>
+          <DialogDescription className=" text-xs text-white/60">Manage documents and web crawlers</DialogDescription>
         </DialogHeader>
 
-        <DialogDescription asChild>
-          <div className='flex flex-col md:flex-row gap-8'>
-            <Upload />
-            <List />
-          </div>
-        </DialogDescription>
+        <Tabs defaultValue="Web Crawlers">
+          <TabsList className="p-0 h-auto mb-8 bg-transparent">
+            {
+              ["Documents", "Web Crawlers"].map(l => (
+                <TabsTrigger
+                  className="m-0 text-white/60 bg-transparent border-b-2 border-transparent rounded-none hover:text-white/80 data-[state=active]:border-white"
+                  value={l}
+                  key={l}
+                >
+                  {l}
+                </TabsTrigger>
+              ))
+            }
+          </TabsList>
+
+          <TabsContent value="Documents">
+            <Documents />
+          </TabsContent>
+
+          <TabsContent value="Web Crawlers">
+            <WebCrawlers />
+          </TabsContent>
+        </Tabs>
       </DialogContent>
     </Dialog>
   )

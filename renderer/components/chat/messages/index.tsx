@@ -16,9 +16,9 @@ import { useToast } from "@/components/ui/use-toast";
 import useContextStore from "@/store/context";
 import useConvoStore from "@/store/conversations";
 
+import ManageResourses from "./manage-resourses";
 import SpeechToText from "./speech-to-text";
 import ImageUpload from "./image-upload";
-import FileUpload from "./file-upload";
 import Settings from "../settings";
 import Header from "./header";
 import List from "./list";
@@ -480,7 +480,7 @@ function Messages() {
           disabled={isChatInputDisabled}
         />
 
-        <FileUpload />
+        <ManageResourses />
       </div>
     </div>
   )
