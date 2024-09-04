@@ -166,7 +166,7 @@ function Messages() {
         let dataMap = []
 
         if (data) {
-          if (ollamaModeType === "vision") {
+          if (ollamaModeType === "vision" && model_type === "Ollama") {
             dataMap = await Promise.all(data?.map(async ({ id, ...rest }) => {
               if (rest?.images?.length > 0) {
                 const base64Files = await Promise.all(rest.images.map(imgToBase64))
@@ -451,7 +451,7 @@ function Messages() {
           />
 
           {
-            ollamaModeType === "vision" &&
+            model_type === "Ollama" && ollamaModeType === "vision" &&
             <ImageUpload
               files={files}
               loading={loading}
