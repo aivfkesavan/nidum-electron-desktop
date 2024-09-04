@@ -3,17 +3,17 @@ import { IoIosAttach } from "react-icons/io";
 import useContextStore from "@/store/context";
 import { useToast } from "@/components/ui/use-toast";
 
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+// import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   Dialog,
   DialogContent,
-  DialogDescription,
+  // DialogDescription,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
 import Documents from "./documents";
-import WebCrawlers from "./web-crawlers";
+// import WebCrawlers from "./web-crawlers";
 
 function FileUpload() {
   const ollamaEmbeddingModel = useContextStore(s => s.ollamaEmbeddingModel)
@@ -64,10 +64,12 @@ function FileUpload() {
           <DialogTitle className="text-left">
             Manage Resources
           </DialogTitle>
-          <DialogDescription className=" text-xs text-white/60">Manage documents and web crawlers</DialogDescription>
+          {/* <DialogDescription className=" text-xs text-white/60">Manage documents and web crawlers</DialogDescription> */}
         </DialogHeader>
 
-        <Tabs defaultValue="Web Crawlers">
+        <Documents />
+
+        {/* <Tabs defaultValue="Web Crawlers">
           <TabsList className="p-0 h-auto mb-8 bg-transparent">
             {
               ["Documents", "Web Crawlers"].map(l => (
@@ -89,7 +91,7 @@ function FileUpload() {
           <TabsContent value="Web Crawlers">
             <WebCrawlers />
           </TabsContent>
-        </Tabs>
+        </Tabs> */}
       </DialogContent>
     </Dialog>
   )
