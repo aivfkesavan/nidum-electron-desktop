@@ -24,7 +24,7 @@ const llmModels: listT[] = [
     id: "3",
     logo: "/hugging-face.png",
     title: "Hugging Face",
-    para: "The LLM inferencing from Hugging Face"
+    para: "Inference API from HuggingFace (Serverless)"
   },
   // {
   //   id: "3",
