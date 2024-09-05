@@ -77,7 +77,7 @@ function HuggingFace() {
       </div>
 
       <div className="mb-12 text-xs text-white/60">
-        Click here to sign up for a Huggingface account and generate a token: <a href="https://huggingface.co/join?ref=raddrive.com" className="text-white/90 hover:underline" target="_blank">https://huggingface.co/join</a>
+        Click here to sign up for a Huggingface account and generate a token: <a href="https://huggingface.co/join?ref=ragdrive.com" className="text-white/90 hover:underline" target="_blank">https://huggingface.co/join</a>
       </div>
 
       <Footer onSave={onSave} />
