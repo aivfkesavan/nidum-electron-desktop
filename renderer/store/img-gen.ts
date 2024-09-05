@@ -10,46 +10,49 @@ export type ImgGenMsg = {
 
 type state = {
   isLoading: boolean
-  messages: ImgGenMsg[]
+  messages: Record<string, ImgGenMsg[]>
 }
 
 type actions = {
-  pushIntoMessages: (payload: ImgGenMsg | ImgGenMsg[]) => void;
-  addBotMessages: (payload: ImgGenMsg) => void;
   upadateLoading: () => void;
-  deleteMessage: (id: string) => void;
-  deleteLastProccess: () => void;
+  pushIntoMessages: (project_id: string, payload: ImgGenMsg | ImgGenMsg[]) => void;
+  addBotMessages: (project_id: string, payload: ImgGenMsg) => void;
+  deleteMessage: (project_id: string, id: string) => void;
+  deleteLastProccess: (project_id: string) => void;
 }
 
 const useImgGenStore = create<state & actions>()(persist(immer(set => ({
   isLoading: false,
-  messages: [],
-
-  pushIntoMessages: (payload) => set(state => {
-    if (Array.isArray(payload)) {
-      state.messages.push(...payload)
-    } else {
-      state.messages.push(payload)
-    }
-  }),
-
-  addBotMessages: (payload) => set(state => {
-    state.messages = state.messages.filter(m => m.role !== "loading")
-    state.isLoading = !state.isLoading
-    state.messages.push(payload)
-  }),
+  messages: {},
 
   upadateLoading: () => set(state => {
     state.isLoading = !state.isLoading
   }),
 
-  deleteMessage: (id) => set(state => {
-    state.messages = state.messages.filter(msg => msg.id !== id)
+  pushIntoMessages: (project_id, payload) => set(state => {
+    if (!state.messages[project_id]) {
+      state.messages[project_id] = []
+    }
+    if (Array.isArray(payload)) {
+      state.messages[project_id].push(...payload)
+    } else {
+      state.messages[project_id].push(payload)
+    }
   }),
 
-  deleteLastProccess: () => set(state => {
-    state.messages.pop()
-    state.messages.pop()
+  addBotMessages: (project_id, payload) => set(state => {
+    state.messages[project_id] = state.messages[project_id].filter(m => m.role !== "loading")
+    state.isLoading = !state.isLoading
+    state.messages[project_id].push(payload)
+  }),
+
+  deleteMessage: (project_id, id) => set(state => {
+    state.messages[project_id] = state.messages[project_id].filter(msg => msg.id !== id)
+  }),
+
+  deleteLastProccess: (project_id) => set(state => {
+    state.messages[project_id].pop()
+    state.messages[project_id].pop()
     state.isLoading = false
   }),
 

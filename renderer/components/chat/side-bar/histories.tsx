@@ -1,4 +1,5 @@
 import { useState } from "react"; // useEffect, 
+import { IoImages } from "react-icons/io5";
 import { IoSearch } from "react-icons/io5";
 import { nanoid } from "nanoid";
 
@@ -19,7 +20,7 @@ import ChatCard from "./chat-card";
 type groupedChatsT = Record<string, Chat[]>
 
 function Histories() {
-  const { chat_id, project_id, updateContext } = useContextStore()
+  const { chat_id, project_id, hfImgGenModel, model_type, updateContext } = useContextStore()
   const addChat = useConvoStore(s => s.addChat)
 
   const [searchBy, setSearchBy] = useState("")
@@ -83,7 +84,7 @@ function Histories() {
         />
       </div>
 
-      <div className="my-2 mx-2.5">
+      <div className="mt-2 mx-2.5">
         <button
           className="df w-full px-3 py-2 text-[13px] text-left text-white/70 cursor-pointer rounded-lg group bg-secondary hover:text-white group"
           onClick={addChatTo}
@@ -92,6 +93,19 @@ function Histories() {
           <Message className="size-4 group-hover:stroke-white" />
         </button>
       </div>
+
+      {
+        model_type === "Hugging Face" && hfImgGenModel && hfImgGenModel !== "-" &&
+        <div className="mb-2 mt-1.5 mx-2.5">
+          <button
+            className="df w-full px-3 py-2 text-[13px] text-left text-white/70 cursor-pointer rounded-lg group bg-secondary hover:text-white group"
+            onClick={() => updateContext({ chat_id: `${project_id}-imgGen` })}
+          >
+            <span className="flex-1">Image Generator</span>
+            <IoImages className="size-4 group-hover:stroke-white" />
+          </button>
+        </div>
+      }
 
       <div className="scroll-y p-2 border-b">
         {Object.entries(groupedChats).map(([dateGroup, groupChats]) => (

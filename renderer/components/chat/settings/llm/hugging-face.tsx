@@ -98,6 +98,10 @@ function HuggingFace() {
                 </SelectItem>
               ))
             }
+
+            <SelectItem value="-">
+              Not Selected
+            </SelectItem>
           </SelectContent>
         </Select>
       </div>

@@ -19,6 +19,8 @@ function ImgGenerate() {
   const hfImgGenModel = useContextStore(s => s.hfImgGenModel)
   const hfApiKey = useContextStore(s => s.hfApiKey)
 
+  const project_id = useContextStore(s => s.project_id)
+
   const { generateImage } = useDownloads()
 
   const {
@@ -54,7 +56,7 @@ function ImgGenerate() {
             content: "",
           }
         ]
-        pushIntoMessages(payload)
+        pushIntoMessages(project_id, payload)
 
         const fileName = `${nanoid(10)}.png`
         generateImage({
@@ -65,7 +67,7 @@ function ImgGenerate() {
             inputs,
           },
           onSuccess() {
-            addBotMessages({
+            addBotMessages(project_id, {
               id: nanoid(10),
               role: "assistant",
               content: fileName,
@@ -73,7 +75,7 @@ function ImgGenerate() {
             toast({ title: `Image - (${inputs}) generated succesfully` })
           },
           onError() {
-            deleteLastProccess()
+            deleteLastProccess(project_id)
           }
         })
       }
@@ -95,7 +97,7 @@ function ImgGenerate() {
     }
   }
 
-  const deleteChat = (msgId: string) => deleteMessage(msgId)
+  const deleteChat = (msgId: string) => deleteMessage(project_id, msgId)
 
   function downloadImg(fileName: string) {
     downloadGenerateImg(fileName).then(r => {
@@ -107,7 +109,7 @@ function ImgGenerate() {
     <>
       <div className="scroll-y px-6 py-2 mt-2">
         {
-          messages?.length === 0 &&
+          !messages?.[project_id] &&
           <div className="dc h-[calc(100%-16px)]">
             <img
               className="w-16 opacity-60"
@@ -119,7 +121,7 @@ function ImgGenerate() {
 
         <div className="max-w-4xl w-full mx-auto pt-6 lg:pl-6">
           <List
-            list={messages}
+            list={messages?.[project_id] || []}
             deleteChat={deleteChat}
             downloadImg={downloadImg}
           />
