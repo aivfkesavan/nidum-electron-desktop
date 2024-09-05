@@ -1,4 +1,4 @@
-import { app, ipcMain, shell } from 'electron';
+import { app, ipcMain, shell, dialog } from 'electron';
 // import { autoUpdater } from 'electron-updater';
 import serve from 'electron-serve';
 import path from 'path';
@@ -6,6 +6,7 @@ import path from 'path';
 import { createWindow } from './helpers';
 import startServer from '../server';
 
+let mainWindow;
 const isProd = process.env.NODE_ENV === 'production'
 
 if (isProd) {
@@ -14,10 +15,41 @@ if (isProd) {
   app.setPath('userData', `${app.getPath('userData')} (development)`)
 }
 
-(async () => {
-  await app.whenReady()
+if (process.defaultApp) {
+  if (process.argv.length >= 2) {
+    app.setAsDefaultProtocolClient('ragdrive', process.execPath, [path.resolve(process.argv[1])])
+  }
+} else {
+  app.setAsDefaultProtocolClient('ragdrive')
+}
 
-  const mainWindow = createWindow('main', {
+const gotTheLock = app.requestSingleInstanceLock()
+
+if (!gotTheLock) {
+  app.quit()
+} else {
+  app.on('second-instance', (event, commandLine, workingDirectory) => {
+    // Someone tried to run a second instance, we should focus our window.
+    if (mainWindow) {
+      if (mainWindow.isMinimized()) mainWindow.restore()
+      mainWindow.focus()
+    }
+
+    dialog.showErrorBox('Welcome Back', `You arrived from: ${commandLine.pop().slice(0, -1)}`)
+  })
+
+  // Create mainWindow, load the rest of the app, etc...
+  app.whenReady().then(() => {
+    createWindowHelper()
+  })
+
+  app.on('open-url', (event, url) => {
+    dialog.showErrorBox('Welcome Back', `You arrived from: ${url}`)
+  })
+}
+
+async function createWindowHelper() {
+  mainWindow = createWindow('main', {
     width: 1200,
     height: 600,
     minWidth: 800,
@@ -45,7 +77,27 @@ if (isProd) {
   }
 
   startServer()
-})()
+}
+
+app.on('ready', () => {
+  console.log('App ready event triggered.');
+  // autoUpdater.checkForUpdatesAndNotify();
+});
+
+app.on('window-all-closed', () => {
+  app.quit()
+})
+
+ipcMain.on('message', async (event, arg) => {
+  event.reply('message', `${arg} World!`)
+})
+
+ipcMain.on('app:restart', () => {
+  app.relaunch()
+  app.exit(0)
+})
+
+
 
 // autoUpdater.setFeedURL({
 //   provider: 'generic',
@@ -112,21 +164,3 @@ if (isProd) {
 //     }
 //   });
 // });
-
-app.on('ready', () => {
-  console.log('App ready event triggered.');
-  // autoUpdater.checkForUpdatesAndNotify();
-});
-
-app.on('window-all-closed', () => {
-  app.quit()
-})
-
-ipcMain.on('message', async (event, arg) => {
-  event.reply('message', `${arg} World!`)
-})
-
-ipcMain.on('app:restart', () => {
-  app.relaunch()
-  app.exit(0)
-})
