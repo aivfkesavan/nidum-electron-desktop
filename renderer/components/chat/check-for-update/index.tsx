@@ -42,7 +42,7 @@ function CheckForUpdate() {
           />
           <DialogTitle className="text-sm">New Verion Available</DialogTitle>
           <DialogDescription className="text-xs">
-            do you want to download it now?
+            Do you want to download it now?
           </DialogDescription>
         </DialogHeader>
 

@@ -15,6 +15,9 @@ type state = {
   ollamaModeType: "" | "vision";
   hfApiKey: string;
   hfModel: string;
+
+  hfImgGenModel: string;
+
   voice: string;
 
   embedding_type: "Ollama" | "Nidum";
@@ -49,6 +52,8 @@ const useContextStore = create<state & actions>()(persist(set => ({
   ollamaModeType: "",
   hfApiKey: "",
   hfModel: "",
+
+  hfImgGenModel: "",
 
   voice: "Google UK English Female",
 

@@ -2,11 +2,16 @@ import { useEffect } from "react";
 import Messages from "./messages";
 import SideBar from "./side-bar";
 
+import useContextStore from "@store/context";
 import useInitSetup from "@hooks/use-init-setup";
+
 import CheckForUpdate from "./check-for-update";
+import ImgGenerate from "./img-generate";
 import Header from "./header";
 
 function Chat() {
+  const chat_id = useContextStore(s => s.chat_id)
+
   useInitSetup()
 
   useEffect(() => {
@@ -20,7 +25,11 @@ function Chat() {
 
       <div className="dfc h-screen flex-1 text-sm">
         <Header />
-        <Messages />
+        {
+          chat_id === "imgGen"
+            ? <ImgGenerate />
+            : <Messages key={chat_id} />
+        }
       </div>
 
       <CheckForUpdate />
