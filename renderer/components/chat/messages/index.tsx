@@ -243,7 +243,7 @@ function Messages() {
           max_tokens: num(projectdetails?.max_tokens, 500),
           temperature: num(projectdetails?.temperature, 0.1),
           frequency_penalty: num(projectdetails?.frequency_penalty, 0),
-          stream: model_type === "Ollama" || model_type === "Hugging Face",
+          stream: model_type !== "Nidum",
           messages: prompt,
         }
 
@@ -300,7 +300,7 @@ function Messages() {
           return
         }
 
-        if (model_type === "Nidum" || model_type === "Groq") {
+        if (model_type === "Nidum") {
           const res = await response.json()
           const content = res?.choices?.[0]?.message?.content
 
@@ -322,11 +322,11 @@ function Messages() {
         } else {
           const reader = response.body?.getReader()
           let botRes = ""
+          let halfData = ""
 
           reader?.read().then(function processResult(result: any): any {
             try {
               if (result.done) {
-                console.log("at done")
                 const botReply: Message = {
                   role: "assistant",
                   content: botRes,
@@ -346,12 +346,19 @@ function Messages() {
 
               const decoded = new TextDecoder().decode(result.value)
               const resArr = model_type === "Ollama" ? [decoded] : decoded?.split("data: ")
-              // console.log(resArr)
+
+              if (halfData) {
+                resArr[0] = halfData + resArr[0]
+                halfData = ""
+              }
+
               for (const res of resArr) {
-                // console.log(res)
                 if (res && res !== "[DONE]") {
-                  const json = JSON.parse(res)
-                  console.log(json)
+                  if (!res.endsWith("}\n\n")) {
+                    halfData = res
+                    continue
+                  }
+                  const json = JSON?.parse(res)
                   const text = model_type === "Ollama" ? json?.message?.content : json?.choices?.[0]?.delta?.content || ""
                   const finishReason = model_type === "Ollama" ? "" : json?.choices?.[0]?.finish_reason
                   const hasFinishReason = ["stop", "length"].includes(finishReason)
@@ -364,7 +371,6 @@ function Messages() {
                   botRes += text
 
                   if (hasFinishReason) {
-                    console.log("has finish reason")
                     const botReply: Message = {
                       role: "assistant",
                       content: botRes,
