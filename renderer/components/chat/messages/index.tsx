@@ -285,7 +285,9 @@ function Messages() {
         const response = await fetch(url, {
           signal: abortController.current.signal,
           method: "POST",
+          cache: "no-store",
           body: JSON.stringify(payload),
+          next: { revalidate: 0 },
           headers,
         })
 
@@ -324,6 +326,7 @@ function Messages() {
           reader?.read().then(function processResult(result: any): any {
             try {
               if (result.done) {
+                console.log("at done")
                 const botReply: Message = {
                   role: "assistant",
                   content: botRes,
@@ -342,30 +345,56 @@ function Messages() {
               }
 
               const decoded = new TextDecoder().decode(result.value)
-              const res = model_type === "Ollama" ? decoded : decoded?.split("data: ")[1]
-              if (res && res !== "[DONE]") {
-                const json = JSON.parse(res)
-                const text = model_type === "Ollama" ? json?.message?.content : json?.choices?.[0]?.delta?.content || ""
-                if (json?.error && !text) {
-                  setTempData([])
-                  setLoading(false)
-                  toast({ title: "Please use new chat" })
-                  return
-                }
-                botRes += text
-
-                const botReply: Message = {
-                  role: "assistant",
-                  content: botRes,
-                  id: nanoid(10),
-                }
-
-                setTempData(prev => prev.map(p => {
-                  if (p.role === "assistant" || p.role === "loading") {
-                    return botReply
+              const resArr = model_type === "Ollama" ? [decoded] : decoded?.split("data: ")
+              // console.log(resArr)
+              for (const res of resArr) {
+                // console.log(res)
+                if (res && res !== "[DONE]") {
+                  const json = JSON.parse(res)
+                  console.log(json)
+                  const text = model_type === "Ollama" ? json?.message?.content : json?.choices?.[0]?.delta?.content || ""
+                  const finishReason = model_type === "Ollama" ? "" : json?.choices?.[0]?.finish_reason
+                  const hasFinishReason = ["stop", "length"].includes(finishReason)
+                  if (json?.error && !text) {
+                    setTempData([])
+                    setLoading(false)
+                    toast({ title: "Please use new chat" })
+                    return
                   }
-                  return p
-                }))
+                  botRes += text
+
+                  if (hasFinishReason) {
+                    console.log("has finish reason")
+                    const botReply: Message = {
+                      role: "assistant",
+                      content: botRes,
+                      id: nanoid(10),
+                    }
+                    setTempData([])
+                    setLoading(false)
+                    pushIntoMessages(project_id, currContextId, [
+                      user,
+                      botReply
+                    ])
+                    if (needAutoPlay) {
+                      speak(botReply.id, botReply.content)
+                    }
+                    return;
+                  }
+
+                  const botReply: Message = {
+                    role: "assistant",
+                    content: botRes,
+                    id: nanoid(5),
+                  }
+
+                  setTempData(prev => prev.map(p => {
+                    if (p.role === "assistant" || p.role === "loading") {
+                      return botReply
+                    }
+                    return p
+                  }))
+                }
               }
 
               return reader.read().then(processResult)
