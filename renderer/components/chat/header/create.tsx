@@ -13,7 +13,7 @@ import {
   TooltipTrigger,
   TooltipPortal,
 } from "@/components/ui/tooltip";
-import ProjectModel from "../../project-model";
+import ProjectModel from "../project-model";
 
 function Create() {
   const [open, setOpen] = useState(false)

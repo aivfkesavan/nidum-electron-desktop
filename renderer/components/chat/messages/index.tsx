@@ -20,7 +20,6 @@ import ManageResourses from "./manage-resourses";
 import SpeechToText from "./speech-to-text";
 import ImageUpload from "./image-upload";
 import Settings from "../settings";
-import Header from "./header";
 import List from "./list";
 
 function Messages() {
@@ -346,7 +345,7 @@ function Messages() {
 
               const decoded = new TextDecoder().decode(result.value)
               const resArr = model_type === "Ollama" ? [decoded] : decoded?.split("data: ")
-              console.log(resArr)
+
               if (halfData) {
                 resArr[0] = halfData + resArr[0]
                 halfData = ""
@@ -442,9 +441,7 @@ function Messages() {
   const deleteChat = (msgId: string) => deleteMessage(id, msgId)
 
   return (
-    <div className="dfc h-screen flex-1 text-sm">
-      <Header />
-
+    <>
       <div className="scroll-y px-6 py-2 mt-2">
         {
           tempData?.length === 0 &&
@@ -544,7 +541,7 @@ function Messages() {
 
         <ManageResourses />
       </div>
-    </div>
+    </>
   )
 }
 

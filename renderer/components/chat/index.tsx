@@ -4,6 +4,7 @@ import SideBar from "./side-bar";
 
 import useInitSetup from "@hooks/use-init-setup";
 import CheckForUpdate from "./check-for-update";
+import Header from "./header";
 
 function Chat() {
   useInitSetup()
@@ -16,7 +17,11 @@ function Chat() {
   return (
     <main className="app-wrapper transition-all">
       <SideBar />
-      <Messages />
+
+      <div className="dfc h-screen flex-1 text-sm">
+        <Header />
+        <Messages />
+      </div>
 
       <CheckForUpdate />
     </main>
