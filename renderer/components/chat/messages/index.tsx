@@ -346,7 +346,7 @@ function Messages() {
 
               const decoded = new TextDecoder().decode(result.value)
               const resArr = model_type === "Ollama" ? [decoded] : decoded?.split("data: ")
-
+              console.log(resArr)
               if (halfData) {
                 resArr[0] = halfData + resArr[0]
                 halfData = ""
@@ -354,7 +354,7 @@ function Messages() {
 
               for (const res of resArr) {
                 if (res && res !== "[DONE]") {
-                  if (!res.endsWith("}\n\n")) {
+                  if (!res.endsWith("}\n\n") && model_type !== "Ollama") {
                     halfData = res
                     continue
                   }

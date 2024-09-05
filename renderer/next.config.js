@@ -20,7 +20,6 @@ module.exports = {
     return config
   },
   experimental: {
-    serverComponentsHmrCache: false,
     esmExternals: 'loose',
   },
   transpilePackages: ['@uiw/react-markdown-preview'],
