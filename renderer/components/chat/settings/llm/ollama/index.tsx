@@ -1,10 +1,10 @@
 import { useState } from "react";
 import { MdOutlineFileDownload, MdOutlineDeleteOutline } from "react-icons/md";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQueryClient } from "@tanstack/react-query";
 
 import { useOllamaModels } from "@hooks/use-ollama";
 import { useDownloads } from "@components/common/download-manager";
-import { getLLMModels } from "@actions/ollama";
+import { useLLMModels } from "@hooks/use-llm-models";
 import useContextStore from "@store/context";
 import { useToast } from "@components/ui/use-toast";
 import useUIStore from "@store/ui";
@@ -24,10 +24,7 @@ function Ollama() {
   const { toast } = useToast()
 
   const { data: downloaded, isLoading } = useOllamaModels(ollamaUrl)
-  const { data: models, isLoading: isLoading2 } = useQuery({
-    queryKey: ["llm-models"],
-    queryFn: getLLMModels,
-  })
+  const { data: models, isLoading: isLoading2 } = useLLMModels("llm")
 
   const queryClient = useQueryClient()
 

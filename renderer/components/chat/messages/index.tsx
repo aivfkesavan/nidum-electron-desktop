@@ -13,7 +13,7 @@ import { imgToBase64, setImgToBase64Map } from "@actions/img";
 import { useAudio } from "./use-speech";
 import { useToast } from "@/components/ui/use-toast";
 
-import useContextStore from "@/store/context";
+import useContextStore, { llm_modelsT } from "@/store/context";
 import useConvoStore from "@/store/conversations";
 
 import ManageResourses from "./manage-resourses";
@@ -28,7 +28,12 @@ function Messages() {
 
   const {
     updateContext, project_id, chat_id: id,
-    model_type, groqApiKey, groqModel, ollamaUrl, ollamaModel, ollamaModeType,
+
+    model_type,
+    hfApiKey, hfModel,
+    groqApiKey, groqModel,
+    ollamaUrl, ollamaModel, ollamaModeType,
+
     embedding_type, ollamEmbeddingUrl, ollamaEmbeddingModel,
   } = useContextStore()
 
@@ -112,6 +117,10 @@ function Messages() {
         else if (model_type === "Ollama") {
           if (!ollamaUrl) return toast({ title: "Please provide base url" })
           if (!ollamaModel) return toast({ title: "Select a model to continue the chat" })
+        }
+        else if (model_type === "Hugging Face") {
+          if (!hfApiKey) return toast({ title: "Please provide Hugging Face API key" })
+          if (!hfModel) return toast({ title: "Please choose a Hugging Face Model" })
         }
 
         if (ragEnabled) {
@@ -214,11 +223,12 @@ function Messages() {
           restUserContent,
         ]
 
-        type urlsT = Record<"Groq" | "Ollama" | "Nidum", string>
+        type urlsT = Record<llm_modelsT, string>
         const urls: urlsT = {
           Groq: "https://api.groq.com/openai/v1/chat/completions",
           Ollama: `${ollamaUrl}/api/chat`,
           Nidum: "https://nidum2b.tunnelgate.haive.tech/v1/chat/completions",
+          "Hugging Face": `https://api-inference.huggingface.co/models/${hfModel}/v1/chat/completions`,
         }
 
         let url = urls?.[model_type as keyof typeof urls]
@@ -233,7 +243,7 @@ function Messages() {
           max_tokens: num(projectdetails?.max_tokens, 500),
           temperature: num(projectdetails?.temperature, 0.1),
           frequency_penalty: num(projectdetails?.frequency_penalty, 0),
-          stream: model_type === "Ollama",
+          stream: model_type === "Ollama" || model_type === "Hugging Face",
           messages: prompt,
         }
 
@@ -248,6 +258,17 @@ function Messages() {
 
         if (model_type === "Ollama") {
           payload.model = ollamaModel
+        }
+
+        if (model_type === "Hugging Face") {
+          payload.model = hfModel
+          headers.Authorization = `Bearer ${hfApiKey}`
+          if (payload.top_p === 0) {
+            payload.top_p = 0.1
+          }
+          if (payload.top_p === 1) {
+            payload.top_p = 0.9
+          }
         }
 
         // if (!isWithinTokenLimit(JSON.stringify(prompt), projectdetails.tokenLimit)) {
