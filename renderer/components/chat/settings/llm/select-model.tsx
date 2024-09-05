@@ -10,34 +10,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import OllmaStatusCheck from "@components/common/ollma-status-check";
-
-type listT = {
-  id: string
-  title: "Groq" | "Ollama" | "Nidum"
-  logo: string
-  para: string
-}
-
-const list: listT[] = [
-  {
-    id: "1",
-    logo: "/logo.png",
-    title: "Ollama",
-    para: "Run AI models locally on your machine"
-  },
-  {
-    id: "2",
-    logo: "/groq.png",
-    title: "Groq",
-    para: "The fastest LLM inferencing from Groq's LPUs"
-  },
-  // {
-  //   id: "3",
-  //   logo: "/logo.png",
-  //   title: "Nidum",
-  //   para: "Best uncensored inferencing for Agents and Tools"
-  // },
-]
+import llmModels from "@utils/llm-models";
 
 function SelectModel() {
   const updateContext = useContextStore(s => s.updateContext)
@@ -46,7 +19,7 @@ function SelectModel() {
 
   const [open, setOpen] = useState(false)
 
-  const found = list?.find(l => l.title === model_type) || null
+  const found = llmModels?.find(l => l.title === model_type) || null
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
@@ -55,7 +28,6 @@ function SelectModel() {
           <div className="dc size-8 shrink-0 relative">
             <img
               className="w-8"
-              // className={`${found?.title === "Ollama" ? "invert h-10 -mt-1.5" : "w-8"}`} 
               src={found?.logo}
               alt=""
             />
@@ -77,7 +49,7 @@ function SelectModel() {
       <DialogContent>
         <div className="mt-3">
           {
-            list.map(l => (
+            llmModels.map(l => (
               <div
                 key={l.id}
                 className={cn("df gap-4 mb-4 pl-8 -ml-6 last:mb-0 group cursor-pointer border-l-2 border-transparent hover:border-l-white", {
@@ -91,10 +63,6 @@ function SelectModel() {
                 <div className="dc size-8 relative">
                   <img
                     className="w-8"
-                    // className={cn({
-                    //   "invert h-10 -mt-1.5": l.title === "Ollama",
-                    //   "w-8": l.title !== "Ollama"
-                    // })}
                     src={l.logo}
                     alt={l.title}
                   />

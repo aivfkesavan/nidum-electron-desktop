@@ -1,16 +1,20 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 
+export type llm_modelsT = "Groq" | "Ollama" | "Nidum" | "Hugging Face";
+
 type state = {
   project_id: string;
   chat_id: string;
 
-  model_type: "Groq" | "Ollama" | "Nidum";
+  model_type: llm_modelsT
   groqApiKey: string;
   groqModel: string;
   ollamaUrl: string;
   ollamaModel: string;
   ollamaModeType: "" | "vision";
+  hfApiKey: string;
+  hfModel: string;
   voice: string;
 
   embedding_type: "Ollama" | "Nidum";
@@ -43,6 +47,8 @@ const useContextStore = create<state & actions>()(persist(set => ({
   ollamaUrl: "http://localhost:11490",
   ollamaModel: "",
   ollamaModeType: "",
+  hfApiKey: "",
+  hfModel: "",
 
   voice: "Google UK English Female",
 

@@ -12,16 +12,16 @@ import {
 } from "@/components/ui/select";
 import Footer from "../common/footer";
 
-function Groq() {
+function HuggingFace() {
   const updateContext = useContextStore(s => s.updateContext)
-  const groqApiKey = useContextStore(s => s.groqApiKey)
-  const groqModel = useContextStore(s => s.groqModel)
+  const hfApiKey = useContextStore(s => s.hfApiKey)
+  const hfModel = useContextStore(s => s.hfModel)
 
-  const { isLoading, data: models } = useLLMModels("groq")
+  const { isLoading, data: models } = useLLMModels("hf")
 
   const [details, setDetails] = useState({
-    groqApiKey,
-    groqModel,
+    hfApiKey,
+    hfModel,
   })
 
   function onChange(payload: Record<string, any>) {
@@ -42,21 +42,21 @@ function Groq() {
   return (
     <>
       <div className="my-4">
-        <label htmlFor="" className="mb-0.5 text-xs opacity-70">Groq api key</label>
+        <label htmlFor="" className="mb-0.5 text-xs opacity-70">Hugging Face api key</label>
 
         <input
           type="text"
           className="text-sm px-2 py-1.5 bg-transparent border"
-          placeholder="gsk_zxTDTUKUCXRYWgk-gjhdh-dhtxet"
-          value={details.groqApiKey}
-          onChange={e => onChange({ groqApiKey: e.target.value })}
+          placeholder="hf_zxTDTUKUCXRYWgk-gjhdh-dhtxet"
+          value={details.hfApiKey}
+          onChange={e => onChange({ hfApiKey: e.target.value })}
         />
       </div>
 
       <div className="mb-4">
         <label htmlFor="" className="mb-0.5 text-xs opacity-70">Model</label>
 
-        <Select value={details.groqModel} onValueChange={v => onChange({ groqModel: v })}>
+        <Select value={details.hfModel} onValueChange={v => onChange({ hfModel: v })}>
           <SelectTrigger className="h-8">
             <SelectValue placeholder="Model" />
           </SelectTrigger>
@@ -76,13 +76,9 @@ function Groq() {
         </Select>
       </div>
 
-      <div className="mb-12 text-xs text-white/60">
-        Click here to sign up for a Groq developer account: <a href="https://console.groq.com/login?ref=ragdrive.com" className=" text-white/90 hover:underline" target="_blank">https://console.groq.com/login</a>
-      </div>
-
       <Footer onSave={onSave} />
     </>
   )
 }
 
-export default Groq
+export default HuggingFace

@@ -10,28 +10,7 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import OllmaStatusCheck from "@components/common/ollma-status-check";
-
-type listT = {
-  id: string
-  title: "Groq" | "Ollama" | "Nidum"
-  logo: string
-  para: string
-}
-
-const list: listT[] = [
-  {
-    id: "1",
-    logo: "/logo.png",
-    title: "Ollama",
-    para: "Run AI models locally on your machine"
-  },
-  {
-    id: "2",
-    logo: "/groq.png",
-    title: "Groq",
-    para: "The fastest LLM inferencing from Groq's LPUs"
-  },
-]
+import llmModels from "@utils/llm-models";
 
 function ModelSelect() {
   const updateContext = useContextStore(s => s.updateContext)
@@ -48,7 +27,7 @@ function ModelSelect() {
 
       <PopoverContent className="p-1 space-y-1 data-[state=open]:duration-300 data-[state=closed]:duration-300">
         {
-          list.map(l => (
+          llmModels.map(l => (
             <div
               key={l.id}
               className={cn("df p-2 cursor-pointer rounded hover:bg-input/40", {
