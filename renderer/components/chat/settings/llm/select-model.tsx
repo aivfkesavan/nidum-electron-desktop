@@ -16,6 +16,7 @@ function SelectModel() {
   const updateContext = useContextStore(s => s.updateContext)
   const model_type = useContextStore(s => s.model_type)
   const ollamaUrl = useContextStore(s => s.ollamaUrl)
+  const chat_id = useContextStore(s => s.chat_id)
 
   const [open, setOpen] = useState(false)
 
@@ -56,7 +57,11 @@ function SelectModel() {
                   "border-white": l.title === model_type
                 })}
                 onClick={() => {
-                  updateContext({ model_type: l.title })
+                  let payload: any = { model_type: l.title }
+                  if (chat_id.endsWith("-imgGen")) {
+                    payload.chat_id = ""
+                  }
+                  updateContext(payload)
                   setOpen(false)
                 }}
               >

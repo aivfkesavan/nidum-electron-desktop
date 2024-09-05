@@ -10,6 +10,7 @@ import ImgGenerate from "./img-generate";
 import Header from "./header";
 
 function Chat() {
+  const project_id = useContextStore(s => s.project_id)
   const chat_id = useContextStore(s => s.chat_id)
 
   useInitSetup()
@@ -26,7 +27,7 @@ function Chat() {
       <div className="dfc h-screen flex-1 text-sm">
         <Header />
         {
-          chat_id === "imgGen"
+          chat_id === `${project_id}-imgGen`
             ? <ImgGenerate />
             : <Messages key={chat_id} />
         }
