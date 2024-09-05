@@ -24,7 +24,7 @@ const llmModels: listT[] = [
     id: "3",
     logo: "/hugging-face.png",
     title: "Hugging Face",
-    para: "The fastest LLM inferencing from Hugging Face's LPUs"
+    para: "The LLM inferencing from Hugging Face"
   },
   // {
   //   id: "3",
