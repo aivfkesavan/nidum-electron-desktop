@@ -22,8 +22,8 @@ export function getWhisperPath() {
   return createPath(["whisper"])
 }
 
-export function checkRootPathExists() {
-  const directoryPath = getRoot()
+export function checkIsDirExists(dir = "") {
+  const directoryPath = dir || getRoot()
   if (!existsSync(directoryPath)) {
     try {
       mkdirSync(directoryPath, { recursive: true });

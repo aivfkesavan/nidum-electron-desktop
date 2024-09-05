@@ -14,12 +14,15 @@ import Footer from "../common/footer";
 
 function HuggingFace() {
   const updateContext = useContextStore(s => s.updateContext)
+  const hfImgGenModel = useContextStore(s => s.hfImgGenModel)
   const hfApiKey = useContextStore(s => s.hfApiKey)
   const hfModel = useContextStore(s => s.hfModel)
 
+  const { isLoading: isLoading2, data: models2 } = useLLMModels("hf-img-gen")
   const { isLoading, data: models } = useLLMModels("hf")
 
   const [details, setDetails] = useState({
+    hfImgGenModel,
     hfApiKey,
     hfModel,
   })
@@ -35,7 +38,7 @@ function HuggingFace() {
     updateContext(details)
   }
 
-  if (isLoading) {
+  if (isLoading || isLoading2) {
     return <div className="dc h-80"><span className="loader-2"></span></div>
   }
 
@@ -54,7 +57,7 @@ function HuggingFace() {
       </div>
 
       <div className="mb-4">
-        <label htmlFor="" className="mb-0.5 text-xs opacity-70">Model</label>
+        <label htmlFor="" className="mb-0.5 text-xs opacity-70">Chat Model</label>
 
         <Select value={details.hfModel} onValueChange={v => onChange({ hfModel: v })}>
           <SelectTrigger className="h-8">
@@ -64,6 +67,29 @@ function HuggingFace() {
           <SelectContent>
             {
               models.map(m => (
+                <SelectItem
+                  value={m.id}
+                  key={m.id}
+                >
+                  {m.name}
+                </SelectItem>
+              ))
+            }
+          </SelectContent>
+        </Select>
+      </div>
+
+      <div className="mb-4">
+        <label htmlFor="" className="mb-0.5 text-xs opacity-70">Image Generation Model</label>
+
+        <Select value={details.hfImgGenModel} onValueChange={v => onChange({ hfImgGenModel: v })}>
+          <SelectTrigger className="h-8">
+            <SelectValue placeholder="Model" />
+          </SelectTrigger>
+
+          <SelectContent>
+            {
+              models2.map(m => (
                 <SelectItem
                   value={m.id}
                   key={m.id}

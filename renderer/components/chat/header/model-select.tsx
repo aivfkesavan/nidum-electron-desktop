@@ -41,10 +41,6 @@ function ModelSelect() {
               <div className="dc size-8 relative">
                 <img
                   className="w-7"
-                  // className={cn({
-                  //   "invert h-8 -mt-1": l.title === "Ollama",
-                  //   "w-7": l.title !== "Ollama"
-                  // })}
                   src={l.logo}
                   alt={l.title}
                 />

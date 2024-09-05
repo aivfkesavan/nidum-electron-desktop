@@ -3,6 +3,7 @@ import { useMutation } from "@tanstack/react-query";
 import { pipeline } from '@xenova/transformers';
 import { toast } from 'sonner';
 
+import { generateImg, generateImgT } from "@actions/img";
 import { installLatestDMG } from "@actions/upgrade";
 import constants from "@utils/constants";
 
@@ -29,9 +30,16 @@ type downloadWhisperModelProps = {
   onError: () => void
 }
 
+type GenerateImageType = {
+  data: generateImgT
+  onSuccess: () => void
+  onError: () => void
+}
+
 type DownloadContextType = {
   downloads: Downloads
   isDownloading: boolean
+  generateImage: (v: GenerateImageType) => void
   downloadModel: (v: downloadModelProps) => void
   downloadLatestExec: (link: string) => void
   downloadXenovaModels: (v: downloadModelProps) => void
@@ -373,11 +381,22 @@ export function DownloadProvider({ children }: props) {
     }
   }
 
+  async function generateImage({ data, onSuccess, onError }: GenerateImageType) {
+    try {
+      await generateImg(data)
+      onSuccess()
+    } catch (error) {
+      console.log(error)
+      onError()
+    }
+  }
+
   return (
     <DownloadContext.Provider
       value={{
         downloads,
         isDownloading: Object.keys(downloads).length > 0,
+        generateImage,
         downloadModel,
         downloadWhisperModel,
         downloadLatestExec,

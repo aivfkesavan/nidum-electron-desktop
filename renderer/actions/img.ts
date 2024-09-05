@@ -43,6 +43,21 @@ export async function uploadImg(files: File[]) {
   }
 }
 
+export type generateImgT = {
+  url: string
+  apiKey: string
+  inputs: string
+  fileName: string
+}
+
+export async function generateImg(data: generateImgT) {
+  return axios.post(`${constants.backendUrl}/image/generate`, data)
+}
+
+export async function downloadGenerateImg(fileName: string) {
+  return axios.post(`${constants.backendUrl}/image/download-generated-img`, { fileName })
+}
+
 export async function deleteImg(fileName: string) {
   const folderName = getFolderName()
   return axios.delete(`${constants.backendUrl}/image/${folderName}/${fileName}`).then(r => r.data)
