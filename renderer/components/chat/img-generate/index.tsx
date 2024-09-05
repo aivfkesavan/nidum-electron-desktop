@@ -76,6 +76,7 @@ function ImgGenerate() {
           },
           onError() {
             deleteLastProccess(project_id)
+            toast({ title: "Authorization header is correct, but the token seems invalid" })
           }
         })
       }
