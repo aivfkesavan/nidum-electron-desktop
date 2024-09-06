@@ -2,14 +2,15 @@ import { useEffect, useRef, useState } from "react";
 import { LuSend } from "react-icons/lu";
 import { nanoid } from "nanoid";
 
+import { downloadGenerateImg } from "@actions/img";
 import useImgGenStore, { ImgGenMsg } from "@store/img-gen";
 import { useDownloads } from "@components/common/download-manager";
 import useContextStore from "@store/context";
 import { useToast } from "@components/ui/use-toast";
-import { downloadGenerateImg } from "@actions/img";
 
 import SpeechToText from "../messages/speech-to-text";
 import Settings from "../settings";
+import ImgModel from "./img-model";
 import List from "./list";
 
 function ImgGenerate() {
@@ -165,6 +166,10 @@ function ImgGenerate() {
           disabled={isLoading}
         />
       </div>
+
+      <ImgModel
+        downloadImg={downloadImg}
+      />
     </>
   )
 }

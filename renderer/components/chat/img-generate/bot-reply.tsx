@@ -5,11 +5,12 @@ import constants from "@utils/constants";
 
 type props = {
   response: string
+  openImg: () => void
   downloadImg: (f: string) => void
   deleteChat?: () => void
 }
 
-function BotReply({ response, downloadImg, deleteChat = () => { } }: props) {
+function BotReply({ response, openImg, downloadImg, deleteChat = () => { } }: props) {
   return (
     <div className="mb-6 group">
       <div className="w-fit max-w-[88%] py-2 ml-9 relative">
@@ -24,7 +25,8 @@ function BotReply({ response, downloadImg, deleteChat = () => { } }: props) {
         <img
           alt=""
           src={`${constants.backendUrl}/image/img_gen/${response}`}
-          className="size-80 rounded-md border border-white/10"
+          className="size-80 rounded-md border border-white/10 cursor-pointer"
+          onClick={openImg}
         />
       </div>
 
