@@ -3,6 +3,8 @@ import useConvoStore from "@/store/conversations";
 
 function useSystemPrompt() {
   const project_id = useContextStore(s => s.project_id)
+  const chat_id = useContextStore(s => s.chat_id)
+
   const systemPrompt = useConvoStore(s => s.projects[project_id]?.systemPrompt || "")
   const webEnabled = useConvoStore(s => s.projects[project_id]?.web_enabled || "")
   const ragEnabled = useConvoStore(s => s.projects[project_id]?.rag_enabled || "")
@@ -15,6 +17,8 @@ function useSystemPrompt() {
   }
 
   return {
+    disTxt: "Please choose new text chat to edit System Prompt",
+    isDisabled: chat_id?.endsWith("-imgGen"),
     prompt: (ragEnabled || webEnabled) ? ragPrompt : systemPrompt,
     onChange,
   }
