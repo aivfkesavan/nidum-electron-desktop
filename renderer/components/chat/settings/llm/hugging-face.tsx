@@ -45,7 +45,7 @@ function HuggingFace() {
   return (
     <>
       <div className="my-4">
-        <label htmlFor="" className="mb-0.5 text-xs opacity-70">Hugging Face api key</label>
+        <label htmlFor="" className="mb-0.5 text-xs opacity-70">Hugging Face Token</label>
 
         <input
           type="text"
@@ -107,7 +107,7 @@ function HuggingFace() {
       </div>
 
       <div className="mb-12 text-xs text-white/60">
-        Click here to sign up for a Huggingface account and generate a token: <a href="https://huggingface.co/join?ref=ragdrive.com" className="text-white/90 hover:underline" target="_blank">https://huggingface.co/join</a>
+        Click here to sign up for a Hugging Face account: <a href="https://huggingface.co/join?ref=ragdrive.com" className="text-white/90 hover:underline" target="_blank">https://huggingface.co/join</a>
       </div>
 
       <Footer onSave={onSave} />

@@ -42,7 +42,7 @@ function Groq() {
   return (
     <>
       <div className="my-4">
-        <label htmlFor="" className="mb-0.5 text-xs opacity-70">Groq api key</label>
+        <label htmlFor="" className="mb-0.5 text-xs opacity-70">Groq API Key</label>
 
         <input
           type="text"
@@ -77,7 +77,7 @@ function Groq() {
       </div>
 
       <div className="mb-12 text-xs text-white/60">
-        Click here to sign up for a Groq developer account: <a href="https://console.groq.com/login?ref=ragdrive.com" className=" text-white/90 hover:underline" target="_blank">https://console.groq.com/login</a>
+        Click here to sign up for a Groq account: <a href="https://console.groq.com/login?ref=ragdrive.com" className=" text-white/90 hover:underline" target="_blank">https://console.groq.com/login</a>
       </div>
 
       <Footer onSave={onSave} />

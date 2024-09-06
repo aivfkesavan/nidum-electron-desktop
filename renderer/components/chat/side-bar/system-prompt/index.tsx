@@ -2,6 +2,7 @@ import { useState } from "react";
 import { IoResizeOutline } from "react-icons/io5";
 
 import useSystemPrompt from "./use-system-prompt";
+import { useToast } from "@components/ui/use-toast";
 
 import {
   Accordion,
@@ -12,12 +13,27 @@ import {
 import Model from "./model";
 
 function SystemPrompt() {
-  const { prompt, isDisabled, disTxt, onChange } = useSystemPrompt()
+  const { prompt, isDisabled, onChange } = useSystemPrompt()
   const [open, setOpen] = useState(false)
+  const { toast } = useToast()
 
   const updateOpen = (e: any) => {
     e?.stopPropagation?.()
     setOpen(p => !p)
+  }
+
+  function notify() {
+    if (isDisabled) {
+      toast({ title: "Please choose new text chat to edit System Prompt" })
+    }
+  }
+
+  if (isDisabled) {
+    return (
+      <div className="px-4 py-2 text-xs border-t">
+        Image Generator
+      </div>
+    )
   }
 
   return (
@@ -26,17 +42,21 @@ function SystemPrompt() {
         <AccordionItem value="1" className="border-none">
           <AccordionTrigger className="px-4 py-2 text-xs">
             System Prompt
-            <span
-              className="p-1 mr-1 ml-auto bg-input hover:bg-secondary rounded-full"
-              onClick={updateOpen}
-            >
-              <IoResizeOutline />
-            </span>
+            {
+              !isDisabled &&
+              <span
+                className="p-1 mr-1 ml-auto bg-input hover:bg-secondary rounded-full"
+                onClick={updateOpen}
+              >
+                <IoResizeOutline />
+              </span>
+            }
           </AccordionTrigger>
+
           <AccordionContent className="px-4 py-2">
             <textarea
               className="p-2 mb-2 text-xs bg-input/50 resize-none"
-              value={isDisabled ? disTxt : prompt}
+              value={prompt}
               onChange={e => onChange(e.target.value)}
               disabled={isDisabled}
             ></textarea>

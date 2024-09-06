@@ -18,13 +18,13 @@ const llmModels: listT[] = [
     id: "2",
     logo: "/groq.png",
     title: "Groq",
-    para: "The fastest LLM inferencing from Groq's LPUs"
+    para: "Fastest LLM inferencing from Groq's LPUs"
   },
   {
     id: "3",
     logo: "/hugging-face.png",
     title: "Hugging Face",
-    para: "Inference API from HuggingFace (Serverless)"
+    para: "Inference API from Hugging Face (Serverless)"
   },
   // {
   //   id: "3",

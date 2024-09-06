@@ -112,12 +112,13 @@ function ImgGenerate() {
       <div className="scroll-y px-6 py-2 mt-2">
         {
           (!messages?.[project_id] || messages?.[project_id]?.length === 0) &&
-          <div className="dc h-[calc(100%-16px)]">
+          <div className="dfc justify-center items-center h-[calc(100%-3rem)]">
             <img
               className="w-16 opacity-60"
               src="/logo.png"
               alt=""
             />
+            <p className="text-white/70">Image Generator</p>
           </div>
         }
 

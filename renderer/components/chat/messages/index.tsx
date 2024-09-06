@@ -446,7 +446,7 @@ function Messages() {
         {
           tempData?.length === 0 &&
           (!data || data?.length === 0) &&
-          <div className="dc h-[calc(100%-16px)]">
+          <div className="dc h-[calc(100%-3rem)]">
             <img
               className="w-16 opacity-60"
               src="/logo.png"

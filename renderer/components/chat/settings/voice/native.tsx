@@ -44,7 +44,7 @@ function Native() {
             <SelectValue placeholder="Voice" />
           </SelectTrigger>
 
-          <SelectContent>
+          <SelectContent className="max-h-64">
             {
               voices.map(v => (
                 <SelectItem
