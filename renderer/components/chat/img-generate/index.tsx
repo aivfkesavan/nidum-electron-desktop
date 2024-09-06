@@ -33,7 +33,7 @@ function ImgGenerate() {
 
   useEffect(() => {
     scrollableRef?.current?.scrollIntoView({ behavior: "instant", block: "end" })
-  }, [messages.length])
+  }, [messages?.[project_id]?.length])
 
   const postData = async (inputs: string, dummy: boolean) => {
     try {
@@ -72,7 +72,7 @@ function ImgGenerate() {
               role: "assistant",
               content: fileName,
             })
-            toast({ title: `Image - (${inputs}) generated succesfully` })
+            toast({ title: `Image - (${inputs}) generated successfully` })
           },
           onError() {
             deleteLastProccess(project_id)
@@ -110,7 +110,7 @@ function ImgGenerate() {
     <>
       <div className="scroll-y px-6 py-2 mt-2">
         {
-          !messages?.[project_id] &&
+          (!messages?.[project_id] || messages?.[project_id]?.length === 0) &&
           <div className="dc h-[calc(100%-16px)]">
             <img
               className="w-16 opacity-60"
