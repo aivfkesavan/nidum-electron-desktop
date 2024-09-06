@@ -19,7 +19,11 @@ import ChatCard from "./chat-card";
 
 type groupedChatsT = Record<string, Chat[]>
 
-function Histories() {
+type HistoriesProps = {
+  isFullScreen: boolean
+}
+
+function Histories({ isFullScreen }: HistoriesProps) {
   const { chat_id, project_id, hfImgGenModel, model_type, updateContext } = useContextStore()
   const addChat = useConvoStore(s => s.addChat)
 
@@ -64,7 +68,7 @@ function Histories() {
         "-translate-x-full": !!project_id
       })}
     >
-      <div className="df p-2 pt-2.5 pl-[102px] text-[11px] mt-[5px] font-medium relative text-white/60">
+      <div className={`df p-2 pt-2.5 ${isFullScreen ? "pl-10" : "pl-[102px]"} text-[11px] mt-[5px] font-medium relative text-white/60`}>
         <p className="flex-1">Chats</p>
 
         <GoToProject />

@@ -16,7 +16,11 @@ import ProjectModel from "../project-model";
 
 type groupedPrpjectT = Record<string, Project[]>
 
-function Projects() {
+type ProjectsProps = {
+  isFullScreen: boolean
+}
+
+function Projects({ isFullScreen }: ProjectsProps) {
   const updateContext = useContextStore(s => s.updateContext)
   const project_id = useContextStore(s => s.project_id)
 
@@ -54,7 +58,7 @@ function Projects() {
         "-translate-x-full": !!project_id
       })}
     >
-      <div className="df p-2 pt-2.5 pl-[102px] text-[11px] mt-[5px] font-medium text-white/60">
+      <div className={`df p-2 pt-2.5 ${isFullScreen ? "pl-10" : "pl-[102px]"} text-[11px] mt-[5px] font-medium text-white/60`}>
         Projects
       </div>
 
