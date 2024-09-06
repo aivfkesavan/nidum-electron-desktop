@@ -17,7 +17,6 @@ function useSystemPrompt() {
   }
 
   return {
-    disTxt: "Please choose new text chat to edit System Prompt",
     isDisabled: chat_id?.endsWith("-imgGen"),
     prompt: (ragEnabled || webEnabled) ? ragPrompt : systemPrompt,
     onChange,
