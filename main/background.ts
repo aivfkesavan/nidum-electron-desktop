@@ -76,6 +76,19 @@ async function createWindowHelper() {
     mainWindow.webContents.openDevTools()
   }
 
+  function sendWindowState() {
+    const isFullScreen = mainWindow.isFullScreen()
+    mainWindow.webContents.send('window:state', isFullScreen);
+  }
+
+  mainWindow.on('enter-full-screen', sendWindowState);
+  mainWindow.on('leave-full-screen', sendWindowState);
+  mainWindow.on('maximize', sendWindowState);
+  mainWindow.on('unmaximize', sendWindowState);
+  mainWindow.on('resize', sendWindowState);
+
+  ipcMain.on('window:getState', sendWindowState);
+
   startServer()
 }
 

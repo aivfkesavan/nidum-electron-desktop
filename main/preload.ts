@@ -17,7 +17,6 @@ const handler = {
 
 contextBridge.exposeInMainWorld('ipc', handler)
 contextBridge.exposeInMainWorld('electronAPI', {
-  getOS: () => process.platform,
   restartApp: () => ipcRenderer.send('app:restart'),
 })
 
