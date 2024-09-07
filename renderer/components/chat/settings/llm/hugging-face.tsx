@@ -14,15 +14,15 @@ import Footer from "../common/footer";
 
 function HuggingFace() {
   const updateContext = useContextStore(s => s.updateContext)
-  const hfImgGenModel = useContextStore(s => s.hfImgGenModel)
+  // const hfImgGenModel = useContextStore(s => s.hfImgGenModel)
   const hfApiKey = useContextStore(s => s.hfApiKey)
   const hfModel = useContextStore(s => s.hfModel)
 
-  const { isLoading: isLoading2, data: models2 } = useLLMModels("hf-img-gen")
+  // const { isLoading: isLoading2, data: models2 } = useLLMModels("hf-img-gen")
   const { isLoading, data: models } = useLLMModels("hf")
 
   const [details, setDetails] = useState({
-    hfImgGenModel,
+    // hfImgGenModel,
     hfApiKey,
     hfModel,
   })
@@ -38,7 +38,7 @@ function HuggingFace() {
     updateContext(details)
   }
 
-  if (isLoading || isLoading2) {
+  if (isLoading) { // || isLoading2
     return <div className="dc h-80"><span className="loader-2"></span></div>
   }
 
@@ -79,7 +79,7 @@ function HuggingFace() {
         </Select>
       </div>
 
-      <div className="mb-4">
+      {/* <div className="mb-4">
         <label htmlFor="" className="mb-0.5 text-xs opacity-70">Image Generation Model</label>
 
         <Select value={details.hfImgGenModel} onValueChange={v => onChange({ hfImgGenModel: v })}>
@@ -104,7 +104,7 @@ function HuggingFace() {
             </SelectItem>
           </SelectContent>
         </Select>
-      </div>
+      </div> */}
 
       <div className="mb-12 text-xs text-white/60">
         Click here to sign up for a Hugging Face account: <a href="https://huggingface.co/join?ref=ragdrive.com" className="text-white/90 hover:underline" target="_blank">https://huggingface.co/join</a>
