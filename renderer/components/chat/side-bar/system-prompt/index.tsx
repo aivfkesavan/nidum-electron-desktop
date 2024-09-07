@@ -2,7 +2,6 @@ import { useState } from "react";
 import { IoResizeOutline } from "react-icons/io5";
 
 import useSystemPrompt from "./use-system-prompt";
-import { useToast } from "@components/ui/use-toast";
 
 import {
   Accordion,
@@ -15,17 +14,10 @@ import Model from "./model";
 function SystemPrompt() {
   const { prompt, isDisabled, onChange } = useSystemPrompt()
   const [open, setOpen] = useState(false)
-  const { toast } = useToast()
 
   const updateOpen = (e: any) => {
     e?.stopPropagation?.()
     setOpen(p => !p)
-  }
-
-  function notify() {
-    if (isDisabled) {
-      toast({ title: "Please choose new text chat to edit System Prompt" })
-    }
   }
 
   if (isDisabled) {
