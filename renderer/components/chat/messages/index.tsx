@@ -6,7 +6,7 @@ import { LuX } from "react-icons/lu";
 
 import type { Message } from "@/store/conversations";
 
-import { createContext, duckDuckGoPrompt, duckDuckGoSerach, ragSearch } from "../../../utils/improve-context";
+import { createContext, ragDefaultPrompt, duckDuckGoSerach, ragSearch, systemDefaultPrompt, webDefaultPrompt } from "../../../utils/improve-context";
 import { imgToBase64, setImgToBase64Map } from "@actions/img";
 // import isWithinTokenLimit from "@/utils/is-within-token-limit";
 
@@ -188,12 +188,12 @@ function Messages() {
           }
         }
 
-        let systemPrompt = projectdetails?.systemPrompt || "You are a helpful AI assistant"
+        let systemPrompt = projectdetails?.systemPrompt || systemDefaultPrompt
 
         if (webEnabled && !ragEnabled) {
           const searchReult = await duckDuckGoSerach(msg)
           systemPrompt = createContext({
-            base: duckDuckGoPrompt,
+            base: projectdetails?.webPrompt || webDefaultPrompt,
             context: searchReult,
           })
         }
@@ -201,7 +201,7 @@ function Messages() {
         if (ragEnabled && filesLen > 0) {
           const searchReult = await ragSearch(msg)
           systemPrompt = createContext({
-            base: projectdetails?.ragPrompt || duckDuckGoPrompt,
+            base: projectdetails?.ragPrompt || ragDefaultPrompt,
             context: searchReult,
           })
         }

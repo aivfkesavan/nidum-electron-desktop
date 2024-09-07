@@ -17,6 +17,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { systemDefaultPrompt } from '@utils/improve-context';
 
 const list = [
   "General",
@@ -52,7 +53,7 @@ function ProjectModel({ data, id, open, closeModel }: props) {
       other: data?.other || "",
       category: data?.category || "",
       description: data?.description || "",
-      systemPrompt: data?.systemPrompt || "You are a helpful AI assistant",
+      systemPrompt: data?.systemPrompt || systemDefaultPrompt,
     }
   })
 
@@ -76,7 +77,7 @@ function ProjectModel({ data, id, open, closeModel }: props) {
       other: "",
       category: "",
       description: "",
-      systemPrompt: "You are a helpful AI assistant",
+      systemPrompt: systemDefaultPrompt,
     })
     closeModel()
   }
