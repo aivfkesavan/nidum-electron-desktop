@@ -28,7 +28,7 @@ const list = [
 function About() {
   return (
     <div className="text-xs text-white/80">
-      <p className="mb-4">Current Version: RAGDrive Version 1.0.6 (Codename - Madurai)</p>
+      <p className="mb-4">Current Version: RAGDrive Version 1.0.7 (Codename - Madurai)</p>
       <p className="mb-4">Hi there! We are a small bootstrapped startup of mostly sober geeks and we hope you have as much fun using RAGDrive as we did creating this for you.</p>
       <p className="mb-4">Watch it in a small video: <a href="https://youtu.be/RAar8QIUIzw?si=NdfbxONCWshP1KAP" target="_blank">https://youtu.be/RAar8QIUIzw?si=NdfbxONCWshP1KAP</a></p>
       <p className="mb-4">Our goal is to bring AI with RAG and Agents to all. Not just the developers and AI enthusiasts but every end user. We are right now the World's First and ONLY edge no-code Local AI Studio that supports Documents and Image RAG.</p>
