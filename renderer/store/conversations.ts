@@ -4,7 +4,7 @@ import { persist } from 'zustand/middleware';
 import { immer } from 'zustand/middleware/immer';
 import dayjs from 'dayjs';
 
-import { duckDuckGoPrompt } from '@utils/improve-context';
+import { ragDefaultPrompt, systemDefaultPrompt, webDefaultPrompt } from '@utils/improve-context';
 
 export type Message = {
   id: string;
@@ -26,6 +26,7 @@ export type Project = {
   category: string;
   other: string
   systemPrompt: string;
+  webPrompt: string;
   ragPrompt: string;
   frequency_penalty: number;
   temperature: number;
@@ -89,8 +90,9 @@ const createDefaultProject = (): [string, Project] => {
     description: "This is a default project",
     category: "General",
     other: "",
-    systemPrompt: "You are a helpful assistant.",
-    ragPrompt: duckDuckGoPrompt,
+    systemPrompt: systemDefaultPrompt,
+    webPrompt: webDefaultPrompt,
+    ragPrompt: ragDefaultPrompt,
     frequency_penalty: 0,
     temperature: 0.1,
     // tokenLimit: 6000,
@@ -133,7 +135,8 @@ const useConvoStore = create<state & actions>()(persist(immer(set => ({
     state.projects[id] = {
       id,
       ...project,
-      ragPrompt: duckDuckGoPrompt,
+      webPrompt: webDefaultPrompt,
+      ragPrompt: ragDefaultPrompt,
       // tokenLimit: 6000,
       frequency_penalty: 0,
       temperature: 0.1,
