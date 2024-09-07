@@ -246,6 +246,22 @@ const useConvoStore = create<state & actions>()(persist(immer(set => ({
 })),
   {
     name: 'convo-storage',
+    version: 1,
+    migrate: (persistedState: any, version) => {
+      if (version === 0 || !version) {
+        Object
+          .values(persistedState.projects)
+          .forEach((project: Project) => {
+            project.webPrompt = webDefaultPrompt
+          })
+
+        return {
+          ...persistedState,
+        }
+      }
+
+      return persistedState
+    }
   }
 ))
 
