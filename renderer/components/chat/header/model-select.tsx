@@ -3,6 +3,7 @@ import { LuChevronRight } from "react-icons/lu";
 
 import useIsFullScreenCheck from "@hooks/use-is-full-screen-check";
 import useContextStore from "@/store/context";
+import usePlatform from "@hooks/use-platform";
 import { cn } from "@lib/utils";
 
 import {
@@ -14,7 +15,9 @@ import OllmaStatusCheck from "@components/common/ollma-status-check";
 import llmModels from "@utils/llm-models";
 
 function ModelSelect() {
+  const platform = usePlatform()
   const isFullScreen = useIsFullScreenCheck()
+
   const updateContext = useContextStore(s => s.updateContext)
   const model_type = useContextStore(s => s.model_type)
   const ollamaUrl = useContextStore(s => s.ollamaUrl)
@@ -24,7 +27,7 @@ function ModelSelect() {
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
-      <PopoverTrigger className={`non-draggable df gap-px pl-28 [.open_&]:pl-0 text-sm transition-all ${isFullScreen ? "-translate-x-20 [.open_&]:translate-x-0" : ""}`}>
+      <PopoverTrigger className={`non-draggable df gap-px pl-28 [.open_&]:pl-0 text-sm transition-all ${isFullScreen || platform === "windows" ? "-translate-x-20 [.open_&]:translate-x-0" : ""}`}>
         AI Server: {model_type === "Ollama" ? "Local" : model_type} <LuChevronRight className="opacity-50" />
       </PopoverTrigger>
 
