@@ -54,9 +54,10 @@ async function createWindowHelper() {
     height: 600,
     minWidth: 800,
     minHeight: 300,
-    titleBarStyle: "hidden",
+    autoHideMenuBar: process.platform === "win32" ? true : false,
+    titleBarStyle: process.platform === "win32" ? "hiddenInset" : "hidden",
     titleBarOverlay: {
-      height: 44
+      height: process.platform === "win32" ? 12 : 44
     },
     webPreferences: {
       preload: path.join(__dirname, 'preload.js'),
