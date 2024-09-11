@@ -8,6 +8,7 @@ import whisper from "./controllers/whisper";
 import ollama from "./controllers/ollama";
 import image from "./controllers/image";
 import doc from "./controllers/doc";
+import ai from "./controllers/ai";
 
 function startServer() {
   const app = express()
@@ -19,6 +20,7 @@ function startServer() {
   app.use(express.urlencoded({ extended: false }))
   app.use(express.json())
 
+  app.use("/ai", ai)
   app.use("/doc", doc)
   app.use("/nidum", ollama)
   app.use("/image", image)

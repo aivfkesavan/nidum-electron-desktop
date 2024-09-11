@@ -24,7 +24,7 @@ const llmModels: listT[] = [
     id: "2",
     logo: "/groq.png",
     title: "Groq",
-    para: "Fastest LLM inferencing from Groq's LPUs"
+    para: "Run inference on Groq LPUs"
   },
   {
     id: "3",
