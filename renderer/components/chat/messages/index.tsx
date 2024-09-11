@@ -9,6 +9,7 @@ import type { Message } from "@/store/conversations";
 import { createContext, ragDefaultPrompt, duckDuckGoSerach, ragSearch, systemDefaultPrompt, webDefaultPrompt } from "../../../utils/improve-context";
 import { imgToBase64, setImgToBase64Map } from "@actions/img";
 // import isWithinTokenLimit from "@/utils/is-within-token-limit";
+import constants from "@utils/constants";
 
 import { useAudio } from "./use-speech";
 import { useToast } from "@/components/ui/use-toast";
@@ -242,9 +243,9 @@ function Messages() {
           Ollama: `${ollamaUrl}/api/chat`,
           Nidum: "https://nidum2b.tunnelgate.haive.tech/v1/chat/completions",
           "Hugging Face": `https://api-inference.huggingface.co/models/${hfModel}/v1/chat/completions`,
-          "SambaNova Systems": "https://api.sambanova.ai/v1/chat/completions",
+          // "SambaNova Systems": "https://api.sambanova.ai/v1/chat/completions",
+          "SambaNova Systems": `${constants.backendUrl}/ai/sambanova`,
           Anthropic: "https://api.anthropic.com/v1/messages",
-          // Anthropic: "http://localhost:4000/ai/anthropic",
           OpenAI: "https://api.openai.com/v1/chat/completions",
         }
 
@@ -292,11 +293,11 @@ function Messages() {
         }
 
         if (model_type === "SambaNova Systems") {
+          // payload.model = sambaNovaModel
+          // headers.Authorization = `Bearer ${sambaNovaApiKey}`
+
           payload.model = sambaNovaModel
-          headers.Authorization = `Bearer ${sambaNovaApiKey}`
-          // headers['Access-Control-Allow-Origin'] = '*'
-          // headers['Access-Control-Allow-Methods'] = 'POST, GET, OPTIONS'
-          // headers['Access-Control-Allow-Headers'] = 'Authorization, Content-Type'
+          payload.apiKey = sambaNovaApiKey
         }
 
         if (model_type === "Anthropic") {
@@ -342,7 +343,7 @@ function Messages() {
           return
         }
 
-        if (model_type === "Nidum") {
+        if (model_type === "Nidum" || model_type === "SambaNova Systems") {
           const res = await response.json()
           const content = res?.choices?.[0]?.message?.content
 
