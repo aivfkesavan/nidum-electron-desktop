@@ -71,6 +71,7 @@ export const createWindow = (
   state = ensureVisibleOnSomeDisplay(restore())
 
   const win = new BrowserWindow({
+    titleBarStyle: 'hidden',
     ...state,
     ...options,
     webPreferences: {
