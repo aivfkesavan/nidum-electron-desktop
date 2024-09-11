@@ -47,9 +47,21 @@ if (!gotTheLock) {
           label: 'Help',
           submenu: [
             {
-              label: 'Learn More',
+              label: 'Help Information',
               click: () => {
-                shell.openExternal('https://ragdrive.com/'); // Replace with your desired URL
+                // Display help message with a description, email, and link
+                dialog.showMessageBox({
+                  type: 'info',
+                  title: 'Help',
+                  message: 'For assistance, you can reach us at info@nidum.ai or visit our website.',
+                  detail: 'Visit https://ragdrive.com/ for more information.',
+                  buttons: ['Open Website', 'Close'],
+                }).then((result) => {
+                  // If the user clicks 'Open Website', open the URL
+                  if (result.response === 0) {
+                    shell.openExternal('https://ragdrive.com/');
+                  }
+                });
               },
             },
           ],
@@ -59,9 +71,6 @@ if (!gotTheLock) {
       // Get the current application menu
       const defaultMenu = Menu.getApplicationMenu();
       const menuItems = defaultMenu ? defaultMenu.items : [];
-
-      // Build the Help menu using Menu.buildFromTemplate()
-      const helpMenu = Menu.buildFromTemplate(helpMenuTemplate);
 
       // Merge Help menu into the default menu items
       const updatedMenu = Menu.buildFromTemplate([
@@ -140,8 +149,6 @@ ipcMain.on('app:restart', () => {
   app.relaunch()
   app.exit(0)
 })
-
-
 
 // autoUpdater.setFeedURL({
 //   provider: 'generic',
