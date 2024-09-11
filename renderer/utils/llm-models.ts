@@ -15,6 +15,12 @@ const llmModels: listT[] = [
     para: "Run AI models locally on your machine"
   },
   {
+    id: "4",
+    logo: "/sambanova.png",
+    title: "SambaNova Systems",
+    para: "Inference API from SambaNova Systems"
+  },
+  {
     id: "2",
     logo: "/groq.png",
     title: "Groq",
@@ -25,6 +31,18 @@ const llmModels: listT[] = [
     logo: "/hugging-face.png",
     title: "Hugging Face",
     para: "Inference API from Hugging Face (Serverless)"
+  },
+  {
+    id: "6",
+    logo: "/openai.png",
+    title: "OpenAI",
+    para: "Inference API from OpenAI"
+  },
+  {
+    id: "5",
+    logo: "/anthropic.png",
+    title: "Anthropic",
+    para: "Inference API from Anthropic"
   },
   // {
   //   id: "3",

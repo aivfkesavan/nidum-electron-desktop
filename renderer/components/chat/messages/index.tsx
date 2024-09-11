@@ -32,7 +32,9 @@ function Messages() {
     hfApiKey, hfModel,
     groqApiKey, groqModel,
     ollamaUrl, ollamaModel, ollamaModeType,
-
+    sambaNovaApiKey, sambaNovaModel,
+    anthropicApiKey, anthropicModel,
+    openaiApiKey, openaiModel,
     embedding_type, ollamEmbeddingUrl, ollamaEmbeddingModel,
   } = useContextStore()
 
@@ -120,6 +122,18 @@ function Messages() {
         else if (model_type === "Hugging Face") {
           if (!hfApiKey) return toast({ title: "Please provide Hugging Face API key" })
           if (!hfModel) return toast({ title: "Please choose a Hugging Face Model" })
+        }
+        else if (model_type === "SambaNova Systems") {
+          if (!sambaNovaApiKey) return toast({ title: "Please provide SambaNova API key" })
+          if (!sambaNovaModel) return toast({ title: "Please choose a SambaNova Model" })
+        }
+        else if (model_type === "Anthropic") {
+          if (!anthropicApiKey) return toast({ title: "Please provide Anthropic API key" })
+          if (!anthropicModel) return toast({ title: "Please choose a Anthropic Model" })
+        }
+        else if (model_type === "OpenAI") {
+          if (!openaiApiKey) return toast({ title: "Please provide OpenAI API key" })
+          if (!openaiModel) return toast({ title: "Please choose a OpenAI Model" })
         }
 
         if (ragEnabled) {
@@ -228,6 +242,10 @@ function Messages() {
           Ollama: `${ollamaUrl}/api/chat`,
           Nidum: "https://nidum2b.tunnelgate.haive.tech/v1/chat/completions",
           "Hugging Face": `https://api-inference.huggingface.co/models/${hfModel}/v1/chat/completions`,
+          "SambaNova Systems": "https://api.sambanova.ai/v1/chat/completions",
+          Anthropic: "https://api.anthropic.com/v1/messages",
+          // Anthropic: "http://localhost:4000/ai/anthropic",
+          OpenAI: "https://api.openai.com/v1/chat/completions",
         }
 
         let url = urls?.[model_type as keyof typeof urls]
@@ -237,13 +255,16 @@ function Messages() {
         }
 
         const payload: any = {
-          n: num(projectdetails?.n, 1),
           top_p: num(projectdetails?.top_p, 1),
           max_tokens: num(projectdetails?.max_tokens, 500),
           temperature: num(projectdetails?.temperature, 0.1),
-          frequency_penalty: num(projectdetails?.frequency_penalty, 0),
           stream: model_type !== "Nidum",
           messages: prompt,
+        }
+
+        if (model_type !== "Anthropic") {
+          payload.n = num(projectdetails?.n, 1)
+          payload.frequency_penalty = num(projectdetails?.frequency_penalty, 0)
         }
 
         if (model_type === "Groq") {
@@ -268,6 +289,28 @@ function Messages() {
           if (payload.top_p === 1) {
             payload.top_p = 0.9
           }
+        }
+
+        if (model_type === "SambaNova Systems") {
+          payload.model = sambaNovaModel
+          headers.Authorization = `Bearer ${sambaNovaApiKey}`
+          // headers['Access-Control-Allow-Origin'] = '*'
+          // headers['Access-Control-Allow-Methods'] = 'POST, GET, OPTIONS'
+          // headers['Access-Control-Allow-Headers'] = 'Authorization, Content-Type'
+        }
+
+        if (model_type === "Anthropic") {
+          payload.model = anthropicModel
+          headers["x-api-key"] = anthropicApiKey
+          headers["anthropic-version"] = "2023-06-01"
+          headers["anthropic-dangerous-direct-browser-access"] = true
+          payload.system = prompt[0].content
+          payload.messages = prompt.slice(1)
+        }
+
+        if (model_type === "OpenAI") {
+          payload.model = openaiModel
+          headers.Authorization = `Bearer ${openaiApiKey}`
         }
 
         // if (!isWithinTokenLimit(JSON.stringify(prompt), projectdetails.tokenLimit)) {
@@ -326,6 +369,7 @@ function Messages() {
           reader?.read().then(function processResult(result: any): any {
             try {
               if (result.done) {
+                console.log("at proper done")
                 const botReply: Message = {
                   role: "assistant",
                   content: botRes,
@@ -353,13 +397,31 @@ function Messages() {
 
               for (const res of resArr) {
                 if (res && res !== "[DONE]") {
+                  console.log(res)
+                  if (model_type === "Anthropic" && res.startsWith("event:")) {
+                    console.log("at continue")
+                    continue
+                  }
                   if (!res.endsWith("}\n\n") && model_type !== "Ollama") {
                     halfData = res
                     continue
                   }
                   const json = JSON?.parse(res)
-                  const text = model_type === "Ollama" ? json?.message?.content : json?.choices?.[0]?.delta?.content || ""
-                  const finishReason = model_type === "Ollama" ? "" : json?.choices?.[0]?.finish_reason
+                  console.log(json)
+                  let text = ""
+                  let finishReason = ""
+
+                  if (model_type === "Ollama") {
+                    text = json?.message?.content
+                    finishReason = ""
+                  } else if (model_type === "Anthropic") {
+                    text = json?.delta?.text || ""
+                    finishReason = ""
+                  } else {
+                    text = json?.choices?.[0]?.delta?.content || ""
+                    finishReason = json?.choices?.[0]?.finish_reason
+                  }
+
                   const hasFinishReason = ["stop", "length"].includes(finishReason)
                   if (json?.error && !text) {
                     setTempData([])
