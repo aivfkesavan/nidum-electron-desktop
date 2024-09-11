@@ -1,7 +1,7 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 
-export type llm_modelsT = "Groq" | "Ollama" | "Nidum" | "Hugging Face";
+export type llm_modelsT = "Groq" | "Ollama" | "Nidum" | "Hugging Face" | "SambaNova Systems" | "Anthropic" | "OpenAI";
 
 type state = {
   project_id: string;
@@ -15,6 +15,12 @@ type state = {
   ollamaModeType: "" | "vision";
   hfApiKey: string;
   hfModel: string;
+  sambaNovaApiKey: string;
+  sambaNovaModel: string;
+  anthropicApiKey: string;
+  anthropicModel: string;
+  openaiApiKey: string;
+  openaiModel: string;
 
   hfImgGenModel: string;
 
@@ -52,6 +58,12 @@ const useContextStore = create<state & actions>()(persist(set => ({
   ollamaModeType: "",
   hfApiKey: "",
   hfModel: "",
+  sambaNovaApiKey: "",
+  sambaNovaModel: "",
+  anthropicApiKey: "",
+  anthropicModel: "",
+  openaiApiKey: "",
+  openaiModel: "",
 
   hfImgGenModel: "",
 

@@ -78,7 +78,7 @@ function SelectModel() {
                 </div>
 
                 <div className="">
-                  <p className="text-sm group-hover:underline">AI Server: {l.title === "Ollama" ? "Local" : l.title}</p>
+                  <p className="text-sm group-hover:underline">{l.title === "Ollama" ? "Local" : l.title}</p>
                   <p className="text-xs text-white/70">{l.para}</p>
                 </div>
               </div>
