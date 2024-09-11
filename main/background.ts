@@ -1,5 +1,4 @@
-import { app, ipcMain, shell, dialog } from 'electron';
-// import { autoUpdater } from 'electron-updater';
+import { app, ipcMain, shell, dialog, Menu } from 'electron';
 import serve from 'electron-serve';
 import path from 'path';
 
@@ -29,7 +28,6 @@ if (!gotTheLock) {
   app.quit()
 } else {
   app.on('second-instance', (event, commandLine, workingDirectory) => {
-    // Someone tried to run a second instance, we should focus our window.
     if (mainWindow) {
       if (mainWindow.isMinimized()) mainWindow.restore()
       mainWindow.focus()
@@ -38,9 +36,42 @@ if (!gotTheLock) {
     dialog.showErrorBox('Welcome Back', `You arrived from: ${commandLine.pop().slice(0, -1)}`)
   })
 
-  // Create mainWindow, load the rest of the app, etc...
   app.whenReady().then(() => {
     createWindowHelper()
+
+    // Add the custom "Help" menu only for macOS (darwin)
+    if (process.platform === 'darwin') {
+      // Define a custom Help menu
+      const helpMenuTemplate = [
+        {
+          label: 'Help',
+          submenu: [
+            {
+              label: 'Learn More',
+              click: () => {
+                shell.openExternal('https://ragdrive.com/'); // Replace with your desired URL
+              },
+            },
+          ],
+        },
+      ];
+
+      // Get the current application menu
+      const defaultMenu = Menu.getApplicationMenu();
+      const menuItems = defaultMenu ? defaultMenu.items : [];
+
+      // Build the Help menu using Menu.buildFromTemplate()
+      const helpMenu = Menu.buildFromTemplate(helpMenuTemplate);
+
+      // Merge Help menu into the default menu items
+      const updatedMenu = Menu.buildFromTemplate([
+        ...menuItems,         // Keep all existing items
+        ...helpMenuTemplate,  // Add Help menu at the end
+      ]);
+
+      // Set the updated menu
+      Menu.setApplicationMenu(updatedMenu);
+    }
   })
 
   app.on('open-url', (event, url) => {
@@ -95,7 +126,6 @@ async function createWindowHelper() {
 
 app.on('ready', () => {
   console.log('App ready event triggered.');
-  // autoUpdater.checkForUpdatesAndNotify();
 });
 
 app.on('window-all-closed', () => {
