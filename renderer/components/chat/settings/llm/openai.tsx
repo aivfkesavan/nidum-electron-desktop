@@ -76,9 +76,9 @@ function OpenAI() {
         </Select>
       </div>
 
-      {/* <div className="mb-12 text-xs text-white/60">
-        Click here to sign up for a Groq account: <a href="https://console.groq.com/login?ref=ragdrive.com" className=" text-white/90 hover:underline" target="_blank">https://console.groq.com/login</a>
-      </div> */}
+      <div className="mb-12 text-xs text-white/60">
+        Click here to sign up for a OpenAI account: <a href="https://platform.openai.com?ref=ragdrive.com" className=" text-white/90 hover:underline" target="_blank">https://platform.openai.com</a>
+      </div>
 
       <Footer onSave={onSave} />
     </>
