@@ -1,10 +1,10 @@
-name: "Nidum.ai macOS and Windows Build and Release"
+name: "Nidum.ai macOS Build and Release"
 on:
   push:
     branches:
       - main
 jobs:
-  create-release-macos:
+  create-release:
     runs-on: macos-latest
     permissions:
       contents: write
@@ -27,7 +27,7 @@ jobs:
           echo "VERSION=$VERSION" >> $GITHUB_ENV
         shell: bash
 
-      - name: Build Electron App for macOS
+      - name: Build Electron App
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           APPLE_CERTIFICATE: ${{ secrets.APPLE_CERTIFICATE }}
@@ -45,9 +45,8 @@ jobs:
           security import certificate.p12 -k build.keychain -P "$APPLE_CERTIFICATE_PASSWORD" -T /usr/bin/codesign
           security set-key-partition-list -S apple-tool:,apple:,codesign: -s -k "$KEYCHAIN_PASSWORD" build.keychain
           
-          # Build the Electron app for macOS
+          # Build the Electron app
           npm run build
-
           # Verify that the app is correctly signed
           APP_PATH=$(find "$PWD/dist" -name "*.app" -type d | head -n 1)
           if [ -z "$APP_PATH" ]; then
@@ -59,7 +58,6 @@ jobs:
             echo "Error: Code signing verification failed."
             exit 1
           fi
-
           # Locate the built DMG file
           DMG_PATH=$(find "$PWD/dist" -name "*.dmg" -type f | head -n 1)
           if [ -z "$DMG_PATH" ]; then
@@ -67,21 +65,18 @@ jobs:
             exit 1
           fi
           echo "DMG_PATH=$DMG_PATH" >> $GITHUB_ENV
-
           # Notarize the DMG
           xcrun notarytool submit "$DMG_PATH" --wait --apple-id "$APPLE_ID" --password "$APPLE_APP_SPECIFIC_PASSWORD" --team-id "$APPLE_TEAM_ID"
           if [ $? -ne 0 ]; then
             echo "Error: Notarization failed."
             exit 1
           fi
-
           # Staple the notarization ticket
           xcrun stapler staple "$DMG_PATH"
           if [ $? -ne 0 ]; then
             echo "Error: Stapling notarization ticket failed."
             exit 1
           fi
-
       - name: Check if Release Exists
         id: check_release
         env:
@@ -92,11 +87,10 @@ jobs:
           else
             echo "RELEASE_EXISTS=false" >> $GITHUB_ENV
           fi
-
-      - name: Locate macOS Files
-        id: locate_macos_files
+      - name: Locate Additional Files
+        id: locate_files
         run: |
-          # Locate the macOS ZIP and YAML files
+          # Locate the ZIP and YAML files
           ZIP_PATH=$(find "$PWD/dist" -name "*.zip" -type f | head -n 1)
           YAML_PATH=$(find "$PWD/dist" -name "*.yml" -type f | head -n 1)
           if [ -z "$ZIP_PATH" ] || [ -z "$YAML_PATH" ]; then
@@ -105,69 +99,16 @@ jobs:
           fi
           echo "ZIP_PATH=$ZIP_PATH" >> $GITHUB_ENV
           echo "YAML_PATH=$YAML_PATH" >> $GITHUB_ENV
-
-  create-release-windows:
-    runs-on: windows-latest
-    permissions:
-      contents: write
-    steps:
-      - name: Check out the repository
-        uses: actions/checkout@v3
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v3
-        with:
-          node-version: '20.16.0'
-
-      - name: Install dependencies
-        run: npm ci
-
-      - name: Build Electron App for Windows (EXE and MSI)
-        env:
-          CSC_LINK: ${{ secrets.WINDOWS_CERTIFICATE }}
-          CSC_KEY_PASSWORD: ${{ secrets.WINDOWS_CERTIFICATE_PASSWORD }}
-        run: |
-          # Build the Electron app for Windows (both EXE and MSI)
-          npm run build -- --win --x64 --config.win.target=nsis,msi
-
-      - name: Locate Windows Files
-        id: locate_windows_files
-        run: |
-          # Locate the Windows EXE, MSI, and ZIP files
-          EXE_PATH=$(find "$PWD/dist" -name "*.exe" -type f | head -n 1)
-          MSI_PATH=$(find "$PWD/dist" -name "*.msi" -type f | head -n 1)
-          ZIP_PATH=$(find "$PWD/dist" -name "*.zip" -type f | head -n 1)
-          if [ -z "$EXE_PATH" ] || [ -z "$MSI_PATH" ] || [ -z "$ZIP_PATH" ]; then
-            echo "Error: EXE, MSI, or ZIP file not found."
-            exit 1
-          fi
-          echo "EXE_PATH=$EXE_PATH" >> $GITHUB_ENV
-          echo "MSI_PATH=$MSI_PATH" >> $GITHUB_ENV
-          echo "ZIP_PATH=$ZIP_PATH" >> $GITHUB_ENV
-
-  create-or-update-release:
-    needs: [create-release-macos, create-release-windows]
-    runs-on: ubuntu-latest
-    steps:
-      - name: Check if Release Exists
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          if [ "${{ needs.create-release-macos.outputs.RELEASE_EXISTS }}" = "true" ]; then
-            echo "RELEASE_EXISTS=true" >> $GITHUB_ENV
-          else
-            echo "RELEASE_EXISTS=false" >> $GITHUB_ENV
-          fi
-
       - name: Create or Update Release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           if [ "${{ env.RELEASE_EXISTS }}" = "true" ]; then
             echo "Updating existing release for version v${{ env.VERSION }}"
-            gh release upload "v${{ env.VERSION }}" "${{ needs.create-release-macos.outputs.DMG_PATH }}" "${{ needs.create-release-macos.outputs.ZIP_PATH }}" "${{ needs.create-release-macos.outputs.YAML_PATH }}" "${{ needs.create-release-windows.outputs.EXE_PATH }}" "${{ needs.create-release-windows.outputs.MSI_PATH }}" "${{ needs.create-release-windows.outputs.ZIP_PATH }}" --clobber
+            gh release upload "v${{ env.VERSION }}" "${{ env.DMG_PATH }}" "${{ env.ZIP_PATH }}" "${{ env.YAML_PATH }}" --clobber
           else
             echo "Creating new release for version v${{ env.VERSION }}"
-            gh release create "v${{ env.VERSION }}" "${{ needs.create-release-macos.outputs.DMG_PATH }}" "${{ needs.create-release-macos.outputs.ZIP_PATH }}" "${{ needs.create-release-macos.outputs.YAML_PATH }}" "${{ needs.create-release-windows.outputs.EXE_PATH }}" "${{ needs.create-release-windows.outputs.MSI_PATH }}" "${{ needs.create-release-windows.outputs.ZIP_PATH }}" \
+            gh release create "v${{ env.VERSION }}" "${{ env.DMG_PATH }}" "${{ env.ZIP_PATH }}" "${{ env.YAML_PATH }}" \
               --title "Release v${{ env.VERSION }}" \
               --generate-notes
+          fi
