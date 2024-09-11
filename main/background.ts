@@ -72,10 +72,13 @@ if (!gotTheLock) {
       const defaultMenu = Menu.getApplicationMenu();
       const menuItems = defaultMenu ? defaultMenu.items : [];
 
-      // Merge Help menu into the default menu items
+      // Remove the default "Help" menu (if it exists)
+      const filteredMenuItems = menuItems.filter(item => item.label !== 'Help');
+
+      // Add the custom Help menu at the end
       const updatedMenu = Menu.buildFromTemplate([
-        ...menuItems,         // Keep all existing items
-        ...helpMenuTemplate,  // Add Help menu at the end
+        ...filteredMenuItems,    // All items except the default Help
+        ...helpMenuTemplate,     // Add the custom Help menu
       ]);
 
       // Set the updated menu
@@ -149,6 +152,8 @@ ipcMain.on('app:restart', () => {
   app.relaunch()
   app.exit(0)
 })
+
+
 
 // autoUpdater.setFeedURL({
 //   provider: 'generic',
