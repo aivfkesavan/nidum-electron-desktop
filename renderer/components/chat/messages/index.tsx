@@ -259,7 +259,7 @@ function Messages() {
           top_p: num(projectdetails?.top_p, 1),
           max_tokens: num(projectdetails?.max_tokens, 500),
           temperature: num(projectdetails?.temperature, 0.1),
-          stream: model_type !== "Nidum",
+          stream: !["Nidum", "Anthropic"].includes(model_type),
           messages: prompt,
         }
 
@@ -343,9 +343,9 @@ function Messages() {
           return
         }
 
-        if (model_type === "Nidum" || model_type === "SambaNova Systems") {
+        if (["Nidum", "Anthropic", "SambaNova Systems"].includes(model_type)) {
           const res = await response.json()
-          const content = res?.choices?.[0]?.message?.content
+          const content = res?.choices?.[0]?.message?.content || res?.content?.[0]?.text || ""
 
           const botReply: Message = {
             role: "assistant",
@@ -398,9 +398,7 @@ function Messages() {
 
               for (const res of resArr) {
                 if (res && res !== "[DONE]") {
-                  console.log(res)
                   if (model_type === "Anthropic" && res.startsWith("event:")) {
-                    console.log("at continue")
                     continue
                   }
                   if (!res.endsWith("}\n\n") && model_type !== "Ollama") {
@@ -408,7 +406,6 @@ function Messages() {
                     continue
                   }
                   const json = JSON?.parse(res)
-                  console.log(json)
                   let text = ""
                   let finishReason = ""
 
