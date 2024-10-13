@@ -1,13 +1,10 @@
 {
     "compilerOptions": {
         "target": "es2022",
-        "lib": [
-            "es2022",
-            "DOM",
-            "DOM.Iterable"
-        ],
+        "lib": ["es2022"],
         "module": "es2022",
         "skipLibCheck": true,
+
         "esModuleInterop": true,
         "removeComments": false,
         "allowSyntheticDefaultImports": true,
@@ -15,27 +12,20 @@
         "noFallthroughCasesInSwitch": true,
         "noUncheckedIndexedAccess": true,
         "moduleDetection": "force",
+
         "moduleResolution": "bundler",
-        "allowImportingTsExtensions": true,
-        "resolveJsonModule": true,
+        "resolveJsonModule": false,
         "isolatedModules": true,
-        "noEmit": true,
-        "jsx": "react-jsx",
-        "strict": false,
+        "composite": true,
+
+        "strict": true,
         "strictNullChecks": true,
         "noImplicitAny": true,
         "noImplicitReturns": true,
         "noImplicitThis": true,
-        "noImplicitOverride": true,
-        "allowJs": true,
+        "noImplicitOverride": true
     },
     "include": [
-        "./src",
-        "./electron"
-    ],
-    "references": [
-        {
-            "path": "./tsconfig.node.json"
-        }
+        "vite.config.ts"
     ]
 }
