@@ -22,9 +22,13 @@ function useInitSetup() {
     if (data && !ollamaEmbeddingModel) {
       setTimeout(() => {
         downloadModel({
-          name: "mxbai-embed-large:latest",
-          ollamaUrl: ollamEmbeddingUrl,
-          initiater: "embedder",
+          id: "",
+          model: "",
+          lable: "",
+          fileName: "",
+          // name: "mxbai-embed-large:latest",
+          // ollamaUrl: ollamEmbeddingUrl,
+          // initiater: "embedder",
           onSuccess() {
             queryClient.invalidateQueries({ queryKey: ["ollama-tags"] })
             updateContext({ ollamaEmbeddingModel: "mxbai-embed-large:latest" })

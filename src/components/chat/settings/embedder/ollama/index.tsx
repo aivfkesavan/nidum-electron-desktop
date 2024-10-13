@@ -29,9 +29,13 @@ function Ollama() {
           <button
             className="px-3 py-1.5 bg-input"
             onClick={() => downloadModel({
-              name: "mxbai-embed-large:latest",
-              ollamaUrl: ollamEmbeddingUrl,
-              initiater: "embedder",
+              id: "",
+              model: "",
+              lable: "",
+              fileName: "",
+              // name: "mxbai-embed-large:latest",
+              // ollamaUrl: ollamEmbeddingUrl,
+              // initiater: "embedder",
               onSuccess() {
                 queryClient.invalidateQueries({ queryKey: ["ollama-tags"] })
                 updateContext({ ollamaEmbeddingModel: "mxbai-embed-large:latest" })
