@@ -7,7 +7,6 @@ import { useLLamaDownloadedModels } from "../../../../../hooks/use-llm-models";
 import { useDownloads } from "../../../../../components/common/download-manager";
 import { useLLMModels } from "../../../../../hooks/use-llm-models";
 import useContextStore from "../../../../../store/context";
-import useNodeOllama from "../../../../../hooks/use-node-ollama";
 import { useToast } from "../../../../../components/ui/use-toast";
 import useUIStore from "../../../../../store/ui";
 
@@ -23,7 +22,6 @@ function Ollama() {
   const close = useUIStore(s => s.close)
 
   const { toast } = useToast()
-  // const { loadModel } = useNodeOllama()
 
   const { data: downloaded, isLoading } = useLLamaDownloadedModels()
   const { data: models, isLoading: isLoading2 } = useLLMModels("llm2")
@@ -53,7 +51,6 @@ function Ollama() {
       const visionModels = ["llava:7b"]
       const ollamaModeType = visionModels.includes(selected) ? "vision" : ""
       updateContext({ ollamaModel: selected, ollamaModeType })
-      // loadModel(selected)
       close()
     } else {
       toast({

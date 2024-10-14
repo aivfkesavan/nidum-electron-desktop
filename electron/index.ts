@@ -2,7 +2,6 @@ import { app, shell, BrowserWindow, ipcMain, Menu, dialog } from "electron";
 import { fileURLToPath } from "node:url";
 import path from "node:path";
 
-import { registerLlmRpc } from "./rpc/llmRpc";
 import server from './server';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -47,7 +46,6 @@ function createWindow() {
       height: process.platform === "win32" ? 12 : 44
     },
   });
-  registerLlmRpc(win);
 
   // open external links in the default browser
   win.webContents.setWindowOpenHandler(({ url }) => {
