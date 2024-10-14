@@ -28,24 +28,34 @@ jobs:
           VERSION=$(node -p "require('./package.json').version")
           echo "VERSION=$VERSION" >> $GITHUB_ENV
 
-      - name: Print Credentials for Debugging (Unmasked)
+      - name: Build Electron App for Production
         run: |
-          echo "::add-mask::" # Disable masking for the upcoming values
-          echo "APPLE_CERTIFICATE: $APPLE_CERTIFICATE"
-          echo "APPLE_CERTIFICATE_PASSWORD: $APPLE_CERTIFICATE_PASSWORD"
-          echo "APPLE_ID: $APPLE_ID"
-          echo "APPLE_APP_SPECIFIC_PASSWORD: $APPLE_APP_SPECIFIC_PASSWORD"
-          echo "APPLE_TEAM_ID: $APPLE_TEAM_ID"
-          echo "KEYCHAIN_PASSWORD: $KEYCHAIN_PASSWORD"
-        env:
-          APPLE_CERTIFICATE: ${{ secrets.APPLE_CERTIFICATE }}
-          APPLE_CERTIFICATE_PASSWORD: ${{ secrets.APPLE_CERTIFICATE_PASSWORD }}
-          APPLE_ID: ${{ secrets.APPLE_ID }}
-          APPLE_APP_SPECIFIC_PASSWORD: ${{ secrets.APPLE_APP_SPECIFIC_PASSWORD }}
-          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
-          KEYCHAIN_PASSWORD: ${{ secrets.KEYCHAIN_PASSWORD }}
+          NODE_ENV=production npm run build
+          
+      - name: Verify App Structure
+        run: |
+          APP_PATH=$(find "$PWD/dist" -name "*.app" -type d | head -n 1)
+          if [ -z "$APP_PATH" ]; then
+            echo "Error: App not found."
+            exit 1
+          fi
+          echo "Verifying .app structure:"
+          ls -R "$APP_PATH"
 
-      - name: Build Electron App
+      - name: List DMG Contents for Debugging
+        run: |
+          DMG_PATH=$(find "$PWD/dist" -name "*.dmg" -type f | head -n 1)
+          if [ -z "$DMG_PATH" ]; then
+            echo "Error: DMG file not found."
+            exit 1
+          fi
+          echo "Listing contents of the DMG file:"
+          hdiutil attach "$DMG_PATH"
+          MOUNT_DIR=$(hdiutil info | grep "/Volumes/" | awk '{print $NF}')
+          ls -la "$MOUNT_DIR"
+          hdiutil detach "$MOUNT_DIR"
+
+      - name: Sign and Notarize DMG
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           APPLE_CERTIFICATE: ${{ secrets.APPLE_CERTIFICATE }}
@@ -62,9 +72,6 @@ jobs:
           security unlock-keychain -p "$KEYCHAIN_PASSWORD" build.keychain
           security import certificate.p12 -k build.keychain -P "$APPLE_CERTIFICATE_PASSWORD" -T /usr/bin/codesign
           security set-key-partition-list -S apple-tool:,apple:,codesign: -s -k "$KEYCHAIN_PASSWORD" build.keychain
-          
-          # Build the Electron app
-          npm run build
           
           # Verify code signing
           APP_PATH=$(find "$PWD/dist" -name "*.app" -type d | head -n 1)
