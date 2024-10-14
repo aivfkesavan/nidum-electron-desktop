@@ -59,7 +59,7 @@ function NativeProvider({ disabled, postData }: props) {
 
   if (loading) return (
     <div className="dc size-10">
-      <span className="loader-2 opacity-75"></span>
+      <span className="loader-2 opacity-75 will-change-transform"></span>
     </div>
   )
 

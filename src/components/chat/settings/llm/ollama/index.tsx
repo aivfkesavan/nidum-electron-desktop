@@ -5,7 +5,7 @@ import { useQueryClient } from "@tanstack/react-query";
 // import { useOllamaModels } from "../../../../../hooks/use-ollama";
 import { useLLamaDownloadedModels } from "../../../../../hooks/use-llm-models";
 import { useDownloads } from "../../../../../components/common/download-manager";
-// import { useLLMModels } from "../../../../../hooks/use-llm-models";
+import { useLLMModels } from "../../../../../hooks/use-llm-models";
 import useContextStore from "../../../../../store/context";
 import useNodeOllama from "../../../../../hooks/use-node-ollama";
 import { useToast } from "../../../../../components/ui/use-toast";
@@ -14,28 +14,6 @@ import useUIStore from "../../../../../store/ui";
 import { RadioGroup, RadioGroupItem } from "../../../../../components/ui/radio-group";
 import { Label } from "../../../../../components/ui/label";
 import DeleteModel from "./delete-model";
-
-const models = [
-  {
-    "name": "Llama 3.1 8B",
-    "size": "4.70 GB",
-    "id": "llama3.1",
-    "file_name": "llama3.1_8b_q4.gguf",
-    "hf_link": "hf:mradermacher/Meta-Llama-3.1-8B-Instruct-GGUF/Meta-Llama-3.1-8B-Instruct.Q4_K_M.gguf",
-    "category": "General Purpose - Medium",
-    "description": "Llama 3.1 8B Q4 is the latest state-of-the-art model from Meta (Needs 8GB RAM)"
-  },
-  {
-    "name": "Gemma 2 9B",
-    "size": "3.43 GB",
-    "id": "gemma2:9b",
-    "file_name": "gemma_2_9b_q2.gguf",
-    "hf_link": "hf:mradermacher/meta-llama-Llama-3.2-1B-Instruct-qlora-malaysian-16k-i1-GGUF/meta-llama-Llama-3.2-1B-Instruct-qlora-malaysian-16k.i1-IQ1_S.gguf",
-    // "hf_link": "hf:bartowski/gemma-2-9b-it-GGUF/gemma-2-9b-it-IQ2_M.gguf",
-    "category": "General Purpose - Small",
-    "description": "Gemma 2 2B Q4 is a small but high-performing and efficient model by Google (Needs 4GB RAM)"
-  }
-]
 
 function Ollama() {
   const { downloads, downloadModel } = useDownloads()
@@ -48,7 +26,7 @@ function Ollama() {
   const { loadModel } = useNodeOllama()
 
   const { data: downloaded, isLoading } = useLLamaDownloadedModels()
-  // const { data: models, isLoading: isLoading2 } = useLLMModels("llm")
+  const { data: models, isLoading: isLoading2 } = useLLMModels("llm2")
 
   const queryClient = useQueryClient()
 
@@ -93,7 +71,7 @@ function Ollama() {
     setModel("")
   }
 
-  if (isLoading) {
+  if (isLoading || isLoading2) {
     return <div className="dc h-80"><span className="loader-2"></span></div>
   }
 
