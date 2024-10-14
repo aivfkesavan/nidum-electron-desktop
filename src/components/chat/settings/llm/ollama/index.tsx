@@ -23,7 +23,7 @@ function Ollama() {
   const close = useUIStore(s => s.close)
 
   const { toast } = useToast()
-  const { loadModel } = useNodeOllama()
+  // const { loadModel } = useNodeOllama()
 
   const { data: downloaded, isLoading } = useLLamaDownloadedModels()
   const { data: models, isLoading: isLoading2 } = useLLMModels("llm2")
@@ -53,7 +53,7 @@ function Ollama() {
       const visionModels = ["llava:7b"]
       const ollamaModeType = visionModels.includes(selected) ? "vision" : ""
       updateContext({ ollamaModel: selected, ollamaModeType })
-      loadModel(selected)
+      // loadModel(selected)
       close()
     } else {
       toast({

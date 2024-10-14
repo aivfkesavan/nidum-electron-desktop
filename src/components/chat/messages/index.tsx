@@ -82,7 +82,7 @@ function Messages() {
   const { speak } = useAudio()
 
   const data = useConvoStore(s => s.messages?.[id] || [])
-  const isChatInputDisabled = !project_id || (model_type === "Ollama" ? !allLoaded : false)
+  const isChatInputDisabled = !project_id
 
   useEffect(() => {
     init()
@@ -95,24 +95,24 @@ function Messages() {
     // setIsHistrySet(false)
   }, [id])
 
-  useEffect(() => {
-    if (model_type === "Ollama" && ollamaModel && downloadedModels && !isModelLoadedOnce) {
-      const isPresent = downloadedModels?.some((d: any) => d.fileName === ollamaModel)
-      if (isPresent) {
-        loadModel(ollamaModel)
-        setIsModelLoadedOnce(true)
-      }
-    }
-  }, [model_type, ollamaModel, isModelLoadedOnce, downloadedModels])
+  // useEffect(() => {
+  //   if (model_type === "Ollama" && ollamaModel && downloadedModels && !isModelLoadedOnce) {
+  //     const isPresent = downloadedModels?.some((d: any) => d.fileName === ollamaModel)
+  //     if (isPresent) {
+  //       loadModel(ollamaModel)
+  //       setIsModelLoadedOnce(true)
+  //     }
+  //   }
+  // }, [model_type, ollamaModel, isModelLoadedOnce, downloadedModels])
 
-  useEffect(() => {
-    return () => {
-      if (model_type === "Ollama") {
-        stopActivePrompt()
-        resetChatHistory()
-      }
-    }
-  }, [id, model_type])
+  // useEffect(() => {
+  //   return () => {
+  //     if (model_type === "Ollama") {
+  //       stopActivePrompt()
+  //       resetChatHistory()
+  //     }
+  //   }
+  // }, [id, model_type])
 
   // useEffect(() => {
   //   if (id && data.length > 0 && model_type === "Ollama" && allLoaded && !isHistrySet) {
@@ -146,40 +146,40 @@ function Messages() {
     // }
   }, [data.length, tempData])
 
-  useEffect(() => {
-    if (id && generatingResult && model_type === "Ollama") {
-      const chats = state.chatSession.simplifiedChat
-      const last: any = chats[chats.length - 1]
-      const msg = last.message
-      if (last.type === "model") {
-        const botReply: Message = {
-          role: "assistant",
-          content: msg,
-          id: nanoid(5),
-        }
+  // useEffect(() => {
+  //   if (id && generatingResult && model_type === "Ollama") {
+  //     const chats = state.chatSession.simplifiedChat
+  //     const last: any = chats[chats.length - 1]
+  //     const msg = last.message
+  //     if (last.type === "model") {
+  //       const botReply: Message = {
+  //         role: "assistant",
+  //         content: msg,
+  //         id: nanoid(5),
+  //       }
 
-        setTempData(prev => prev.map(p => {
-          if (p.role === "assistant" || p.role === "loading") {
-            return botReply
-          }
-          return p
-        }))
-      }
-    }
-  }, [state.chatSession.simplifiedChat, generatingResult, project_id, id, model_type])
+  //       setTempData(prev => prev.map(p => {
+  //         if (p.role === "assistant" || p.role === "loading") {
+  //           return botReply
+  //         }
+  //         return p
+  //       }))
+  //     }
+  //   }
+  // }, [state.chatSession.simplifiedChat, generatingResult, project_id, id, model_type])
 
-  useEffect(() => {
-    if (!generatingResult && tempData.length > 0 && project_id && id && model_type === "Ollama") {
-      setTempData([])
-      setLoading(false)
-      pushIntoMessages(project_id, id, tempData)
-    }
-  }, [generatingResult, project_id, id, model_type])
+  // useEffect(() => {
+  //   if (!generatingResult && tempData.length > 0 && project_id && id && model_type === "Ollama") {
+  //     setTempData([])
+  //     setLoading(false)
+  //     pushIntoMessages(project_id, id, tempData)
+  //   }
+  // }, [generatingResult, project_id, id, model_type])
 
   function num(n: string | number, defaultVal: number) {
     return (n || n === 0) ? Number(n) : defaultVal
   }
-  // console.log(state.chatSession.simplifiedChat)
+
   const convertToBase64 = (file: File): Promise<string> => {
     return new Promise((resolve, reject) => {
       const reader = new FileReader()
@@ -275,22 +275,39 @@ function Messages() {
           }
         ])
 
-        let dataMap: any = data?.map(({ id, images, ...rest }) => rest)
+        let dataMap: any = []
 
-        // if (data) {
-        //   if (ollamaModeType === "vision" && model_type === "Ollama") {
-        //     dataMap = await Promise.all(data?.map(async ({ id, ...rest }) => {
-        //       if (rest?.images?.length > 0) {
-        //         const base64Files = await Promise.all(rest.images.map(imgToBase64))
-        //         rest.images = base64Files
-        //       }
-        //       return rest
-        //     }))
+        if (data) {
+          if (model_type === "Ollama") {
+            if (ollamaModeType === "vision") {
+              dataMap = await Promise.all(data?.map(async ({ id, ...rest }) => {
+                if (rest?.images && rest?.images?.length > 0) {
+                  const base64Files = await Promise.all(rest.images.map(imgToBase64))
+                  rest.images = base64Files
+                }
+                return rest
+              }))
 
-        //   } else {
-        //     dataMap = data?.map(({ id, images, ...rest }) => rest)
-        //   }
-        // }
+            } else {
+              dataMap = data.map(d => {
+                let is_user = d.role === "user"
+                if (is_user) {
+                  return {
+                    type: "user",
+                    text: d.content
+                  }
+                }
+                return {
+                  type: "model",
+                  response: [d.content],
+                }
+              })
+            }
+
+          } else {
+            dataMap = data?.map(({ id, images, ...rest }) => rest)
+          }
+        }
 
         let systemPrompt = projectdetails?.systemPrompt || systemDefaultPrompt
 
@@ -317,45 +334,22 @@ function Messages() {
           restUserContent.images = base64Files
         }
 
-        if (model_type === "Ollama") {
-          const previoius: any = data.map(d => {
-            let is_user = d.role === "user"
-            if (is_user) {
-              return {
-                type: "user",
-                text: d.content
-              }
-            }
-            return {
-              type: "model",
-              response: [d.content],
-            }
-          })
-
-          setChatHistory([
-            {
-              type: "system",
-              text: systemPrompt
-            },
-            ...previoius
-          ])
-          sendPrompt(msg)
-          return;
-        }
-
         const prompt = [
           {
             role: "system",
-            content: systemPrompt
+            [model_type === "Ollama" ? "text" : "content"]: systemPrompt
           },
           ...dataMap,
-          restUserContent,
         ]
+
+        if (model_type !== "Ollama") {
+          prompt.push(restUserContent)
+        }
 
         type urlsT = Record<llm_modelsT, string>
         const urls: urlsT = {
           Groq: "https://api.groq.com/openai/v1/chat/completions",
-          Ollama: "", // `${ollamaUrl}/api/chat`,
+          Ollama: `${constants.backendUrl}/llama-chat`,
           Nidum: "https://nidum2b.tunnelgate.haive.tech/v1/chat/completions",
           "Hugging Face": `https://api-inference.huggingface.co/models/${hfModel}/v1/chat/completions`,
           "SambaNova Systems": `${constants.backendUrl}/ai/sambanova`,
@@ -391,9 +385,10 @@ function Messages() {
           payload.model = "nidum_ai_2b"
         }
 
-        // if (model_type === "Ollama") {
-        //   payload.model = ollamaModel
-        // }
+        if (model_type === "Ollama") {
+          payload.modelName = ollamaModel
+          payload.message = msg
+        }
 
         if (model_type === "Hugging Face") {
           payload.model = hfModel
@@ -501,7 +496,7 @@ function Messages() {
               }
 
               const decoded = new TextDecoder().decode(result.value)
-              const resArr = decoded?.split("data: ") // model_type === "Ollama" ? [decoded] : 
+              const resArr = decoded?.split("data: ")
 
               if (halfData) {
                 resArr[0] = halfData + resArr[0]
@@ -521,11 +516,11 @@ function Messages() {
                   let text = ""
                   let finishReason = ""
 
-                  // if (model_type === "Ollama") {
-                  //   text = json?.message?.content
-                  //   finishReason = ""
-                  // } else 
-                  if (model_type === "Anthropic") {
+                  if (model_type === "Ollama") {
+                    text = json?.reply || ""
+                    finishReason = ""
+                  }
+                  else if (model_type === "Anthropic") {
                     text = json?.delta?.text || ""
                     finishReason = ""
                   } else {
@@ -584,19 +579,14 @@ function Messages() {
     } catch (error) {
       setLoading(false)
       setTempData([])
-      console.log(error)
       toast({ title: "Something went wrong!" })
     }
   }
 
   const stopListening = () => {
     try {
-      if (model_type === "Ollama") {
-        stopActivePrompt()
-      } else {
-        abortController?.current?.abort()
-        abortController.current = new AbortController()
-      }
+      abortController?.current?.abort()
+      abortController.current = new AbortController()
       pushIntoMessages(project_id, id, tempData.filter(f => f.role !== "loading"))
       setLoading(false)
       setTempData([])
