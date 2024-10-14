@@ -5,7 +5,7 @@ import SideBar from "./side-bar";
 // import useContextStore from "@store/context";
 // import useInitSetup from "@renderer/hooks/use-init-setup";
 
-// import CheckForUpdate from "./check-for-update";
+import CheckForUpdate from "./check-for-update";
 // import ImgGenerate from "./img-generate";
 import Header from "./header";
 
@@ -34,7 +34,7 @@ function Chat() {
         <Messages />
       </div>
 
-      {/* <CheckForUpdate /> */}
+      <CheckForUpdate />
     </main>
   )
 }

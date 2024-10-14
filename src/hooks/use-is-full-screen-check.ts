@@ -1,31 +1,42 @@
 import { useEffect, useState } from 'react';
 
 function useIsFullScreenCheck() {
-  const [isFullScreen] = useState(false); // , setIsFullScreen
+  const [isFullScreen, setIsFullScreen] = useState(false);
 
   useEffect(() => {
     const checkWindowState = () => {
-      // @ts-ignore
-      // window.ipc.send('window:getState');
+      window.ipcRenderer.send('window:getState');
     };
 
-    // const handleWindowState = (isFullScreen: boolean) => {
-    //   setIsFullScreen(isFullScreen);
-    // };
+    const handleWindowState = (_event: Event, isFullScreen: boolean) => {
+      setIsFullScreen(isFullScreen);
+    };
 
     checkWindowState();
 
-    // const unsubscribe = window?.ipc?.on('window:state', handleWindowState);
+    // @ts-ignore
+    window.ipcRenderer.on('window:state', handleWindowState);
 
-    window.addEventListener('resize', checkWindowState);
+    // Debounce resize event for performance optimization
+    const debounce = (func: () => void, delay: number) => {
+      let timer: ReturnType<typeof setTimeout>;
+      return () => {
+        clearTimeout(timer);
+        timer = setTimeout(() => func(), delay);
+      };
+    };
+
+    const debouncedCheckWindowState = debounce(checkWindowState, 200);
+    window.addEventListener('resize', debouncedCheckWindowState);
 
     return () => {
-      // unsubscribe();
-      window.removeEventListener('resize', checkWindowState);
+      // @ts-ignore
+      window.ipcRenderer.off('window:state', handleWindowState);
+      window.removeEventListener('resize', debouncedCheckWindowState);
     };
   }, []);
 
   return isFullScreen;
 }
 
-export default useIsFullScreenCheck
+export default useIsFullScreenCheck;

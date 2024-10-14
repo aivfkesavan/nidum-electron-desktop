@@ -31,6 +31,7 @@ function Messages() {
   const { toast } = useToast()
   const {
     state,
+    loading: llamaModelLoading,
     allLoaded,
     generatingResult,
     loadModel,
@@ -667,8 +668,12 @@ function Messages() {
         <div className="flex-1 relative">
           <input
             type="text"
-            className="pl-4 pr-10 bg-transparent border-2 rounded-full"
-            placeholder={!project_id ? "Please choose a project" : "Message"}
+            className={`aa pl-4 pr-10 bg-transparent border-2 rounded-full ${model_type === "Ollama" && llamaModelLoading ? "input-disabled-progoress" : ""}`}
+            placeholder={
+              !project_id ? "Please choose a project" :
+                model_type === "Ollama" && llamaModelLoading ? "Model is loading..."
+                  : "Message"
+            }
             value={message}
             onChange={e => setMessage(e.target.value)}
             onKeyDown={keyPress}
