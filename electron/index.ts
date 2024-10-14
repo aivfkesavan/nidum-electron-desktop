@@ -84,9 +84,12 @@ function createWindow() {
 
   ipcMain.on('window:getState', sendWindowState);
 
-  // win.on("close", () => {
-  //     serverApp?.close?.()
-  // })
+  win.on("close", () => {
+    if (serverApp) {
+      console.log("closig serverApp....")
+      serverApp?.close?.()
+    }
+  })
 }
 
 
@@ -180,10 +183,12 @@ app.on("activate", () => {
 
 // app.whenReady().then(createWindow);
 
-app.on("before-quit", () => {
-  serverApp?.close?.()
-  console.log("closeed")
-})
+// app.on("before-quit", () => {
+//   if (serverApp) {
+//     serverApp?.close?.()
+//   }
+//   console.log("closeed")
+// })
 
 ipcMain.on('app:restart', () => {
   app.relaunch()
