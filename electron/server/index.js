@@ -3,6 +3,7 @@ import cors from "cors";
 
 import { checkPathsSetup } from './utils/path-helper';
 import duckduckgo from "./controllers/duckduckgo";
+import llamaChat from "./controllers/llama-chat";
 import upgrade from "./controllers/upgrade";
 import whisper from "./controllers/whisper";
 import ollama from "./controllers/ollama";
@@ -22,6 +23,7 @@ app.use(express.json())
 app.use("/ai", ai)
 app.use("/doc", doc)
 app.use("/llama", llama)
+app.use("/llama-chat", llamaChat)
 app.use("/nidum", ollama)
 app.use("/image", image)
 app.use("/whisper", whisper)
