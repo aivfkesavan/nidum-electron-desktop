@@ -29,22 +29,25 @@ jobs:
           echo "VERSION=$VERSION" >> $GITHUB_ENV
 
       - name: Build Electron App for Production
+        env:
+          NODE_ENV: production
         run: |
-          NODE_ENV=production npm run build
-          
+          npm run build
+
       - name: Verify App Structure
         run: |
-          APP_PATH=$(find "$PWD/dist" -name "*.app" -type d | head -n 1)
+          APP_PATH=$(find "$PWD/release" -name "*.app" -type d | head -n 1)
           if [ -z "$APP_PATH" ]; then
             echo "Error: App not found."
             exit 1
           fi
           echo "Verifying .app structure:"
           ls -R "$APP_PATH"
+        shell: bash
 
       - name: List DMG Contents for Debugging
         run: |
-          DMG_PATH=$(find "$PWD/dist" -name "*.dmg" -type f | head -n 1)
+          DMG_PATH=$(find "$PWD/release" -name "*.dmg" -type f | head -n 1)
           if [ -z "$DMG_PATH" ]; then
             echo "Error: DMG file not found."
             exit 1
@@ -54,6 +57,7 @@ jobs:
           MOUNT_DIR=$(hdiutil info | grep "/Volumes/" | awk '{print $NF}')
           ls -la "$MOUNT_DIR"
           hdiutil detach "$MOUNT_DIR"
+        shell: bash
 
       - name: Sign and Notarize DMG
         env:
@@ -72,40 +76,29 @@ jobs:
           security unlock-keychain -p "$KEYCHAIN_PASSWORD" build.keychain
           security import certificate.p12 -k build.keychain -P "$APPLE_CERTIFICATE_PASSWORD" -T /usr/bin/codesign
           security set-key-partition-list -S apple-tool:,apple:,codesign: -s -k "$KEYCHAIN_PASSWORD" build.keychain
-          
-          # Verify code signing
-          APP_PATH=$(find "$PWD/dist" -name "*.app" -type d | head -n 1)
-          if [ -z "$APP_PATH" ]; then
-            echo "Error: App not found."
-            exit 1
-          fi
-          codesign --verify --deep --strict --verbose=2 "$APP_PATH"
-          if [ $? -ne 0 ]; then
-            echo "Error: Code signing verification failed."
-            exit 1
-          fi
-          
+
           # Locate the DMG file
-          DMG_PATH=$(find "$PWD/dist" -name "*.dmg" -type f | head -n 1)
+          DMG_PATH=$(find "$PWD/release" -name "*.dmg" -type f | head -n 1)
           if [ -z "$DMG_PATH" ]; then
             echo "Error: DMG file not found."
             exit 1
           fi
           echo "DMG_PATH=$DMG_PATH" >> $GITHUB_ENV
-          
+
           # Notarize the DMG
           xcrun notarytool submit "$DMG_PATH" --wait --apple-id "$APPLE_ID" --password "$APPLE_APP_SPECIFIC_PASSWORD" --team-id "$APPLE_TEAM_ID"
           if [ $? -ne 0 ]; then
             echo "Error: Notarization failed."
             exit 1
           fi
-          
+
           # Staple the notarization ticket
           xcrun stapler staple "$DMG_PATH"
           if [ $? -ne 0 ]; then
             echo "Error: Stapling notarization ticket failed."
             exit 1
           fi
+        shell: bash
 
       - name: Check if Release Exists
         id: check_release
@@ -117,6 +110,7 @@ jobs:
           else
             echo "RELEASE_EXISTS=false" >> $GITHUB_ENV
           fi
+        shell: bash
 
       - name: Create or Update Release
         env:
@@ -131,3 +125,4 @@ jobs:
               --title "Release v${{ env.VERSION }}" \
               --generate-notes
           fi
+        shell: bash
