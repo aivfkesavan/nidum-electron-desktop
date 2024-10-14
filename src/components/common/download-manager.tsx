@@ -292,7 +292,7 @@ export function DownloadProvider({ children }: props) {
               duration: Infinity,
               id: "latest-v",
             })
-            mutate(fileName as never)
+            mutate(fileName as string)
           }, 1500)
           break
         }

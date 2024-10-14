@@ -70,8 +70,7 @@ router.get('/dowload-dmg', async (req, res) => {
     })
 
     const fileName = path.basename(url);
-    // const filePath = createPath([fileName]);
-    const filePath = path.join(os.homedir(), "Downloads", fileName)
+    const filePath = createPath([fileName]);
     const writer = createWriteStream(filePath);
 
     response.data.pipe(writer);
@@ -93,8 +92,7 @@ router.get('/dowload-dmg', async (req, res) => {
 router.get('/install-dmg', async (req, res) => {
   try {
     const { fileName } = req.query
-    const filePath = path.join(os.homedir(), "Downloads", fileName)
-    // const filePath = createPath([fileName])
+    const filePath = createPath([fileName])
 
     // log(`DMG file downloaded successfully to ${filePath}`);
 

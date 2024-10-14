@@ -16,7 +16,6 @@ import { useToast } from "../../../components/ui/use-toast";
 
 import useContextStore, { llm_modelsT } from "../../../store/context";
 import { useLLamaDownloadedModels } from "../../../hooks/use-llm-models";
-import useNodeOllama from "../../../hooks/use-node-ollama";
 import useConvoStore from "../../../store/conversations";
 
 import ManageResourses from "./manage-resourses";
@@ -29,17 +28,6 @@ import logo from '../../../assets/imgs/logo.png';
 
 function Messages() {
   const { toast } = useToast()
-  const {
-    state,
-    loading: llamaModelLoading,
-    allLoaded,
-    generatingResult,
-    loadModel,
-    stopActivePrompt,
-    resetChatHistory,
-    sendPrompt,
-    setChatHistory,
-  } = useNodeOllama()
 
   const {
     updateContext, project_id, chat_id: id,
@@ -209,6 +197,9 @@ function Messages() {
         else if (model_type === "Ollama") {
           // if (!ollamaUrl) return toast({ title: "Please provide base url" })
           if (!ollamaModel) return toast({ title: "Select a model to continue the chat" })
+          if (!downloadedModels?.some((d: any) => d.fileName === ollamaModel)) {
+            return toast({ title: "Model not available" })
+          }
         }
         else if (model_type === "Hugging Face") {
           if (!hfApiKey) return toast({ title: "Please provide Hugging Face API key" })
@@ -341,7 +332,7 @@ function Messages() {
           },
           ...dataMap,
         ]
-
+        // console.log(prompt)
         if (model_type !== "Ollama") {
           prompt.push(restUserContent)
         }
@@ -658,12 +649,8 @@ function Messages() {
         <div className="flex-1 relative">
           <input
             type="text"
-            className={`aa pl-4 pr-10 bg-transparent border-2 rounded-full ${model_type === "Ollama" && llamaModelLoading ? "input-disabled-progoress" : ""}`}
-            placeholder={
-              !project_id ? "Please choose a project" :
-                model_type === "Ollama" && llamaModelLoading ? "Model is loading..."
-                  : "Message"
-            }
+            className="pl-4 pr-10 bg-transparent border-2 rounded-full"
+            placeholder={!project_id ? "Please choose a project" : "Message"}
             value={message}
             onChange={e => setMessage(e.target.value)}
             onKeyDown={keyPress}
