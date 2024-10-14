@@ -112,7 +112,7 @@
       "node_modules/@node-llama-cpp/*"
     ],
     "directories": {
-      "output": "release",
+      "output": "dist",
       "buildResources": "public"
     },
     "mac": {
