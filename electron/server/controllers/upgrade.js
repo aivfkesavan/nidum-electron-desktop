@@ -10,7 +10,7 @@ import os from 'os';
 import packageJson from '../../../package.json';
 
 import isLatestSemantic from '../utils/is-latest-semantic.js'
-// import { createPath } from '../utils/path-helper';
+import { createPath } from '../utils/path-helper';
 
 const router = express.Router()
 
@@ -130,12 +130,13 @@ router.get('/install-dmg', async (req, res) => {
     // log('DMG unmounted successfully');
 
     // Clean up the downloaded file
-    await fs.unlink(filePath);
+    // await fs.unlink(filePath);
     // log(`Downloaded DMG file deleted: ${filePath}`);
 
     res.json({ msg: "success" })
 
   } catch (error) {
+    console.log(error)
     // log(`Error in install-dmg process: ${error.message}`, 'ERROR');
     res.status(500).send('Error: ' + error.message);
   }
