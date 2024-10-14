@@ -1,7 +1,7 @@
 import express from 'express';
 import cors from "cors";
 
-import { checkIsDirExists } from './utils/path-helper';
+import { checkPathsSetup } from './utils/path-helper';
 import duckduckgo from "./controllers/duckduckgo";
 import upgrade from "./controllers/upgrade";
 import whisper from "./controllers/whisper";
@@ -13,7 +13,7 @@ import ai from "./controllers/ai";
 
 const app = express()
 
-checkIsDirExists()
+checkPathsSetup()
 
 app.use(cors())
 app.use(express.urlencoded({ extended: false }))

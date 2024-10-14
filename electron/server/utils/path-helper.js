@@ -1,4 +1,4 @@
-import { existsSync, mkdirSync } from 'fs';
+import { existsSync, mkdirSync, writeFileSync } from 'fs';
 import path from 'path';
 import os from 'os';
 
@@ -22,16 +22,35 @@ export function getWhisperPath() {
   return createPath(["whisper"])
 }
 
-export function checkIsDirExists(dir = "") {
-  const directoryPath = dir || getRoot()
+export function checkIsDirExists(directoryPath = "") {
   if (!existsSync(directoryPath)) {
     try {
       mkdirSync(directoryPath, { recursive: true });
       console.log(`Directory created: ${directoryPath}`);
+      return false
+
     } catch (err) {
       console.error(`Error creating directory: ${err.message}`);
+      return false
     }
+
   } else {
     console.log(`Directory already exists: ${directoryPath}`);
+    return true
   }
+}
+
+function modelsPathCheck() {
+  const modelsPath = createPath(["models"])
+
+  const modelAlreadyExits = checkIsDirExists(modelsPath)
+  if (!modelAlreadyExits) {
+    writeFileSync(createPath(["models", "downloaded.json"]), JSON.stringify([]))
+  }
+}
+
+export function checkPathsSetup() {
+  const directoryPath = getRoot()
+  checkIsDirExists(directoryPath)
+  modelsPathCheck()
 }

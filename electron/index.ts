@@ -7,15 +7,6 @@ import server from './server';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
-// The built directory structure
-//
-// ├─┬─┬ dist
-// │ │ └── index.html
-// │ │
-// │ ├─┬ dist-electron
-// │ │ ├── index.js
-// │ │ └── preload.mjs
-// │
 process.env.APP_ROOT = path.join(__dirname, "..");
 
 export const VITE_DEV_SERVER_URL = process.env["VITE_DEV_SERVER_URL"];
@@ -64,6 +55,10 @@ function createWindow() {
         void win.loadURL(VITE_DEV_SERVER_URL);
     else
         void win.loadFile(path.join(RENDERER_DIST, "index.html"));
+
+    // win.on("close", () => {
+    //     serverApp?.close?.()
+    // })
 }
 
 // Quit when all windows are closed, except on macOS. There, it's common
@@ -87,7 +82,6 @@ app.on("activate", () => {
 app.whenReady().then(createWindow);
 
 app.on("before-quit", () => {
-    // @ts-ignore
     serverApp?.close?.()
     console.log("closeed")
 })

@@ -15,6 +15,7 @@ import { useAudio } from "./use-speech";
 import { useToast } from "../../../components/ui/use-toast";
 
 import useContextStore, { llm_modelsT } from "../../../store/context";
+import { useLLamaDownloadedModels } from "../../../hooks/use-llm-models";
 import useNodeOllama from "../../../hooks/use-node-ollama";
 import useConvoStore from "../../../store/conversations";
 
@@ -64,8 +65,9 @@ function Messages() {
   const webEnabled = useConvoStore(s => s.projects[project_id]?.web_enabled)
   const ragEnabled = useConvoStore(s => s.projects[project_id]?.rag_enabled)
 
+  const { data: downloadedModels } = useLLamaDownloadedModels()
   const [isModelLoadedOnce, setIsModelLoadedOnce] = useState(false)
-  const [isHistrySet, setIsHistrySet] = useState(false)
+  // const [isHistrySet, setIsHistrySet] = useState(false)
 
   // const [reachedLimit, setReachedLimit] = useState(false)
   const [tempData, setTempData] = useState<Message[]>([])
@@ -89,15 +91,18 @@ function Messages() {
     setTempData([])
     setLoading(false)
     setFiles([])
-    setIsHistrySet(false)
+    // setIsHistrySet(false)
   }, [id])
 
   useEffect(() => {
-    if (model_type === "Ollama" && ollamaModel && !isModelLoadedOnce) {
-      loadModel(ollamaModel)
-      setIsModelLoadedOnce(true)
+    if (model_type === "Ollama" && ollamaModel && downloadedModels && !isModelLoadedOnce) {
+      const isPresent = downloadedModels?.some((d: any) => d.fileName === ollamaModel)
+      if (isPresent) {
+        loadModel(ollamaModel)
+        setIsModelLoadedOnce(true)
+      }
     }
-  }, [model_type, ollamaModel, isModelLoadedOnce])
+  }, [model_type, ollamaModel, isModelLoadedOnce, downloadedModels])
 
   useEffect(() => {
     return () => {
