@@ -132,9 +132,7 @@
       "entitlementsInherit": "entitlements.mac.inherit.plist",
       "gatekeeperAssess": false,
       "notarize": {
-        "appleId": "${APPLE_ID}",
-        "appleIdPassword": "${APPLE_APP_SPECIFIC_PASSWORD}",
-        "teamId": "${APPLE_TEAM_ID}"
+        "teamId": "JCN5972XNZ"
       }
     }
   }
