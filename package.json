@@ -10,7 +10,7 @@
     "start": "vite dev",
     "start:build": "electron ./dist-electron",
     "prebuild": "rimraf ./dist ./dist-electron ./release",
-    "build": "tsc && vite build && electron-builder --config ./electron-builder.ts",
+    "build": "tsc && vite build && electron-builder",
     "lint": "npm run lint:eslint",
     "lint:eslint": "eslint --ext .js --ext .ts --report-unused-disable-directives .",
     "format": "npm run lint:eslint -- --fix",
@@ -98,10 +98,24 @@
     "vite-plugin-svgr": "^4.2.0",
     "zx": "^8.1.7"
   },
-  "overrides": {
-    "electron-builder": {
-      "read-config-file": {
-        "config-file-ts": ">=0.2.8-rc1"
+  "build": {
+    "appId": "com.nidum.ragdrive",
+    "directories": {
+      "output": "dist",
+      "buildResources": "public"
+    },
+    "mac": {
+      "category": "public.app-category.productivity",
+      "target": [
+        "dmg",
+        "zip"
+      ],
+      "hardenedRuntime": true,
+      "entitlements": "entitlements.mac.plist",
+      "entitlementsInherit": "entitlements.mac.inherit.plist",
+      "gatekeeperAssess": false,
+      "notarize": {
+        "teamId": "JCN5972XNZ"
       }
     }
   }

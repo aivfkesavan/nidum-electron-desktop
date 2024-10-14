@@ -3,21 +3,12 @@ productName: RAGDrive
 copyright: Copyright © 2024 nidum.ai
 directories:
   output: dist
-  buildResources: resources
+  buildResources: public
 files:
-  - from: "server/bin"
-    to: "bin"
-    filter:
-      - "**/*"
   - from: "."
     filter:
       - "package.json"
       - "app/**/*"
-extraResources:
-  - from: "server/bin"
-    to: "bin"
-    filter:
-      - "**/*"
 publish:
   provider: github
   private: true
