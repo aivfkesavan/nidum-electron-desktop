@@ -197,6 +197,10 @@
   .non-draggable {
     -webkit-app-region: no-drag;
   }
+
+  .input-disabled-progoress {
+    @apply disabled:cursor-progress;
+  }
 }
 
 @keyframes mic-bg-animation {

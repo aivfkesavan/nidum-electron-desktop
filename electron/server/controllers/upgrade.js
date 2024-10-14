@@ -7,8 +7,10 @@ import fs from 'fs/promises';
 import util from 'util'
 import os from 'os';
 
+import packageJson from '../../../package.json';
+
 import isLatestSemantic from '../utils/is-latest-semantic.js'
-import { createPath } from '../utils/path-helper';
+// import { createPath } from '../utils/path-helper';
 
 const router = express.Router()
 
@@ -29,7 +31,7 @@ const execPromise = util.promisify(exec);
 
 router.get('/is-latest-version-available', async (req, res) => {
   try {
-    const currentVersion = "1.0.7"
+    const currentVersion = packageJson.version
     const { data } = await axios.get("https://raw.githubusercontent.com/aivfkesavan/nidum-public/main/versions.json")
     const latestVersion = data?.[os.platform()] || data?.darwin
 
@@ -91,7 +93,8 @@ router.get('/dowload-dmg', async (req, res) => {
 router.get('/install-dmg', async (req, res) => {
   try {
     const { fileName } = req.query
-    const filePath = createPath([fileName])
+    const filePath = path.join(os.homedir(), "Downloads", fileName)
+    // const filePath = createPath([fileName])
 
     // log(`DMG file downloaded successfully to ${filePath}`);
 
