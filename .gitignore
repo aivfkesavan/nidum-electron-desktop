@@ -11,4 +11,3 @@ node_modules
 /.vitepress/.cache
 /src-old
 /release
-package-lock.json
