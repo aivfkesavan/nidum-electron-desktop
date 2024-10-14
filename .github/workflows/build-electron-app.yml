@@ -1,10 +1,8 @@
-name: Nidum.ai macOS Build and Release
-
+name: "Nidum.ai macOS Build and Release"
 on:
   push:
     branches:
       - main
-
 jobs:
   create-release:
     runs-on: macos-latest
@@ -27,39 +25,9 @@ jobs:
         run: |
           VERSION=$(node -p "require('./package.json').version")
           echo "VERSION=$VERSION" >> $GITHUB_ENV
-
-      - name: Build Electron App for Production
-        env:
-          NODE_ENV: production
-        run: |
-          npm run build
-
-      - name: Verify App Structure
-        run: |
-          APP_PATH=$(find "$PWD/release" -name "*.app" -type d | head -n 1)
-          if [ -z "$APP_PATH" ]; then
-            echo "Error: App not found."
-            exit 1
-          fi
-          echo "Verifying .app structure:"
-          ls -R "$APP_PATH"
         shell: bash
 
-      - name: List DMG Contents for Debugging
-        run: |
-          DMG_PATH=$(find "$PWD/release" -name "*.dmg" -type f | head -n 1)
-          if [ -z "$DMG_PATH" ]; then
-            echo "Error: DMG file not found."
-            exit 1
-          fi
-          echo "Listing contents of the DMG file:"
-          hdiutil attach "$DMG_PATH"
-          MOUNT_DIR=$(hdiutil info | grep "/Volumes/" | awk '{print $NF}')
-          ls -la "$MOUNT_DIR"
-          hdiutil detach "$MOUNT_DIR"
-        shell: bash
-
-      - name: Sign and Notarize DMG
+      - name: Build Electron App
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           APPLE_CERTIFICATE: ${{ secrets.APPLE_CERTIFICATE }}
@@ -69,37 +37,46 @@ jobs:
           APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
           KEYCHAIN_PASSWORD: ${{ secrets.KEYCHAIN_PASSWORD }}
         run: |
-          # Import the Apple certificate
+          # Decode and import the Apple certificate
           echo $APPLE_CERTIFICATE | base64 --decode > certificate.p12
           security create-keychain -p "$KEYCHAIN_PASSWORD" build.keychain
           security default-keychain -s build.keychain
           security unlock-keychain -p "$KEYCHAIN_PASSWORD" build.keychain
           security import certificate.p12 -k build.keychain -P "$APPLE_CERTIFICATE_PASSWORD" -T /usr/bin/codesign
           security set-key-partition-list -S apple-tool:,apple:,codesign: -s -k "$KEYCHAIN_PASSWORD" build.keychain
-
-          # Locate the DMG file
-          DMG_PATH=$(find "$PWD/release" -name "*.dmg" -type f | head -n 1)
+          
+          # Build the Electron app
+          npm run build
+          # Verify that the app is correctly signed
+          APP_PATH=$(find "$PWD/dist" -name "*.app" -type d | head -n 1)
+          if [ -z "$APP_PATH" ]; then
+            echo "Error: App not found."
+            exit 1
+          fi
+          codesign --verify --deep --strict --verbose=2 "$APP_PATH"
+          if [ $? -ne 0 ]; then
+            echo "Error: Code signing verification failed."
+            exit 1
+          fi
+          # Locate the built DMG file
+          DMG_PATH=$(find "$PWD/dist" -name "*.dmg" -type f | head -n 1)
           if [ -z "$DMG_PATH" ]; then
             echo "Error: DMG file not found."
             exit 1
           fi
           echo "DMG_PATH=$DMG_PATH" >> $GITHUB_ENV
-
           # Notarize the DMG
           xcrun notarytool submit "$DMG_PATH" --wait --apple-id "$APPLE_ID" --password "$APPLE_APP_SPECIFIC_PASSWORD" --team-id "$APPLE_TEAM_ID"
           if [ $? -ne 0 ]; then
             echo "Error: Notarization failed."
             exit 1
           fi
-
           # Staple the notarization ticket
           xcrun stapler staple "$DMG_PATH"
           if [ $? -ne 0 ]; then
             echo "Error: Stapling notarization ticket failed."
             exit 1
           fi
-        shell: bash
-
       - name: Check if Release Exists
         id: check_release
         env:
@@ -110,19 +87,28 @@ jobs:
           else
             echo "RELEASE_EXISTS=false" >> $GITHUB_ENV
           fi
-        shell: bash
-
+      - name: Locate Additional Files
+        id: locate_files
+        run: |
+          # Locate the ZIP and YAML files
+          ZIP_PATH=$(find "$PWD/dist" -name "*.zip" -type f | head -n 1)
+          YAML_PATH=$(find "$PWD/dist" -name "*.yml" -type f | head -n 1)
+          if [ -z "$ZIP_PATH" ] || [ -z "$YAML_PATH" ]; then
+            echo "Error: ZIP or YAML file not found."
+            exit 1
+          fi
+          echo "ZIP_PATH=$ZIP_PATH" >> $GITHUB_ENV
+          echo "YAML_PATH=$YAML_PATH" >> $GITHUB_ENV
       - name: Create or Update Release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           if [ "${{ env.RELEASE_EXISTS }}" = "true" ]; then
             echo "Updating existing release for version v${{ env.VERSION }}"
-            gh release upload "v${{ env.VERSION }}" "${{ env.DMG_PATH }}" --clobber
+            gh release upload "v${{ env.VERSION }}" "${{ env.DMG_PATH }}" "${{ env.ZIP_PATH }}" "${{ env.YAML_PATH }}" --clobber
           else
             echo "Creating new release for version v${{ env.VERSION }}"
-            gh release create "v${{ env.VERSION }}" "${{ env.DMG_PATH }}" \
+            gh release create "v${{ env.VERSION }}" "${{ env.DMG_PATH }}" "${{ env.ZIP_PATH }}" "${{ env.YAML_PATH }}" \
               --title "Release v${{ env.VERSION }}" \
               --generate-notes
           fi
-        shell: bash
