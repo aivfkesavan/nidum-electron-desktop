@@ -123,3 +123,4 @@ jobs:
             gh release create "v${{ env.VERSION }}" "${{ env.DMG_PATH }}" \
               --title "Release v${{ env.VERSION }}" \
               --generate-notes
+          fi
