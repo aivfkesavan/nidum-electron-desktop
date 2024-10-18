@@ -41,7 +41,59 @@ async function extractSublinks(page, url) {
   return sublinks
 }
 
-async function crawl({ url, maxRequestsPerCrawl = 50, folderName }) {
+export async function getSublinks({ url, excludedLinks = [], maxRequestsPerCrawl = 5 }) {
+  try {
+    const visitedUrls = new Set()
+    const urlsToVisit = [normalizeUrl(url)]
+    const excludedNormalized = new Set(excludedLinks.map(normalizeUrl))
+
+    const browser = await chromium.launch()
+    const context = await browser.newContext()
+    const page = await context.newPage()
+
+    const allSublinks = new Set()
+    let requestCount = 0
+
+    while (urlsToVisit.length > 0 && requestCount < maxRequestsPerCrawl) {
+      const currentUrl = urlsToVisit.shift()
+      const normalizedUrl = normalizeUrl(currentUrl)
+
+      if (visitedUrls.has(normalizedUrl) || excludedNormalized.has(normalizedUrl)) continue
+      visitedUrls.add(normalizedUrl)
+
+      try {
+        await page.goto(normalizedUrl, { waitUntil: 'domcontentloaded' })
+        requestCount++;
+
+        const sublinks = await extractSublinks(page, normalizedUrl)
+        sublinks.forEach(link => {
+          if (!visitedUrls.has(normalizeUrl(link)) && !excludedNormalized.has(normalizeUrl(link))) {
+            allSublinks.add(link)
+          }
+        })
+
+        if (requestCount < maxRequestsPerCrawl) {
+          urlsToVisit.push(...sublinks.filter(link => !visitedUrls.has(normalizeUrl(link)) && !excludedNormalized.has(normalizeUrl(link))))
+        }
+
+      } catch (error) {
+        console.error(`Failed to crawl ${normalizedUrl}: ${error.message}`)
+      }
+    }
+
+    await browser.close()
+
+    const final = [...allSublinks]
+    return final
+
+  } catch (error) {
+    logger.error(`${JSON.stringify(error)}, ${error?.message}`)
+    console.log(error)
+    return []
+  }
+}
+
+export async function crawlWebsite({ url, maxRequestsPerCrawl = 50, folderName }) {
   try {
     const visitedUrls = new Set()
     const urlsToVisit = [normalizeUrl(url)]
@@ -84,5 +136,3 @@ async function crawl({ url, maxRequestsPerCrawl = 50, folderName }) {
     console.log(error)
   }
 }
-
-export default crawl
