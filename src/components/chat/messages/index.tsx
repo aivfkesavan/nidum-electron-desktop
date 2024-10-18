@@ -55,8 +55,6 @@ function Messages() {
   const ragEnabled = useConvoStore(s => s.projects[project_id]?.rag_enabled)
 
   const { data: downloadedModels } = useLLamaDownloadedModels()
-  const [isModelLoadedOnce, setIsModelLoadedOnce] = useState(false)
-  // const [isHistrySet, setIsHistrySet] = useState(false)
 
   // const [reachedLimit, setReachedLimit] = useState(false)
   const [tempData, setTempData] = useState<Message[]>([])
@@ -80,47 +78,7 @@ function Messages() {
     setTempData([])
     setLoading(false)
     setFiles([])
-    // setIsHistrySet(false)
   }, [id])
-
-  // useEffect(() => {
-  //   if (model_type === "Ollama" && ollamaModel && downloadedModels && !isModelLoadedOnce) {
-  //     const isPresent = downloadedModels?.some((d: any) => d.fileName === ollamaModel)
-  //     if (isPresent) {
-  //       loadModel(ollamaModel)
-  //       setIsModelLoadedOnce(true)
-  //     }
-  //   }
-  // }, [model_type, ollamaModel, isModelLoadedOnce, downloadedModels])
-
-  // useEffect(() => {
-  //   return () => {
-  //     if (model_type === "Ollama") {
-  //       stopActivePrompt()
-  //       resetChatHistory()
-  //     }
-  //   }
-  // }, [id, model_type])
-
-  // useEffect(() => {
-  //   if (id && data.length > 0 && model_type === "Ollama" && allLoaded && !isHistrySet) {
-  //     // console.log("at setting")
-  //     setChatHistory(data.map(d => {
-  //       let is_user = d.role === "user"
-  //       if (is_user) {
-  //         return {
-  //           type: "user",
-  //           text: d.content
-  //         }
-  //       }
-  //       return {
-  //         type: "model",
-  //         response: [d.content],
-  //       }
-  //     }))
-  //     setIsHistrySet(true)
-  //   }
-  // }, [id, data, model_type, allLoaded, isHistrySet])
 
   useEffect(() => {
     scrollableRef?.current?.scrollIntoView({ behavior: "instant", block: "end" })
@@ -133,36 +91,6 @@ function Messages() {
     //   setReachedLimit(false)
     // }
   }, [data.length, tempData])
-
-  // useEffect(() => {
-  //   if (id && generatingResult && model_type === "Ollama") {
-  //     const chats = state.chatSession.simplifiedChat
-  //     const last: any = chats[chats.length - 1]
-  //     const msg = last.message
-  //     if (last.type === "model") {
-  //       const botReply: Message = {
-  //         role: "assistant",
-  //         content: msg,
-  //         id: nanoid(5),
-  //       }
-
-  //       setTempData(prev => prev.map(p => {
-  //         if (p.role === "assistant" || p.role === "loading") {
-  //           return botReply
-  //         }
-  //         return p
-  //       }))
-  //     }
-  //   }
-  // }, [state.chatSession.simplifiedChat, generatingResult, project_id, id, model_type])
-
-  // useEffect(() => {
-  //   if (!generatingResult && tempData.length > 0 && project_id && id && model_type === "Ollama") {
-  //     setTempData([])
-  //     setLoading(false)
-  //     pushIntoMessages(project_id, id, tempData)
-  //   }
-  // }, [generatingResult, project_id, id, model_type])
 
   function num(n: string | number, defaultVal: number) {
     return (n || n === 0) ? Number(n) : defaultVal
