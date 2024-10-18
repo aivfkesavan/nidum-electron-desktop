@@ -1,5 +1,5 @@
 import express from 'express';
-import crawle from '../utils/crawler';
+import crawle from '../utils/crawler2';
 
 const router = express.Router()
 
