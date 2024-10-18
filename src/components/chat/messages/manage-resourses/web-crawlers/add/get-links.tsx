@@ -1,12 +1,13 @@
 import { useMutation } from '@tanstack/react-query';
 import { useForm } from 'react-hook-form';
 
-import useContextStore from '../../../../../store/context';
-import { crawleWeb } from '../../../../../actions/webcrawler';
+import { getSubLinks } from '../../../../../../actions/webcrawler';
 
-function Add() {
-  const projectId = useContextStore(s => s.project_id)
+type props = {
+  updateLinks: (v: string[]) => void
+}
 
+function GetLinks({ updateLinks }: props) {
   const { register, handleSubmit, formState: { errors } } = useForm({
     defaultValues: {
       url: "https://crawlee.dev",
@@ -15,15 +16,13 @@ function Add() {
   })
 
   const { isPending, mutate } = useMutation({
-    mutationFn: crawleWeb,
-    onSuccess() {
+    mutationFn: getSubLinks,
+    onSuccess(res) {
+      updateLinks(res.links)
     }
   })
 
-  const onSubmit = (data: any) => mutate({
-    ...data,
-    folderName: `wsc_${projectId}`
-  })
+  const onSubmit = (data: any) => mutate(data)
 
   return (
     <form
@@ -70,10 +69,10 @@ function Add() {
         className="df px-12 py-1.5 mt-4 mx-auto bg-input hover:bg-input/80"
       >
         {isPending && <span className='loader-2'></span>}
-        Crawle
+        Get Links
       </button>
     </form>
   )
 }
 
-export default Add
+export default GetLinks
