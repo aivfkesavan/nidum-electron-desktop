@@ -14,19 +14,6 @@ import { createPath } from '../utils/path-helper';
 
 const router = express.Router()
 
-// const logPath = createPath(["app.log"])
-
-// function log(message, level = 'INFO') {
-//   const timestamp = new Date().toISOString();
-//   const logMessage = `${timestamp} [${level}]: ${message}\n`;
-
-//   fs.appendFile(logPath, logMessage, (err) => {
-//     if (err) console.error('Error writing to log file:', err);
-//   })
-
-//   console.log(logMessage);
-// }
-
 const execPromise = util.promisify(exec);
 
 router.get('/is-latest-version-available', async (req, res) => {
