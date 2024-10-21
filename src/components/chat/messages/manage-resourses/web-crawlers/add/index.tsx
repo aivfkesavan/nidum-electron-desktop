@@ -5,19 +5,25 @@ import useContextStore from '../../../../../../store/context';
 import GetLinks from "./get-links";
 import Tree from "./tree";
 
+type hierarchyT = Node & {
+  checked: boolean
+}
 function Add() {
   const projectId = useContextStore(s => s.project_id)
 
   const [includedLinks, setIncludedLinks] = useState<string[]>([])
-  const [hierarchy, setHierarchy] = useState<Node[]>([])
+  const [hierarchy, setHierarchy] = useState<hierarchyT[]>([])
   const [links, setLinks] = useState<string[]>([])
   const [step, setStep] = useState(1)
 
   function updateLinks(payload: string[]) {
     const arr = [...new Set([...payload, ...links])]
     const list = buildHierarchy(arr)
-    setLinks(payload)
-    setHierarchy(list)
+    setLinks(p => [...p, ...payload])
+    setHierarchy(list.map(l => ({
+      ...l,
+      checked: includedLinks.includes(l.fullUrl) || payload.includes(l.fullUrl),
+    })))
     setIncludedLinks(p => [
       ...p,
       ...payload
@@ -25,9 +31,43 @@ function Add() {
     setStep(2)
   }
 
-  function onChecked(v: string) {
-    console.log(v)
-    setIncludedLinks(p => p.includes(v) ? p.filter(l => l !== v) : [...p, v])
+  function updateIncludedLinks(node: Node, checked: boolean, currentLinks: string[]): string[] {
+    const updatedLinks = checked
+      ? [...new Set([...currentLinks, node.fullUrl])]
+      : currentLinks.filter(link => link !== node.fullUrl)
+
+    return node.childs.reduce(
+      (acc, child) => updateIncludedLinks(child, checked, acc),
+      updatedLinks
+    )
+  }
+
+  function childCheck(list: hierarchyT, url: string, checked: boolean) {
+    if (url.includes(list.fullUrl)) {
+      const isCheked = !checked || true
+
+      return {
+        ...list,
+      }
+    }
+    return list
+  }
+
+  function onChecked(url: string, checked: boolean) {
+    setHierarchy(prev => {
+      let newArr = prev.map(p => {
+        if (url.includes(p.fullUrl)) {
+          return {
+            ...p,
+            checked,
+
+          }
+        }
+        return p
+      })
+      return newArr
+    })
+    setIncludedLinks(p => checked ? [...p, url] : p.filter(f => f !== url))
   }
 
   if (step === 1) {
@@ -43,7 +83,6 @@ function Add() {
           <Tree
             {...h}
             key={h.url}
-            checked={includedLinks}
             onChecked={onChecked}
           />
         ))
