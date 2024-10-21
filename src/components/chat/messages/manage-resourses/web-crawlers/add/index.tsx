@@ -1,5 +1,6 @@
 import { useState } from "react";
 
+import { sortUrlsByPathname } from "../../../../../../utils/url-helper";
 import useContextStore from '../../../../../../store/context';
 import { useAddCrawl } from "../../../../../../hooks/use-crawler";
 
@@ -15,11 +16,11 @@ function Add() {
   const { mutate, isPending } = useAddCrawl()
 
   function updateLinks(payload: string[]) {
-    setLinks(p => [...p, ...payload])
-    setIncludedLinks(p => [...p, ...payload])
+    setLinks(p => sortUrlsByPathname([...new Set([...p, ...payload])]))
+    setIncludedLinks(p => [...new Set([...p, ...payload])])
     setStep(2)
   }
-
+  console.log(links)
   function onSubmit() {
     mutate(
       {
