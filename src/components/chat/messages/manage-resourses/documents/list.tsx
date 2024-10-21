@@ -26,7 +26,7 @@ function List() {
     <div className='mini-scroll-bar flex-1 px-4 max-md:pt-6 overflow-y-auto border-t md:border-t-0 md:border-l'>
       {
         files?.length === 0 &&
-        <div className="dc h-72 text-white/60">
+        <div className="dc h-full text-white/60">
           No files added yet
         </div>
       }
