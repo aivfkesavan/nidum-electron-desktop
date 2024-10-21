@@ -1,5 +1,7 @@
 import express from 'express';
+
 import { getSublinks, crawlWebsite2 } from '../utils/crawler2';
+import { indexFolder } from '../utils/llama';
 
 const router = express.Router()
 
@@ -20,6 +22,9 @@ router.post("/crawle", async (req, res) => {
   try {
     const { urls, folderName } = req.body
     await crawlWebsite2({ urls, folderName })
+
+    await indexFolder({ folderName })
+
     return res.json({ msg: "Saved successfully" })
 
   } catch (error) {

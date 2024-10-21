@@ -1,3 +1,5 @@
+import fs from 'fs/promises';
+
 import {
   Settings,
   HuggingFaceEmbedding,
@@ -12,10 +14,17 @@ import { getRagPath, createPath } from "./path-helper";
 export async function indexFolder({ folderName }) {
   Settings.embedModel = new HuggingFaceEmbedding()
 
+  const persistDir = getRagPath(folderName)
+
+  try {
+    await fs.rm(persistDir, { recursive: true, force: true })
+  } catch (e) {
+    // console.log("no folder found")
+  }
+
   const directoryPath = createPath([folderName])
   const documents = await new SimpleDirectoryReader().loadData({ directoryPath })
 
-  const persistDir = getRagPath(folderName)
   const storageContext = await storageContextFromDefaults({ persistDir })
 
   await VectorStoreIndex.fromDocuments(documents, { storageContext })
