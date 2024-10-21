@@ -29,11 +29,14 @@ export function useAddCrawl() {
 
   return useMutation({
     mutationFn: crawleWeb,
-    onSuccess() {
-      queryClient.invalidateQueries({ queryKey: ["get-crawled-list"] })
+    onSuccess(res, variables) {
+      queryClient.invalidateQueries({ queryKey: ["get-crawled-list", variables.folderName] })
       toast({
         title: "Page(s) successfully crawled"
       })
+    },
+    onError(err) {
+      toast({ title: `${JSON.stringify(err)}` })
     }
   })
 }
@@ -44,11 +47,14 @@ export function useDeleteCrawledLinks() {
 
   return useMutation({
     mutationFn: deletedCrawledLinks,
-    onSuccess() {
-      queryClient.invalidateQueries({ queryKey: ["get-crawled-list"] })
+    onSuccess(res, variables) {
+      queryClient.invalidateQueries({ queryKey: ["get-crawled-list", variables.folderName] })
       toast({
         title: "Deleted selected links"
       })
+    },
+    onError(err) {
+      toast({ title: `${JSON.stringify(err)}` })
     }
   })
 }

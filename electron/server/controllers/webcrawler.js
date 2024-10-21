@@ -4,6 +4,7 @@ import fs from 'fs/promises';
 import { getSublinks, crawlWebsite2, convertUrlsToFilenames } from '../utils/crawler2';
 import { indexFolder } from '../utils/llama';
 import { createPath } from '../utils/path-helper';
+import logger from '../utils/logger';
 
 const router = express.Router()
 
@@ -20,6 +21,7 @@ router.get("/get-crawled-list/:folderName", async (req, res) => {
       return res.json([])
     }
   } catch (error) {
+    logger.error(`${JSON.stringify(error)}, ${error?.message}`)
     res.status(500).json({ error: error.message })
   }
 })
@@ -32,6 +34,7 @@ router.post("/get-links", async (req, res) => {
     return res.json({ links })
 
   } catch (error) {
+    logger.error(`${JSON.stringify(error)}, ${error?.message}`)
     res.status(500).json({ error: error.message })
   }
 })
@@ -46,6 +49,7 @@ router.post("/crawle", async (req, res) => {
     return res.json({ msg: "Saved successfully" })
 
   } catch (error) {
+    logger.error(`${JSON.stringify(error)}, ${error?.message}`)
     res.status(500).json({ error: error.message })
   }
 })
@@ -86,6 +90,7 @@ router.post("/delete", async (req, res) => {
     return res.json({ msg: "Saved successfully" })
 
   } catch (error) {
+    logger.error(`${JSON.stringify(error)}, ${error?.message}`)
     res.status(500).json({ error: error.message })
   }
 })
