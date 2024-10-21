@@ -17,7 +17,7 @@ function normalizeUrl(url) {
   }
 }
 
-function convertUrlsToFilenames(url) {
+export function convertUrlsToFilenames(url) {
   const urlObject = new URL(url)
 
   let pathname = urlObject.pathname.replace(/^\/|\/$/g, '')
@@ -162,7 +162,7 @@ export async function crawlWebsite2({ urls, folderName }) {
       await page.goto(normalizedUrl, { waitUntil: 'domcontentloaded' })
       const content = await page.innerText('body')
 
-      const base = convertUrlsToFilenames(url)
+      const base = convertUrlsToFilenames(url) || "root"
 
       const resultPath = createPath([folderName, `${base}.txt`])
       await fs.writeFile(resultPath, JSON.stringify(content, null, 2))
