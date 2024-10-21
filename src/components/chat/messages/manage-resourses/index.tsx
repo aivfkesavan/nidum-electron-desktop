@@ -69,7 +69,7 @@ function FileUpload() {
 
         {/* <Documents /> */}
 
-        <Tabs defaultValue="Web Crawlers">
+        <Tabs defaultValue="Documents">
           <TabsList className="p-0 h-auto mb-8 bg-transparent">
             {
               ["Documents", "Web Crawlers"].map(l => (

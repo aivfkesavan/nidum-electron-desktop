@@ -21,9 +21,9 @@ function GetLinks({ updateLinks }: props) {
   const { toast } = useToast()
 
   const [onlyThisPage, setOnlyThisPage] = useState(true)
-  const { register, handleSubmit, formState: { errors } } = useForm({
+  const { register, handleSubmit, formState: { errors }, reset } = useForm({
     defaultValues: {
-      url: "https://crawlee.dev",
+      url: "",
       maxRequestsPerCrawl: 1,
     }
   })
@@ -46,10 +46,17 @@ function GetLinks({ updateLinks }: props) {
 
   const onSubmit = (data: any) => {
     if (onlyThisPage) {
-      mutateaAdd({
-        urls: [data.url],
-        folderName: projectId
-      })
+      mutateaAdd(
+        {
+          urls: [data.url],
+          folderName: projectId
+        },
+        {
+          onSettled() {
+            reset()
+          }
+        }
+      )
 
     } else {
       // const origin = new URL(data.url).origin
