@@ -1,5 +1,5 @@
 import express from 'express';
-import { getSublinks, crawlWebsite } from '../utils/crawler2';
+import { getSublinks, crawlWebsite2 } from '../utils/crawler2';
 
 const router = express.Router()
 
@@ -18,8 +18,8 @@ router.post("/get-links", async (req, res) => {
 
 router.post("/crawle", async (req, res) => {
   try {
-    const { url, maxRequestsPerCrawl, folderName } = req.body
-    await crawlWebsite({ url, maxRequestsPerCrawl, folderName })
+    const { urls, folderName } = req.body
+    await crawlWebsite2({ urls, folderName })
     return res.json({ msg: "Saved successfully" })
 
   } catch (error) {

@@ -11,9 +11,8 @@ export async function getSubLinks(payload: payT) {
 }
 
 type payloadT = {
-  url: string
+  urls: string[]
   folderName: string
-  maxRequestsPerCrawl?: number
 }
 export async function crawleWeb(payload: payloadT) {
   return axios.post(`${constants.backendUrl}/web-crawler/crawle`, payload).then(r => r.data)
