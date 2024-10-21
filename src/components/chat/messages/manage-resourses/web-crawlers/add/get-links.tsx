@@ -75,7 +75,7 @@ function GetLinks({ updateLinks }: props) {
       className='flex-1 text-xs'
     >
       <div className="mb-2">
-        <label className="block mb-1 font-medium text-white/80">Crawle New Website</label>
+        <label className="block mb-1 font-medium text-white/80">URL</label>
 
         <input
           type="url"
