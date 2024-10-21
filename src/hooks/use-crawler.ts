@@ -36,7 +36,10 @@ export function useAddCrawl() {
       })
     },
     onError(err) {
-      toast({ title: `${JSON.stringify(err)}` })
+      toast({
+        // @ts-ignore
+        title: err?.response?.data?.error || "Something went wrong!"
+      })
     }
   })
 }
@@ -54,7 +57,10 @@ export function useDeleteCrawledLinks() {
       })
     },
     onError(err) {
-      toast({ title: `${JSON.stringify(err)}` })
+      toast({
+        // @ts-ignore
+        title: err?.response?.data?.error || "Something went wrong!"
+      })
     }
   })
 }
