@@ -3,6 +3,7 @@ import fs from 'fs/promises';
 
 import { createPath } from './path-helper';
 import logger from './logger';
+import axios from 'axios';
 
 function normalizeUrl(url) {
   try {
@@ -161,47 +162,95 @@ export async function crawlWebsite({ url, maxRequestsPerCrawl = 50, folderName }
   }
 }
 
+async function checkCloudflareHeaders(url) {
+  try {
+    const response = await axios.get(url);
+
+    const isCloudflare = response.headers['server'] && response.headers['server'].includes('cloudflare');
+    const hasCfRay = response.headers['cf-ray'] !== undefined;
+
+    if (isCloudflare || hasCfRay) {
+      console.log('Cloudflare protection detected via headers.');
+      return true
+    } else {
+      console.log('No Cloudflare protection detected via headers.');
+      return false
+    }
+  } catch (error) {
+    console.error('Error fetching the page:', error);
+    return true
+  }
+}
+
+async function checkPageStatus(url) {
+  try {
+    const response = await axios.get(url, { maxRedirects: 0 });
+    // console.log('Page loaded with status code:', response.status);
+    return false
+  } catch (error) {
+    if (error.response) {
+      // console.log('Page blocked with status code:', error.response.status);
+      if (error.response.status === 403 || error.response.status === 503) {
+        // console.log('Likely verification step detected (CAPTCHA or Cloudflare).');
+        return true
+      }
+    }
+    return false
+  }
+}
 
 export async function crawlWebsite2({ urls, folderName }) {
-  try {
-    const browser = await chromium.launch()
-    const context = await browser.newContext()
-    const page = await context.newPage()
+  const browser = await chromium.launch()
+  const context = await browser.newContext()
+  const page = await context.newPage()
 
-    await fs.mkdir(createPath([folderName]), { recursive: true })
-    await fs.mkdir(createPath(["crawled"]), { recursive: true })
+  await fs.mkdir(createPath([folderName]), { recursive: true })
+  await fs.mkdir(createPath(["crawled"]), { recursive: true })
 
-    for await (const url of urls) {
-      const normalizedUrl = normalizeUrl(url)
-      await page.goto(normalizedUrl, { waitUntil: 'domcontentloaded' })
-      const content = await page.innerText('body')
+  for await (const url of urls) {
+    const normalizedUrl = normalizeUrl(url)
+    await page.goto(normalizedUrl, { waitUntil: 'domcontentloaded' })
 
-      const base = convertUrlsToFilenames(url) || "root"
+    const check1 = await page.evaluate(() => {
+      return document.body.innerText.includes('Just a moment...') ||
+        document.querySelector('script[src*="/cdn-cgi/challenge-platform/"]') !== null;
+    })
 
-      const resultPath = createPath([folderName, `${base}.txt`])
-      await fs.writeFile(resultPath, JSON.stringify(content, null, 2))
-    }
+    if (check1) {
+      throw new Error("Bot verification detected")
 
-    await browser.close()
-    const filePath = createPath(["crawled", `${folderName}.json`])
-    const content = [...urls]
+    } else {
+      const check2 = await checkPageStatus(normalizedUrl)
+      const check3 = await checkCloudflareHeaders(normalizedUrl)
 
-    try {
-      const fileData = await fs.readFile(filePath, 'utf8');
-      let data = JSON.parse(fileData)
-      if (data && Array.isArray(data)) {
-        content.push(...data)
+      if (check2 || check3) {
+        throw new Error("Bot verification detected")
       }
-
-    } catch (err) {
-      console.log("file is not exists", err)
     }
 
-    let finalContents = [...new Set(content)]
-    await fs.writeFile(filePath, JSON.stringify(finalContents, null, 2), 'utf8');
+    const content = await page.innerText('body')
 
-  } catch (error) {
-    logger.error(`${JSON.stringify(error)}, ${error?.message}`)
-    console.log(error)
+    const base = convertUrlsToFilenames(url) || "root"
+
+    const resultPath = createPath([folderName, `${base}.txt`])
+    await fs.writeFile(resultPath, JSON.stringify(content, null, 2))
   }
+
+  await browser.close()
+  const filePath = createPath(["crawled", `${folderName}.json`])
+  const content = [...urls]
+
+  try {
+    const fileData = await fs.readFile(filePath, 'utf8');
+    let data = JSON.parse(fileData)
+    if (data && Array.isArray(data)) {
+      content.push(...data)
+    }
+
+  } catch (err) {
+    console.log("file is not exists", err)
+  }
+
+  let finalContents = [...new Set(content)]
+  await fs.writeFile(filePath, JSON.stringify(finalContents, null, 2), 'utf8');
 }
