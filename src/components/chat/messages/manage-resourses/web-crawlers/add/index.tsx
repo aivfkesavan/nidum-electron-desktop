@@ -20,7 +20,7 @@ function Add() {
     setIncludedLinks(p => [...new Set([...p, ...payload])])
     setStep(2)
   }
-  console.log(links)
+
   function onSubmit() {
     mutate(
       {
@@ -28,7 +28,7 @@ function Add() {
         folderName: projectId
       },
       {
-        onSuccess() {
+        onSettled() {
           setIncludedLinks([])
           setLinks([])
           setStep(1)
@@ -51,7 +51,7 @@ function Add() {
       }
       {
         links.map(l => (
-          <div key={l} className="df">
+          <div key={l} className="df mb-1">
             <input
               type="checkbox"
               className="w-fit"
