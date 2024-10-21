@@ -3,7 +3,7 @@ import { promises as fs } from 'fs';
 import 'dotenv/config';
 
 import { queryIndex, indexFolder } from "../utils/llama";
-import { createPath, getRagPath } from "../utils/path-helper";
+import { createPath } from "../utils/path-helper";
 import { upload } from "../middleawres/upload";
 
 const router = express.Router()
@@ -39,9 +39,6 @@ router.post("/:folderName", upload.array('files'), async (req, res) => {
       await fs.unlink(createPath([folderName, file]));
     }
 
-    const indexStore = getRagPath(folderName)
-    await fs.rm(indexStore, { recursive: true, force: true })
-
     await indexFolder({ folderName })
 
     return res.json({ msg: "index stored" })
@@ -57,9 +54,6 @@ router.delete("/:folderName/:filename", async (req, res) => {
     const filePath = createPath([folderName, filename])
 
     await fs.unlink(filePath)
-
-    const indexStore = getRagPath(folderName)
-    await fs.rm(indexStore, { recursive: true, force: true })
 
     await indexFolder({ folderName })
 

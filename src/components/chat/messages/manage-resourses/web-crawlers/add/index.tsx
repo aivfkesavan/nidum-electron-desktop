@@ -13,10 +13,10 @@ type hierarchyT = Node & {
 function Add() {
   const projectId = useContextStore(s => s.project_id)
 
-  const [includedLinks, setIncludedLinks] = useState<string[]>([])
+  const [includedLinks, setIncludedLinks] = useState<string[]>(["https://crawlee.dev/python"])
   // const [hierarchy, setHierarchy] = useState<hierarchyT[]>([])
-  const [links, setLinks] = useState<string[]>([])
-  const [step, setStep] = useState(1)
+  const [links, setLinks] = useState<string[]>(["https://crawlee.dev/python"])
+  const [step, setStep] = useState(2)
 
   const { mutate, isPending } = useMutation({
     mutationFn: crawleWeb,
@@ -87,6 +87,10 @@ function Add() {
   return (
     <div className="max-h-96 overflow-y-auto">
       {
+        includedLinks[0] &&
+        <h5 className="mb-1 text-sm">{new URL(includedLinks[0]).origin}</h5>
+      }
+      {
         links.map(l => (
           <div key={l} className="df">
             <input
@@ -97,14 +101,20 @@ function Add() {
               checked={includedLinks.includes(l)}
               onChange={() => setIncludedLinks(prev => includedLinks.includes(l) ? prev.filter(p => p !== l) : [...prev, l])}
             />
-            <label htmlFor={l}>{l}</label>
+            <label
+              htmlFor={l}
+              className="text-sm"
+            >
+              {new URL(l).pathname}
+            </label>
           </div>
         ))
       }
 
       <button
-        onClick={() => mutate({ urls: includedLinks, folderName: projectId })}
         disabled={isPending}
+        onClick={() => mutate({ urls: includedLinks, folderName: projectId })}
+        className="df px-12 py-1.5 mt-4 mx-auto bg-input hover:bg-input/80"
       >
         Crawle it
       </button>

@@ -22,7 +22,7 @@ function convertUrlsToFilenames(url) {
 
   let pathname = urlObject.pathname.replace(/^\/|\/$/g, '')
 
-  let filename = pathname.replace(/\//g, '_').replace(/\.[^/.]+$/, "")
+  let filename = pathname.replace(/\//g, '_')
 
   return filename
 }
@@ -150,24 +150,41 @@ export async function crawlWebsite({ url, maxRequestsPerCrawl = 50, folderName }
 
 export async function crawlWebsite2({ urls, folderName }) {
   try {
-    // const browser = await chromium.launch()
-    // const context = await browser.newContext()
-    // const page = await context.newPage()
+    const browser = await chromium.launch()
+    const context = await browser.newContext()
+    const page = await context.newPage()
 
-    // await fs.mkdir(createPath([folderName]), { recursive: true })
+    await fs.mkdir(createPath([folderName]), { recursive: true })
+    await fs.mkdir(createPath(["crawled"]), { recursive: true })
 
     for await (const url of urls) {
-      // const normalizedUrl = normalizeUrl(url)
-      // await page.goto(normalizedUrl, { waitUntil: 'domcontentloaded' })
-      // const content = await page.innerText('body')
+      const normalizedUrl = normalizeUrl(url)
+      await page.goto(normalizedUrl, { waitUntil: 'domcontentloaded' })
+      const content = await page.innerText('body')
 
       const base = convertUrlsToFilenames(url)
-      console.log(base)
-      // const resultPath = createPath([folderName, `${base}.txt`])
-      // await fs.writeFile(resultPath, JSON.stringify(content, null, 2))
+
+      const resultPath = createPath([folderName, `${base}.txt`])
+      await fs.writeFile(resultPath, JSON.stringify(content, null, 2))
     }
 
-    // await browser.close()
+    await browser.close()
+    const filePath = createPath(["crawled", `${folderName}.json`])
+    const content = [...urls]
+
+    try {
+      const fileData = await fs.readFile(filePath, 'utf8');
+      let data = JSON.parse(fileData)
+      if (data && Array.isArray(data)) {
+        content.push(...data)
+      }
+
+    } catch (err) {
+      console.log("file is not exists", err)
+    }
+
+    let finalContents = [...new Set(content)]
+    await fs.writeFile(filePath, JSON.stringify(finalContents, null, 2), 'utf8');
 
   } catch (error) {
     logger.error(`${JSON.stringify(error)}, ${error?.message}`)
