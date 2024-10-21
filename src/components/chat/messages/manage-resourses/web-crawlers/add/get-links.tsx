@@ -34,7 +34,7 @@ function GetLinks({ updateLinks }: props) {
 
         <input
           type="url"
-          className=" bg-input/70"
+          className="bg-input/70"
           placeholder="https://example.com"
           {...register("url", {
             required: "Website URL is required",
@@ -69,7 +69,7 @@ function GetLinks({ updateLinks }: props) {
         className="df px-12 py-1.5 mt-4 mx-auto bg-input hover:bg-input/80"
       >
         {isPending && <span className='loader-2'></span>}
-        Get Links
+        Fetch Pages
       </button>
     </form>
   )

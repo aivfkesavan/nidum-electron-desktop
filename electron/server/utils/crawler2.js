@@ -17,6 +17,16 @@ function normalizeUrl(url) {
   }
 }
 
+function convertUrlsToFilenames(url) {
+  const urlObject = new URL(url)
+
+  let pathname = urlObject.pathname.replace(/^\/|\/$/g, '')
+
+  let filename = pathname.replace(/\//g, '_').replace(/\.[^/.]+$/, "")
+
+  return filename
+}
+
 async function extractSublinks(page, url) {
   let sublinks = []
 
@@ -130,6 +140,34 @@ export async function crawlWebsite({ url, maxRequestsPerCrawl = 50, folderName }
     }
 
     await browser.close()
+
+  } catch (error) {
+    logger.error(`${JSON.stringify(error)}, ${error?.message}`)
+    console.log(error)
+  }
+}
+
+
+export async function crawlWebsite2({ urls, folderName }) {
+  try {
+    // const browser = await chromium.launch()
+    // const context = await browser.newContext()
+    // const page = await context.newPage()
+
+    // await fs.mkdir(createPath([folderName]), { recursive: true })
+
+    for await (const url of urls) {
+      // const normalizedUrl = normalizeUrl(url)
+      // await page.goto(normalizedUrl, { waitUntil: 'domcontentloaded' })
+      // const content = await page.innerText('body')
+
+      const base = convertUrlsToFilenames(url)
+      console.log(base)
+      // const resultPath = createPath([folderName, `${base}.txt`])
+      // await fs.writeFile(resultPath, JSON.stringify(content, null, 2))
+    }
+
+    // await browser.close()
 
   } catch (error) {
     logger.error(`${JSON.stringify(error)}, ${error?.message}`)
