@@ -2,7 +2,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 import { crawleWeb, deletedCrawledLinks, getCrawledLinks } from "../actions/webcrawler";
 import useContextStore from "../store/context";
-import { groupLinks } from "../utils/url-helper";
+import { groupLinks, sortUrlsByPathname } from "../utils/url-helper";
 import { useToast } from "../components/ui/use-toast";
 
 export function useCrawler() {
@@ -12,7 +12,14 @@ export function useCrawler() {
     queryKey: ["get-crawled-list", projectId],
     queryFn: () => getCrawledLinks(projectId),
     enabled: !!projectId,
-    select: res => groupLinks(res),
+    select: res => {
+      const data = groupLinks(res)
+      Object.keys(data).forEach(key => {
+        data[key] = sortUrlsByPathname(data[key])
+      })
+
+      return data
+    },
   })
 }
 

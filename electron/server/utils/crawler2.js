@@ -27,6 +27,20 @@ export function convertUrlsToFilenames(url) {
   return filename
 }
 
+function filterAndCleanUrls(urls) {
+  const filteredUrls = new Set();
+
+  urls.forEach(url => {
+    const parsedUrl = new URL(url);
+
+    parsedUrl.hash = '';
+
+    filteredUrls.add(parsedUrl.href);
+  })
+
+  return Array.from(filteredUrls);
+}
+
 async function extractSublinks(page, url) {
   let sublinks = []
 
@@ -94,7 +108,7 @@ export async function getSublinks({ url, excludedLinks = [], maxRequestsPerCrawl
     await browser.close()
 
     const final = [...allSublinks]
-    return final
+    return filterAndCleanUrls(final)
 
   } catch (error) {
     logger.error(`${JSON.stringify(error)}, ${error?.message}`)
