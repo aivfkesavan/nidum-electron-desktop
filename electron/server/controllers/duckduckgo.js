@@ -1,5 +1,5 @@
 import express from 'express';
-import duckduckgoSearch from 'duckduckgo-search';
+import { text as duckduckgoSearch } from '../utils/duckduckgo-search';
 
 const router = express.Router()
 
@@ -9,7 +9,7 @@ router.get("/", async (req, res) => {
 
     const results = []
 
-    for await (const result of duckduckgoSearch.text(text)) {
+    for await (const result of duckduckgoSearch(text)) {
       results.push(result)
     }
 

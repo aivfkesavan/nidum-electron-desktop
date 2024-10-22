@@ -154,6 +154,9 @@ async function checkPageStatus(url) {
 async function handleBotVerification(page, url, attempt = 1) {
   await page.waitForTimeout(5000)
 
+  // const waitUntilOption = attempt === 1 ? 'domcontentloaded' : 'networkidle';
+  // await page.goto(url, { waitUntil: waitUntilOption })
+
   const challengeResolved = await page.evaluate(() => {
     return !document.body.innerText.includes('Just a moment...') &&
       document.querySelector('script[src*="/cdn-cgi/challenge-platform/"]') === null;
@@ -180,7 +183,7 @@ async function crawlPage(page, url) {
 
   if (check1 || await checkPageStatus(url) || await checkCloudflareHeaders(url)) {
     const content = await handleBotVerification(page, url)
-    if (!content) throw Error("Tried bot verification, but can't solve")
+    if (!content) throw Error("Attempted bot verification, but couldn't complete it")
     return content
   }
 
