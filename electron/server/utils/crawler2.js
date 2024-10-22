@@ -183,7 +183,7 @@ async function crawlPage(page, url) {
 
   if (check1 || await checkPageStatus(url) || await checkCloudflareHeaders(url)) {
     const content = await handleBotVerification(page, url)
-    if (!content) throw Error("Attempted bot verification, but couldn't complete it")
+    if (!content) throw Error("This site is protected, and we are unable to scrape it at the moment.")
     return content
   }
 

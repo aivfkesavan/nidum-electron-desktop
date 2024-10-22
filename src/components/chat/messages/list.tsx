@@ -42,7 +42,7 @@ function List({ list = [], isTemp = false, deleteChat = () => { } }: props) {
               [1, 2, 3, 4].map(p => (
                 <p key={p} className="animate-msg mb-2 h-3 bg-white/20 rounded-sm"
                   style={{
-                    width: `calc(100% - ${p * 20}px)`
+                    width: `calc(100% - ${p * 40}px)`
                   }}
                 ></p>
               ))
