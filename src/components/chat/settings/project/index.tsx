@@ -66,7 +66,7 @@ function Chat() {
       [alterKey]: false,
     }))
   }
-  console.log(hasWebCrawle, hasFiles)
+
   return (
     <>
       <div className="mb-4">
