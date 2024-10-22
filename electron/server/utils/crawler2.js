@@ -124,27 +124,22 @@ export async function getSublinks({ url, excludedLinks = [], maxRequestsPerCrawl
 
 async function checkCloudflareHeaders(url) {
   try {
-    const response = await axios.get(url);
+    const response = await axios.get(url)
 
-    const isCloudflare = response.headers['server'] && response.headers['server'].includes('cloudflare');
-    const hasCfRay = response.headers['cf-ray'] !== undefined;
+    const isCloudflare = response.headers['server'] && response.headers['server'].includes('cloudflare')
+    const hasCfRay = response.headers['cf-ray'] !== undefined
 
-    if (isCloudflare || hasCfRay) {
-      console.log('Cloudflare protection detected via headers.');
-      return true
-    } else {
-      console.log('No Cloudflare protection detected via headers.');
-      return false
-    }
+    if (isCloudflare || hasCfRay) return true
+    return false
+
   } catch (error) {
-    console.error('Error fetching the page:', error);
     return true
   }
 }
 
 async function checkPageStatus(url) {
   try {
-    await axios.get(url, { maxRedirects: 0 });
+    await axios.get(url, { maxRedirects: 0 })
     return false
   } catch (error) {
     if (error.response) {
@@ -154,6 +149,42 @@ async function checkPageStatus(url) {
     }
     return false
   }
+}
+
+async function handleBotVerification(page, url, attempt = 1) {
+  await page.waitForTimeout(5000)
+
+  const challengeResolved = await page.evaluate(() => {
+    return !document.body.innerText.includes('Just a moment...') &&
+      document.querySelector('script[src*="/cdn-cgi/challenge-platform/"]') === null;
+  })
+
+  if (challengeResolved) {
+    return await page.innerText('body')
+  }
+
+  if (attempt < 3) {
+    return await handleBotVerification(page, url, attempt + 1)
+  }
+
+  return ""
+}
+
+async function crawlPage(page, url) {
+  await page.goto(url, { waitUntil: 'domcontentloaded' })
+
+  const check1 = await page.evaluate(() => {
+    return document.body.innerText.includes('Just a moment...') ||
+      document.querySelector('script[src*="/cdn-cgi/challenge-platform/"]') !== null
+  })
+
+  if (check1 || await checkPageStatus(url) || await checkCloudflareHeaders(url)) {
+    const content = await handleBotVerification(page, url)
+    if (!content) throw Error("Tried bot verification, but can't solve")
+    return content
+  }
+
+  return await page.innerText('body')
 }
 
 export async function crawlWebsite({ urls, folderName }) {
@@ -201,27 +232,8 @@ export async function crawlWebsite({ urls, folderName }) {
 
   for await (const url of urls) {
     const normalizedUrl = normalizeUrl(url)
-    await page.goto(normalizedUrl, { waitUntil: 'domcontentloaded' })
 
-    const check1 = await page.evaluate(() => {
-      return document.body.innerText.includes('Just a moment...') ||
-        document.querySelector('script[src*="/cdn-cgi/challenge-platform/"]') !== null;
-    })
-
-    if (check1) {
-      throw new Error("Bot verification detected")
-
-    } else {
-      const check2 = await checkPageStatus(normalizedUrl)
-      const check3 = await checkCloudflareHeaders(normalizedUrl)
-
-      if (check2 || check3) {
-        throw new Error("Bot verification detected")
-      }
-    }
-
-    const content = await page.innerText('body')
-
+    const content = await crawlPage(page, normalizedUrl)
     const base = convertUrlsToFilenames(url) || "root"
 
     const resultPath = createPath([folderName, `${base}.txt`])
