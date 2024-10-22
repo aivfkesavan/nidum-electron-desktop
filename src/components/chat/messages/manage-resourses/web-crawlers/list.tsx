@@ -3,6 +3,7 @@ import { MdOutlineDeleteOutline } from "react-icons/md";
 
 import { useCrawler, useDeleteCrawledLinks } from "../../../../../hooks/use-crawler";
 import useContextStore from "../../../../../store/context";
+import TooltipLable from "./tooltip-lable";
 
 type props = {
   url: string
@@ -22,9 +23,10 @@ function Card({ url, checked, onCheck }: props) {
         onChange={() => onCheck(url)}
         className="w-fit"
       />
-      <label htmlFor={id}>
-        {new URL(url)?.pathname}
-      </label>
+      <TooltipLable
+        htmlFor={id}
+        url={url}
+      />
     </div>
   )
 }
@@ -56,7 +58,7 @@ function List() {
   }
 
   return (
-    <div className='mini-scroll-bar flex-1 px-4 max-h-96 max-md:pt-6 overflow-y-auto border-t md:border-t-0 md:border-l'>
+    <div className='mini-scroll-bar px-4 md:max-h-96 max-md:pt-6 md:overflow-y-auto border-t md:border-t-0 md:border-l'>
       {
         !isLoading && data &&
         Object?.entries(data)?.map(([key, urls]: any) => (
