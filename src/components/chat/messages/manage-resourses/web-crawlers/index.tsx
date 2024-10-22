@@ -3,7 +3,7 @@ import Add from "./add";
 
 function WebCrawlers() {
   return (
-    <div className='flex flex-col md:flex-row gap-8'>
+    <div className='grid md:grid-cols-2 gap-8'>
       <Add />
       <List />
     </div>

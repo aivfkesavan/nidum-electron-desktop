@@ -72,7 +72,7 @@ function GetLinks({ updateLinks }: props) {
   return (
     <form
       onSubmit={handleSubmit(onSubmit)}
-      className='flex-1 text-xs'
+      className='text-xs'
     >
       <div className="mb-2">
         <label className="block mb-1 font-medium text-white/80">URL</label>
