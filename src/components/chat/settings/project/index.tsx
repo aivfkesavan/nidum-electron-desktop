@@ -1,6 +1,7 @@
 import { useState } from "react";
 
 import useContextStore from "../../../../store/context";
+import { useCrawler } from "../../../../hooks/use-crawler";
 import useConvoStore from "../../../../store/conversations";
 // import useUIStore from "@store/ui";
 
@@ -22,6 +23,7 @@ function Chat() {
 
   // const ollamaEmbeddingModel = useContextStore(s => s.ollamaEmbeddingModel)
   const project_id = useContextStore(s => s.project_id)
+  const { data: crawlerData } = useCrawler()
 
   const projectMap = useConvoStore(s => s.projects)
   const hasFiles = useConvoStore(s => s.files[project_id]?.length)
@@ -37,6 +39,8 @@ function Chat() {
     web_enabled: false,
     rag_enabled: false,
   })
+
+  const hasWebCrawle = crawlerData && Object.keys(crawlerData)?.length > 0
 
   const onChange = (key: string, val: any) => {
     setDetails(pr => ({
@@ -62,7 +66,7 @@ function Chat() {
       [alterKey]: false,
     }))
   }
-
+  console.log(hasWebCrawle, hasFiles)
   return (
     <>
       <div className="mb-4">
@@ -191,9 +195,9 @@ function Chat() {
           <Switch
             checked={details.rag_enabled}
             onCheckedChange={val => onChangeRag("rag_enabled", val)}
-            title={!hasFiles ? "Upload files to enable RAG search" : "Enable RAG search"}
+            title={!hasFiles ? "Upload files or webcrawle sites to enable RAG search" : "Enable RAG search"}
             className="ml-auto"
-            disabled={!selected || !hasFiles}
+            disabled={!selected || !(hasFiles || hasWebCrawle)}
           />
         </div>
       </div>

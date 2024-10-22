@@ -9,11 +9,19 @@ router.get("/", async (req, res) => {
 
     const results = []
 
+    let fetchedCount = 0
+    let limit = 20
+
     for await (const result of duckduckgoSearch(text)) {
       results.push(result)
+      fetchedCount++
+
+      if (fetchedCount >= limit) {
+        break;
+      }
     }
 
-    return res.json(results?.filter((_, i) => i < 20))
+    return res.json(results)
 
   } catch (error) {
     return res.status(400).json({ error })
