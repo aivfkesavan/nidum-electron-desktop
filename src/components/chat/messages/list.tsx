@@ -38,10 +38,19 @@ function List({ list = [], isTemp = false, deleteChat = () => { } }: props) {
                 className="w-4"
               />
             </div>
-            <span className="mr-1 text-xs">Thinking</span>
+            {
+              [1, 2, 3, 4].map(p => (
+                <p key={p} className="animate-msg mb-2 h-3 bg-white/20 rounded-sm"
+                  style={{
+                    width: `calc(100% - ${p * 20}px)`
+                  }}
+                ></p>
+              ))
+            }
+            {/* <span className="mr-1 text-xs">Thinking</span>
             <span className="animate-ping text-2xl leading-3">.</span>
             <span className="animate-ping delay-75 text-2xl leading-3">.</span>
-            <span className="animate-ping delay-100 text-2xl leading-3">.</span>
+            <span className="animate-ping delay-100 text-2xl leading-3">.</span> */}
           </div>
         </div>
       )
