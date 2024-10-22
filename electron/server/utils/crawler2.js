@@ -1,9 +1,12 @@
 import { chromium } from 'playwright';
 import fs from 'fs/promises';
-
-import { createPath } from './path-helper';
-import logger from './logger';
 import axios from 'axios';
+import fsn from 'fs';
+
+import { createPath, getRoot } from './path-helper';
+import downloadFile from './download-file';
+import runCommand from './run-command';
+import logger from './logger';
 
 function normalizeUrl(url) {
   try {
@@ -118,50 +121,6 @@ export async function getSublinks({ url, excludedLinks = [], maxRequestsPerCrawl
   }
 }
 
-export async function crawlWebsite({ url, maxRequestsPerCrawl = 50, folderName }) {
-  try {
-    const visitedUrls = new Set()
-    const urlsToVisit = [normalizeUrl(url)]
-
-    const browser = await chromium.launch()
-    const context = await browser.newContext()
-    const page = await context.newPage()
-
-    await fs.mkdir(createPath([folderName]), { recursive: true })
-
-    while (urlsToVisit.length > 0 && visitedUrls.size < maxRequestsPerCrawl) {
-      const currentUrl = urlsToVisit.shift()
-      const normalizedUrl = normalizeUrl(currentUrl)
-
-      if (visitedUrls.has(normalizedUrl)) continue
-      visitedUrls.add(normalizedUrl)
-
-      try {
-        await page.goto(normalizedUrl, { waitUntil: 'domcontentloaded' })
-        const content = await page.innerText('body')
-
-        const base = normalizedUrl.replace(url, "").replace(/^\/|\/$/g, "").replaceAll("/", "_") || "root";
-
-        const resultPath = createPath([folderName, `${base}.txt`])
-        await fs.writeFile(resultPath, JSON.stringify(content, null, 2))
-
-        if (visitedUrls.size < maxRequestsPerCrawl && urlsToVisit.length < maxRequestsPerCrawl) {
-          const sublinks = await extractSublinks(page, normalizedUrl)
-          urlsToVisit.push(...sublinks.filter(link => !visitedUrls.has(normalizeUrl(link))))
-        }
-      } catch (error) {
-        console.error(`Failed to crawl ${normalizedUrl}: ${error.message}`)
-      }
-    }
-
-    await browser.close()
-
-  } catch (error) {
-    logger.error(`${JSON.stringify(error)}, ${error?.message}`)
-    console.log(error)
-  }
-}
-
 async function checkCloudflareHeaders(url) {
   try {
     const response = await axios.get(url);
@@ -184,14 +143,11 @@ async function checkCloudflareHeaders(url) {
 
 async function checkPageStatus(url) {
   try {
-    const response = await axios.get(url, { maxRedirects: 0 });
-    // console.log('Page loaded with status code:', response.status);
+    await axios.get(url, { maxRedirects: 0 });
     return false
   } catch (error) {
     if (error.response) {
-      // console.log('Page blocked with status code:', error.response.status);
       if (error.response.status === 403 || error.response.status === 503) {
-        // console.log('Likely verification step detected (CAPTCHA or Cloudflare).');
         return true
       }
     }
@@ -199,8 +155,22 @@ async function checkPageStatus(url) {
   }
 }
 
-export async function crawlWebsite2({ urls, folderName }) {
-  const browser = await chromium.launch()
+export async function crawlWebsite({ urls, folderName }) {
+  const INSTALL_DIR = getRoot()
+  const CHROMIUM_EXEC = createPath(['chrome-mac', 'Chromium.app', 'Contents', 'MacOS', 'Chromium'])
+  const zipPath = createPath(["chromium.zip"])
+
+  if (!fsn.existsSync(CHROMIUM_EXEC)) {
+    const PUPPETEER_URL = 'https://commondatastorage.googleapis.com/chromium-browser-snapshots/Mac/970485/chrome-mac.zip'
+    await downloadFile(PUPPETEER_URL, zipPath)
+    await runCommand(`unzip ${zipPath} -d ${INSTALL_DIR}`)
+    await runCommand(`rm ${zipPath}`)
+    await runCommand(`chmod +x "${CHROMIUM_EXEC}"`)
+  }
+
+  const browser = await chromium.launch({
+    executablePath: CHROMIUM_EXEC
+  })
   const context = await browser.newContext()
   const page = await context.newPage()
 

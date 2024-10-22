@@ -1,7 +1,7 @@
 import express from 'express';
 import fs from 'fs/promises';
 
-import { getSublinks, crawlWebsite2, convertUrlsToFilenames } from '../utils/crawler2';
+import { getSublinks, crawlWebsite, convertUrlsToFilenames } from '../utils/crawler2';
 import { indexFolder } from '../utils/llama';
 import { createPath } from '../utils/path-helper';
 import logger from '../utils/logger';
@@ -42,7 +42,7 @@ router.post("/get-links", async (req, res) => {
 router.post("/crawle", async (req, res) => {
   try {
     const { urls, folderName } = req.body
-    await crawlWebsite2({ urls, folderName })
+    await crawlWebsite({ urls, folderName })
 
     await indexFolder({ folderName })
 
