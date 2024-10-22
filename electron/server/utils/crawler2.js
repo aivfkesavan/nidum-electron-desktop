@@ -2,6 +2,7 @@ import { chromium } from 'playwright';
 import fs from 'fs/promises';
 import axios from 'axios';
 import fsn from 'fs';
+import os from 'os';
 
 import { createPath, getRoot } from './path-helper';
 import downloadFile from './download-file';
@@ -157,15 +158,36 @@ async function checkPageStatus(url) {
 
 export async function crawlWebsite({ urls, folderName }) {
   const INSTALL_DIR = getRoot()
-  const CHROMIUM_EXEC = createPath(['chrome-mac', 'Chromium.app', 'Contents', 'MacOS', 'Chromium'])
+  let CHROMIUM_EXEC = createPath(['chrome-mac', 'Chromium.app', 'Contents', 'MacOS', 'Chromium'])
   const zipPath = createPath(["chromium.zip"])
 
   if (!fsn.existsSync(CHROMIUM_EXEC)) {
-    const PUPPETEER_URL = 'https://commondatastorage.googleapis.com/chromium-browser-snapshots/Mac/970485/chrome-mac.zip'
-    await downloadFile(PUPPETEER_URL, zipPath)
-    await runCommand(`unzip ${zipPath} -d ${INSTALL_DIR}`)
-    await runCommand(`rm ${zipPath}`)
-    await runCommand(`chmod +x "${CHROMIUM_EXEC}"`)
+    let PUPPETEER_URL = ""
+    const architecture = os.arch()
+    const opSys = os.platform()
+
+    if (opSys === "darwin") {
+      if (architecture.includes("arm")) {
+        PUPPETEER_URL = 'https://commondatastorage.googleapis.com/chromium-browser-snapshots/Mac_Arm/1371887/chrome-mac.zip'
+      } else {
+        PUPPETEER_URL = 'https://commondatastorage.googleapis.com/chromium-browser-snapshots/Mac/1371812/chrome-mac.zip'
+      }
+    }
+    // else if (opSys === "win32") {
+    //   PUPPETEER_URL = 'https://commondatastorage.googleapis.com/chromium-browser-snapshots/Win/1371812/chrome-win.zip'
+    //   CHROMIUM_EXEC = createPath(['chrome-win', 'chrome.exe'])
+    // }
+    // else if (opSys === "linux") {
+    //   PUPPETEER_URL = 'https://commondatastorage.googleapis.com/chromium-browser-snapshots/Linux/1371812/chrome-linux.zip'
+    //   CHROMIUM_EXEC = createPath(['chrome-linux', 'chrome'])
+    // }
+
+    if (PUPPETEER_URL) {
+      await downloadFile(PUPPETEER_URL, zipPath)
+      await runCommand(`unzip ${zipPath} -d ${INSTALL_DIR}`)
+      await runCommand(`rm ${zipPath}`)
+      await runCommand(`chmod +x "${CHROMIUM_EXEC}"`)
+    }
   }
 
   const browser = await chromium.launch({
