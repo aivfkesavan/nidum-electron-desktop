@@ -5,8 +5,8 @@ export async function getCrawledLinks(projectId: string) {
   return axios.get(`${constants.backendUrl}/web-crawler/get-crawled-list/${projectId}`).then(r => r.data)
 }
 
-export async function getLinkPreview(urls: string[]) {
-  return axios.post(`${constants.backendUrl}/web-crawler/get-metadata`, { urls }).then(r => r.data)
+export async function getLinkPreview(url: string) {
+  return axios.get(`${constants.backendUrl}/web-crawler/metadata?url=${encodeURIComponent(url)}`).then(r => r.data)
 }
 
 type payT = {
