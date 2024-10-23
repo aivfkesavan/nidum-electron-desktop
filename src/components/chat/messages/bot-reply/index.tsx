@@ -8,6 +8,7 @@ import useClipboardCopy from "../../../../hooks/use-clipboard-copy";
 import MarkdownParser from "./markdown-parse";
 
 import logo from '../../../../assets/imgs/logo.png';
+import LinkPreview from "./link-preview";
 
 type props = {
   id: string
@@ -80,6 +81,23 @@ function BotReply({ id, response, isTemp = false, deleteChat = () => { } }: prop
           </button>
         </div>
       }
+
+      <div className="grid grid-cols-5 gap-4 ml-8 mt-4">
+        {
+          [
+            "https://web.whatsapp.com",
+            "https://crawlee.dev",
+            "https://crawlee.dev/api/basic-crawler/interface/BasicCrawlerOptions",
+            "https://www.bbc.com/news/articles/cgeyezggpezo",
+            "https://www.npmjs.com/package/@ashwamegh/react-link-preview",
+          ].map(f => (
+            <LinkPreview
+              key={f}
+              url={f}
+            />
+          ))
+        }
+      </div>
     </div>
   )
 }

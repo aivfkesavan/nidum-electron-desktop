@@ -1,4 +1,5 @@
 import express from 'express';
+import ogs from 'open-graph-scraper';
 import fs from 'fs/promises';
 
 import { getSublinks, crawlWebsite, convertUrlsToFilenames } from '../utils/crawler2';
@@ -7,6 +8,36 @@ import { createPath } from '../utils/path-helper';
 import logger from '../utils/logger';
 
 const router = express.Router()
+
+router.get('/metadata', async (req, res) => {
+  const { url } = req.query
+
+  if (!url) return res.status(400).json({ error: 'No URL provided' })
+
+  try {
+    const decoded = decodeURIComponent(url)
+    const { result, error } = await ogs({ url: decoded })
+
+    if (error) {
+      throw new Error("Error on getting data")
+    }
+
+    let baseUrl = result?.ogUrl ? new URL(result?.ogUrl) : {}
+
+    let payload = {
+      title: result?.ogTitle || result?.twitterTitle,
+      description: result?.ogDescription || result?.twitterDescription,
+      siteName: result?.ogSiteName || baseUrl?.hostname,
+      favicon: result?.favicon ?
+        result?.favicon?.startsWith("/") ? baseUrl?.origin + result?.favicon : result?.favicon
+        : result?.ogImage?.[0]?.url || "",
+    }
+    return res.json(payload)
+
+  } catch (error) {
+    res.status(500).json({ error: 'Unable to fetch metadata' })
+  }
+})
 
 router.get("/get-crawled-list/:folderName", async (req, res) => {
   try {
