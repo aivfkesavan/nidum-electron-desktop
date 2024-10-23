@@ -39,8 +39,8 @@ function List({ list = [], isTemp = false, deleteChat = () => { } }: props) {
               />
             </div>
             {
-              [1, 2, 3, 4].map(p => (
-                <p key={p} className="animate-msg mb-2 h-3 bg-white/20 rounded-sm"
+              [1, 2, 3, 4, 5, 6].map(p => (
+                <p key={p} className="animate-msg mb-1.5 h-2 bg-white/20 rounded-sm"
                   style={{
                     width: `calc(100% - ${p * 40}px)`
                   }}
@@ -62,6 +62,7 @@ function List({ list = [], isTemp = false, deleteChat = () => { } }: props) {
         id={l.id}
         isTemp={isTemp}
         response={l.content}
+        webSearched={l?.webSearched}
         deleteChat={() => deleteChat(l.id)}
       />
     )

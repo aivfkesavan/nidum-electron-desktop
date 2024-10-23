@@ -11,6 +11,7 @@ export type Message = {
   role: "user" | "assistant" | "loading"
   content: string;
   images?: string[];
+  webSearched?: string[]
 }
 
 export type Chat = {

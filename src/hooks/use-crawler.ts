@@ -65,11 +65,10 @@ export function useDeleteCrawledLinks() {
   })
 }
 
-export function usePreviewLinks(url: string) {
+export function usePreviewLinks(id: string, urls: string[]) {
   return useQuery({
-    queryKey: ["link-preview", url],
-    queryFn: () => getLinkPreview(url),
-    enabled: !!url,
-    retry: false,
+    queryKey: ["link-preview", id],
+    queryFn: () => getLinkPreview(urls),
+    enabled: urls.length > 0,
   })
 }

@@ -229,13 +229,17 @@ function Messages() {
         }
 
         let systemPrompt = projectdetails?.systemPrompt || systemDefaultPrompt
+        let webSearchedData: string[] = []
 
         if (webEnabled && !ragEnabled) {
-          const searchReult = await duckDuckGoSerach(msg)
-          systemPrompt = createContext({
-            base: projectdetails?.webPrompt || webDefaultPrompt,
-            context: searchReult,
-          })
+          const searchResult = await duckDuckGoSerach(msg)
+          if (searchResult?.length > 0) {
+            webSearchedData = searchResult.map((f: any) => f.href)
+            systemPrompt = createContext({
+              base: projectdetails?.webPrompt || webDefaultPrompt,
+              context: searchResult.map((f: any) => f.body).join(","),
+            })
+          }
         }
 
         if (ragEnabled && filesLen > 0) {
@@ -379,6 +383,9 @@ function Messages() {
             id: nanoid(10),
             content,
           }
+          if (webSearchedData?.length > 0) {
+            botReply.webSearched = webSearchedData
+          }
           setTempData([])
           setLoading(false)
           pushIntoMessages(project_id, currContextId, [
@@ -401,6 +408,9 @@ function Messages() {
                   role: "assistant",
                   content: botRes,
                   id: nanoid(10),
+                }
+                if (webSearchedData?.length > 0) {
+                  botReply.webSearched = webSearchedData
                 }
                 setTempData([])
                 setLoading(false)
@@ -461,6 +471,9 @@ function Messages() {
                       role: "assistant",
                       content: botRes,
                       id: nanoid(10),
+                    }
+                    if (webSearchedData?.length > 0) {
+                      botReply.webSearched = webSearchedData
                     }
                     setTempData([])
                     setLoading(false)
