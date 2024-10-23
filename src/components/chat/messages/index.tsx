@@ -17,6 +17,7 @@ import { useToast } from "../../../components/ui/use-toast";
 import useContextStore, { llm_modelsT } from "../../../store/context";
 import { useLLamaDownloadedModels } from "../../../hooks/use-llm-models";
 import useConvoStore from "../../../store/conversations";
+import { useCrawler } from "../../../hooks/use-crawler";
 
 import ManageResourses from "./manage-resourses";
 import SpeechToText from "./speech-to-text";
@@ -55,6 +56,7 @@ function Messages() {
   const ragEnabled = useConvoStore(s => s.projects[project_id]?.rag_enabled)
 
   const { data: downloadedModels } = useLLamaDownloadedModels()
+  const { data: crawlerData } = useCrawler()
 
   // const [reachedLimit, setReachedLimit] = useState(false)
   const [tempData, setTempData] = useState<Message[]>([])
@@ -185,21 +187,33 @@ function Messages() {
         //   user.images = files.map(f => f.name)
         // }
 
-        setTempData([
-          user,
-          {
-            role: "loading",
-            id: nanoid(10),
+        const initial = [user]
+        const webSearchId = nanoid(10)
+
+        if (webEnabled) {
+          const webSearch: Message = {
+            id: webSearchId,
+            role: "web-searched",
             content: "",
+            webSearched: [],
           }
-        ])
+          initial.push(webSearch)
+        }
+
+        initial.push({
+          role: "loading",
+          id: nanoid(10),
+          content: "",
+        })
+        setTempData(initial)
 
         let dataMap: any = []
+        const onlyAllwedInputs = ["user", "assistant"]
 
         if (data) {
           if (model_type === "Ollama") {
             if (ollamaModeType === "vision") {
-              dataMap = await Promise.all(data?.map(async ({ id, ...rest }) => {
+              dataMap = await Promise.all(data?.filter(d => onlyAllwedInputs.includes(d.role))?.map(async ({ id, ...rest }) => {
                 if (rest?.images && rest?.images?.length > 0) {
                   const base64Files = await Promise.all(rest.images.map(imgToBase64))
                   rest.images = base64Files
@@ -208,7 +222,7 @@ function Messages() {
               }))
 
             } else {
-              dataMap = data.map(d => {
+              dataMap = data?.filter(d => onlyAllwedInputs.includes(d.role))?.map(d => {
                 let is_user = d.role === "user"
                 if (is_user) {
                   return {
@@ -224,7 +238,7 @@ function Messages() {
             }
 
           } else {
-            dataMap = data?.map(({ id, images, ...rest }) => rest)
+            dataMap = data?.filter(d => onlyAllwedInputs.includes(d.role))?.map(({ id, images, ...rest }) => rest)
           }
         }
 
@@ -240,9 +254,18 @@ function Messages() {
               context: searchResult.map((f: any) => f.body).join(","),
             })
           }
+          setTempData(prev => prev.map(p => {
+            if (p.role === "web-searched") {
+              return {
+                ...p,
+                webSearched: webSearchedData
+              }
+            }
+            return p
+          }))
         }
 
-        if (ragEnabled && filesLen > 0) {
+        if (ragEnabled && (filesLen > 0 || Object.keys(crawlerData)?.length > 0)) {
           const searchReult = await ragSearch(msg)
           systemPrompt = createContext({
             base: projectdetails?.ragPrompt || ragDefaultPrompt,
@@ -378,20 +401,24 @@ function Messages() {
           const res = await response.json()
           const content = res?.choices?.[0]?.message?.content || res?.content?.[0]?.text || ""
 
+          const finalOutput = [user]
           const botReply: Message = {
             role: "assistant",
             id: nanoid(10),
             content,
           }
           if (webSearchedData?.length > 0) {
-            botReply.webSearched = webSearchedData
+            finalOutput.push({
+              id: webSearchId,
+              role: "web-searched",
+              content: "",
+              webSearched: webSearchedData,
+            })
           }
+          finalOutput.push(botReply)
           setTempData([])
           setLoading(false)
-          pushIntoMessages(project_id, currContextId, [
-            user,
-            botReply
-          ])
+          pushIntoMessages(project_id, currContextId, finalOutput)
           if (needAutoPlay) {
             speak(botReply.id, botReply.content)
           }
@@ -404,20 +431,24 @@ function Messages() {
           reader?.read().then(function processResult(result: any): any {
             try {
               if (result.done) {
+                const finalOutput = [user]
                 const botReply: Message = {
                   role: "assistant",
                   content: botRes,
                   id: nanoid(10),
                 }
                 if (webSearchedData?.length > 0) {
-                  botReply.webSearched = webSearchedData
+                  finalOutput.push({
+                    id: webSearchId,
+                    role: "web-searched",
+                    content: "",
+                    webSearched: webSearchedData,
+                  })
                 }
+                finalOutput.push(botReply)
                 setTempData([])
                 setLoading(false)
-                pushIntoMessages(project_id, currContextId, [
-                  user,
-                  botReply
-                ])
+                pushIntoMessages(project_id, currContextId, finalOutput)
                 if (needAutoPlay) {
                   speak(botReply.id, botReply.content)
                 }
@@ -467,20 +498,24 @@ function Messages() {
                   botRes += text
 
                   if (hasFinishReason) {
+                    const finalOutput = [user]
                     const botReply: Message = {
                       role: "assistant",
                       content: botRes,
                       id: nanoid(10),
                     }
                     if (webSearchedData?.length > 0) {
-                      botReply.webSearched = webSearchedData
+                      finalOutput.push({
+                        id: webSearchId,
+                        role: "web-searched",
+                        content: "",
+                        webSearched: webSearchedData,
+                      })
                     }
+                    finalOutput.push(botReply)
                     setTempData([])
                     setLoading(false)
-                    pushIntoMessages(project_id, currContextId, [
-                      user,
-                      botReply
-                    ])
+                    pushIntoMessages(project_id, currContextId, finalOutput)
                     if (needAutoPlay) {
                       speak(botReply.id, botReply.content)
                     }

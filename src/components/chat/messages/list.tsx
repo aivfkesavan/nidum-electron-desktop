@@ -1,4 +1,5 @@
 import type { Message } from "../../../store/conversations";
+import LinkPreview from "./link-preview";
 import UserQuery from "./user-query";
 import BotReply from "./bot-reply";
 
@@ -20,6 +21,16 @@ function List({ list = [], isTemp = false, deleteChat = () => { } }: props) {
           response={l.content}
           images={l.images}
           deleteChat={() => deleteChat(l.id)}
+        />
+      )
+    }
+
+    if (l.role === "web-searched") {
+      return (
+        <LinkPreview
+          key={l.id}
+          id={l.id}
+          urls={l.webSearched}
         />
       )
     }
@@ -62,7 +73,6 @@ function List({ list = [], isTemp = false, deleteChat = () => { } }: props) {
         id={l.id}
         isTemp={isTemp}
         response={l.content}
-        webSearched={l?.webSearched}
         deleteChat={() => deleteChat(l.id)}
       />
     )

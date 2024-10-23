@@ -5,7 +5,7 @@ import {
   SheetHeader,
   SheetTitle,
   SheetTrigger,
-} from "../../../../ui/sheet";
+} from "../../../ui/sheet";
 
 import LinkCard from "./link-card";
 
@@ -18,7 +18,7 @@ function FullLinks({ data }: props) {
     <Sheet>
       <SheetTrigger asChild>
         <div className="df gap-1 flex-wrap px-2.5 py-1.5 text-[11px] rounded-md bg-zinc-800 cursor-pointer">
-          {data?.filter((d, i) => i > 4 && !!d?.favicon)?.filter((d, i) => i < 7)?.map((d, i) => (
+          {data?.filter((d, i) => i > 4 && !!d?.favicon)?.filter((d, i) => i < 5)?.map((d, i) => (
             <img
               className="size-4 rounded-full"
               src={d?.favicon}
