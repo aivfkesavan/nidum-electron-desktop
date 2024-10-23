@@ -5,19 +5,20 @@ import { TbLoader2 } from "react-icons/tb";
 import { useAudioStore, useAudio } from "../use-speech";
 import useClipboardCopy from "../../../../hooks/use-clipboard-copy";
 
-import MarkdownParser from "./markdown-parse";
-
 import logo from '../../../../assets/imgs/logo.png';
+
+import MarkdownParser from "./markdown-parse";
 import LinkPreview from "./link-preview";
 
 type props = {
   id: string
   isTemp: boolean
   response: string
+  webSearched?: string[]
   deleteChat?: () => void
 }
 
-function BotReply({ id, response, isTemp = false, deleteChat = () => { } }: props) {
+function BotReply({ id, response, isTemp = false, webSearched = [], deleteChat = () => { } }: props) {
   const isSpeaking = useAudioStore(s => s.isSpeaking)
   const botResId = useAudioStore(s => s.botResId)
   const loading = useAudioStore(s => s.loading)
@@ -82,22 +83,13 @@ function BotReply({ id, response, isTemp = false, deleteChat = () => { } }: prop
         </div>
       }
 
-      <div className="grid grid-cols-5 gap-4 ml-8 mt-4">
-        {
-          [
-            "https://web.whatsapp.com",
-            "https://crawlee.dev",
-            "https://crawlee.dev/api/basic-crawler/interface/BasicCrawlerOptions",
-            "https://www.bbc.com/news/articles/cgeyezggpezo",
-            "https://www.npmjs.com/package/@ashwamegh/react-link-preview",
-          ].map(f => (
-            <LinkPreview
-              key={f}
-              url={f}
-            />
-          ))
-        }
-      </div>
+      {
+        webSearched?.length > 0 &&
+        <LinkPreview
+          id={id}
+          urls={webSearched}
+        />
+      }
     </div>
   )
 }

@@ -9,36 +9,6 @@ import logger from '../utils/logger';
 
 const router = express.Router()
 
-router.get('/metadata', async (req, res) => {
-  const { url } = req.query
-
-  if (!url) return res.status(400).json({ error: 'No URL provided' })
-
-  try {
-    const decoded = decodeURIComponent(url)
-    const { result, error } = await ogs({ url: decoded })
-
-    if (error) {
-      throw new Error("Error on getting data")
-    }
-
-    let baseUrl = result?.ogUrl ? new URL(result?.ogUrl) : {}
-
-    let payload = {
-      title: result?.ogTitle || result?.twitterTitle,
-      description: result?.ogDescription || result?.twitterDescription,
-      siteName: result?.ogSiteName || baseUrl?.hostname,
-      favicon: result?.favicon ?
-        result?.favicon?.startsWith("/") ? baseUrl?.origin + result?.favicon : result?.favicon
-        : result?.ogImage?.[0]?.url || "",
-    }
-    return res.json(payload)
-
-  } catch (error) {
-    res.status(500).json({ error: 'Unable to fetch metadata' })
-  }
-})
-
 router.get("/get-crawled-list/:folderName", async (req, res) => {
   try {
     const { folderName } = req.params
@@ -54,6 +24,42 @@ router.get("/get-crawled-list/:folderName", async (req, res) => {
   } catch (error) {
     logger.error(`${JSON.stringify(error)}, ${error?.message}`)
     res.status(500).json({ error: error.message })
+  }
+})
+
+router.post('/get-metadata', async (req, res) => {
+  const { urls } = req.body
+
+  try {
+    const metadataPromises = urls.map(async (url) => {
+      try {
+        const { result, error } = await ogs({ url })
+
+        if (error) return { url }
+
+        let baseUrl = result?.ogUrl ? new URL(result?.ogUrl) : {}
+
+        return {
+          title: result?.ogTitle || result?.twitterTitle,
+          description: result?.ogDescription || result?.twitterDescription,
+          siteName: result?.ogSiteName || baseUrl?.hostname,
+          favicon: result?.favicon ?
+            result?.favicon?.startsWith("/") ? baseUrl?.origin + result?.favicon : result?.favicon
+            : result?.ogImage?.[0]?.url || "",
+          url,
+        }
+      } catch (error) {
+        return { url }
+      }
+    })
+
+    const final = await Promise.all(metadataPromises)
+    final.sort((a, b) => Object.values(a).length > Object.values(b).length)
+    return res.json(final)
+
+  } catch (error) {
+    console.log(error)
+    res.status(500).json({ error: 'Unable to fetch metadata' })
   }
 })
 
