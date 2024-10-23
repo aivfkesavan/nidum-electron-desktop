@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
-import { crawleWeb, deletedCrawledLinks, getCrawledLinks } from "../actions/webcrawler";
+import { crawleWeb, deletedCrawledLinks, getCrawledLinks, getLinkPreview } from "../actions/webcrawler";
 import useContextStore from "../store/context";
 import { groupLinks, sortUrlsByPathname } from "../utils/url-helper";
 import { useToast } from "../components/ui/use-toast";
@@ -62,5 +62,14 @@ export function useDeleteCrawledLinks() {
         title: err?.response?.data?.error || "Something went wrong!"
       })
     }
+  })
+}
+
+export function usePreviewLinks(url: string) {
+  return useQuery({
+    queryKey: ["link-preview", url],
+    queryFn: () => getLinkPreview(url),
+    enabled: !!url,
+    retry: false,
   })
 }

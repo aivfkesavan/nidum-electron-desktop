@@ -1,6 +1,10 @@
 import constants from "../utils/constants";
 import axios from "axios";
 
+export async function getLinkPreview(url: string) {
+  return axios.get(`${constants.backendUrl}/web-crawler/metadata?url=${encodeURIComponent(url)}`).then(r => r.data)
+}
+
 export async function getCrawledLinks(projectId: string) {
   return axios.get(`${constants.backendUrl}/web-crawler/get-crawled-list/${projectId}`).then(r => r.data)
 }
