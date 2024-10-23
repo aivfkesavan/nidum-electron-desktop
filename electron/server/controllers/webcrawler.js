@@ -33,7 +33,12 @@ router.post('/get-metadata', async (req, res) => {
   try {
     const metadataPromises = urls.map(async (url) => {
       try {
-        const { result, error } = await ogs({ url })
+        const { result, error } = await ogs({
+          url,
+          onlyGetOpenGraphInfo: [
+            "title", "description", "favicon", "image", "logo"
+          ],
+        })
 
         if (error) return { url }
 

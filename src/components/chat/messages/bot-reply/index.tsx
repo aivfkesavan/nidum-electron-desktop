@@ -8,7 +8,6 @@ import useClipboardCopy from "../../../../hooks/use-clipboard-copy";
 import logo from '../../../../assets/imgs/logo.png';
 
 import MarkdownParser from "./markdown-parse";
-import LinkPreview from "./link-preview";
 
 type props = {
   id: string
@@ -18,7 +17,7 @@ type props = {
   deleteChat?: () => void
 }
 
-function BotReply({ id, response, isTemp = false, webSearched = [], deleteChat = () => { } }: props) {
+function BotReply({ id, response, isTemp = false, deleteChat = () => { } }: props) {
   const isSpeaking = useAudioStore(s => s.isSpeaking)
   const botResId = useAudioStore(s => s.botResId)
   const loading = useAudioStore(s => s.loading)
@@ -81,14 +80,6 @@ function BotReply({ id, response, isTemp = false, webSearched = [], deleteChat =
             <MdDeleteOutline />
           </button>
         </div>
-      }
-
-      {
-        webSearched?.length > 0 &&
-        <LinkPreview
-          id={id}
-          urls={webSearched}
-        />
       }
     </div>
   )

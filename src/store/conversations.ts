@@ -8,7 +8,7 @@ import { ragDefaultPrompt, systemDefaultPrompt, webDefaultPrompt } from '../util
 
 export type Message = {
   id: string;
-  role: "user" | "assistant" | "loading"
+  role: "user" | "assistant" | "loading" | "web-searched"
   content: string;
   images?: string[];
   webSearched?: string[]
