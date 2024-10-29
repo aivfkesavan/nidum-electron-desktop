@@ -3,7 +3,7 @@ import { IoIosAttach } from "react-icons/io";
 import useContextStore from "../../../../store/context";
 // import { useToast } from "../../../../components/ui/use-toast";
 
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "../../../../components/ui/tabs";
+// import { Tabs, TabsContent, TabsList, TabsTrigger } from "../../../../components/ui/tabs";
 import {
   Dialog,
   DialogContent,
@@ -12,7 +12,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "../../../../components/ui/dialog";
-import WebCrawlers from "./web-crawlers";
+// import WebCrawlers from "./web-crawlers";
 import Documents from "./documents";
 
 function FileUpload() {
@@ -67,9 +67,9 @@ function FileUpload() {
           <DialogDescription className=" text-xs text-white/60">Manage documents and web crawlers</DialogDescription>
         </DialogHeader>
 
-        {/* <Documents /> */}
+        <Documents />
 
-        <Tabs defaultValue="Documents">
+        {/* <Tabs defaultValue="Documents">
           <TabsList className="p-0 h-auto mb-8 bg-transparent">
             {
               ["Documents", "Web Crawlers"].map(l => (
@@ -91,7 +91,7 @@ function FileUpload() {
           <TabsContent value="Web Crawlers">
             <WebCrawlers />
           </TabsContent>
-        </Tabs>
+        </Tabs> */}
       </DialogContent>
     </Dialog>
   )
