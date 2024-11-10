@@ -1,4 +1,4 @@
-import expressWinston from 'express-winston';
+// import expressWinston from 'express-winston';
 import express from 'express';
 import cors from "cors";
 
@@ -13,19 +13,19 @@ import image from "./controllers/image";
 import doc from "./controllers/doc";
 import ai from "./controllers/ai";
 
-import logger from './utils/logger';
+// import logger from './utils/logger';
 
 const app = express()
 
 checkPathsSetup()
 
-app.use(expressWinston.logger({
-  winstonInstance: logger,
-  meta: true,
-  msg: 'HTTP {{req.method}} {{req.url}}',
-  expressFormat: true,
-  colorize: false,
-}))
+// app.use(expressWinston.logger({
+//   winstonInstance: logger,
+//   meta: true,
+//   msg: 'HTTP {{req.method}} {{req.url}}',
+//   expressFormat: true,
+//   colorize: false,
+// }))
 
 app.use(cors())
 app.use(express.urlencoded({ extended: false }))
@@ -41,19 +41,19 @@ app.use("/whisper", whisper)
 app.use("/upgrade", upgrade)
 app.use("/duckduckgo", duckduckgo)
 
-app.use((err, req, res, next) => {
-  logger.error(`${err.status || 500} - ${err.message} - ${req.originalUrl} - ${req.method} - ${req.ip}`);
+// app.use((err, req, res, next) => {
+//   logger.error(`${err.status || 500} - ${err.message} - ${req.originalUrl} - ${req.method} - ${req.ip}`);
 
-  res.status(err.status || 500).send({
-    error: {
-      status: err.status || 500,
-      message: err.message || 'Internal Server Error',
-    },
-  })
-})
+//   res.status(err.status || 500).send({
+//     error: {
+//       status: err.status || 500,
+//       message: err.message || 'Internal Server Error',
+//     },
+//   })
+// })
 
-app.use(expressWinston.errorLogger({
-  winstonInstance: logger,
-}))
+// app.use(expressWinston.errorLogger({
+//   winstonInstance: logger,
+// }))
 
 export default app
