@@ -1,5 +1,6 @@
 import { app, shell, BrowserWindow, ipcMain, Menu, dialog } from "electron";
 import { fileURLToPath } from "node:url";
+import { autoUpdater } from 'electron-updater';
 import path from "node:path";
 
 import server from './server';
@@ -31,8 +32,9 @@ function createWindow() {
   serverApp = server.listen(4000, () => {
     console.log("connected")
   })
+  const icon = process.platform === "win32" ? "icon.ico" : "icon.icns"
   win = new BrowserWindow({
-    icon: path.join(process.env.VITE_PUBLIC, "icon.icns"),
+    icon: path.join(process.env.VITE_PUBLIC, icon),
     webPreferences: {
       preload: path.join(__dirname, "preload.mjs")
     },
@@ -108,6 +110,12 @@ if (!gotTheLock) {
   app.whenReady().then(() => {
     createWindow()
 
+    if (process.platform === "win32") {
+      setTimeout(() => {
+        autoUpdater.checkForUpdatesAndNotify()
+      }, 5000)
+    }
+
     // Add the custom "Help" menu only for macOS (darwin)
     if (process.platform === 'darwin') {
       // Define a custom Help menu
@@ -179,16 +187,77 @@ app.on("activate", () => {
   }
 });
 
-// app.whenReady().then(createWindow);
-
-// app.on("before-quit", () => {
-//   if (serverApp) {
-//     serverApp?.close?.()
-//   }
-//   console.log("closeed")
-// })
-
 ipcMain.on('app:restart', () => {
   app.relaunch()
   app.exit(0)
 })
+
+if (process.platform === "win32") {
+  autoUpdater.autoDownload = false
+  autoUpdater.autoInstallOnAppQuit = true
+  autoUpdater.setFeedURL({
+    provider: 'generic',
+    url: 'https://releases.nidum.ai/download/downloads/',
+  })
+
+  autoUpdater.on('checking-for-update', () => {
+    console.log('Checking for updates...')
+  })
+
+  autoUpdater.on('update-available', (info) => {
+    // console.log('Update available.')
+    // console.log(`Latest version available: ${info.version}`)
+    // console.log('Prompting user to download the update...')
+
+    dialog.showMessageBox({
+      type: 'info',
+      title: 'Update Available',
+      message: 'A new version is available. Do you want to download it now?',
+      buttons: ['Download', 'Cancel']
+    }).then((result) => {
+      const buttonIndex = result.response
+
+      if (buttonIndex === 0) {
+        // console.log('User chose to download the update.')
+        autoUpdater.downloadUpdate()
+      } else {
+        console.log('User canceled the update download.')
+      }
+    })
+  })
+
+  autoUpdater.on('update-not-available', (info) => {
+    console.log('No updates available.')
+    console.log(`Checked version: ${info.version}`)
+  })
+
+  autoUpdater.on('error', (err) => {
+    console.log('Error in auto-updater:', err)
+  })
+
+  autoUpdater.on('download-progress', (progressObj) => {
+    console.log(`Download speed: ${progressObj.bytesPerSecond} B/s`)
+    console.log(`Downloaded ${progressObj.percent}%`)
+    console.log(`${progressObj.transferred} bytes out of ${progressObj.total} bytes.`)
+  })
+
+  autoUpdater.on('update-downloaded', (info) => {
+    console.log('Update downloaded.')
+    console.log(`Downloaded version: ${info.version}`)
+    console.log('Prompting user to restart the application...')
+
+    dialog.showMessageBox({
+      type: 'info',
+      title: 'Update Ready',
+      message: 'A new version has been downloaded. Restart the application to apply the updates.',
+      buttons: ['Restart', 'Later']
+    }).then((returnValue) => {
+      if (returnValue.response === 0) {
+        console.log('User chose to restart the application to install the update.')
+        autoUpdater.quitAndInstall(false, true)
+      } else {
+        console.log('User chose to install the update later.')
+      }
+    })
+  })
+}

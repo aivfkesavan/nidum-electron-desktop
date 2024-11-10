@@ -1,17 +1,17 @@
 appId: com.nidum.ai.ragdrive
-productName: RAGDrive
-copyright: Copyright © 2024 nidum.ai
+productName: Nidum AI
 directories:
-  output: dist
   buildResources: public
-files:
-  - from: "."
-    filter:
-      - "package.json"
-      - "app/**/*"
+win:
+  executableName: Nidum AI
+nsis:
+  artifactName: ${name}-${version}.${ext}
+  shortcutName: ${productName}
+  uninstallDisplayName: ${productName}
+  createDesktopShortcut: always
+appImage:
+  artifactName: ${name}-${version}.${ext}
+npmRebuild: false
 publish:
-  provider: github
-  private: true
-  releaseType: release
-mac:
-  identity: null
+  provider: generic
+  url: https://releases.nidum.ai/download/downloads/
