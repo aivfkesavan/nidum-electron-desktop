@@ -79,7 +79,7 @@ function Projects({ isFullScreen, platform }: props) {
 
       <div className="my-2 mx-2.5">
         <button
-          className="df w-full px-3 py-2 text-[13px] text-left text-white/70 cursor-pointer rounded-lg group bg-secondary hover:text-white group"
+          className="df w-full px-3 py-2 text-[13px] text-left text-white/70 cursor-pointer rounded-lg group bg-secondary hover:text-white group active:scale-105 transition-all"
           onClick={() => setOpen(true)}
         >
           <span className="flex-1">New Project</span>
