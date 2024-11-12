@@ -30,7 +30,7 @@ const requestIntercepter = (
       if (isAuthendicated) {
         const token = useAuthStore.getState().token
         axiosHeaders.set('Authorization', `Bearer ${token}`)
-
+        console.log({ token })
         // Merge additional headers
         Object.entries(headers).forEach(([key, value]) => {
           axiosHeaders.set(key, value)

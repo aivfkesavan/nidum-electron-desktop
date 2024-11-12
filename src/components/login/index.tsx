@@ -34,6 +34,7 @@ function Login() {
         ip: res?.ip,
         _id: res?._id,
         email: data?.email,
+        token: res?.token,
         isLoggedIn: true,
       })
       navigate("/", { replace: true })

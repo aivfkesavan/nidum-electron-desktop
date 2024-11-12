@@ -40,7 +40,6 @@ function Messages() {
     sambaNovaApiKey, sambaNovaModel,
     anthropicApiKey, anthropicModel,
     openaiApiKey, openaiModel,
-    // embedding_type, ollamEmbeddingUrl, ollamaEmbeddingModel,
   } = useContextStore()
 
   const projectdetails = useConvoStore(s => s.projects[project_id] || null)
@@ -146,10 +145,6 @@ function Messages() {
           if (!openaiApiKey) return toast({ title: "Please provide OpenAI API key" })
           if (!openaiModel) return toast({ title: "Please choose a OpenAI Model" })
         }
-
-        // if (ragEnabled) {
-        //   if (embedding_type === "Ollama" && (!ollamEmbeddingUrl || !ollamaEmbeddingModel)) return toast({ title: "Please Check your embedding configurations in settings" })
-        // }
 
         setFiles([])
         setMessage('')

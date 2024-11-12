@@ -1,5 +1,4 @@
 export { default as duckDuckGoSerach } from "./duck-duck-go-search";
-export { default as fileSearchQdrant } from "./file-search-qdrant";
 export { default as ragSearch } from "./rag-search";
 
 export const systemDefaultPrompt = "You are a helpful assistant."

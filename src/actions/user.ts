@@ -44,3 +44,11 @@ export function signup(data: any) {
     data,
   })
 }
+
+export function logout() {
+  return sendApiReq({
+    method: "post",
+    url: endPoints.logout,
+    data: {}
+  })
+}
