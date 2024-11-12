@@ -2,7 +2,6 @@ import { useState } from "react";
 import { MdOutlineFileDownload, MdOutlineDeleteOutline } from "react-icons/md";
 import { useQueryClient } from "@tanstack/react-query";
 
-// import { useOllamaModels } from "../../../../../hooks/use-ollama";
 import { useLLamaDownloadedModels } from "../../../../../hooks/use-llm-models";
 import { useDownloads } from "../../../../../components/common/download-manager";
 import { useLLMModels } from "../../../../../hooks/use-llm-models";

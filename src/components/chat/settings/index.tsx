@@ -1,5 +1,5 @@
 import { HiOutlineInformationCircle } from "react-icons/hi2";
-import { MdOutlineRecordVoiceOver } from "react-icons/md";
+import { MdOutlineRecordVoiceOver, MdPublic } from "react-icons/md";
 import { GoProjectRoadmap } from "react-icons/go";
 import { RiVoiceprintFill } from "react-icons/ri";
 import { FaLinode } from "react-icons/fa";
@@ -23,6 +23,7 @@ import Project from "./project";
 import Voice from "./voice";
 import About from "./about";
 import LLM from "./llm";
+import GoPublic from "./go-public";
 
 const list = [
   {
@@ -36,6 +37,12 @@ const list = [
     title: "AI Model",
     logo: <FaLinode className="text-base" />,
     child: <LLM />,
+  },
+  {
+    id: "6",
+    title: "Go Public",
+    logo: <MdPublic className="text-base" />,
+    child: <GoPublic />,
   },
   {
     id: "3",

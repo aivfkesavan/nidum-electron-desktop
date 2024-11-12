@@ -34,7 +34,6 @@ function Ollama() {
               lable: "",
               fileName: "",
               // name: "mxbai-embed-large:latest",
-              // ollamaUrl: ollamEmbeddingUrl,
               // initiater: "embedder",
               onSuccess() {
                 queryClient.invalidateQueries({ queryKey: ["ollama-tags"] })

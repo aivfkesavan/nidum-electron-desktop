@@ -36,7 +36,7 @@ function Messages() {
     model_type,
     hfApiKey, hfModel,
     groqApiKey, groqModel,
-    ollamaModel, ollamaModeType, // ollamaUrl, 
+    ollamaModel, ollamaModeType,
     sambaNovaApiKey, sambaNovaModel,
     anthropicApiKey, anthropicModel,
     openaiApiKey, openaiModel,
@@ -125,7 +125,6 @@ function Messages() {
           if (!groqModel) return toast({ title: "Please choose a Groq Model" })
         }
         else if (model_type === "Ollama") {
-          // if (!ollamaUrl) return toast({ title: "Please provide base url" })
           if (!ollamaModel) return toast({ title: "Select a model to continue the chat" })
           if (!downloadedModels?.some((d: any) => d.fileName === ollamaModel)) {
             return toast({ title: "Model not available" })
