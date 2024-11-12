@@ -1,9 +1,7 @@
-import axios from "axios";
 import { endPoints } from "../services/end-points";
 import sendApiReq from "../services/send-api-req";
-import constants from "../utils/constants";
 
-export type loginT = { email: string, password: string }
+type loginT = { email: string, password: string }
 export function login(data: loginT) {
   return sendApiReq({
     isAuthendicated: false,
@@ -46,5 +44,33 @@ export function logout() {
     method: "post",
     url: endPoints.logout,
     data: {}
+  })
+}
+
+export function getSharedServers() {
+  return sendApiReq({
+    url: endPoints.sharedServer,
+  })
+}
+
+export function getInvites() {
+  return sendApiReq({
+    url: endPoints.invites,
+  })
+}
+
+export function addInvite(to: string) {
+  return sendApiReq({
+    method: "put",
+    url: endPoints.addInvite,
+    data: { to },
+  })
+}
+
+export function removeInvite(to: string) {
+  return sendApiReq({
+    method: "put",
+    url: endPoints.removeInvites,
+    data: { to },
   })
 }

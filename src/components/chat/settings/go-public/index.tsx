@@ -1,8 +1,16 @@
 import { useState } from "react";
 import { LuX } from "react-icons/lu";
 
+import { useAddInviteMutate, useInvites, useRemoveInviteMutate } from "../../../../hooks/use-user";
+
 function GoPublic() {
   const [emailTo, setEmailTo] = useState("")
+
+  const { data, isLoading } = useInvites()
+  const { mutate: mutateRemove, isPending: isPending2 } = useRemoveInviteMutate()
+  const { mutate: mutateAdd, isPending: isPending1 } = useAddInviteMutate()
+
+  const loading = isPending1 || isPending2 || isLoading
 
   return (
     <div className="">
@@ -30,33 +38,43 @@ function GoPublic() {
           className="w-full max-w-[280px] px-2.5 py-1.5 bg-zinc-700/30"
           placeholder="john@gmail.com"
           value={emailTo}
+          disabled={loading}
           onChange={e => setEmailTo(e.target.value)}
         />
         <button
-          className="px-2 py-1 bg-zinc-200 text-zinc-800 hover:bg-zinc-300"
-          disabled={!emailTo}
+          className="dc w-16 px-2 py-1 bg-zinc-200 text-zinc-800 hover:bg-zinc-300"
+          disabled={!emailTo || loading}
           onClick={() => {
-            setEmailTo("")
+            mutateAdd(emailTo, {
+              onSettled() {
+                setEmailTo("")
+              }
+            })
           }}
         >
+          {isPending1 && <span className="loader-2 size-3 border-2 border-zinc-800"></span>}
           Invite
         </button>
       </div>
 
       <div className="max-w-md mt-8 w-full mx-auto">
-        {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19]?.map(l => (
-          <div
-            key={l}
-            className="df pl-2 mb-1 text-sm hover:bg-zinc-700/50 rounded-sm"
-          >
-            <p className="flex-1">examolbjkdc@vkhdceyv.vuycdw{l}</p>
-            <button
-              className="p-1 hover:bg-red-500"
+        {
+          data?.map((l: string) => (
+            <div
+              key={l}
+              className="df pl-2 mb-1 text-sm hover:bg-zinc-700/50 rounded-sm"
             >
-              <LuX />
-            </button>
-          </div>
-        ))}
+              <p className="flex-1">{l}</p>
+              <button
+                onClick={() => mutateRemove(l)}
+                disabled={loading}
+                className="p-1 hover:bg-red-500"
+              >
+                <LuX />
+              </button>
+            </div>
+          ))
+        }
       </div>
     </div>
   )

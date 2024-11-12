@@ -1,7 +1,5 @@
-import { useMutation } from "@tanstack/react-query";
 
-import useAuthStore from "../../../store/auth";
-import { logout } from "../../../actions/user";
+import { useLogoutMutate } from "../../../hooks/use-user";
 
 import {
   DropdownMenu,
@@ -11,14 +9,7 @@ import {
 } from "../../ui/dropdown-menu";
 
 function Account() {
-  const clearAuth = useAuthStore(s => s.clear)
-
-  const { mutate, isPending } = useMutation({
-    mutationFn: logout,
-    onSuccess() {
-      clearAuth()
-    }
-  })
+  const { mutate, isPending } = useLogoutMutate()
 
   return (
     <DropdownMenu>
