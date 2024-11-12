@@ -10,7 +10,6 @@ type state = {
   model_type: llm_modelsT
   groqApiKey: string;
   groqModel: string;
-  ollamaUrl: string;
   ollamaModel: string;
   ollamaModeType: "" | "vision";
   hfApiKey: string;
@@ -53,7 +52,6 @@ const useContextStore = create<state & actions>()(persist(set => ({
   model_type: "Ollama",
   groqApiKey: "",
   groqModel: "",
-  ollamaUrl: "http://localhost:11490",
   ollamaModel: "",
   ollamaModeType: "",
   hfApiKey: "",

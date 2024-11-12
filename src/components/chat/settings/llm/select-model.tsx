@@ -15,7 +15,6 @@ import llmModels from "../../../../utils/llm-models";
 function SelectModel() {
   const updateContext = useContextStore(s => s.updateContext)
   const model_type = useContextStore(s => s.model_type)
-  const ollamaUrl = useContextStore(s => s.ollamaUrl)
   const chat_id = useContextStore(s => s.chat_id)
 
   const [open, setOpen] = useState(false)
@@ -34,7 +33,7 @@ function SelectModel() {
             />
             {
               found.title === "Ollama" &&
-              <OllmaStatusCheck ollamaUrl={ollamaUrl} className="absolute top-0 -right-2" />
+              <OllmaStatusCheck className="absolute top-0 -right-2" />
             }
           </div>
 
@@ -73,7 +72,7 @@ function SelectModel() {
                   />
                   {
                     l.title === "Ollama" &&
-                    <OllmaStatusCheck ollamaUrl={ollamaUrl} className="absolute top-0 -right-2" />
+                    <OllmaStatusCheck className="absolute top-0 -right-2" />
                   }
                 </div>
 
