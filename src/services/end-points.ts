@@ -12,8 +12,8 @@ export const endPoints = {
   logout: "/user/logout",
 
   // user
-  invites: "/user/invites", // ?email
-  sharedServer: "/user/shared-server", // ?email
+  invites: "/user/invites",
+  sharedServer: "/user/shared-server",
   addInvite: "/user/invites/add",
   removeInvites: "/user/invites/remove",
   deleteOtp: "/user/delete-otp",

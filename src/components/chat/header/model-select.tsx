@@ -1,6 +1,7 @@
 import { LuChevronRight } from "react-icons/lu";
 
 import useIsFullScreenCheck from "../../../hooks/use-is-full-screen-check";
+import { useSharedServers } from "../../../hooks/use-user";
 import useContextStore from "../../../store/context";
 import usePlatform from "../../../hooks/use-platform";
 import llmModels from "../../../utils/llm-models";
@@ -25,6 +26,8 @@ function ModelSelect() {
   const isFullScreen = useIsFullScreenCheck()
   const platform = usePlatform()
 
+  const { data, isLoading } = useSharedServers()
+
   const updateContext = useContextStore(s => s.updateContext)
   const model_type = useContextStore(s => s.model_type)
   const chat_id = useContextStore(s => s.chat_id)
@@ -36,7 +39,7 @@ function ModelSelect() {
     }
     updateContext(payload)
   }
-
+  console.log(data)
   const firstModel = llmModels[0]
   const otherModels = llmModels.slice(1)
 
@@ -73,40 +76,43 @@ function ModelSelect() {
           <DropdownMenuPortal>
             <DropdownMenuSubContent sideOffset={5}>
               <DropdownMenuItem
-                className={cn("p-2", {
+                className={cn("px-2 py-1.5", {
                   "bg-input/50": firstModel?.title === model_type
                 })}
                 onClick={() => handleModelSelect(firstModel?.title || "")}
               >
                 Local Server
               </DropdownMenuItem>
+
               <DropdownMenuSeparator />
 
               <DropdownMenuGroup>
                 <DropdownMenuLabel className="pb-0 text-xs text-zinc-500">Invited list</DropdownMenuLabel>
+                {
+                  !isLoading &&
+                  data?.invites?.map((invite: any) => (
+                    <DropdownMenuSub key={invite._id}>
+                      <DropdownMenuSubTrigger className="px-2 py-1.5">
+                        {invite?.email}
+                      </DropdownMenuSubTrigger>
 
-                {[1, 2, 3, 4, 5].map(model => (
-                  <DropdownMenuSub key={model}>
-                    <DropdownMenuSubTrigger className="p-2">
-                      email@gamial.com
-                    </DropdownMenuSubTrigger>
-
-                    <DropdownMenuPortal>
-                      <DropdownMenuSubContent sideOffset={5}>
-                        {[1, 2, 3, 4, 5].map(f => (
-                          <DropdownMenuItem
-                            key={f}
-                            className={cn("p-2", {
-                              // "bg-input/50": model.title === model_type
-                            })}
-                          >
-                            Dev {f}
-                          </DropdownMenuItem>
-                        ))}
-                      </DropdownMenuSubContent>
-                    </DropdownMenuPortal>
-                  </DropdownMenuSub>
-                ))}
+                      <DropdownMenuPortal>
+                        <DropdownMenuSubContent sideOffset={5}>
+                          {invite?.devices?.map((device: any) => (
+                            <DropdownMenuItem
+                              key={device?._id}
+                              className={cn("px-2 py-1.5", {
+                                // "bg-input/50": model.title === model_type
+                              })}
+                            >
+                              {device?.name}
+                            </DropdownMenuItem>
+                          ))}
+                        </DropdownMenuSubContent>
+                      </DropdownMenuPortal>
+                    </DropdownMenuSub>
+                  ))
+                }
               </DropdownMenuGroup>
             </DropdownMenuSubContent>
           </DropdownMenuPortal>

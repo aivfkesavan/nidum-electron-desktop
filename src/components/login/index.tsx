@@ -1,12 +1,9 @@
 import { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
 import { IoEye, IoEyeOff } from "react-icons/io5";
 import { useForm } from "react-hook-form";
+import { Link } from "react-router-dom";
 
-import { login, loginT } from "../../actions/user";
-import useAuthStore from "../../store/auth";
-import { useToast } from "../ui/use-toast";
-
+import { useLoginMutate } from "../../hooks/use-user";
 import logo from '../../assets/imgs/logo.png';
 
 function Login() {
@@ -17,40 +14,15 @@ function Login() {
     },
   })
 
+  const { isPending, mutate } = useLoginMutate()
   const [showPass, setShowPass] = useState(false)
-  const updateAuth = useAuthStore(s => s.update)
-  const navigate = useNavigate()
-  const { toast } = useToast()
 
   const updateShowPass = (e: React.FormEvent<HTMLButtonElement>) => {
     e.preventDefault()
     setShowPass(p => !p)
   }
 
-  const onSubmit = async (data: loginT) => {
-    try {
-      const res = await login(data)
-      updateAuth({
-        ip: res?.ip,
-        _id: res?._id,
-        email: data?.email,
-        token: res?.token,
-        isLoggedIn: true,
-      })
-      navigate("/", { replace: true })
-
-    } catch (error) {
-      let hasError = error?.message
-      if (hasError) {
-        toast({ title: hasError })
-      } else {
-        toast({
-          title: "Something went wrong!!!",
-          description: "Try again, later.",
-        })
-      }
-    }
-  }
+  const onSubmit = (data: any) => mutate(data)
 
   return (
     <section className='dc min-h-screen animate-enter-opacity'>
@@ -138,7 +110,7 @@ function Login() {
           <button
             type='submit'
             className="w-full py-1.5 text-sm text-zinc-900 bg-zinc-50 hover:opacity-85 disabled:opacity-50"
-            disabled={isSubmitting}
+            disabled={isSubmitting || isPending}
           >
             Log in
           </button>
