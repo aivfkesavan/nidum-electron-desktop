@@ -1,0 +1,46 @@
+import axios from "axios";
+import { endPoints } from "../services/end-points";
+import sendApiReq from "../services/send-api-req";
+import constants from "../utils/constants";
+
+export type loginT = { email: string, password: string }
+export function login(data: loginT) {
+  return sendApiReq({
+    isAuthendicated: false,
+    method: "post",
+    url: endPoints.login,
+    data,
+  })
+}
+
+export type verifyOtpT = { email: string, otp: number }
+export function verifyOtp(data: verifyOtpT) {
+  return sendApiReq({
+    isAuthendicated: false,
+    method: "post",
+    url: endPoints.verifyOtp,
+    data,
+  })
+}
+
+export function resendOtp(email: string) {
+  return sendApiReq({
+    isAuthendicated: false,
+    method: "post",
+    url: endPoints.resendOtp,
+    data: { email },
+  })
+}
+
+export function getlocationInfo() {
+  return axios.get(`${constants.backendUrl}/general/location`).then(r => r.data)
+}
+
+export function signup(data: any) {
+  return sendApiReq({
+    isAuthendicated: false,
+    method: "post",
+    url: endPoints.register,
+    data,
+  })
+}
