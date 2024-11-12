@@ -11,8 +11,6 @@ export const endPoints = {
   login: "/user/login",
   logout: "/user/logout",
 
-  location: "/user/location",
-
   // user
   invites: "/user/invites", // ?email
   sharedServer: "/user/shared-server", // ?email

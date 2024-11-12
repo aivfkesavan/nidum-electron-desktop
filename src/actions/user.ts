@@ -32,10 +32,6 @@ export function resendOtp(email: string) {
   })
 }
 
-export function getlocationInfo() {
-  return axios.get(`${constants.backendUrl}/general/location`).then(r => r.data)
-}
-
 export function signup(data: any) {
   return sendApiReq({
     isAuthendicated: false,
