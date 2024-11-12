@@ -5,7 +5,6 @@ import { checkPathsSetup } from './utils/path-helper';
 import duckduckgo from "./controllers/duckduckgo";
 import webcrawler from "./controllers/webcrawler";
 import llamaChat from "./controllers/llama-chat";
-import general from "./controllers/general";
 import upgrade from "./controllers/upgrade";
 import whisper from "./controllers/whisper";
 import llama from "./controllers/llama";
@@ -30,6 +29,5 @@ app.use("/image", image)
 app.use("/whisper", whisper)
 app.use("/upgrade", upgrade)
 app.use("/duckduckgo", duckduckgo)
-app.use("/general", general)
 
 export default app

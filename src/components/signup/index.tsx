@@ -3,7 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { IoEye, IoEyeOff } from "react-icons/io5";
 import { useForm } from 'react-hook-form';
 
-import { getlocationInfo, resendOtp as resendOtpAction, signup, verifyOtp as verifyOtpAction } from '../../actions/user';
+import { resendOtp as resendOtpAction, signup, verifyOtp as verifyOtpAction } from '../../actions/user';
 import { useToast } from '../ui/use-toast';
 
 import logo from '../../assets/imgs/logo.png';
@@ -76,12 +76,10 @@ function Signup() {
     if (showOtp) return verifyOtp(data)
 
     try {
-      const locData = await getlocationInfo()
       const { otp, ...rest } = data
 
       await signup({
         ...rest,
-        ip: locData?.ip_address,
         name: data?.firstName + " " + data?.lastName
       })
       toast({ title: "Check your email for otp" })
