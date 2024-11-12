@@ -21,7 +21,6 @@ function Chat() {
   const editProject = useConvoStore(s => s.editProject)
   // const updateTab = useUIStore(s => s.update)
 
-  // const ollamaEmbeddingModel = useContextStore(s => s.ollamaEmbeddingModel)
   const project_id = useContextStore(s => s.project_id)
   const { data: crawlerData } = useCrawler()
 

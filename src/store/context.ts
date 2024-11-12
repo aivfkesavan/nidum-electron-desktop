@@ -25,14 +25,6 @@ type state = {
 
   voice: string;
 
-  embedding_type: "Ollama" | "Nidum";
-  ollamEmbeddingUrl: string;
-  ollamaEmbeddingModel: string;
-
-  vb_type: "Qdrant" | "Nidum";
-  qdrantDBUrl: string;
-  qdrantDBApiKey: string;
-
   stt_type: "Groq" | "System native";
   nativeSttModelsDownloaded: string;
   nativeSttModel: string;
@@ -66,14 +58,6 @@ const useContextStore = create<state & actions>()(persist(set => ({
   hfImgGenModel: "",
 
   voice: "Google UK English Female",
-
-  embedding_type: "Ollama",
-  ollamEmbeddingUrl: "http://localhost:11490",
-  ollamaEmbeddingModel: "",
-
-  vb_type: "Qdrant",
-  qdrantDBUrl: "",
-  qdrantDBApiKey: "",
 
   stt_type: "System native",
   nativeSttModelsDownloaded: "",
