@@ -32,13 +32,13 @@ function SelectModel() {
               alt=""
             />
             {
-              found.title === "Ollama" &&
+              found.title === "Local" &&
               <OllmaStatusCheck className="absolute top-0 -right-2" />
             }
           </div>
 
           <div className="text-left">
-            <p className="text-sm group-hover:underline">AI Server: {found.title === "Ollama" ? "Local" : found.title}</p>
+            <p className="text-sm group-hover:underline">AI Server: {found.title}</p>
             <p className="text-xs text-white/70">{found?.para}</p>
           </div>
 
@@ -71,13 +71,13 @@ function SelectModel() {
                     alt={l.title}
                   />
                   {
-                    l.title === "Ollama" &&
+                    l.title === "Local" &&
                     <OllmaStatusCheck className="absolute top-0 -right-2" />
                   }
                 </div>
 
                 <div className="">
-                  <p className="text-sm group-hover:underline">{l.title === "Ollama" ? "Local" : l.title}</p>
+                  <p className="text-sm group-hover:underline">{l.title}</p>
                   <p className="text-xs text-white/70">{l.para}</p>
                 </div>
               </div>

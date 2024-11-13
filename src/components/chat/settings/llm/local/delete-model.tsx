@@ -1,7 +1,7 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 
 import { deleteDownloadedModel } from "../../../../../actions/llms";
-import { useToast } from "../../../../../components/ui/use-toast";
+import { useToast } from "../../../../ui/use-toast";
 
 import {
   Dialog,
@@ -10,7 +10,7 @@ import {
   DialogHeader,
   DialogTitle,
   DialogFooter,
-} from "../../../../../components/ui/dialog";
+} from "../../../../ui/dialog";
 
 type props = {
   id: string

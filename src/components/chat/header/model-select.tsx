@@ -48,7 +48,7 @@ function ModelSelect() {
       <DropdownMenuTrigger
         className={`non-draggable df gap-px pl-28 [.open_&]:pl-0 text-sm transition-all ${isFullScreen || platform === "windows" ? "-translate-x-20 [.open_&]:translate-x-0" : ""}`}
       >
-        AI Server: {model_type === "Ollama" ? "Local" : model_type} <LuChevronRight className="opacity-50" />
+        AI Server: {model_type} <LuChevronRight className="opacity-50" />
       </DropdownMenuTrigger>
 
       <DropdownMenuContent className="p-1 min-w-48">
@@ -61,7 +61,7 @@ function ModelSelect() {
                   src={firstModel?.logo}
                   alt={firstModel?.title}
                 />
-                {model_type === "Ollama" &&
+                {model_type === "Local" &&
                   <OllmaStatusCheck className="absolute top-0 -right-0.5" />
                 }
               </div>
@@ -135,7 +135,7 @@ function ModelSelect() {
                 />
               </div>
               <div>
-                <p className="text-sm">{model.title === "Ollama" ? "Local" : model.title}</p>
+                <p className="text-sm">{model.title}</p>
                 <p className="text-[10px] text-white/70">{model.para}</p>
               </div>
             </div>
