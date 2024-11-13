@@ -1,4 +1,6 @@
 import type { llm_modelsT } from "../store/context";
+import { TbDeviceDesktopBolt } from "react-icons/tb";
+
 import anthropic from '../assets/imgs/anthropic.png';
 import sambanova from '../assets/imgs/sambanova.png';
 import openai from '../assets/imgs/openai.png';
@@ -6,12 +8,11 @@ import logo from '../assets/imgs/logo.png';
 import groq from '../assets/imgs/groq.png';
 import hf from '../assets/imgs/hugging-face.png';
 
-export type listT = {
+type listT = {
   id: string
   title: llm_modelsT
-  logo: string
+  logo: any
   para: string
-  hasSub?: boolean
 }
 
 const llmModels: listT[] = [
@@ -23,10 +24,9 @@ const llmModels: listT[] = [
   },
   {
     id: "2",
-    logo: logo,
+    logo: TbDeviceDesktopBolt,
     title: "Nidum Shared",
-    para: "Use AI models that someone is sharing through Nidum",
-    hasSub: true,
+    para: "Use AI models that someone is sharing through Nidum"
   },
   {
     id: "3",

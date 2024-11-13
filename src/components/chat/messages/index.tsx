@@ -34,6 +34,7 @@ function Messages() {
     updateContext, project_id, chat_id: id,
 
     model_type,
+    sharedAppId,
     hfApiKey, hfModel,
     groqApiKey, groqModel,
     llamaModel, llamaModeType,
@@ -288,8 +289,9 @@ function Messages() {
 
         type urlsT = Record<llm_modelsT, string>
         const urls: urlsT = {
-          Groq: "https://api.groq.com/openai/v1/chat/completions",
           Local: `${constants.backendUrl}/llama-chat`,
+          "Nidum Shared": `https://${sharedAppId}.chaim.nidum.ai/llama-chat`,
+          Groq: "https://api.groq.com/openai/v1/chat/completions",
           Nidum: "https://nidum2b.tunnelgate.haive.tech/v1/chat/completions",
           "Hugging Face": `https://api-inference.huggingface.co/models/${hfModel}/v1/chat/completions`,
           "SambaNova Systems": `${constants.backendUrl}/ai/sambanova`,
