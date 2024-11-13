@@ -2,7 +2,6 @@ import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 
 type authState = {
-  ip: string
   _id: string;
   email: string;
   token: string;
@@ -15,7 +14,6 @@ type actions = {
 }
 
 const payload = {
-  ip: "",
   _id: "",
   email: '',
   token: '',
