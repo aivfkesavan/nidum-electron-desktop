@@ -1,11 +1,12 @@
 import { LuChevronRight } from "react-icons/lu";
 
+import llmModels, { listT } from "../../../utils/llm-models";
+import { cn } from "../../../lib/utils";
+
 import useIsFullScreenCheck from "../../../hooks/use-is-full-screen-check";
 import { useSharedServers } from "../../../hooks/use-user";
 import useContextStore from "../../../store/context";
 import usePlatform from "../../../hooks/use-platform";
-import llmModels from "../../../utils/llm-models";
-import { cn } from "../../../lib/utils";
 
 import {
   DropdownMenu,
@@ -16,11 +17,29 @@ import {
   DropdownMenuSubContent,
   DropdownMenuSubTrigger,
   DropdownMenuPortal,
-  DropdownMenuGroup,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
 } from "../../../components/ui/dropdown-menu";
-import OllmaStatusCheck from "../../../components/common/ollma-status-check";
+import OnlineStatus from "../../common/online-status";
+
+function Title(model: listT) {
+  return (
+    <div className="df">
+      <div className="dc size-8 relative mr-2">
+        <img
+          className="w-7"
+          src={model.logo}
+          alt={model.title}
+        />
+        {model.title === "Local" &&
+          <OnlineStatus className="absolute top-0 -right-0.5" />
+        }
+      </div>
+      <div>
+        <p className="text-sm">{model.title}</p>
+        <p className="text-[10px] text-white/70">{model.para}</p>
+      </div>
+    </div>
+  )
+}
 
 function ModelSelect() {
   const isFullScreen = useIsFullScreenCheck()
@@ -40,9 +59,6 @@ function ModelSelect() {
     updateContext(payload)
   }
 
-  const firstModel = llmModels[0]
-  const otherModels = llmModels.slice(1)
-
   return (
     <DropdownMenu>
       <DropdownMenuTrigger
@@ -52,95 +68,61 @@ function ModelSelect() {
       </DropdownMenuTrigger>
 
       <DropdownMenuContent className="p-1 min-w-48">
-        <DropdownMenuSub>
-          <DropdownMenuSubTrigger className="p-2">
-            <div className="df">
-              <div className="dc size-8 relative mr-2">
-                <img
-                  className="w-7"
-                  src={firstModel?.logo}
-                  alt={firstModel?.title}
-                />
-                {model_type === "Local" &&
-                  <OllmaStatusCheck className="absolute top-0 -right-0.5" />
-                }
-              </div>
-
-              <div>
-                <p className="text-sm">Local</p>
-                <p className="text-[10px] text-white/70">{firstModel?.para}</p>
-              </div>
-            </div>
-          </DropdownMenuSubTrigger>
-
-          <DropdownMenuPortal>
-            <DropdownMenuSubContent sideOffset={5}>
+        {llmModels.map(model => {
+          if (!model?.hasSub) {
+            return (
               <DropdownMenuItem
-                className={cn("px-2 py-1.5", {
-                  "bg-input/50": firstModel?.title === model_type
+                key={model.id}
+                className={cn("p-2", {
+                  "bg-input/50": model.title === model_type
                 })}
-                onClick={() => handleModelSelect(firstModel?.title || "")}
+                onClick={() => handleModelSelect(model.title)}
               >
-                Local Server
+                <Title {...model} />
               </DropdownMenuItem>
+            )
+          }
 
-              <DropdownMenuSeparator />
+          return (
+            <DropdownMenuSub key={model.id}>
+              <DropdownMenuSubTrigger className="p-2">
+                <Title {...model} />
+              </DropdownMenuSubTrigger>
 
-              <DropdownMenuGroup>
-                <DropdownMenuLabel className="pb-0 text-xs text-zinc-500">Invited list</DropdownMenuLabel>
-                {
-                  !isLoading &&
-                  data?.invites?.map((invite: any) => (
-                    <DropdownMenuSub key={invite._id}>
-                      <DropdownMenuSubTrigger className="px-2 py-1.5">
-                        {invite?.email}
-                      </DropdownMenuSubTrigger>
+              <DropdownMenuPortal>
+                <DropdownMenuSubContent sideOffset={5}>
+                  {
+                    !isLoading &&
+                    data?.invites?.map((invite: any) => (
+                      <DropdownMenuSub key={invite._id}>
+                        <DropdownMenuSubTrigger className="df px-2 py-1.5 text-xs">
+                          <OnlineStatus isOnline={invite?.isServerOn} />
+                          {invite?.email}
+                        </DropdownMenuSubTrigger>
 
-                      <DropdownMenuPortal>
-                        <DropdownMenuSubContent sideOffset={5}>
-                          {invite?.devices?.map((device: any) => (
-                            <DropdownMenuItem
-                              key={device?._id}
-                              className={cn("px-2 py-1.5", {
-                                // "bg-input/50": model.title === model_type
-                              })}
-                            >
-                              {device?.name}
-                            </DropdownMenuItem>
-                          ))}
-                        </DropdownMenuSubContent>
-                      </DropdownMenuPortal>
-                    </DropdownMenuSub>
-                  ))
-                }
-              </DropdownMenuGroup>
-            </DropdownMenuSubContent>
-          </DropdownMenuPortal>
-        </DropdownMenuSub>
-
-        {otherModels.map(model => (
-          <DropdownMenuItem
-            key={model.id}
-            className={cn("p-2", {
-              "bg-input/50": model.title === model_type
-            })}
-            onClick={() => handleModelSelect(model.title)}
-          >
-            <div className="df">
-              <div className="dc size-8 relative mr-2">
-                <img
-                  className="w-7"
-                  src={model.logo}
-                  alt={model.title}
-                />
-              </div>
-              <div>
-                <p className="text-sm">{model.title}</p>
-                <p className="text-[10px] text-white/70">{model.para}</p>
-              </div>
-            </div>
-          </DropdownMenuItem>
-        ))}
+                        <DropdownMenuPortal>
+                          <DropdownMenuSubContent sideOffset={5}>
+                            {invite?.devices?.map((device: any) => (
+                              <DropdownMenuItem
+                                key={device?._id}
+                                className={cn("df px-2 py-1.5 text-xs", {
+                                  // "bg-input/50": model.title === model_type
+                                })}
+                              >
+                                <OnlineStatus isOnline={device?.isServerOn} />
+                                {device?.name}
+                              </DropdownMenuItem>
+                            ))}
+                          </DropdownMenuSubContent>
+                        </DropdownMenuPortal>
+                      </DropdownMenuSub>
+                    ))
+                  }
+                </DropdownMenuSubContent>
+              </DropdownMenuPortal>
+            </DropdownMenuSub>
+          )
+        })}
       </DropdownMenuContent>
     </DropdownMenu>
   )
