@@ -2,6 +2,7 @@ import useContextStore from "../../../../store/context";
 
 import SelectModel from "./select-model";
 import HuggingFace from "./hugging-face";
+import NidumShared from "./nidum-shared";
 import SambavaNova from "./sambanova";
 import Anthropic from "./anthropic";
 // import Nidum from "./nidum";
@@ -18,6 +19,10 @@ function Model() {
 
       {
         modelType === "Local" && <Local />
+      }
+
+      {
+        modelType === "Nidum Shared" && <NidumShared />
       }
 
       {
