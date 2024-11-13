@@ -36,7 +36,7 @@ function Messages() {
     model_type,
     hfApiKey, hfModel,
     groqApiKey, groqModel,
-    ollamaModel, ollamaModeType,
+    llamaModel, llamaModeType,
     sambaNovaApiKey, sambaNovaModel,
     anthropicApiKey, anthropicModel,
     openaiApiKey, openaiModel,
@@ -123,9 +123,9 @@ function Messages() {
           if (!groqApiKey) return toast({ title: "Please provide Groq API key" })
           if (!groqModel) return toast({ title: "Please choose a Groq Model" })
         }
-        else if (model_type === "Ollama") {
-          if (!ollamaModel) return toast({ title: "Select a model to continue the chat" })
-          if (!downloadedModels?.some((d: any) => d.fileName === ollamaModel)) {
+        else if (model_type === "Local") {
+          if (!llamaModel) return toast({ title: "Select a model to continue the chat" })
+          if (!downloadedModels?.some((d: any) => d.fileName === llamaModel)) {
             return toast({ title: "Model not available" })
           }
         }
@@ -205,8 +205,8 @@ function Messages() {
         const onlyAllwedInputs = ["user", "assistant"]
 
         if (data) {
-          if (model_type === "Ollama") {
-            if (ollamaModeType === "vision") {
+          if (model_type === "Local") {
+            if (llamaModeType === "vision") {
               dataMap = await Promise.all(data?.filter(d => onlyAllwedInputs.includes(d.role))?.map(async ({ id, ...rest }) => {
                 if (rest?.images && rest?.images?.length > 0) {
                   const base64Files = await Promise.all(rest.images.map(imgToBase64))
@@ -277,19 +277,19 @@ function Messages() {
         const prompt = [
           {
             role: "system",
-            [model_type === "Ollama" ? "text" : "content"]: systemPrompt
+            [model_type === "Local" ? "text" : "content"]: systemPrompt
           },
           ...dataMap,
         ]
         // console.log(prompt)
-        if (model_type !== "Ollama") {
+        if (model_type !== "Local") {
           prompt.push(restUserContent)
         }
 
         type urlsT = Record<llm_modelsT, string>
         const urls: urlsT = {
           Groq: "https://api.groq.com/openai/v1/chat/completions",
-          Ollama: `${constants.backendUrl}/llama-chat`,
+          Local: `${constants.backendUrl}/llama-chat`,
           Nidum: "https://nidum2b.tunnelgate.haive.tech/v1/chat/completions",
           "Hugging Face": `https://api-inference.huggingface.co/models/${hfModel}/v1/chat/completions`,
           "SambaNova Systems": `${constants.backendUrl}/ai/sambanova`,
@@ -325,8 +325,8 @@ function Messages() {
           payload.model = "nidum_ai_2b"
         }
 
-        if (model_type === "Ollama") {
-          payload.modelName = ollamaModel
+        if (model_type === "Local") {
+          payload.modelName = llamaModel
           payload.message = msg
         }
 
@@ -462,7 +462,7 @@ function Messages() {
                   if (model_type === "Anthropic" && res.startsWith("event:")) {
                     continue
                   }
-                  if (!res.endsWith("}\n\n")) { //  && model_type !== "Ollama"
+                  if (!res.endsWith("}\n\n")) { //  && model_type !== "Local"
                     halfData = res
                     continue
                   }
@@ -470,7 +470,7 @@ function Messages() {
                   let text = ""
                   let finishReason = ""
 
-                  if (model_type === "Ollama") {
+                  if (model_type === "Local") {
                     text = json?.reply || ""
                     finishReason = ""
                   }
@@ -628,7 +628,7 @@ function Messages() {
           />
 
           {
-            model_type === "Ollama" && ollamaModeType === "vision" &&
+            model_type === "Local" && llamaModeType === "vision" &&
             <ImageUpload
               files={files}
               loading={loading}

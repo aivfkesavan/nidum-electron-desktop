@@ -3,19 +3,19 @@ import { MdOutlineFileDownload, MdOutlineDeleteOutline } from "react-icons/md";
 import { useQueryClient } from "@tanstack/react-query";
 
 import { useLLamaDownloadedModels } from "../../../../../hooks/use-llm-models";
-import { useDownloads } from "../../../../../components/common/download-manager";
+import { useDownloads } from "../../../../common/download-manager";
 import { useLLMModels } from "../../../../../hooks/use-llm-models";
 import useContextStore from "../../../../../store/context";
-import { useToast } from "../../../../../components/ui/use-toast";
+import { useToast } from "../../../../ui/use-toast";
 import useUIStore from "../../../../../store/ui";
 
-import { RadioGroup, RadioGroupItem } from "../../../../../components/ui/radio-group";
-import { Label } from "../../../../../components/ui/label";
+import { RadioGroup, RadioGroupItem } from "../../../../ui/radio-group";
+import { Label } from "../../../../ui/label";
 import DeleteModel from "./delete-model";
 
-function Ollama() {
+function Local() {
   const { downloads, downloadModel } = useDownloads()
-  const ollamaModel = useContextStore(s => s.ollamaModel)
+  const llamaModel = useContextStore(s => s.llamaModel)
 
   const updateContext = useContextStore(s => s.updateContext)
   const close = useUIStore(s => s.close)
@@ -27,7 +27,7 @@ function Ollama() {
 
   const queryClient = useQueryClient()
 
-  const [selected, setSelected] = useState(ollamaModel || "")
+  const [selected, setSelected] = useState(llamaModel || "")
   const [model, setModel] = useState("")
 
   const updateModel = (v: string = "") => setModel(v)
@@ -48,8 +48,8 @@ function Ollama() {
   function onSave() {
     if (downloaded?.some((d: any) => d?.fileName?.includes(selected))) {
       const visionModels = ["llava:7b"]
-      const ollamaModeType = visionModels.includes(selected) ? "vision" : ""
-      updateContext({ ollamaModel: selected, ollamaModeType })
+      const llamaModeType = visionModels.includes(selected) ? "vision" : ""
+      updateContext({ llamaModel: selected, llamaModeType })
       close()
     } else {
       toast({
@@ -62,7 +62,7 @@ function Ollama() {
   function closeModel(id: string) {
     if (selected === id) {
       setSelected("")
-      updateContext({ ollamaModel: "" })
+      updateContext({ llamaModel: "" })
     }
     setModel("")
   }
@@ -152,4 +152,4 @@ function Ollama() {
   )
 }
 
-export default Ollama
+export default Local

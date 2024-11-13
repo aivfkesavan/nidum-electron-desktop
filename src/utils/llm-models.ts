@@ -17,7 +17,7 @@ const llmModels: listT[] = [
   {
     id: "1",
     logo: logo,
-    title: "Ollama",
+    title: "Local",
     para: "Run AI models locally on your machine"
   },
   {

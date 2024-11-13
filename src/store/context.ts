@@ -1,7 +1,7 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 
-export type llm_modelsT = "Groq" | "Ollama" | "Nidum" | "Hugging Face" | "SambaNova Systems" | "Anthropic" | "OpenAI";
+export type llm_modelsT = "Local" | "Groq" | "Nidum" | "Hugging Face" | "SambaNova Systems" | "Anthropic" | "OpenAI";
 
 type state = {
   project_id: string;
@@ -10,8 +10,8 @@ type state = {
   model_type: llm_modelsT
   groqApiKey: string;
   groqModel: string;
-  ollamaModel: string;
-  ollamaModeType: "" | "vision";
+  llamaModel: string;
+  llamaModeType: "" | "vision";
   hfApiKey: string;
   hfModel: string;
   sambaNovaApiKey: string;
@@ -41,11 +41,11 @@ const useContextStore = create<state & actions>()(persist(set => ({
   project_id: "",
   chat_id: "",
 
-  model_type: "Ollama",
+  model_type: "Local",
   groqApiKey: "",
   groqModel: "",
-  ollamaModel: "",
-  ollamaModeType: "",
+  llamaModel: "",
+  llamaModeType: "",
   hfApiKey: "",
   hfModel: "",
   sambaNovaApiKey: "",
@@ -69,7 +69,27 @@ const useContextStore = create<state & actions>()(persist(set => ({
   updateContext: val => set(val),
 }),
   {
+    version: 3,
     name: 'context-storage',
+    migrate(persistedState: any, version) {
+      if (!version || version < 3) {
+        persistedState.llamaModel = persistedState.ollamaModel
+        persistedState.llamaModeType = persistedState.llamaModeType
+        persistedState.model_type = persistedState.model_type === "Ollama" ? "Local" : persistedState.model_type
+
+        delete persistedState.ollamaModel
+        delete persistedState.ollamaModeType
+        delete persistedState.ollamaUrl
+        delete persistedState.embedding_type
+        delete persistedState.ollamEmbeddingUrl
+        delete persistedState.ollamaEmbeddingModel
+        delete persistedState.vb_type
+        delete persistedState.qdrantDBUrl
+        delete persistedState.qdrantDBApiKey
+      }
+
+      return persistedState
+    },
   })
 );
 

@@ -5,7 +5,7 @@ import HuggingFace from "./hugging-face";
 import SambavaNova from "./sambanova";
 import Anthropic from "./anthropic";
 // import Nidum from "./nidum";
-import Ollama from "./ollama";
+import Local from "./local";
 import OpenAI from "./openai";
 import Groq from "./groq";
 
@@ -17,7 +17,7 @@ function Model() {
       <SelectModel />
 
       {
-        modelType === "Ollama" && <Ollama />
+        modelType === "Local" && <Local />
       }
 
       {
