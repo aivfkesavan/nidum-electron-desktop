@@ -1,26 +1,48 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { LuX } from "react-icons/lu";
 
 import { useAddInviteMutate, useInvites, useRemoveInviteMutate } from "../../../../hooks/use-user";
+import { useDeviceInfo, useDeviceMutate } from "../../../../hooks/use-device";
 
 function GoPublic() {
+  const [deviceName, setDeviceName] = useState("")
   const [emailTo, setEmailTo] = useState("")
 
-  const { data, isLoading } = useInvites()
+  const { data: device, isLoading: isLoading1 } = useDeviceInfo()
+  const { data: invites, isLoading: isLoading2 } = useInvites()
+
   const { mutate: mutateRemove, isPending: isPending2 } = useRemoveInviteMutate()
+  const { mutate: mutateDevice, isPending: isPending3 } = useDeviceMutate()
   const { mutate: mutateAdd, isPending: isPending1 } = useAddInviteMutate()
 
-  const loading = isPending1 || isPending2 || isLoading
+  useEffect(() => {
+    if (device) {
+      setDeviceName(device?.name || "")
+    }
+  }, [device])
 
+  function onBlur(name: string) {
+    console.log(name, device?.name)
+    if (name !== device?.name) {
+      mutateDevice({ _id: device?._id, name })
+    }
+  }
+
+  const loading = isPending1 || isPending2 || isLoading1 || isLoading2 || isPending3
+  console.log(device, deviceName)
   return (
     <div className="">
       {
-        // <div className="text-xs text-center">Adding this system to your list of registered servers</div>
+        isLoading1 &&
+        <div className="text-xs text-center">Checking device status</div>
       }
 
       <div className="dc mb-8">
         <input
-          className=" max-w-60 px-3 py-2 text-sm bg-zinc-700/50"
+          className="max-w-60 px-3 py-2 text-sm bg-zinc-700/50"
+          value={deviceName}
+          onChange={e => setDeviceName(e.target.value)}
+          onBlur={e => onBlur(e.target.value)}
         />
 
         <button
@@ -59,7 +81,7 @@ function GoPublic() {
 
       <div className="max-w-md mt-8 w-full mx-auto">
         {
-          data?.map((l: string) => (
+          invites?.map((l: string) => (
             <div
               key={l}
               className="df pl-2 mb-1 text-sm hover:bg-zinc-700/50 rounded-sm"

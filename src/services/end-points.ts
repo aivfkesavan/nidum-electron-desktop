@@ -19,4 +19,8 @@ export const endPoints = {
   deleteOtp: "/user/delete-otp",
   deleteAccount: "/user/account", // :otp
 
+  // device
+  initDevice: "/device/init", // :appId
+  device: "/device",
+
 } as const

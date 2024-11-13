@@ -39,7 +39,7 @@ function ModelSelect() {
     }
     updateContext(payload)
   }
-  console.log(data)
+
   const firstModel = llmModels[0]
   const otherModels = llmModels.slice(1)
 

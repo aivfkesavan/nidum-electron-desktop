@@ -29,7 +29,6 @@ export function useLoginMutate() {
     mutationFn: login,
     onSuccess(res, variables) {
       updateAuth({
-        ip: res?.ip,
         _id: res?._id,
         email: variables?.email,
         token: res?.token,
