@@ -47,6 +47,34 @@ export function logout() {
   })
 }
 
+type updatePassT = { oldPassword: string, newPassword: string }
+export function updatePass(data: updatePassT) {
+  return sendApiReq({
+    method: "put",
+    url: endPoints.updatePass,
+    data,
+  })
+}
+
+export function forgetPass(email: string) {
+  return sendApiReq({
+    isAuthendicated: false,
+    method: "post",
+    url: endPoints.forgetPass,
+    data: { email },
+  })
+}
+
+type resetPassT = { email: string, password: string, otp: number }
+export function resetPass(data: resetPassT) {
+  return sendApiReq({
+    isAuthendicated: false,
+    method: "post",
+    url: endPoints.resetPass,
+    data,
+  })
+}
+
 export function getSharedServers() {
   return sendApiReq({
     url: endPoints.sharedServer,
@@ -74,3 +102,20 @@ export function removeInvite(to: string) {
     data: { to },
   })
 }
+
+export function reqDeleteAccount() {
+  return sendApiReq({
+    method: "post",
+    url: endPoints.deleteOtp,
+    data: {},
+  })
+}
+
+export function confirmDeleteAccount(otp: number) {
+  return sendApiReq({
+    method: "delete",
+    url: `${endPoints.deleteAccount}/${otp}`,
+    data: {}
+  })
+}
+

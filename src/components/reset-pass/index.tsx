@@ -1,25 +1,38 @@
 import { useState } from "react";
 import { IoEye, IoEyeOff } from "react-icons/io5";
-import { useForm } from "react-hook-form";
-import { Link } from "react-router-dom";
+import { useForm } from 'react-hook-form';
 
-import { useLoginMutate } from "../../hooks/use-user";
+import { useResetPassMutate } from '../../hooks/use-user';
+
 import logo from '../../assets/imgs/logo.png';
 
-function Login() {
-  const { register, formState: { errors, isSubmitting }, handleSubmit } = useForm({
+type FormValues = {
+  otp: number
+  email: string
+  password: string
+}
+
+function ResetPass() {
+  const { register, formState: { errors, isSubmitting }, handleSubmit } = useForm<FormValues>({
     defaultValues: {
+      otp: undefined,
       email: "",
-      password: "",
+      password: ""
     },
   })
 
-  const { isPending, mutate } = useLoginMutate()
   const [showPass, setShowPass] = useState(false)
+  const { isPending, mutate } = useResetPassMutate()
 
   const updateShowPass = () => setShowPass(p => !p)
 
-  const onSubmit = (data: any) => mutate(data)
+  function onSubmit(data: FormValues) {
+    mutate(data, {
+      onSuccess() {
+
+      }
+    })
+  }
 
   return (
     <section className='dc min-h-screen animate-enter-opacity'>
@@ -30,7 +43,7 @@ function Login() {
           className="w-20 mx-auto"
         />
 
-        <h1 className="mt-4 mb-8 text-xl font-semibold text-center">Welcome back</h1>
+        <h1 className="mt-4 mb-8 text-xl font-semibold text-center">Reset Password</h1>
 
         <form onSubmit={handleSubmit(onSubmit)}>
           <div className="relative mb-6">
@@ -66,7 +79,7 @@ function Login() {
               htmlFor="login-password"
               className="text-xs"
             >
-              Password
+              New Password
             </label>
 
             <div className="relative">
@@ -104,25 +117,42 @@ function Login() {
             }
           </div>
 
+          <div className="relative mb-8">
+            <label
+              htmlFor="login-otp"
+              className="text-xs text-zinc-300"
+            >
+              OTP
+            </label>
+            <input
+              type="text"
+              id="login-otp"
+              className="w-72 py-1 text-sm border border-zinc-700 bg-transparent focus-visible:border-zinc-600"
+              {...register("otp", {
+                required: "OTP is required",
+                valueAsNumber: true,
+              })}
+            />
+
+            {
+              errors.email &&
+              <div className="mt-0.5 text-xs text-red-400">
+                {errors.email.message}
+              </div>
+            }
+          </div>
+
           <button
             type='submit'
             className="w-full py-1.5 text-sm text-zinc-900 bg-zinc-50 hover:opacity-85 disabled:opacity-50"
             disabled={isSubmitting || isPending}
           >
-            Log in
+            Confirm
           </button>
         </form>
-
-        <div className="mt-6 text-xs text-center text-zinc-400">
-          <Link to="/forget-pass" replace className="text-zinc-300 hover:underline">Forget Psasswoed?</Link>
-        </div>
-
-        <div className="mb-6 mt-4 text-xs text-center text-zinc-400">
-          Don't have an account? <Link to="/signup" replace className="text-zinc-300 hover:underline">Sign up</Link>
-        </div>
       </div>
     </section>
   )
 }
 
-export default Login
+export default ResetPass

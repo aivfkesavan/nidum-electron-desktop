@@ -1,8 +1,10 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
 
-import { addInvite, getInvites, getSharedServers, login, logout, removeInvite } from "../actions/user";
+import { addInvite, confirmDeleteAccount, forgetPass, getInvites, getSharedServers, login, logout, removeInvite, reqDeleteAccount, resetPass, updatePass } from "../actions/user";
+import useDeviceStore from "../store/device";
 import { useToast } from "../components/ui/use-toast";
+import { resetApp } from "../actions/general";
 import useAuthStore from "../store/auth";
 
 export function useSharedServers() {
@@ -36,6 +38,76 @@ export function useLoginMutate() {
       })
       navigate("/", { replace: true })
       toast({ title: "User invited successfully" })
+    },
+    onError(err) {
+      let hasError = err?.message
+      if (hasError) {
+        toast({ title: hasError })
+      } else {
+        toast({
+          title: "Something went wrong!!!",
+          description: "Try again, later.",
+        })
+      }
+    }
+  })
+}
+
+export function useUpdatePassMutate() {
+  const { toast } = useToast()
+
+  return useMutation({
+    mutationFn: updatePass,
+    onSuccess() {
+      toast({ title: "Password updated successfully" })
+    },
+    onError(err) {
+      let hasError = err?.message
+      if (hasError) {
+        toast({ title: hasError })
+      } else {
+        toast({
+          title: "Something went wrong!!!",
+          description: "Try again, later.",
+        })
+      }
+    }
+  })
+}
+
+export function useFogetPassMutate() {
+  const { toast } = useToast()
+  const navigate = useNavigate()
+
+  return useMutation({
+    mutationFn: forgetPass,
+    onSuccess() {
+      navigate("/reset-pass")
+      toast({ title: "Please check your email for otp" })
+    },
+    onError(err) {
+      let hasError = err?.message
+      if (hasError) {
+        toast({ title: hasError })
+      } else {
+        toast({
+          title: "Something went wrong!!!",
+          description: "Try again, later.",
+        })
+      }
+    }
+  })
+}
+
+export function useResetPassMutate() {
+  const { toast } = useToast()
+  const navigate = useNavigate()
+
+  return useMutation({
+    mutationFn: resetPass,
+    onSuccess() {
+      navigate("/login")
+      toast({ title: "Password updated successfully" })
     },
     onError(err) {
       let hasError = err?.message
@@ -102,3 +174,78 @@ export function useLogoutMutate() {
   })
 }
 
+export function useResetApp(showToast: boolean = true) {
+  const { toast } = useToast()
+  const navigate = useNavigate()
+
+  const clearDevice = useDeviceStore(s => s.clear)
+
+  return useMutation({
+    mutationFn: resetApp,
+    onSuccess() {
+      clearDevice()
+      navigate("/login", { replace: true })
+      if (showToast) {
+        toast({ title: "App data reseted successfully" })
+      }
+    },
+    onError(err) {
+      console.log(err)
+      if (showToast) {
+        toast({ title: err?.message || "Something went wrong!" })
+      }
+    }
+  })
+}
+
+export function useReqAccountDeleteMutate() {
+  const { toast } = useToast()
+
+  return useMutation({
+    mutationFn: (v: any) => reqDeleteAccount(),
+    onSuccess() {
+      toast({ title: "Please check your email for otp" })
+    },
+    onError(err) {
+      let hasError = err?.message
+      if (hasError) {
+        toast({ title: hasError })
+      } else {
+        toast({
+          title: "Something went wrong!!!",
+          description: "Try again, later.",
+        })
+      }
+    }
+  })
+}
+
+export function useAccountDeleteConfirmMutate() {
+  const { mutate } = useResetApp(false)
+  const { toast } = useToast()
+
+  const clear = useAuthStore(s => s.clear)
+
+  return useMutation({
+    mutationFn: confirmDeleteAccount,
+    onSuccess() {
+      mutate({ includeModels: true }, {
+        onSuccess() {
+          clear()
+          toast({ title: "Account deleted successfully" })
+        }
+      })
+    },
+    onError(err) {
+      let hasError = err?.message
+      if (hasError) {
+        toast({ title: hasError })
+      } else {
+        toast({
+          title: "Something went wrong!!!",
+          description: "Try again, later.",
+        })
+      }
+    }
+  })
+}

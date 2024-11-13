@@ -7,6 +7,7 @@ import webcrawler from "./controllers/webcrawler";
 import llamaChat from "./controllers/llama-chat";
 import upgrade from "./controllers/upgrade";
 import whisper from "./controllers/whisper";
+import general from "./controllers/general";
 import llama from "./controllers/llama";
 import image from "./controllers/image";
 import zrok from "./controllers/zrok";
@@ -27,13 +28,14 @@ app.get("/health", (req, res) => {
 
 app.use("/ai", ai)
 app.use("/doc", doc)
+app.use("/zrok", zrok)
 app.use("/llama", llama)
-app.use("/llama-chat", llamaChat)
-app.use("/web-crawler", webcrawler)
 app.use("/image", image)
 app.use("/whisper", whisper)
+app.use("/general", general)
 app.use("/upgrade", upgrade)
+app.use("/llama-chat", llamaChat)
 app.use("/duckduckgo", duckduckgo)
-app.use("/zrok", zrok)
+app.use("/web-crawler", webcrawler)
 
 export default app
