@@ -1,17 +1,18 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 
-export type llm_modelsT = "Local" | "Groq" | "Nidum" | "Hugging Face" | "SambaNova Systems" | "Anthropic" | "OpenAI";
+export type llm_modelsT = "Local" | "Nidum Shared" | "Groq" | "Nidum" | "Hugging Face" | "SambaNova Systems" | "Anthropic" | "OpenAI";
 
 type state = {
   project_id: string;
   chat_id: string;
 
   model_type: llm_modelsT
-  groqApiKey: string;
-  groqModel: string;
   llamaModel: string;
   llamaModeType: "" | "vision";
+  sharedAppId: string;
+  groqApiKey: string;
+  groqModel: string;
   hfApiKey: string;
   hfModel: string;
   sambaNovaApiKey: string;
@@ -42,10 +43,11 @@ const useContextStore = create<state & actions>()(persist(set => ({
   chat_id: "",
 
   model_type: "Local",
-  groqApiKey: "",
-  groqModel: "",
   llamaModel: "",
   llamaModeType: "",
+  sharedAppId: "",
+  groqApiKey: "",
+  groqModel: "",
   hfApiKey: "",
   hfModel: "",
   sambaNovaApiKey: "",

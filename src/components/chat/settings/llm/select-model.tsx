@@ -9,7 +9,7 @@ import {
   DialogContent,
   DialogTrigger,
 } from "../../../../components/ui/dialog";
-import OllmaStatusCheck from "../../../../components/common/ollma-status-check";
+import OnlineStatus from "../../../common/online-status";
 import llmModels from "../../../../utils/llm-models";
 
 function SelectModel() {
@@ -33,7 +33,7 @@ function SelectModel() {
             />
             {
               found.title === "Local" &&
-              <OllmaStatusCheck className="absolute top-0 -right-2" />
+              <OnlineStatus className="absolute top-0 -right-2" />
             }
           </div>
 
@@ -72,7 +72,7 @@ function SelectModel() {
                   />
                   {
                     l.title === "Local" &&
-                    <OllmaStatusCheck className="absolute top-0 -right-2" />
+                    <OnlineStatus className="absolute top-0 -right-2" />
                   }
                 </div>
 
