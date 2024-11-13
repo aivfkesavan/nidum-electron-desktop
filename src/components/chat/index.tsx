@@ -2,6 +2,7 @@ import { useEffect } from "react";
 import Messages from "./messages";
 import SideBar from "./side-bar";
 
+import { useZorkEnable } from "../../hooks/use-device";
 // import useContextStore from "@store/context";
 
 import CheckForUpdate from "./check-for-update";
@@ -11,6 +12,8 @@ import Header from "./header";
 function Chat() {
   // const project_id = useContextStore(s => s.project_id)
   // const chat_id = useContextStore(s => s.chat_id)
+
+  useZorkEnable()
 
   useEffect(() => {
     document.body.classList.add("open")

@@ -1,12 +1,15 @@
 import { useEffect, useState } from "react";
 import { LuX } from "react-icons/lu";
 
+import { useDeviceInfo, useDeviceMutate, useGoPublicMutate, useStopShareMutate } from "../../../../hooks/use-device";
 import { useAddInviteMutate, useInvites, useRemoveInviteMutate } from "../../../../hooks/use-user";
-import { useDeviceInfo, useDeviceMutate } from "../../../../hooks/use-device";
+import useDeviceStore from "../../../../store/device";
 
 function GoPublic() {
   const [deviceName, setDeviceName] = useState("")
   const [emailTo, setEmailTo] = useState("")
+
+  const isPublicShared = useDeviceStore(s => s.isPublicShared)
 
   const { data: device, isLoading: isLoading1 } = useDeviceInfo()
   const { data: invites, isLoading: isLoading2 } = useInvites()
@@ -15,6 +18,9 @@ function GoPublic() {
   const { mutate: mutateDevice, isPending: isPending3 } = useDeviceMutate()
   const { mutate: mutateAdd, isPending: isPending1 } = useAddInviteMutate()
 
+  const { mutate: mutateGoPublic, isPending: isPending4 } = useGoPublicMutate()
+  const { mutate: mutateStop, isPending: isPending5 } = useStopShareMutate()
+
   useEffect(() => {
     if (device) {
       setDeviceName(device?.name || "")
@@ -22,16 +28,20 @@ function GoPublic() {
   }, [device])
 
   function onBlur(name: string) {
-    console.log(name, device?.name)
     if (name !== device?.name) {
       mutateDevice({ _id: device?._id, name })
     }
   }
 
-  const loading = isPending1 || isPending2 || isLoading1 || isLoading2 || isPending3
-  console.log(device, deviceName)
+  function onClk() {
+    if (!isPublicShared) return mutateGoPublic()
+    return mutateStop()
+  }
+
+  const loading = isPending1 || isPending2 || isLoading1 || isLoading2 || isPending3 || isPending4 || isPending5
+
   return (
-    <div className="">
+    <>
       {
         isLoading1 &&
         <div className="text-xs text-center">Checking device status</div>
@@ -46,9 +56,10 @@ function GoPublic() {
         />
 
         <button
-          className={`dc w-36 px-4 py-1.5 text-[13px] ${false ? "bg-red-500 hover:bg-red-600" : "bg-green-500 hover:bg-green-600"}`}
+          className={`dc w-36 px-4 py-1.5 text-[13px] ${isPublicShared ? "bg-red-500 hover:bg-red-600" : "bg-green-500 hover:bg-green-600"}`}
+          onClick={onClk}
         >
-          {/* <span className="loader-2 size-4 border-2"></span> */}
+          {(isPending4 || isPending5) && <span className="loader-2 size-4 border-2"></span>}
           {false ? "Stop Sharing" : "Go Public"}
         </button>
       </div>
@@ -98,7 +109,7 @@ function GoPublic() {
           ))
         }
       </div>
-    </div>
+    </>
   )
 }
 

@@ -1,12 +1,22 @@
-import { exec } from 'child_process';
+import { exec, spawn } from 'child_process';
 
-function runCommand(command) {
+export function runCommand(command) {
   return new Promise((resolve, reject) => {
     exec(command, (error, stdout, stderr) => {
-      if (error) reject(error)
+      if (error) reject(new Error(`Command failed: ${stderr || error.message}`))
       else resolve(stdout)
     })
   })
 }
 
-export default runCommand
+export function runCommandInBg(command, args = []) {
+  return new Promise((resolve, reject) => {
+    spawn(command, args, {
+      detached: true,
+      stdio: ['ignore', 'pipe', 'pipe'],
+      shell: true,
+    })
+
+    resolve("")
+  })
+}
