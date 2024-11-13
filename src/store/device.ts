@@ -1,9 +1,14 @@
+import { customAlphabet } from 'nanoid';
 import { persist } from 'zustand/middleware';
 import { create } from 'zustand';
-import { nanoid } from 'nanoid';
+
+const alphabet = 'abcdefghijklmnopqrstuvwxyz0123456789'; // lowercase and digits only
+const nanoid = customAlphabet(alphabet, 20);
 
 type authState = {
   appId: string;
+  isZrokSetuped: boolean
+  isPublicShared: boolean
 }
 
 type actions = {
@@ -12,7 +17,9 @@ type actions = {
 }
 
 const payload = {
-  appId: nanoid(10),
+  appId: nanoid(),
+  isZrokSetuped: false,
+  isPublicShared: false,
 }
 
 const useDeviceStore = create<authState & actions>()((persist((set) => ({
@@ -22,7 +29,7 @@ const useDeviceStore = create<authState & actions>()((persist((set) => ({
   clear: () => set({ ...payload }),
 }),
   {
-    name: 'user-storage'
+    name: 'device-storage'
   }
 )))
 

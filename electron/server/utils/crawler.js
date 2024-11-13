@@ -5,8 +5,8 @@ import fsn from 'fs';
 import os from 'os';
 
 import { createPath, getRoot } from './path-helper';
+import { runCommand } from './run-command';
 import downloadFile from './download-file';
-import runCommand from './run-command';
 import logger from './logger';
 
 function normalizeUrl(url) {
