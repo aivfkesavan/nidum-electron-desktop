@@ -26,7 +26,7 @@ const useDeviceStore = create<authState & actions>()((persist((set) => ({
   ...payload,
 
   update: (payload: Partial<authState>) => set({ ...payload }),
-  clear: () => set({ ...payload }),
+  clear: () => set({ ...payload, appId: nanoid() }),
 }),
   {
     name: 'device-storage'

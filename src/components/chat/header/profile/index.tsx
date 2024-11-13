@@ -22,6 +22,8 @@ function Profile() {
 
   const [showUpdatePass, setShowUpdatePass] = useState(false)
 
+  const updateShowPass = () => setShowUpdatePass(p => !p)
+
   function onClose(v: boolean) {
     if (!v) {
       close()
@@ -54,7 +56,7 @@ function Profile() {
         {
           !showUpdatePass &&
           <button
-            onClick={() => setShowUpdatePass(p => !p)}
+            onClick={updateShowPass}
             className='px-4 py-1.5 text-xs bg-zinc-300 text-zinc-800 hover:bg-zinc-200'
           >
             Update Password
@@ -63,7 +65,9 @@ function Profile() {
 
         {
           showUpdatePass &&
-          <UpdatePass />
+          <UpdatePass
+            updateShowPass={updateShowPass}
+          />
         }
 
         <hr className='my-4 bg-zinc-600' />
