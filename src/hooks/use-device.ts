@@ -49,7 +49,6 @@ export function useZorkEnable() {
 
   useEffect(() => {
     if (data) {
-      console.log(data)
       update({ isZrokSetuped: true })
     }
   }, [data])

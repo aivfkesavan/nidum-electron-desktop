@@ -1,15 +1,16 @@
 import express from 'express';
 import { promises as fs } from 'fs';
 
-import { getRoot } from '../utils/path-helper';
+import { checkPathsSetup, getRoot } from '../utils/path-helper';
 
 const router = express.Router()
 
 router.post("/remove-files", async (req, res) => {
   try {
     const root = getRoot()
-    await fs.unlink(root)
+    await fs.rm(root, { recursive: true })
 
+    checkPathsSetup()
     // const { includeModels } = req.body
 
     // const root = getRoot()
@@ -67,7 +68,7 @@ router.post("/remove-files", async (req, res) => {
     res.json({ message: "files deleted successfully" })
 
   } catch (error) {
-    // console.log(error)
+    console.log(error)
     res.status(500).json({ error: error.message })
   }
 })

@@ -1,4 +1,5 @@
 import { fileURLToPath } from 'url';
+import { promises as fs } from 'fs';
 import express from 'express';
 import path from 'path';
 import os from 'os';
@@ -23,13 +24,9 @@ const zrokBinary = process.env.NODE_ENV === "development"
   ? path.join(__dirname, "..", "public", 'bin')
   : path.join(__dirname, 'bin')
 
-let enabled = false
-
 router.post("/enable", async (req, res) => {
   try {
     const { appId } = req.body
-
-    if (enabled) return res.json({ msg: "Success" })
 
     const config = `${zrokBinary}/${zrokStart} config set apiEndpoint https://api.chain.nidum.ai`
     await runCommand(config)
@@ -40,7 +37,6 @@ router.post("/enable", async (req, res) => {
     const reserve = `${zrokBinary}/${zrokStart} reserve public http://localhost:4000 --unique-name ${appId}`
     await runCommand(reserve)
 
-    enabled = true
     return res.json({ msg: "Success" })
 
   } catch (error) {
@@ -87,8 +83,15 @@ router.post("/stop", async (req, res) => {
 
 router.post("/disable", async (req, res) => {
   try {
-    const disable = `${zrokBinary}/${zrokStart} disable`
-    await runCommand(disable)
+    try {
+      const disable = `${zrokBinary}/${zrokStart} disable`
+      await runCommand(disable)
+    } catch (error) {
+      console.log(error)
+    }
+    const homeDirectory = os.homedir()
+    const zrokFolder = path.join(homeDirectory, ".zrok")
+    await fs.rm(zrokFolder, { recursive: true })
 
     return res.json({ msg: "Success" })
 
