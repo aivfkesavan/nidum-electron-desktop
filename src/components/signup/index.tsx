@@ -78,10 +78,7 @@ function Signup() {
     try {
       const { otp, ...rest } = data
 
-      await signup({
-        ...rest,
-        name: data?.firstName + " " + data?.lastName
-      })
+      await signup(rest)
       toast({ title: "Check your email for otp" })
       setShowOtp(true)
 
