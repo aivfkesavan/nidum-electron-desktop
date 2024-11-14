@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import { useLogoutMutate } from "../../../hooks/use-user";
 import useUIStore from "../../../store/ui";
 
@@ -12,7 +13,14 @@ import Profile from "./profile";
 function Account() {
   const { mutate, isPending } = useLogoutMutate()
   const update = useUIStore(s => s.update)
+  const close = useUIStore(s => s.close)
   const open = useUIStore(s => s.open)
+
+  useEffect(() => {
+    return () => {
+      close()
+    }
+  }, [])
 
   return (
     <>

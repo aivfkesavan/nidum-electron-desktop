@@ -36,11 +36,12 @@ type state = {
 
 type actions = {
   updateContext: (v: Partial<state>) => void
+  clear: () => void
 }
 
-const useContextStore = create<state & actions>()(persist(set => ({
-  project_id: "",
-  chat_id: "",
+const initPayload: state = {
+  project_id: "default-project",
+  chat_id: "default-chat",
 
   model_type: "Local",
   llamaModel: "",
@@ -67,8 +68,13 @@ const useContextStore = create<state & actions>()(persist(set => ({
   sttGroqApiKey: "",
 
   tts_type: "System native",
+}
+
+const useContextStore = create<state & actions>()(persist(set => ({
+  ...initPayload,
 
   updateContext: val => set(val),
+  clear: () => set({ ...initPayload }),
 }),
   {
     version: 3,

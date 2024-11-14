@@ -60,7 +60,7 @@ function GoPublic() {
           onClick={onClk}
         >
           {(isPending4 || isPending5) && <span className="loader-2 size-4 border-2"></span>}
-          {false ? "Stop Sharing" : "Go Public"}
+          {isPublicShared ? "Stop Sharing" : "Go Public"}
         </button>
       </div>
 
@@ -85,7 +85,7 @@ function GoPublic() {
             })
           }}
         >
-          {isPending1 && <span className="loader-2 size-3 border-2 border-zinc-800"></span>}
+          {isPending1 && <span className="loader-2 size-3 shrink-0 border-2 border-zinc-800"></span>}
           Invite
         </button>
       </div>

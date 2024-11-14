@@ -5,7 +5,9 @@ import { addInvite, confirmDeleteAccount, forgetPass, getInvites, getSharedServe
 import { resetApp } from "../actions/general";
 
 import useOnlineStatus from "./use-online-status";
+import useContextStore from "../store/context";
 import useDeviceStore from "../store/device";
+import useConvoStore from "../store/conversations";
 import useLoginStore from "../store/login";
 import useAuthStore from "../store/auth";
 
@@ -224,12 +226,20 @@ export function useResetApp(showToast: boolean = true) {
   const { toast } = useToast()
   const navigate = useNavigate()
 
+  const clearContext = useContextStore(s => s.clear)
   const clearDevice = useDeviceStore(s => s.clear)
+  const clearLogins = useLoginStore(s => s.clear)
+  const clearConvo = useConvoStore(s => s.clear)
+  const clearAuth = useAuthStore(s => s.clear)
 
   return useMutation({
     mutationFn: resetApp,
     onSuccess() {
       clearDevice()
+      clearLogins()
+      clearAuth()
+      clearContext()
+      clearConvo()
       navigate("/login", { replace: true })
       if (showToast) {
         toast({ title: "App data reseted successfully" })
@@ -270,14 +280,11 @@ export function useAccountDeleteConfirmMutate() {
   const { mutate } = useResetApp(false)
   const { toast } = useToast()
 
-  const clear = useAuthStore(s => s.clear)
-
   return useMutation({
     mutationFn: confirmDeleteAccount,
     onSuccess() {
       mutate({ includeModels: true }, {
         onSuccess() {
-          clear()
           toast({ title: "Account deleted successfully" })
         }
       })

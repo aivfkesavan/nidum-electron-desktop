@@ -79,12 +79,14 @@ type actions = {
   addFile: (projectId: string, file: FileT) => void;
   deleteFile: (project_id: string, file_id: string) => void;
 
+  clear: () => void
+
   // addRandomProjects: (chat: Project[]) => void;
   // addRandomChats: (projectId: string, chat: Chat[]) => void;
 }
 
 const createDefaultProject = (): [string, Project] => {
-  const id = nanoid(10);
+  const id = "default-project"
   return [id, {
     id,
     name: "Default Project",
@@ -107,17 +109,21 @@ const createDefaultProject = (): [string, Project] => {
 }
 
 const createDefaultChat = (): Chat => ({
-  id: nanoid(10),
+  id: "default-chat",
   title: "Default Chat",
   at: dayjs().toISOString(),
 })
 
-const useConvoStore = create<state & actions>()(persist(immer(set => ({
+const initPayload = {
   initialised: false,
   projects: {},
   chats: {},
   messages: {},
   files: {},
+}
+
+const useConvoStore = create<state & actions>()(persist(immer(set => ({
+  ...initPayload,
 
   init: () => set(state => {
     if (!state.initialised && Object.keys(state.projects).length === 0) {
@@ -250,6 +256,7 @@ const useConvoStore = create<state & actions>()(persist(immer(set => ({
     state.files[project_id] = state.files[project_id].filter(c => c.id !== file_id)
   }),
 
+  clear: () => set({ ...initPayload }),
   // addRandomProjects: (projects) => set(state => {
   //   projects.forEach(pro => {
   //     state.projects[pro.id] = pro
@@ -263,22 +270,6 @@ const useConvoStore = create<state & actions>()(persist(immer(set => ({
   {
     name: 'convo-storage',
     version: 1,
-    migrate: (persistedState: any, version) => {
-      if (version === 0 || !version) {
-        Object
-          .values(persistedState.projects)
-          // @ts-ignore
-          .forEach((project: Project) => {
-            project.webPrompt = webDefaultPrompt
-          })
-
-        return {
-          ...persistedState,
-        }
-      }
-
-      return persistedState
-    }
   }
 ))
 
