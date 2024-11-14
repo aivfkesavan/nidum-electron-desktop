@@ -20,13 +20,12 @@ const payload = {
   isLoggedIn: false,
 }
 
-const useAuthStore = create<authState & actions>()((persist(
-  (set) => ({
-    ...payload,
+const useAuthStore = create<authState & actions>()((persist((set) => ({
+  ...payload,
 
-    update: (payload: Partial<authState>) => set({ ...payload }),
-    clear: () => set({ ...payload }),
-  }),
+  update: payload => set({ ...payload }),
+  clear: () => set({ ...payload }),
+}),
   {
     name: 'user-storage'
   }

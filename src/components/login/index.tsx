@@ -107,7 +107,7 @@ function Login() {
           <button
             type='submit'
             className="w-full py-1.5 text-sm text-zinc-900 bg-zinc-50 hover:opacity-85 disabled:opacity-50"
-            disabled={isSubmitting || isPending}
+          // disabled={isSubmitting || isPending}
           >
             Log in
           </button>
