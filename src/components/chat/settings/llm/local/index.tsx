@@ -123,7 +123,10 @@ function Local() {
         }
       </RadioGroup>
 
-      <Footer onSave={onSave} />
+      {
+        llamaModel !== selected &&
+        <Footer onSave={onSave} />
+      }
 
       {
         model &&

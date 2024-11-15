@@ -1,15 +1,10 @@
-import { useState } from "react";
+import { FormProvider, useForm } from "react-hook-form";
 
 import { useLLMModels } from "../../../../hooks/use-llm-models";
 import useContextStore from "../../../../store/context";
 
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "../../../../components/ui/select";
+import ControlledSelect from "../common/controlled-select";
+import ControlledInput from "../common/controlled-input";
 import Footer from "../common/footer";
 
 function HuggingFace() {
@@ -21,21 +16,17 @@ function HuggingFace() {
   // const { isLoading: isLoading2, data: models2 } = useLLMModels("hf-img-gen")
   const { isLoading, data: models } = useLLMModels("hf")
 
-  const [details, setDetails] = useState({
-    // hfImgGenModel,
-    hfApiKey,
-    hfModel,
+  const methods = useForm({
+    defaultValues: {
+      // hfImgGenModel,
+      hfApiKey,
+      hfModel,
+    }
   })
+  const isDirty = methods?.formState?.isDirty
 
-  function onChange(payload: Record<string, any>) {
-    setDetails(pr => ({
-      ...pr,
-      ...payload,
-    }))
-  }
-
-  function onSave() {
-    updateContext(details)
+  function onSave(data: any) {
+    updateContext(data)
   }
 
   if (isLoading) { // || isLoading2
@@ -43,43 +34,21 @@ function HuggingFace() {
   }
 
   return (
-    <>
-      <div className="my-4">
-        <label htmlFor="" className="mb-0.5 text-xs opacity-70">Hugging Face Token</label>
-
-        <input
-          type="text"
-          className="text-sm px-2 py-1.5 bg-transparent border"
+    <FormProvider {...methods}>
+      <form onSubmit={methods.handleSubmit(onSave)}>
+        <ControlledInput
+          name="hfApiKey"
+          label="Hugging Face Token"
           placeholder="hf_zxTDTUKUCXRYWgk-gjhdh-dhtxet"
-          value={details.hfApiKey}
-          onChange={e => onChange({ hfApiKey: e.target.value })}
         />
-      </div>
 
-      <div className="mb-4">
-        <label htmlFor="" className="mb-0.5 text-xs opacity-70">Chat Model</label>
+        <ControlledSelect
+          name="hfModel"
+          label="Chat Model"
+          list={models}
+        />
 
-        <Select value={details.hfModel} onValueChange={v => onChange({ hfModel: v })}>
-          <SelectTrigger className="h-8">
-            <SelectValue placeholder="Model" />
-          </SelectTrigger>
-
-          <SelectContent>
-            {
-              models.map((m: any) => (
-                <SelectItem
-                  value={m.id}
-                  key={m.id}
-                >
-                  {m.name}
-                </SelectItem>
-              ))
-            }
-          </SelectContent>
-        </Select>
-      </div>
-
-      {/* <div className="mb-4">
+        {/* <div className="mb-4">
         <label htmlFor="" className="mb-0.5 text-xs opacity-70">Image Generation Model</label>
 
         <Select value={details.hfImgGenModel} onValueChange={v => onChange({ hfImgGenModel: v })}>
@@ -106,12 +75,13 @@ function HuggingFace() {
         </Select>
       </div> */}
 
-      <div className="mb-12 text-xs text-white/60">
-        Click here to sign up for a Hugging Face account: <a href="https://huggingface.co/join?ref=nidum.ai" className="text-white/90 hover:underline" target="_blank">https://huggingface.co/join</a>
-      </div>
+        <div className="mb-12 text-xs text-white/60">
+          Click here to sign up for a Hugging Face account: <a href="https://huggingface.co/join?ref=nidum.ai" className="text-white/90 hover:underline" target="_blank">https://huggingface.co/join</a>
+        </div>
 
-      <Footer onSave={onSave} />
-    </>
+        {isDirty && <Footer />}
+      </form>
+    </FormProvider>
   )
 }
 

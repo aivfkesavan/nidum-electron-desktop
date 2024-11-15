@@ -1,4 +1,5 @@
 import { useState } from "react";
+
 import { useSharedServers } from "../../../../hooks/use-user";
 import useContextStore from "../../../../store/context";
 
@@ -52,7 +53,10 @@ function NidumShared() {
         }
       </RadioGroup>
 
-      <Footer onSave={onSave} />
+      {
+        selected !== sharedAppId &&
+        <Footer onSave={onSave} />
+      }
     </>
   )
 }

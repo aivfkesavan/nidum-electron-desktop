@@ -1,15 +1,10 @@
-import { useState } from "react";
+import { FormProvider, useForm } from "react-hook-form";
 
 import { useLLMModels } from "../../../../hooks/use-llm-models";
 import useContextStore from "../../../../store/context";
 
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "../../../../components/ui/select";
+import ControlledSelect from "../common/controlled-select";
+import ControlledInput from "../common/controlled-input";
 import Footer from "../common/footer";
 
 function OpenAI() {
@@ -19,20 +14,16 @@ function OpenAI() {
 
   const { isLoading, data: models } = useLLMModels("openai")
 
-  const [details, setDetails] = useState({
-    openaiApiKey,
-    openaiModel,
+  const methods = useForm({
+    defaultValues: {
+      openaiApiKey,
+      openaiModel,
+    }
   })
+  const isDirty = methods?.formState?.isDirty
 
-  function onChange(payload: Record<string, any>) {
-    setDetails(pr => ({
-      ...pr,
-      ...payload,
-    }))
-  }
-
-  function onSave() {
-    updateContext(details)
+  function onSave(data: any) {
+    updateContext(data)
   }
 
   if (isLoading) {
@@ -40,48 +31,27 @@ function OpenAI() {
   }
 
   return (
-    <>
-      <div className="my-4">
-        <label htmlFor="" className="mb-0.5 text-xs opacity-70">OpenAI API Key</label>
-
-        <input
-          type="text"
-          className="text-sm px-2 py-1.5 bg-transparent border"
+    <FormProvider {...methods}>
+      <form onSubmit={methods.handleSubmit(onSave)}>
+        <ControlledInput
+          name="openaiApiKey"
+          label="OpenAI API Key"
           placeholder="432v-vjhfuyfjhb-2387r-2387rh27n3r"
-          value={details.openaiApiKey}
-          onChange={e => onChange({ openaiApiKey: e.target.value })}
         />
-      </div>
 
-      <div className="mb-4">
-        <label htmlFor="" className="mb-0.5 text-xs opacity-70">Model</label>
+        <ControlledSelect
+          name="openaiModel"
+          label="Model"
+          list={models}
+        />
 
-        <Select value={details.openaiModel} onValueChange={v => onChange({ openaiModel: v })}>
-          <SelectTrigger className="h-8">
-            <SelectValue placeholder="Model" />
-          </SelectTrigger>
+        <div className="mb-12 text-xs text-white/60">
+          Click here to sign up for a OpenAI account: <a href="https://platform.openai.com?ref=nidum.ai" className=" text-white/90 hover:underline" target="_blank">https://platform.openai.com</a>
+        </div>
 
-          <SelectContent>
-            {
-              models.map((m: any) => (
-                <SelectItem
-                  value={m.id}
-                  key={m.id}
-                >
-                  {m.name}
-                </SelectItem>
-              ))
-            }
-          </SelectContent>
-        </Select>
-      </div>
-
-      <div className="mb-12 text-xs text-white/60">
-        Click here to sign up for a OpenAI account: <a href="https://platform.openai.com?ref=nidum.ai" className=" text-white/90 hover:underline" target="_blank">https://platform.openai.com</a>
-      </div>
-
-      <Footer onSave={onSave} />
-    </>
+        {isDirty && <Footer />}
+      </form>
+    </FormProvider>
   )
 }
 
