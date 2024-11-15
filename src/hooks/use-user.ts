@@ -101,6 +101,44 @@ export function useLoginMutate() {
   })
 }
 
+export function useGoogleLoginMutate() {
+  const updateAuth = useAuthStore(s => s.update)
+
+  const navigate = useNavigate()
+
+  const { toast } = useToast()
+
+  return useMutation({
+    // @ts-ignore
+    mutationFn: window?.electronAPI?.googleLogin,
+    onSuccess(res: any) {
+      console.log(res)
+      updateAuth({
+        _id: res?._id,
+        email: res?.email,
+        token: res?.token,
+        isLoggedIn: true,
+        isGoogleAuth: true,
+      })
+
+      navigate("/", { replace: true })
+      toast({ title: "User loggedin successfully" })
+    },
+    onError(err) {
+      let hasError = err?.message
+      if (hasError) {
+        toast({ title: hasError })
+      }
+      else {
+        toast({
+          title: "Something went wrong!!!",
+          description: "Try again, later.",
+        })
+      }
+    }
+  })
+}
+
 export function useUpdatePassMutate() {
   const { toast } = useToast()
 
