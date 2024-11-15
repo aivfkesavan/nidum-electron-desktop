@@ -46,12 +46,12 @@ function Delete() {
 
       <AlertDialogContent>
         <AlertDialogHeader>
-          <AlertDialogTitle className="text-base">Are you absolutely sure you want to delete your account?</AlertDialogTitle>
+          <AlertDialogTitle className="text-base">Account Deletion Confirmation</AlertDialogTitle>
 
           {
             !showDelete &&
             <AlertDialogDescription className="text-xs text-zinc-400">
-              This action cannot be undone. This will permanently delete your account and remove all of your data from our servers. You will lose access to all your information and settings.
+              This action will permanently delete your account and remove all data from our servers. All your information and access will be lost.
             </AlertDialogDescription>
           }
         </AlertDialogHeader>

@@ -33,10 +33,9 @@ function Reset() {
 
       <AlertDialogContent>
         <AlertDialogHeader>
-          <AlertDialogTitle className="text-base">Are you sure you want to reset the app?</AlertDialogTitle>
+          <AlertDialogTitle className="text-base">App Reset Confirmation</AlertDialogTitle>
           <AlertDialogDescription className="text-xs text-zinc-400">
-            This action will clear all your app data and settings.
-            This action cannot be undone, and you will lose all your saved informations.
+            All app data and settings will be deleted. This action is irreversible, and all saved information will be lost.
           </AlertDialogDescription>
         </AlertDialogHeader>
 
