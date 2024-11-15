@@ -3,7 +3,6 @@ import { useState } from "react";
 import useContextStore from "../../../../store/context";
 import { useCrawler } from "../../../../hooks/use-crawler";
 import useConvoStore from "../../../../store/conversations";
-// import useUIStore from "@store/ui";
 
 import {
   Select,
@@ -19,7 +18,6 @@ import Footer from "../common/footer";
 
 function Chat() {
   const editProject = useConvoStore(s => s.editProject)
-  // const updateTab = useUIStore(s => s.update)
 
   const project_id = useContextStore(s => s.project_id)
   const { data: crawlerData } = useCrawler()
@@ -34,27 +32,31 @@ function Chat() {
     max_tokens: "",
     frequency_penalty: "",
     top_p: "",
-    // tokenLimit: "",
     web_enabled: false,
     rag_enabled: false,
   })
 
+  const [initialDetails, setInitialDetails] = useState(details)
+
   const hasWebCrawle = crawlerData && Object.keys(crawlerData)?.length > 0
 
   const onChange = (key: string, val: any) => {
-    setDetails(pr => ({
+    setDetails((pr) => ({
       ...pr,
-      [key]: val
+      [key]: val,
     }))
   }
 
   function onSave() {
     editProject(selected, details as any)
+    setInitialDetails(details)
   }
 
   function onSelectProject(val: string) {
     setSelected(val)
-    setDetails(projectMap[val] as any)
+    const projectDetails = projectMap[val] || {} as any
+    setDetails(projectDetails)
+    setInitialDetails(projectDetails)
   }
 
   function onChangeRag(key: "rag_enabled" | "web_enabled", val: boolean) {
@@ -65,6 +67,8 @@ function Chat() {
       [alterKey]: false,
     }))
   }
+
+  const hasChanges = JSON.stringify(details) !== JSON.stringify(initialDetails)
 
   return (
     <>
@@ -132,10 +136,14 @@ function Chat() {
         <input
           min={-2}
           max={2}
-          step={.1}
+          step={0.1}
           type="number"
           className="no-number-arrows px-2 py-1 text-[13px] bg-transparent border resize-none"
-          value={details?.frequency_penalty || details?.frequency_penalty === 0 ? details?.frequency_penalty : ""}
+          value={
+            details?.frequency_penalty || details?.frequency_penalty === 0
+              ? details?.frequency_penalty
+              : ""
+          }
           onChange={e => onChange("frequency_penalty", e.target.valueAsNumber)}
           disabled={!selected}
         />
@@ -150,7 +158,7 @@ function Chat() {
         <input
           min={0}
           max={1}
-          step={.1}
+          step={0.1}
           type="number"
           className="no-number-arrows px-2 py-1 text-[13px] bg-transparent border resize-none"
           value={details?.top_p || ""}
@@ -158,22 +166,6 @@ function Chat() {
           disabled={!selected}
         />
       </div>
-
-      {/* <div className="mb-4">
-        <p className="df mb-0.5 text-xs">
-          <span className="opacity-70">Token Limit</span>
-          <Info details="A Token Limit in a Large Language Model (LLM) refers to the maximum number of tokens (words or characters) the model can process in a single interaction. Staying within this limit ensures optimal performance and accurate responses." />
-        </p>
-        <input
-          min={1}
-          step={1}
-          type="number"
-          className="no-number-arrows px-2 py-1 text-[13px] bg-transparent border resize-none"
-          value={details?.tokenLimit || ""}
-          onChange={e => onChange("tokenLimit", e.target.valueAsNumber)}
-          disabled={!selected}
-        />
-      </div> */}
 
       <div className="grid grid-cols-2 gap-4 mb-4">
         <div className="p-3 border rounded-md">
@@ -194,7 +186,11 @@ function Chat() {
           <Switch
             checked={details.rag_enabled}
             onCheckedChange={val => onChangeRag("rag_enabled", val)}
-            title={!hasFiles ? "Upload files or webcrawle sites to enable RAG search" : "Enable RAG search"}
+            title={
+              !hasFiles
+                ? "Upload files or webcrawle sites to enable RAG search"
+                : "Enable RAG search"
+            }
             className="ml-auto"
             disabled={!selected || !(hasFiles || hasWebCrawle)}
           />
@@ -208,7 +204,7 @@ function Chat() {
         </div>
       }
 
-      <Footer onSave={onSave} />
+      {hasChanges && <Footer onSave={onSave} />}
     </>
   )
 }

@@ -8,7 +8,6 @@ import type { Message } from "../../../store/conversations";
 
 import { createContext, ragDefaultPrompt, duckDuckGoSerach, ragSearch, systemDefaultPrompt, webDefaultPrompt } from "../../../utils/improve-context";
 import { imgToBase64, setImgToBase64Map } from "../../../actions/img";
-// import isWithinTokenLimit from "@/utils/is-within-token-limit";
 import constants from "../../../utils/constants";
 
 import { useAudio } from "./use-speech";
@@ -61,7 +60,6 @@ function Messages() {
   const { data: domainBase } = useDomainBase()
   const { data: device } = useDeviceInfo()
 
-  // const [reachedLimit, setReachedLimit] = useState(false)
   const [tempData, setTempData] = useState<Message[]>([])
   const [loading, setLoading] = useState(false)
   const [message, setMessage] = useState('')
@@ -87,14 +85,6 @@ function Messages() {
 
   useEffect(() => {
     scrollableRef?.current?.scrollIntoView({ behavior: "instant", block: "end" })
-
-    // if (data.length > 0 && tempData.length === 0) {
-    //   if (!isWithinTokenLimit(JSON.stringify(data), projectdetails?.tokenLimit)) {
-    //     setReachedLimit(true)
-    //   }
-    // } else {
-    //   setReachedLimit(false)
-    // }
   }, [data.length, tempData])
 
   function num(n: string | number, defaultVal: number) {
@@ -285,7 +275,7 @@ function Messages() {
           },
           ...dataMap,
         ]
-        // console.log(prompt)
+
         if (model_type !== "Local") {
           prompt.push(restUserContent)
         }
@@ -352,9 +342,6 @@ function Messages() {
         }
 
         if (model_type === "SambaNova Systems") {
-          // payload.model = sambaNovaModel
-          // headers.Authorization = `Bearer ${sambaNovaApiKey}`
-
           payload.model = sambaNovaModel
           payload.apiKey = sambaNovaApiKey
         }
@@ -372,15 +359,6 @@ function Messages() {
           payload.model = openaiModel
           headers.Authorization = `Bearer ${openaiApiKey}`
         }
-
-        // if (!isWithinTokenLimit(JSON.stringify(prompt), projectdetails.tokenLimit)) {
-        //   toast({
-        //     title: "Token limit reached",
-        //     description: "Please use new chat"
-        //   })
-        //   setReachedLimit(true)
-        //   return
-        // }
 
         abortController.current = new AbortController()
 
@@ -404,7 +382,7 @@ function Messages() {
         if (["Nidum", "Anthropic", "SambaNova Systems", "Nidum Shared"].includes(model_type)) {
           const res = await response.json()
           const content = res?.choices?.[0]?.message?.content || res?.content?.[0]?.text || ""
-          console.log({ content })
+
           const finalOutput = [user]
           const botReply: Message = {
             role: "assistant",
@@ -472,7 +450,7 @@ function Messages() {
                   if (model_type === "Anthropic" && res.startsWith("event:")) {
                     continue
                   }
-                  if (!res.endsWith("}\n\n")) { //  && model_type !== "Local"
+                  if (!res.endsWith("}\n\n")) {
                     halfData = res
                     continue
                   }
@@ -548,7 +526,6 @@ function Messages() {
         }
       }
     } catch (error) {
-      console.log(error)
       setLoading(false)
       setTempData([])
       toast({ title: "Something went wrong!" })
