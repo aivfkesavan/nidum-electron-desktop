@@ -7,6 +7,7 @@ import { resendOtp as resendOtpAction, signup, verifyOtp as verifyOtpAction } fr
 import { useToast } from '../ui/use-toast';
 
 import logo from '../../assets/imgs/logo.png';
+import GoogleBtn from '../common/google-btn';
 
 type dataType = { firstName: string, lastName: string, email: string, password: string, otp: string }
 
@@ -286,9 +287,18 @@ function Signup() {
 
         {
           !showOtp &&
-          <div className="mb-6 mt-4 text-xs text-center text-zinc-400">
-            Already have an account? <Link to="/login" replace className="text-zinc-300 hover:underline">Log in</Link>
-          </div>
+          <>
+            <div className="mt-5 text-xs text-center isolate relative text-zinc-400">
+              <span className="absolute top-2 inset-x-0 h-px bg-zinc-700 z-[-1]"></span>
+              <span className="px-2 bg-[#171717] z-[1]">Or</span>
+            </div>
+
+            <GoogleBtn />
+
+            <div className="mt-5 text-xs text-center text-zinc-400">
+              Already have an account? <Link to="/login" replace className="text-zinc-300 hover:underline">Log in</Link>
+            </div>
+          </>
         }
       </div>
     </section>

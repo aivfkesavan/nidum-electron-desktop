@@ -4,6 +4,8 @@ import { useForm } from "react-hook-form";
 import { Link } from "react-router-dom";
 
 import { useLoginMutate } from "../../hooks/use-user";
+
+import GoogleBtn from "../common/google-btn";
 import logo from '../../assets/imgs/logo.png';
 
 function Login() {
@@ -113,11 +115,18 @@ function Login() {
           </button>
         </form>
 
-        <div className="mt-6 text-xs text-center text-zinc-400">
-          <Link to="/forget-pass" replace className="text-zinc-300 hover:underline">Forget Psasswoed?</Link>
+        <div className="mt-1.5 mb-5 text-xs text-right text-zinc-400">
+          <Link to="/forget-pass" replace className="text-zinc-300 hover:underline">Forget Password</Link>
         </div>
 
-        <div className="mb-6 mt-4 text-xs text-center text-zinc-400">
+        <div className="text-xs text-center isolate relative text-zinc-400">
+          <span className="absolute top-2 inset-x-0 h-px bg-zinc-700 z-[-1]"></span>
+          <span className="px-2 bg-[#171717] z-[1]">Or</span>
+        </div>
+
+        <GoogleBtn />
+
+        <div className="mt-6 text-xs text-center text-zinc-400">
           Don't have an account? <Link to="/signup" replace className="text-zinc-300 hover:underline">Sign up</Link>
         </div>
       </div>

@@ -17,6 +17,7 @@ import Delete from './delete';
 import Reset from './reset';
 
 function Profile() {
+  const isGoogleAuth = useAuthStore(s => s.isGoogleAuth)
   const email = useAuthStore(s => s.email)
   const close = useUIStore(s => s.close)
 
@@ -54,7 +55,7 @@ function Profile() {
         </div>
 
         {
-          !showUpdatePass &&
+          !showUpdatePass && !isGoogleAuth &&
           <button
             onClick={updateShowPass}
             className='px-4 py-1.5 text-xs bg-zinc-300 text-zinc-800 hover:bg-zinc-200'
