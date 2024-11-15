@@ -23,6 +23,7 @@ export const endPoints = {
   removeInvites: "/user/invites/remove",
 
   // device
+  domainBase: "/device/domain-base",
   initDevice: "/device/init", // :appId
   device: "/device",
 

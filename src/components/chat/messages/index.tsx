@@ -15,6 +15,7 @@ import { useAudio } from "./use-speech";
 import { useToast } from "../../../components/ui/use-toast";
 
 import useContextStore, { llm_modelsT } from "../../../store/context";
+import { useDeviceInfo, useDomainBase } from "../../../hooks/use-device";
 import { useLLamaDownloadedModels } from "../../../hooks/use-llm-models";
 import useConvoStore from "../../../store/conversations";
 import { useCrawler } from "../../../hooks/use-crawler";
@@ -57,6 +58,8 @@ function Messages() {
 
   const { data: downloadedModels } = useLLamaDownloadedModels()
   const { data: crawlerData } = useCrawler()
+  const { data: domainBase } = useDomainBase()
+  const { data: device } = useDeviceInfo()
 
   // const [reachedLimit, setReachedLimit] = useState(false)
   const [tempData, setTempData] = useState<Message[]>([])
@@ -290,7 +293,7 @@ function Messages() {
         type urlsT = Record<llm_modelsT, string>
         const urls: urlsT = {
           Local: `${constants.backendUrl}/llama-chat`,
-          "Nidum Shared": `https://${sharedAppId}.chaim.nidum.ai/llama-chat`,
+          "Nidum Shared": `https://${sharedAppId}.${domainBase?.domain}/llama-chat/2`,
           Groq: "https://api.groq.com/openai/v1/chat/completions",
           Nidum: "https://nidum2b.tunnelgate.haive.tech/v1/chat/completions",
           "Hugging Face": `https://api-inference.huggingface.co/models/${hfModel}/v1/chat/completions`,
@@ -329,6 +332,11 @@ function Messages() {
 
         if (model_type === "Local") {
           payload.modelName = llamaModel
+          payload.message = msg
+        }
+
+        if (model_type === "Nidum Shared") {
+          payload.modelName = device?.modelName
           payload.message = msg
         }
 
@@ -393,10 +401,10 @@ function Messages() {
           return
         }
 
-        if (["Nidum", "Anthropic", "SambaNova Systems"].includes(model_type)) {
+        if (["Nidum", "Anthropic", "SambaNova Systems", "Nidum Shared"].includes(model_type)) {
           const res = await response.json()
           const content = res?.choices?.[0]?.message?.content || res?.content?.[0]?.text || ""
-
+          console.log({ content })
           const finalOutput = [user]
           const botReply: Message = {
             role: "assistant",
@@ -540,6 +548,7 @@ function Messages() {
         }
       }
     } catch (error) {
+      console.log(error)
       setLoading(false)
       setTempData([])
       toast({ title: "Something went wrong!" })

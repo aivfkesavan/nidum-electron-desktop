@@ -9,7 +9,13 @@ export function getDeviceInfo(appId: string) {
   })
 }
 
-type deviceT = { name: string, _id: string }
+export function getDomainBase() {
+  return sendApiReq({
+    url: endPoints.domainBase,
+  })
+}
+
+type deviceT = { name?: string, _id: string, modelName?: string }
 export function updateDevice(data: deviceT) {
   return sendApiReq({
     url: endPoints.device,

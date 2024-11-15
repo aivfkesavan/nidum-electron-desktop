@@ -7,18 +7,17 @@ import { useDownloads } from "../../../../common/download-manager";
 import { useLLMModels } from "../../../../../hooks/use-llm-models";
 import useContextStore from "../../../../../store/context";
 import { useToast } from "../../../../ui/use-toast";
-import useUIStore from "../../../../../store/ui";
 
 import { RadioGroup, RadioGroupItem } from "../../../../ui/radio-group";
 import { Label } from "../../../../ui/label";
 import DeleteModel from "./delete-model";
+import Footer from "../../common/footer";
 
 function Local() {
   const { downloads, downloadModel } = useDownloads()
   const llamaModel = useContextStore(s => s.llamaModel)
 
   const updateContext = useContextStore(s => s.updateContext)
-  const close = useUIStore(s => s.close)
 
   const { toast } = useToast()
 
@@ -50,7 +49,7 @@ function Local() {
       const visionModels = ["llava:7b"]
       const llamaModeType = visionModels.includes(selected) ? "vision" : ""
       updateContext({ llamaModel: selected, llamaModeType })
-      close()
+
     } else {
       toast({
         title: "Model not downloaded yet",
@@ -124,21 +123,7 @@ function Local() {
         }
       </RadioGroup>
 
-      <div className="df justify-between mt-12 mb-4">
-        <button
-          onClick={close}
-          className="w-20 py-1.5 text-[13px] text-white/70 border hover:text-white hover:bg-input"
-        >
-          Cancel
-        </button>
-
-        <button
-          className="w-20 py-1.5 text-[13px] bg-black/60 hover:bg-input"
-          onClick={onSave}
-        >
-          Save
-        </button>
-      </div>
+      <Footer onSave={onSave} />
 
       {
         model &&
