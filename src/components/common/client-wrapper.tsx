@@ -1,5 +1,5 @@
 import { QueryClientProvider } from '@tanstack/react-query';
-import { BrowserRouter } from "react-router-dom";
+import { HashRouter } from "react-router-dom";
 
 import { queryClient } from "../../lib/query-client";
 
@@ -18,7 +18,7 @@ const style = {
 
 function ClientWrapper({ children }: props) {
   return (
-    <BrowserRouter>
+    <HashRouter>
       <QueryClientProvider client={queryClient}>
         <DownloadProvider>
           {children}
@@ -30,7 +30,7 @@ function ClientWrapper({ children }: props) {
           style={style}
         />
       </QueryClientProvider>
-    </BrowserRouter>
+    </HashRouter>
   )
 }
 
