@@ -1,46 +1,41 @@
-import { useState } from "react";
+import { FormProvider, useForm } from "react-hook-form";
+
 import useContextStore from "../../../../store/context";
+
+import ControlledInput from "../common/controlled-input";
 import Footer from "../common/footer";
 
 function Groq() {
   const updateContext = useContextStore(s => s.updateContext)
   const sttGroqApiKey = useContextStore(s => s.sttGroqApiKey)
 
-  const [details, setDetails] = useState({
-    sttGroqApiKey,
+  const methods = useForm({
+    defaultValues: {
+      sttGroqApiKey,
+    }
   })
+  const isDirty = methods?.formState?.isDirty
 
-  function onChange(payload: Record<string, any>) {
-    setDetails(pr => ({
-      ...pr,
-      ...payload,
-    }))
-  }
-
-  function onSave() {
-    updateContext(details)
+  function onSave(data: any) {
+    updateContext(data)
   }
 
   return (
-    <>
-      <div className="mb-4">
-        <label htmlFor="" className="mb-0.5 text-xs">Groq api key</label>
-
-        <input
-          type="text"
-          className="text-sm px-2 py-1.5 bg-transparent border"
+    <FormProvider {...methods}>
+      <form onSubmit={methods.handleSubmit(onSave)}>
+        <ControlledInput
+          name="sttGroqApiKey"
+          label="Groq api key"
           placeholder="gsk_zxTDTUKUCXRYWgk-gjhdh-dhtxet"
-          value={details.sttGroqApiKey}
-          onChange={e => onChange({ sttGroqApiKey: e.target.value })}
         />
-      </div>
 
-      <div className="mt-6 text-xs text-white/60">
-        Click here to sign up for a Groq developer account: <a href="https://console.groq.com/login" className=" text-white/90 hover:underline" target="_blank">https://console.groq.com/login</a>
-      </div>
+        <div className="mt-6 text-xs text-white/60">
+          Click here to sign up for a Groq developer account: <a href="https://console.groq.com/login" className=" text-white/90 hover:underline" target="_blank">https://console.groq.com/login</a>
+        </div>
 
-      <Footer onSave={onSave} />
-    </>
+        {isDirty && <Footer />}
+      </form>
+    </FormProvider>
   )
 }
 

@@ -1,9 +1,12 @@
+import useUIStore from "../../../../store/ui";
 
 type props = {
-  onSave: () => void
+  onSave?: () => void
 }
 
 function Footer({ onSave }: props) {
+  const close = useUIStore(s => s.close)
+
   return (
     <div className="df justify-between mt-12 mb-4">
       <button
@@ -14,13 +17,23 @@ function Footer({ onSave }: props) {
         Cancel
       </button>
 
-      <button
-        type="submit"
-        onClick={onSave}
-        className="w-20 py-1.5 text-[13px] bg-black/60 hover:bg-input"
-      >
-        Save
-      </button>
+      {
+        !onSave ?
+          <button
+            type="submit"
+            className="w-20 py-1.5 text-[13px] bg-black/60 hover:bg-input"
+          >
+            Save
+          </button>
+          :
+
+          <button
+            className="w-20 py-1.5 text-[13px] bg-black/60 hover:bg-input"
+            onClick={onSave}
+          >
+            Save
+          </button>
+      }
     </div>
   )
 }
