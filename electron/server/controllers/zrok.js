@@ -49,6 +49,12 @@ router.post("/go-public", async (req, res) => {
   try {
     const { appId } = req.body
 
+    try {
+      const stop = "pkill zrok"
+      await runCommand(stop)
+    } catch (error) {
+      console.log("error on killing")
+    }
     const share = `${zrokBinary}/${zrokStart} share reserved -p ${appId} --headless`
     await runCommandInBg(share)
 

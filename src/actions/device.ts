@@ -39,8 +39,8 @@ export function goPublic(appId: string) {
   return axios.post(`${constants.backendUrl}/zrok/go-public`, { appId }).then(r => r.data)
 }
 
-export function stopPublicShare(appId: string) {
-  return axios.post(`${constants.backendUrl}/zrok/stop`, { appId }).then(r => r.data)
+export function stopPublicShare() {
+  return axios.post(`${constants.backendUrl}/zrok/stop`).then(r => r.data)
 }
 
 export function disableZrok() {

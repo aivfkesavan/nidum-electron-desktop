@@ -82,12 +82,11 @@ export function useGoPublicMutate() {
 
 export function useStopShareMutate() {
   const update = useDeviceStore(s => s.update)
-  const appId = useDeviceStore(s => s.appId)
 
   const { toast } = useToast()
 
   return useMutation({
-    mutationFn: () => stopPublicShare(appId),
+    mutationFn: stopPublicShare,
     onSuccess() {
       toast({ title: "Stoped public share" })
       update({ isPublicShared: false })
@@ -97,4 +96,18 @@ export function useStopShareMutate() {
       toast({ title: err?.message || "Something went wrong!" })
     }
   })
+}
+
+export function useStopShareOnAppLeave() {
+  const update = useDeviceStore(s => s.update)
+  const isPublicShared = useDeviceStore(s => s.isPublicShared)
+
+  useEffect(() => {
+    return () => {
+      if (isPublicShared) {
+        stopPublicShare()
+        update({ isPublicShared: false })
+      }
+    }
+  }, [isPublicShared])
 }

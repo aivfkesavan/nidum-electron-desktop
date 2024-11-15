@@ -2,7 +2,7 @@ import { useEffect } from "react";
 import Messages from "./messages";
 import SideBar from "./side-bar";
 
-import { useZorkEnable } from "../../hooks/use-device";
+import { useStopShareOnAppLeave, useZorkEnable } from "../../hooks/use-device";
 // import useContextStore from "@store/context";
 
 import CheckForUpdate from "./check-for-update";
@@ -14,6 +14,8 @@ function Chat() {
   // const chat_id = useContextStore(s => s.chat_id)
 
   useZorkEnable()
+
+  useStopShareOnAppLeave()
 
   useEffect(() => {
     document.body.classList.add("open")
