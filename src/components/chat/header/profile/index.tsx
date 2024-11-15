@@ -35,10 +35,10 @@ function Profile() {
     <Dialog open onOpenChange={onClose}>
       <DialogContent className='max-w-md'>
         <DialogHeader>
-          <DialogTitle>Profile</DialogTitle>
+          <DialogTitle>Manage Account</DialogTitle>
 
           <DialogDescription className='text-zinc-400'>
-            Manage your account settings and preferences.
+            Update your account settings and preferences.
           </DialogDescription>
         </DialogHeader>
 
@@ -76,7 +76,7 @@ function Profile() {
         <div className="df justify-between">
           <div>
             <h3 className=" font-normal text-zinc-300">Reset App</h3>
-            <p className="text-xs text-zinc-400">Clear all app data and start fresh</p>
+            <p className="text-xs text-zinc-400">Clears all app data and starts fresh.</p>
           </div>
           <Reset />
         </div>
@@ -84,7 +84,7 @@ function Profile() {
         <div className="df justify-between">
           <div>
             <h3 className=" font-normal text-zinc-300">Delete Account</h3>
-            <p className="text-xs text-zinc-400">Permanently remove your account and all data</p>
+            <p className="text-xs text-zinc-400">Permanently deletes your account and all associated data.</p>
           </div>
 
           <Delete />
