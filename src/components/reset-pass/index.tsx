@@ -27,11 +27,7 @@ function ResetPass() {
   const updateShowPass = () => setShowPass(p => !p)
 
   function onSubmit(data: FormValues) {
-    mutate(data, {
-      onSuccess() {
-
-      }
-    })
+    mutate(data)
   }
 
   return (

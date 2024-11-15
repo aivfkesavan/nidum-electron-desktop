@@ -2,6 +2,8 @@ import { useState } from "react";
 import { BiExpandAlt } from "react-icons/bi";
 
 import useContextStore from "../../../../store/context";
+import useDeviceStore from "../../../../store/device";
+import { useToast } from "../../../ui/use-toast";
 import llmModels from "../../../../utils/llm-models";
 import { cn } from "../../../../lib/utils";
 
@@ -17,13 +19,29 @@ function SelectModel() {
   const model_type = useContextStore(s => s.model_type)
   const chat_id = useContextStore(s => s.chat_id)
 
+  const isPublicShared = useDeviceStore(s => s.isPublicShared)
+
+  const { toast } = useToast()
+
   const [open, setOpen] = useState(false)
 
   const found: any = llmModels?.find(l => l.title === model_type) || null
 
+  function onClk(e: any) {
+    e?.preventDefault()
+    if (isPublicShared) {
+      return toast({ title: "Stop 'Go Public' feature to change server" })
+    }
+    return setOpen(true)
+  }
+
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger className="text-sm border" asChild>
+      <DialogTrigger
+        className="text-sm border"
+        onClick={onClk}
+        asChild
+      >
         <div className="df gap-4 px-4 py-2.5 rounded-md cursor-pointer hover:bg-input/30">
           <div className="dc size-8 shrink-0 relative">
             {

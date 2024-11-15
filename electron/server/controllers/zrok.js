@@ -31,7 +31,7 @@ router.post("/enable", async (req, res) => {
     const config = `${zrokBinary}/${zrokStart} config set apiEndpoint https://api.chain.nidum.ai`
     await runCommand(config)
 
-    const enable = `${zrokBinary}/${zrokStart} enable YUgkOiDXdBLg`
+    const enable = `${zrokBinary}/${zrokStart} enable xIoAvryd2Svl`
     await runCommand(enable)
 
     const reserve = `${zrokBinary}/${zrokStart} reserve public http://localhost:4000 --unique-name ${appId}`

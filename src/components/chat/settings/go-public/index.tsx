@@ -4,12 +4,18 @@ import { LuX } from "react-icons/lu";
 import { useDeviceInfo, useDeviceMutate, useGoPublicMutate, useStopShareMutate } from "../../../../hooks/use-device";
 import { useAddInviteMutate, useInvites, useRemoveInviteMutate } from "../../../../hooks/use-user";
 import useDeviceStore from "../../../../store/device";
+import useContextStore from "../../../../store/context";
+import { useToast } from "../../../ui/use-toast";
 
 function GoPublic() {
   const [deviceName, setDeviceName] = useState("")
   const [emailTo, setEmailTo] = useState("")
 
   const isPublicShared = useDeviceStore(s => s.isPublicShared)
+  const model_type = useContextStore(s => s.model_type)
+  const llamModel = useContextStore(s => s.llamaModel)
+
+  const { toast } = useToast()
 
   const { data: device, isLoading: isLoading1 } = useDeviceInfo()
   const { data: invites, isLoading: isLoading2 } = useInvites()
@@ -27,6 +33,15 @@ function GoPublic() {
     }
   }, [device])
 
+  useEffect(() => {
+    if (device && llamModel && llamModel !== device?.modelName) {
+      mutateDevice({
+        _id: device?._id,
+        modelName: llamModel,
+      })
+    }
+  }, [llamModel, device])
+
   function onBlur(name: string) {
     if (name !== device?.name) {
       mutateDevice({ _id: device?._id, name })
@@ -34,7 +49,11 @@ function GoPublic() {
   }
 
   function onClk() {
-    if (!isPublicShared) return mutateGoPublic()
+    if (!isPublicShared) {
+      if (model_type !== "Local") return toast({ title: "Choose Local AI server to go public" })
+      if (!llamModel) return toast({ title: "Please choose a model to go public" })
+      return mutateGoPublic()
+    }
     return mutateStop()
   }
 
