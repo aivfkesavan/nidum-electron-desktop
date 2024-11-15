@@ -11,12 +11,12 @@ async function googleAuth() {
   })
 
   return new Promise((resolve, reject) => {
-    authWindow.loadURL(`http://localhost:5000/api/auth/google`)
+    authWindow.loadURL(`https://apiv1.chain.nidum.ai/api/auth/google`)
 
     authWindow.webContents.on('did-finish-load', async () => {
       const currentUrl = authWindow.webContents.getURL()
 
-      if (currentUrl.startsWith('http://localhost:5000/api/auth/google/callback')) {
+      if (currentUrl.startsWith('https://apiv1.chain.nidum.ai/api/auth/google/callback')) {
         try {
           const data = await authWindow.webContents.executeJavaScript(`
             new Promise((resolve, reject) => {

@@ -6,13 +6,14 @@ import useDeviceStore from "../store/device";
 
 import { useToast } from "../components/ui/use-toast";
 
-export function useDeviceInfo() {
+export function useDeviceInfo(sharedAppId?: string) {
   const appId = useDeviceStore(s => s.appId)
+  const id = sharedAppId || appId
 
   return useQuery({
-    queryKey: ["device", appId],
-    queryFn: () => getDeviceInfo(appId),
-    enabled: !!appId,
+    queryKey: ["device", id],
+    queryFn: () => getDeviceInfo(id),
+    enabled: !!id,
   })
 }
 

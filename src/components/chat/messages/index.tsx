@@ -58,7 +58,7 @@ function Messages() {
   const { data: downloadedModels } = useLLamaDownloadedModels()
   const { data: crawlerData } = useCrawler()
   const { data: domainBase } = useDomainBase()
-  const { data: device } = useDeviceInfo()
+  const { data: device } = useDeviceInfo(sharedAppId)
 
   const [tempData, setTempData] = useState<Message[]>([])
   const [loading, setLoading] = useState(false)
@@ -138,6 +138,9 @@ function Messages() {
         else if (model_type === "OpenAI") {
           if (!openaiApiKey) return toast({ title: "Please provide OpenAI API key" })
           if (!openaiModel) return toast({ title: "Please choose a OpenAI Model" })
+        }
+        else if (model_type === "Nidum Shared") {
+          if (!device?.modelName) return toast({ title: "Provider not selected model" })
         }
 
         setFiles([])

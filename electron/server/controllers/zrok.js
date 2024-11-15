@@ -6,6 +6,7 @@ import os from 'os';
 import 'dotenv/config';
 
 import { runCommand, runCommandInBg } from '../utils/run-command';
+import logger from '../utils/logger';
 import delay from '../utils/delay';
 
 const router = express.Router();
@@ -22,7 +23,9 @@ const zrokStart = zrokExecutable[os.platform()] || "zrok"
 
 const zrokBinary = process.env.NODE_ENV === "development"
   ? path.join(__dirname, "..", "public", 'bin')
-  : path.join(__dirname, 'bin')
+  : path.join(__dirname, "..", 'dist', 'bin')
+
+logger.error(zrokBinary)
 
 router.post("/enable", async (req, res) => {
   try {
@@ -41,6 +44,7 @@ router.post("/enable", async (req, res) => {
 
   } catch (error) {
     console.log("Unexpected error:", error);
+    logger.error(`${JSON.stringify(error)}, ${error?.message}`)
     res.status(500).json({ error: error.message });
   }
 })
