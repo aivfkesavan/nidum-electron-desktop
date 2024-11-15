@@ -112,7 +112,6 @@ export function useGoogleLoginMutate() {
     // @ts-ignore
     mutationFn: window?.electronAPI?.googleLogin,
     onSuccess(res: any) {
-      console.log(res)
       updateAuth({
         _id: res?._id,
         email: res?.email,
