@@ -24,6 +24,10 @@ function NidumShared() {
     return <div className="dc h-80"><span className="loader-2"></span></div>
   }
 
+  if (data?.invites?.length === 0) {
+    return <div className="dc h-80 text-xs text-zinc-300">No shared servers found</div>
+  }
+
   return (
     <>
       <RadioGroup value={selected} onValueChange={setSelected} className="my-4">

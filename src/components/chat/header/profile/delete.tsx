@@ -40,7 +40,7 @@ function Delete() {
 
   return (
     <AlertDialog>
-      <AlertDialogTrigger className="px-3 py-1.5 text-xs border bg-red-400/80 hover:bg-red-400">
+      <AlertDialogTrigger className="shrink-0 px-3 py-1.5 text-xs border bg-red-400/80 hover:bg-red-400">
         Delete Account
       </AlertDialogTrigger>
 

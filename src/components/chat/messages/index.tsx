@@ -14,8 +14,8 @@ import { useAudio } from "./use-speech";
 import { useToast } from "../../../components/ui/use-toast";
 
 import useContextStore, { llm_modelsT } from "../../../store/context";
-import { useDeviceInfo, useDomainBase } from "../../../hooks/use-device";
 import { useLLamaDownloadedModels } from "../../../hooks/use-llm-models";
+import { useSharedDevice } from "../../../hooks/use-device";
 import useConvoStore from "../../../store/conversations";
 import { useCrawler } from "../../../hooks/use-crawler";
 
@@ -56,9 +56,8 @@ function Messages() {
   const ragEnabled = useConvoStore(s => s.projects[project_id]?.rag_enabled)
 
   const { data: downloadedModels } = useLLamaDownloadedModels()
+  const { data: sharedDevice } = useSharedDevice(sharedAppId)
   const { data: crawlerData } = useCrawler()
-  const { data: domainBase } = useDomainBase()
-  const { data: device } = useDeviceInfo(sharedAppId)
 
   const [tempData, setTempData] = useState<Message[]>([])
   const [loading, setLoading] = useState(false)
@@ -140,7 +139,7 @@ function Messages() {
           if (!openaiModel) return toast({ title: "Please choose a OpenAI Model" })
         }
         else if (model_type === "Nidum Shared") {
-          if (!device?.modelName) return toast({ title: "Provider not selected model" })
+          if (!sharedDevice?.modelName) return toast({ title: "Provider not selected model" })
         }
 
         setFiles([])
@@ -286,7 +285,7 @@ function Messages() {
         type urlsT = Record<llm_modelsT, string>
         const urls: urlsT = {
           Local: `${constants.backendUrl}/llama-chat`,
-          "Nidum Shared": `https://${sharedAppId}.${domainBase?.domain}/llama-chat/2`,
+          "Nidum Shared": `https://${sharedAppId}.${sharedDevice?.domain}/llama-chat/2`,
           Groq: "https://api.groq.com/openai/v1/chat/completions",
           Nidum: "https://nidum2b.tunnelgate.haive.tech/v1/chat/completions",
           "Hugging Face": `https://api-inference.huggingface.co/models/${hfModel}/v1/chat/completions`,
@@ -329,7 +328,7 @@ function Messages() {
         }
 
         if (model_type === "Nidum Shared") {
-          payload.modelName = device?.modelName
+          payload.modelName = sharedDevice?.modelName
           payload.message = msg
         }
 

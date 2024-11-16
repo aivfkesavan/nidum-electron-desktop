@@ -1,6 +1,6 @@
 
 export const root = {
-  liveBackendBaseUrl: "https://apiv1.chain.nidum.ai/api",
+  liveBackendBaseUrl: "https://apiv1.chain.nidum.ai/api" // http://localhost:5000/api
 }
 
 export const endPoints = {
@@ -23,8 +23,8 @@ export const endPoints = {
   removeInvites: "/user/invites/remove",
 
   // device
-  domainBase: "/device/domain-base",
   initDevice: "/device/init", // :appId
+  sharedDevice: "/device/shared", // :appId
   device: "/device",
 
 } as const

@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { LuX } from "react-icons/lu";
 
-import { useDeviceInfo, useDeviceMutate, useGoPublicMutate, useStopShareMutate } from "../../../../hooks/use-device";
+import { useInitDevice, useDeviceMutate, useGoPublicMutate, useStopShareMutate } from "../../../../hooks/use-device";
 import { useAddInviteMutate, useInvites, useRemoveInviteMutate } from "../../../../hooks/use-user";
 import useDeviceStore from "../../../../store/device";
 import useContextStore from "../../../../store/context";
@@ -17,7 +17,7 @@ function GoPublic() {
 
   const { toast } = useToast()
 
-  const { data: device, isLoading: isLoading1 } = useDeviceInfo()
+  const { data: device, isLoading: isLoading1 } = useInitDevice()
   const { data: invites, isLoading: isLoading2 } = useInvites()
 
   const { mutate: mutateRemove, isPending: isPending2 } = useRemoveInviteMutate()
