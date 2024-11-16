@@ -21,6 +21,7 @@ function Native() {
 
   function onSave(data: any) {
     updateContext(data)
+    methods.reset(data)
   }
 
   return (

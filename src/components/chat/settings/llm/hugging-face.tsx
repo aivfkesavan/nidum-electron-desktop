@@ -27,6 +27,7 @@ function HuggingFace() {
 
   function onSave(data: any) {
     updateContext(data)
+    methods.reset(data)
   }
 
   if (isLoading) { // || isLoading2
