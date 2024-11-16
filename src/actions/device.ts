@@ -3,15 +3,15 @@ import { endPoints } from "../services/end-points";
 import sendApiReq from "../services/send-api-req";
 import constants from "../utils/constants";
 
-export function getDeviceInfo(appId: string) {
+export function getInitDevice(appId: string) {
   return sendApiReq({
     url: `${endPoints.initDevice}/${appId}`,
   })
 }
 
-export function getDomainBase() {
+export function getSharedDevice(appId: string) {
   return sendApiReq({
-    url: endPoints.domainBase,
+    url: `${endPoints.sharedDevice}/${appId}`,
   })
 }
 

@@ -124,6 +124,7 @@ export function DownloadProvider({ children }: props) {
           toast.success(lable, {
             className: "py-2",
             richColors: true,
+            closeButton: true,
             description: "Downloaded successfully",
             position: "top-center",
             duration: 1000,
@@ -211,6 +212,7 @@ export function DownloadProvider({ children }: props) {
           toast.success(model, {
             className: "py-2",
             richColors: true,
+            closeButton: true,
             description: "Downloaded successfully",
             position: "top-center",
             duration: 1000,
@@ -361,6 +363,7 @@ export function DownloadProvider({ children }: props) {
       toast.success(modelName, {
         className: "py-2",
         richColors: true,
+        closeButton: true,
         description: "Downloaded successfully",
         position: "top-center",
         duration: 1000,

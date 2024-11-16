@@ -1,26 +1,26 @@
 import { useEffect } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
-import { enableZrok, getDeviceInfo, getDomainBase, goPublic, stopPublicShare, updateDevice } from "../actions/device";
+import { enableZrok, getInitDevice, getSharedDevice, goPublic, stopPublicShare, updateDevice } from "../actions/device";
 import useDeviceStore from "../store/device";
 
 import { useToast } from "../components/ui/use-toast";
 
-export function useDeviceInfo(sharedAppId?: string) {
+export function useInitDevice() {
   const appId = useDeviceStore(s => s.appId)
-  const id = sharedAppId || appId
 
   return useQuery({
-    queryKey: ["device", id],
-    queryFn: () => getDeviceInfo(id),
-    enabled: !!id,
+    queryKey: ["init-device", appId],
+    queryFn: () => getInitDevice(appId),
+    enabled: !!appId,
   })
 }
 
-export function useDomainBase() {
+export function useSharedDevice(appId: string) {
   return useQuery({
-    queryKey: ["domain-base"],
-    queryFn: getDomainBase,
+    queryKey: ["shared-device", appId],
+    queryFn: () => getSharedDevice(appId),
+    enabled: !!appId,
   })
 }
 

@@ -7,7 +7,8 @@ type llmT = "llm" | "llm2" | "groq" | "hf" | "hf-img-gen" | "sambanova-systems" 
 export function useLLMModels(llm: llmT) {
   return useQuery({
     queryKey: [`${llm}-models`],
-    queryFn: () => getLLMModels(llm)
+    queryFn: () => getLLMModels(llm),
+    gcTime: Infinity,
   })
 }
 

@@ -22,22 +22,30 @@ const zrokExecutable = {
 const zrokStart = zrokExecutable[os.platform()] || "zrok"
 
 const zrokBinary = process.env.NODE_ENV === "development"
-  ? path.join(__dirname, "..", "public", 'bin')
-  : path.join(__dirname, "..", 'dist', 'bin')
+  ? path.join(__dirname, "..", "public", "bin")
+  : path.join(process.resourcesPath, "bin");
 
-logger.error(zrokBinary)
+const zrokBase = path.join(zrokBinary, zrokStart)
+
+logger.error(zrokBase)
+
+async function isLiveCheck(appId) {
+  const response = await fetch(`https://${appId}.chain.nidum.ai/health`)
+  const status = response.status
+  return status === 200
+}
 
 router.post("/enable", async (req, res) => {
   try {
     const { appId } = req.body
 
-    const config = `${zrokBinary}/${zrokStart} config set apiEndpoint https://api.chain.nidum.ai`
+    const config = `${zrokBase} config set apiEndpoint https://api.chain.nidum.ai`;
     await runCommand(config)
 
-    const enable = `${zrokBinary}/${zrokStart} enable xIoAvryd2Svl`
+    const enable = `${zrokBase} enable xIoAvryd2Svl`;
     await runCommand(enable)
 
-    const reserve = `${zrokBinary}/${zrokStart} reserve public http://localhost:4000 --unique-name ${appId}`
+    const reserve = `${zrokBase} reserve public http://localhost:4000 --unique-name ${appId}`;
     await runCommand(reserve)
 
     return res.json({ msg: "Success" })
@@ -59,16 +67,13 @@ router.post("/go-public", async (req, res) => {
     } catch (error) {
       console.log("error on killing")
     }
-    const share = `${zrokBinary}/${zrokStart} share reserved -p ${appId} --headless`
+    const share = `${zrokBase} share reserved -p ${appId} --headless`;
     await runCommandInBg(share)
 
     await delay(5000)
-    const response = await fetch(`https://${appId}.chain.nidum.ai/health`)
-    const status = response.status
 
-    if (status === 200) {
-      return res.json({ msg: "Success" })
-    }
+    const isLive = await isLiveCheck(appId)
+    if (isLive) return res.json({ msg: "Success" })
 
     return res.status(400).json({ msg: "not success" })
 
@@ -80,6 +85,11 @@ router.post("/go-public", async (req, res) => {
 
 router.post("/stop", async (req, res) => {
   try {
+    // const { appId } = req.body
+
+    // const isLive = await isLiveCheck(appId)
+    // if (!isLive) return res.json({ msg: "Success" })
+
     const stop = "pkill zrok"
     await runCommand(stop)
 
@@ -87,14 +97,14 @@ router.post("/stop", async (req, res) => {
 
   } catch (error) {
     console.log("Unexpected error:", error);
-    res.status(500).json({ error: error.message });
+    res.json({ error: error.message });
   }
 })
 
 router.post("/disable", async (req, res) => {
   try {
     try {
-      const disable = `${zrokBinary}/${zrokStart} disable`
+      const disable = `${zrokBase} disable`;
       await runCommand(disable)
     } catch (error) {
       console.log(error)
