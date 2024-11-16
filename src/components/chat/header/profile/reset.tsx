@@ -1,5 +1,8 @@
 import { useState } from "react";
 
+import { useResetApp } from "../../../../hooks/use-user";
+import useDeviceStore from "../../../../store/device";
+
 import {
   AlertDialog,
   AlertDialogAction,
@@ -11,18 +14,18 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "../../../ui/alert-dialog";
-import { useResetApp } from "../../../../hooks/use-user";
 // import { Label } from "../../../ui/label";
 
 function Reset() {
   // const [incxludeModels, setIncludeModels] = useState(false)
   const [showConfirm, setShowConfirm] = useState(false)
   const { mutate, isPending } = useResetApp(true)
+  const appId = useDeviceStore(s => s.appId)
 
   function onReset(e: any) {
     e?.preventDefault()
     if (!showConfirm) return setShowConfirm(true)
-    mutate({ includeModels: true })
+    mutate({ includeModels: true, appId })
   }
 
   return (

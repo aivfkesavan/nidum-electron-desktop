@@ -316,11 +316,12 @@ export function useReqAccountDeleteMutate() {
 export function useAccountDeleteConfirmMutate() {
   const { mutate } = useResetApp(false)
   const { toast } = useToast()
+  const appId = useDeviceStore(s => s.appId)
 
   return useMutation({
     mutationFn: confirmDeleteAccount,
     onSuccess() {
-      mutate({ includeModels: true }, {
+      mutate({ includeModels: true, appId }, {
         onSuccess() {
           toast({ title: "Account deleted successfully" })
         }

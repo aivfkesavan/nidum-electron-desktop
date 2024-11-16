@@ -28,6 +28,7 @@ export function deleteDevice(appId: string) {
   return sendApiReq({
     url: `${endPoints.device}/${appId}`,
     method: "delete",
+    data: {}
   })
 }
 
