@@ -17,6 +17,7 @@ export function useSharedServers() {
   return useQuery({
     queryKey: ["shared-servers"],
     queryFn: getSharedServers,
+    refetchInterval: 3000,
   })
 }
 
