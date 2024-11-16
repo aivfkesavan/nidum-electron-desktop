@@ -14,9 +14,6 @@ router.post("/", async (req, res) => {
     const { modelName, messages, message } = req.body
     const [systemPrompt, ...rest] = messages
 
-    console.log(systemPrompt)
-    console.log(rest)
-
     const llama = await getLlama()
     const model = await llama.loadModel({
       modelPath: createPath(["models", modelName])

@@ -270,15 +270,16 @@ function Messages() {
           restUserContent.images = base64Files
         }
 
+        const isLocal = ["Local", "Nidum Shared"].includes(model_type)
         const prompt = [
           {
             role: "system",
-            [model_type === "Local" ? "text" : "content"]: systemPrompt
+            [isLocal ? "text" : "content"]: systemPrompt
           },
           ...dataMap,
         ]
 
-        if (model_type !== "Local") {
+        if (!isLocal) {
           prompt.push(restUserContent)
         }
 
