@@ -168,7 +168,7 @@ export function useFogetPassMutate() {
     mutationFn: forgetPass,
     onSuccess() {
       navigate("/reset-pass")
-      toast({ title: "Please check your email for otp" })
+      toast({ title: "Please check your email for OTP" })
     },
     onError(err) {
       let hasError = err?.message
@@ -297,7 +297,7 @@ export function useReqAccountDeleteMutate() {
   return useMutation({
     mutationFn: (v: any) => reqDeleteAccount(),
     onSuccess() {
-      toast({ title: "Please check your email for otp" })
+      toast({ title: "Please check your email for OTP" })
     },
     onError(err) {
       let hasError = err?.message

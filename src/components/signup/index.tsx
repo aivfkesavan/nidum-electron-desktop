@@ -80,7 +80,7 @@ function Signup() {
       const { otp, ...rest } = data
 
       await signup(rest)
-      toast({ title: "Check your email for otp" })
+      toast({ title: "Check your email for OTP" })
       setShowOtp(true)
 
     } catch (error) {
