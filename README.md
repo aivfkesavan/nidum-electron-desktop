@@ -1,4 +1,4 @@
-# 🚀 RAGDrive
+# 🚀 nidum.ai
 
 RAGDrive is an innovative, open-source application designed to bring the power of large language models (LLMs) directly to your local system. With RAGDrive, you can easily configure and run LLMs on your local machine while enjoying a suite of advanced features, such as web search, document uploads, and web scraping. RAGDrive also offers a straightforward way to connect and configure popular LLM platforms like OpenAI, Groq, Sambanova, Hugging Face, and Anthropic—all wrapped up in a simple and easy-to-use UI.
 
