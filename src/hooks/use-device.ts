@@ -10,7 +10,7 @@ export function useInitDevice() {
   const appId = useDeviceStore(s => s.appId)
 
   return useQuery({
-    queryKey: ["init-device", appId],
+    queryKey: ["device", appId],
     queryFn: () => getInitDevice(appId),
     enabled: !!appId,
   })
@@ -18,7 +18,7 @@ export function useInitDevice() {
 
 export function useSharedDevice(appId: string) {
   return useQuery({
-    queryKey: ["shared-device", appId],
+    queryKey: ["device", appId],
     queryFn: () => getSharedDevice(appId),
     enabled: !!appId,
   })
