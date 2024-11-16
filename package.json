@@ -113,15 +113,15 @@
     ],
     "extraResources": [
       {
-        "from": "public/bin",
-        "to": "bin",
+        "from": "public/bin/",
+        "to": "bin/",
         "filter": [
           "**/*"
         ]
       }
     ],
     "asarUnpack": [
-      "public/bin/**"
+      "**/bin/**"
     ],
     "asar": true,
     "directories": {
