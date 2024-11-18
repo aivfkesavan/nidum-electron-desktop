@@ -115,11 +115,11 @@ function Login() {
           </button>
         </form>
 
-        <div className="mt-1.5 mb-5 text-xs text-right text-zinc-400">
-          <Link to="/forget-pass" replace className="text-zinc-300 hover:underline">Forget Password</Link>
+        <div className="mt-1.5 mb-4 text-xs text-right text-zinc-400">
+          <Link to="/forget-pass" replace className="text-zinc-300 hover:underline">Forgot Password</Link>
         </div>
 
-        <div className="text-xs text-center isolate relative text-zinc-400">
+        <div className="mb-2 text-xs text-center isolate relative text-zinc-400">
           <span className="absolute top-2 inset-x-0 h-px bg-zinc-700 z-[-1]"></span>
           <span className="px-2 bg-[#171717] z-[1]">Or</span>
         </div>

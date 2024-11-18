@@ -1,9 +1,9 @@
 import type { llm_modelsT } from "../store/context";
-import { TbDeviceDesktopBolt } from "react-icons/tb";
 
 import anthropic from '../assets/imgs/anthropic.png';
 import sambanova from '../assets/imgs/sambanova.png';
 import openai from '../assets/imgs/openai.png';
+import local from '../assets/imgs/local.png';
 import logo from '../assets/imgs/logo.png';
 import groq from '../assets/imgs/groq.png';
 import hf from '../assets/imgs/hugging-face.png';
@@ -18,13 +18,13 @@ type listT = {
 const llmModels: listT[] = [
   {
     id: "1",
-    logo: logo,
+    logo: local,
     title: "Local",
     para: "Run AI models locally on your machine"
   },
   {
     id: "2",
-    logo: TbDeviceDesktopBolt,
+    logo: logo,
     title: "Nidum Shared",
     para: "Use AI models that someone is sharing through Nidum"
   },
