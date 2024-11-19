@@ -27,4 +27,9 @@ export const endPoints = {
   sharedDevice: "/device/shared", // :appId
   device: "/device",
 
+  config: "/config",
+  project: "/project",
+  chat: "/chat",
+  message: "/message",
+
 } as const
