@@ -8,7 +8,7 @@ import useContextStore from "../../../store/context";
 import useUIStore from "../../../store/ui";
 import { cn } from "../../../lib/utils";
 
-import { useProject } from "../../../hooks/use-project";
+import { useProjectsByUserId } from "../../../hooks/use-project";
 
 import Message from '../../../assets/svg/message.svg?react';
 
@@ -22,7 +22,7 @@ type props = {
 }
 
 function Projects({ isFullScreen, platform }: props) {
-  const { data: projects } = useProject()
+  const { data: projects } = useProjectsByUserId()
 
   const updateContext = useContextStore(s => s.updateContext)
   const project_id = useContextStore(s => s.project_id)

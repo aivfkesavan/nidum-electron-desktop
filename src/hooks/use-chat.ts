@@ -1,12 +1,13 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
-import { createChat, deleteChat, getChat, updateChat } from "../actions/chat";
+import { createChat, deleteChat, getChatsByProjectId, updateChat } from "../actions/chat";
 import { useToast } from "../components/ui/use-toast";
+import { Chat } from "../types/base";
 
-export function useChat(project_id: string) {
-  return useQuery({
+export function useChatsByProjectId(project_id: string) {
+  return useQuery<Chat[]>({
     queryKey: ["chats", project_id],
-    queryFn: () => getChat(project_id),
+    queryFn: () => getChatsByProjectId(project_id),
     enabled: !!project_id,
   })
 }
@@ -33,9 +34,9 @@ export function useChatDeleteMutate() {
   const { toast } = useToast()
 
   return useMutation({
-    mutationFn: deleteChat,
-    onSuccess() {
-      queryClient.invalidateQueries({ queryKey: ["chats"] })
+    mutationFn: ({ _id }: { _id: string, project_id: string }) => deleteChat(_id),
+    onSuccess(res, variables) {
+      queryClient.invalidateQueries({ queryKey: ["chats", variables?.project_id] })
       toast({ title: "Chat deleted successfully" })
     },
     onError(err) {

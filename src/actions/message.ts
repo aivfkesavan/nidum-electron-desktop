@@ -1,7 +1,7 @@
 import { endPoints } from "../services/end-points";
 import sendApiReq from "../services/send-api-req";
 
-export function getMessage(chat_id: string) {
+export function getMessagesByChatId(chat_id: string) {
   return sendApiReq({
     url: `${endPoints.message}/${chat_id}`,
   })

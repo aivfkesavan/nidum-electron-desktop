@@ -1,9 +1,15 @@
 import { endPoints } from "../services/end-points";
 import sendApiReq from "../services/send-api-req";
 
-export function getProject() {
+export function getProjectsByUserId() {
   return sendApiReq({
     url: endPoints.project,
+  })
+}
+
+export function getProjectById(project_id: string) {
+  return sendApiReq({
+    url: `${endPoints.project}/${project_id}`,
   })
 }
 

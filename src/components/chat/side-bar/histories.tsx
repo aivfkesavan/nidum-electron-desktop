@@ -8,7 +8,7 @@ import useContextStore from "../../../store/context";
 import useUIStore from "../../../store/ui";
 import { cn } from "../../../lib/utils";
 
-import { useChat, useChatMutate } from "../../../hooks/use-chat";
+import { useChatsByProjectId, useChatMutate } from "../../../hooks/use-chat";
 
 import Message from '../../../assets/svg/message.svg?react';
 
@@ -30,7 +30,7 @@ function Histories({ isFullScreen, platform }: props) {
 
   const updateModal = useUIStore(s => s.update)
 
-  const { data: chats } = useChat(project_id)
+  const { data: chats } = useChatsByProjectId(project_id)
   const { mutate } = useChatMutate()
 
   const [searchBy, setSearchBy] = useState("")
