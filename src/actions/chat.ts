@@ -1,7 +1,7 @@
 import { endPoints } from "../services/end-points";
 import sendApiReq from "../services/send-api-req";
 
-export function getChat(project_id: string) {
+export function getChatsByProjectId(project_id: string) {
   return sendApiReq({
     url: `${endPoints.chat}/${project_id}`,
   })

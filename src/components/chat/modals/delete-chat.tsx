@@ -18,19 +18,26 @@ function DeleteChat() {
   const open = useUIStore(s => s.open)
 
   const updateContext = useContextStore(s => s.updateContext)
+  const project_id = useContextStore(s => s.project_id)
   const chat_id = useContextStore(s => s.chat_id)
 
   const { mutate, isPending } = useChatDeleteMutate()
 
   function onConfirm() {
-    mutate(data?._id, {
-      onSuccess() {
-        if (chat_id === data?._id) {
-          updateContext({ chat_id: "" })
+    mutate(
+      {
+        _id: data?._id,
+        project_id
+      },
+      {
+        onSuccess() {
+          if (chat_id === data?._id) {
+            updateContext({ chat_id: "" })
+          }
+          closeModel()
         }
-        closeModel()
       }
-    })
+    )
   }
 
   return (

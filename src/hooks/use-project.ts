@@ -2,13 +2,21 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 import type { Project } from "../types/base";
 
-import { createProject, deleteProject, getProject, updateProject } from "../actions/project";
+import { createProject, deleteProject, getProjectById, getProjectsByUserId, updateProject } from "../actions/project";
 import { useToast } from "../components/ui/use-toast";
 
-export function useProject() {
+export function useProjectsByUserId() {
   return useQuery<Project[]>({
     queryKey: ["projects"],
-    queryFn: getProject,
+    queryFn: getProjectsByUserId,
+  })
+}
+
+export function useProjectById(_id: string) {
+  return useQuery<Project>({
+    queryKey: ["project", _id],
+    queryFn: () => getProjectById(_id),
+    enabled: !!_id,
   })
 }
 
