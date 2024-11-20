@@ -30,6 +30,8 @@ export const endPoints = {
   config: "/config",
   project: "/project",
   chat: "/chat",
+
   message: "/message",
+  messagePush: "/message/push",
 
 } as const

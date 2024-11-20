@@ -17,10 +17,12 @@ export function useChatMutate() {
   const { toast } = useToast()
 
   return useMutation({
-    mutationFn: (data: any) => !data?._id ? createChat(data) : updateChat(data),
+    mutationFn: (data: Partial<Chat> & { project_id: string }) => !data?._id ? createChat(data) : updateChat(data),
     onSuccess(res, variables) {
       queryClient.invalidateQueries({ queryKey: ["chats", variables?.project_id] })
-      toast({ title: `Chat ${variables?._id ? "updated" : "created"} successfully` })
+      if (!variables?.project_id) {
+        toast({ title: "Chat created successfully" })
+      }
     },
     onError(err) {
       console.log(err)
