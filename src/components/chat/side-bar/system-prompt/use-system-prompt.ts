@@ -2,8 +2,12 @@ import { useEffect, useState } from "react";
 
 import { useProjectById, useProjectMutate } from "../../../../hooks/use-project";
 import useContextStore from "../../../../store/context";
+import useUIStore from "../../../../store/ui";
 
 function useSystemPrompt() {
+  const updateModel = useUIStore(s => s.update)
+  const closeModel = useUIStore(s => s.close)
+
   const project_id = useContextStore(s => s.project_id)
   const chat_id = useContextStore(s => s.chat_id)
 
@@ -24,18 +28,31 @@ function useSystemPrompt() {
 
   const onChange = (v: string) => setVal(v)
 
+  function onBlur() {
+    if (val !== project?.[key]) {
+      updateModel({ open: "confirm" })
+    }
+  }
+
   function onSave() {
-    mutate({
-      _id: project_id,
-      [key]: val,
-    })
+    mutate(
+      {
+        _id: project_id,
+        [key]: val,
+      },
+      {
+        onSuccess() {
+          closeModel()
+        }
+      }
+    )
   }
 
   return {
     isDisabled: chat_id?.endsWith("-imgGen") || isLoading || isPending,
-    isDirty: project?.[key] !== val,
     prompt: val,
     onChange,
+    onBlur,
     onSave,
   }
 }
