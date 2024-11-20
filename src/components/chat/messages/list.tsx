@@ -1,4 +1,4 @@
-import type { Message } from "../../../store/conversations";
+import type { Message } from "../../../types/base";
 import LinkPreview from "./link-preview";
 import UserQuery from "./user-query";
 import BotReply from "./bot-reply";
@@ -12,15 +12,15 @@ type props = {
 }
 
 function List({ list = [], isTemp = false, deleteChat = () => { } }: props) {
-  return list?.map((l: any) => {
+  return list?.map(l => {
     if (l.role === "user") {
       return (
         <UserQuery
           key={l.id}
           isTemp={isTemp}
           response={l.content}
-          images={l.images}
-          deleteChat={() => deleteChat(l.id)}
+          images={l?.images || []}
+          deleteChat={() => deleteChat(l._id as string)}
         />
       )
     }
@@ -30,7 +30,7 @@ function List({ list = [], isTemp = false, deleteChat = () => { } }: props) {
         <LinkPreview
           key={l.id}
           id={l.id}
-          urls={l.webSearched}
+          urls={l?.webSearched || []}
         />
       )
     }
@@ -58,10 +58,6 @@ function List({ list = [], isTemp = false, deleteChat = () => { } }: props) {
                 ></p>
               ))
             }
-            {/* <span className="mr-1 text-xs">Thinking</span>
-            <span className="animate-ping text-2xl leading-3">.</span>
-            <span className="animate-ping delay-75 text-2xl leading-3">.</span>
-            <span className="animate-ping delay-100 text-2xl leading-3">.</span> */}
           </div>
         </div>
       )
@@ -73,7 +69,7 @@ function List({ list = [], isTemp = false, deleteChat = () => { } }: props) {
         id={l.id}
         isTemp={isTemp}
         response={l.content}
-        deleteChat={() => deleteChat(l.id)}
+        deleteChat={() => deleteChat(l._id as string)}
       />
     )
   })

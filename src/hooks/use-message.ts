@@ -1,7 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
-import { createMessage, deleteMessage, getMessagesByChatId, updateMessage } from "../actions/message";
-import { useToast } from "../components/ui/use-toast";
+import { deleteMessage, getMessagesByChatId, pushMessages } from "../actions/message";
 import { Message } from "../types/base";
 
 export function useMessagesChatId(chat_id: string) {
@@ -12,36 +11,22 @@ export function useMessagesChatId(chat_id: string) {
   })
 }
 
-export function useMessageMutaate() {
-  // const queryClient = useQueryClient()
-  // const { toast } = useToast()
-
+export function useMessagePushMutate() {
   return useMutation({
-    mutationFn: (data: any) => !data?._id ? createMessage(data) : updateMessage(data),
-    // onSuccess(res, variables) {
-    //   queryClient.invalidateQueries({ queryKey: ["messages", variables?.chat_id] })
-    //   toast({ title: `Message ${variables?._id ? "updated" : "created"} successfully` })
-    // },
-    // onError(err) {
-    //   console.log(err)
-    //   toast({ title: err?.message || "Something went wrong!" })
-    // }
+    mutationFn: pushMessages,
   })
 }
 
 export function useMessageDeleteMutate() {
   const queryClient = useQueryClient()
-  const { toast } = useToast()
 
   return useMutation({
-    mutationFn: deleteMessage,
-    onSuccess() {
-      queryClient.invalidateQueries({ queryKey: ["messages"] })
-      toast({ title: "Message deleted successfully" })
+    mutationFn: ({ _id }: { _id: string, chat_id: string }) => deleteMessage(_id),
+    onSuccess(res, variables) {
+      queryClient.setQueryData(
+        ["messages", variables?.chat_id],
+        (old: any) => old?.filter((d: any) => d._id !== variables?._id)
+      )
     },
-    onError(err) {
-      console.log(err)
-      toast({ title: err?.message || "Something went wrong!" })
-    }
   })
 }

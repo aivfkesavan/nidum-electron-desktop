@@ -1,10 +1,11 @@
 import { useEffect, useRef, useState } from "react";
 import { FaFileAlt, FaSquare } from "react-icons/fa";
+import { useQueryClient } from "@tanstack/react-query";
 import { LuSend } from "react-icons/lu";
 import { nanoid } from "nanoid";
 import { LuX } from "react-icons/lu";
 
-import type { Message } from "../../../store/conversations";
+import type { Message } from "../../../types/base";
 
 import { createContext, ragDefaultPrompt, duckDuckGoSerach, ragSearch, systemDefaultPrompt, webDefaultPrompt } from "../../../utils/improve-context";
 import { imgToBase64, setImgToBase64Map } from "../../../actions/img";
@@ -16,8 +17,10 @@ import { useToast } from "../../../components/ui/use-toast";
 import useContextStore, { llm_modelsT } from "../../../store/context";
 import useConvoStore from "../../../store/conversations";
 
+import { useMessageDeleteMutate, useMessagePushMutate, useMessagesChatId } from "../../../hooks/use-message";
 import { useLLamaDownloadedModels } from "../../../hooks/use-llm-models";
 import { useSharedDevice } from "../../../hooks/use-device";
+import { useProjectById } from "../../../hooks/use-project";
 import { useCrawler } from "../../../hooks/use-crawler";
 import { useConfig } from "../../../hooks/use-config";
 
@@ -36,24 +39,23 @@ function Messages() {
   const sharedAppId = useContextStore(s => s.sharedAppId)
   const model_type = useContextStore(s => s.model_type)
   const project_id = useContextStore(s => s.project_id)
-  const id = useContextStore(s => s.chat_id)
+  const chat_id = useContextStore(s => s.chat_id)
 
-  const projectdetails = useConvoStore(s => s.projects[project_id] || null)
   const filesLen = useConvoStore(s => s.files[project_id]?.length || 0)
-  const pushIntoMessages = useConvoStore(s => s.pushIntoMessages)
-  const deleteMessage = useConvoStore(s => s.deleteMessage)
   const editProject = useConvoStore(s => s.editProject)
-  const editChat = useConvoStore(s => s.editChat)
-  const addChat = useConvoStore(s => s.addChat)
-  const init = useConvoStore(s => s.init)
 
-  const webEnabled = useConvoStore(s => s.projects[project_id]?.web_enabled)
-  const ragEnabled = useConvoStore(s => s.projects[project_id]?.rag_enabled)
+  const { mutate: msgDeleteMutate } = useMessageDeleteMutate()
+  const { mutate: msPushgMutate } = useMessagePushMutate()
 
   const { data: downloadedModels } = useLLamaDownloadedModels()
   const { data: sharedDevice } = useSharedDevice(sharedAppId, model_type === "Nidum Shared")
   const { data: crawlerData } = useCrawler()
   const { data: config } = useConfig()
+
+  const { data: projectDetails } = useProjectById(project_id)
+  const { data: messages } = useMessagesChatId(chat_id)
+
+  const queryClient = useQueryClient()
 
   const [tempData, setTempData] = useState<Message[]>([])
   const [loading, setLoading] = useState(false)
@@ -65,7 +67,6 @@ function Messages() {
 
   const { speak } = useAudio()
 
-  const data = useConvoStore(s => s.messages?.[id] || [])
   const isChatInputDisabled = !project_id
 
   const {
@@ -78,18 +79,14 @@ function Messages() {
   } = config || {}
 
   useEffect(() => {
-    init()
-  }, [])
-
-  useEffect(() => {
     setTempData([])
     setLoading(false)
     setFiles([])
-  }, [id])
+  }, [chat_id])
 
   useEffect(() => {
     scrollableRef?.current?.scrollIntoView({ behavior: "instant", block: "end" })
-  }, [data.length, tempData])
+  }, [messages?.length, tempData])
 
   function num(n: string | number, defaultVal: number) {
     return (n || n === 0) ? Number(n) : defaultVal
@@ -113,10 +110,33 @@ function Messages() {
     })
   }
 
+  function pushIntoMessages(currContextId: string, messages: Message[]) {
+    msPushgMutate(
+      {
+        chat_id: currContextId,
+        messages,
+      },
+      {
+        onSuccess(res) {
+          queryClient.setQueryData(["messages", currContextId], (old: any) => {
+            const payload = [...old]
+            payload[payload?.length - 2]._id = res?.ids?.[0]
+            payload[payload?.length - 1]._id = res?.ids?.[1]
+            return payload
+          })
+        }
+      }
+    )
+    queryClient.setQueryData(
+      ["messages", currContextId],
+      (old: any) => [...old, ...messages]
+    )
+  }
+
   // @ts-ignore
   const postData = async (msg: string, needAutoPlay: boolean = false) => {
     try {
-      if (msg && projectdetails) {
+      if (msg && projectDetails) {
         if (model_type === "Groq") {
           if (!groqApiKey) return toast({ title: "Please provide Groq API key" })
           if (!groqModel) return toast({ title: "Please choose a Groq Model" })
@@ -152,26 +172,26 @@ function Messages() {
         setLoading(true)
         let temContextId = ""
 
-        if (!id) {
+        if (!chat_id) {
           temContextId = nanoid(10)
 
-          addChat(project_id, {
-            id: temContextId,
-            title: msg,
-          })
+          // addChat(project_id, {
+          //   id: temContextId,
+          //   title: msg,
+          // })
 
           updateContext({ chat_id: temContextId })
         }
 
-        if (id && data?.length === 0) {
-          updateContext({ chat_id: id })
-          editChat(project_id, {
-            id,
-            title: msg,
-          })
+        if (chat_id && messages?.length === 0) {
+          updateContext({ chat_id })
+          // editChat(project_id, {
+          //   id,
+          //   title: msg,
+          // })
         }
 
-        const currContextId = temContextId || id
+        const currContextId = temContextId || chat_id
         const user: Message = {
           id: nanoid(10),
           role: "user",
@@ -185,7 +205,7 @@ function Messages() {
         const initial = [user]
         const webSearchId = nanoid(10)
 
-        if (webEnabled) {
+        if (projectDetails?.web_enabled) {
           const webSearch: Message = {
             id: webSearchId,
             role: "web-searched",
@@ -205,10 +225,10 @@ function Messages() {
         let dataMap: any = []
         const onlyAllwedInputs = ["user", "assistant"]
 
-        if (data) {
+        if (messages) {
           if (model_type === "Local") {
             if (llamaModeType === "vision") {
-              dataMap = await Promise.all(data?.filter(d => onlyAllwedInputs.includes(d.role))?.map(async ({ id, ...rest }) => {
+              dataMap = await Promise.all(messages?.filter(d => onlyAllwedInputs.includes(d.role))?.map(async ({ id, _id, ...rest }) => {
                 if (rest?.images && rest?.images?.length > 0) {
                   const base64Files = await Promise.all(rest.images.map(imgToBase64))
                   rest.images = base64Files
@@ -217,7 +237,7 @@ function Messages() {
               }))
 
             } else {
-              dataMap = data?.filter(d => onlyAllwedInputs.includes(d.role))?.map(d => {
+              dataMap = messages?.filter(d => onlyAllwedInputs.includes(d.role))?.map(d => {
                 let is_user = d.role === "user"
                 if (is_user) {
                   return {
@@ -233,19 +253,20 @@ function Messages() {
             }
 
           } else {
-            dataMap = data?.filter(d => onlyAllwedInputs.includes(d.role))?.map(({ id, images, ...rest }) => rest)
+            dataMap = messages?.filter(d => onlyAllwedInputs.includes(d.role))
+              ?.map(({ role, content }) => ({ role, content }))
           }
         }
 
-        let systemPrompt = projectdetails?.systemPrompt || systemDefaultPrompt
+        let systemPrompt = projectDetails?.systemPrompt || systemDefaultPrompt
         let webSearchedData: string[] = []
 
-        if (webEnabled && !ragEnabled) {
+        if (projectDetails?.web_enabled && !projectDetails?.rag_enabled) {
           const searchResult = await duckDuckGoSerach(msg)
           if (searchResult?.length > 0) {
             webSearchedData = searchResult.map((f: any) => f.href)
             systemPrompt = createContext({
-              base: projectdetails?.webPrompt || webDefaultPrompt,
+              base: projectDetails?.webPrompt || webDefaultPrompt,
               context: searchResult.map((f: any) => f.body).join(","),
             })
           }
@@ -260,10 +281,10 @@ function Messages() {
           }))
         }
 
-        if (ragEnabled && (filesLen > 0 || Object.keys(crawlerData)?.length > 0)) {
+        if (projectDetails?.rag_enabled && (filesLen > 0 || Object.keys(crawlerData)?.length > 0)) {
           const searchReult = await ragSearch(msg)
           systemPrompt = createContext({
-            base: projectdetails?.ragPrompt || ragDefaultPrompt,
+            base: projectDetails?.ragPrompt || ragDefaultPrompt,
             context: searchReult,
           })
         }
@@ -307,16 +328,16 @@ function Messages() {
         }
 
         const payload: any = {
-          top_p: num(projectdetails?.top_p, 1),
-          max_tokens: num(projectdetails?.max_tokens, 500),
-          temperature: num(projectdetails?.temperature, 0.1),
+          top_p: num(projectDetails?.top_p, 1),
+          max_tokens: num(projectDetails?.max_tokens, 500),
+          temperature: num(projectDetails?.temperature, 0.1),
           stream: !["Nidum", "Anthropic"].includes(model_type),
           messages: prompt,
         }
 
         if (model_type !== "Anthropic") {
-          payload.n = num(projectdetails?.n, 1)
-          payload.frequency_penalty = num(projectdetails?.frequency_penalty, 0)
+          payload.n = num(projectDetails?.n, 1)
+          payload.frequency_penalty = num(projectDetails?.frequency_penalty, 0)
         }
 
         if (model_type === "Groq") {
@@ -408,7 +429,7 @@ function Messages() {
           finalOutput.push(botReply)
           setTempData([])
           setLoading(false)
-          pushIntoMessages(project_id, currContextId, finalOutput)
+          pushIntoMessages(currContextId, finalOutput)
           if (needAutoPlay) {
             speak(botReply.id, botReply.content)
           }
@@ -438,7 +459,7 @@ function Messages() {
                 finalOutput.push(botReply)
                 setTempData([])
                 setLoading(false)
-                pushIntoMessages(project_id, currContextId, finalOutput)
+                pushIntoMessages(currContextId, finalOutput)
                 if (needAutoPlay) {
                   speak(botReply.id, botReply.content)
                 }
@@ -505,7 +526,7 @@ function Messages() {
                     finalOutput.push(botReply)
                     setTempData([])
                     setLoading(false)
-                    pushIntoMessages(project_id, currContextId, finalOutput)
+                    pushIntoMessages(currContextId, finalOutput)
                     if (needAutoPlay) {
                       speak(botReply.id, botReply.content)
                     }
@@ -544,7 +565,7 @@ function Messages() {
     try {
       abortController?.current?.abort()
       abortController.current = new AbortController()
-      pushIntoMessages(project_id, id, tempData.filter(f => f.role !== "loading"))
+      pushIntoMessages(chat_id, tempData.filter(f => f.role !== "loading"))
       setLoading(false)
       setTempData([])
     } catch (error) { }
@@ -562,14 +583,19 @@ function Messages() {
     }
   }
 
-  const deleteChat = (msgId: string) => deleteMessage(id, msgId)
+  const deleteChat = (_id: string) => {
+    msgDeleteMutate({
+      chat_id,
+      _id
+    })
+  }
 
   return (
     <>
       <div className="scroll-y px-6 py-2 mt-2">
         {
           tempData?.length === 0 &&
-          (!data || data?.length === 0) &&
+          (!messages || messages?.length === 0) &&
           <div className="dc h-[calc(100%-3rem)]">
             <img
               className="w-16 opacity-60"
@@ -580,10 +606,13 @@ function Messages() {
         }
 
         <div className="max-w-4xl w-full mx-auto pt-6 lg:pl-6">
-          <List
-            list={data}
-            deleteChat={deleteChat}
-          />
+          {
+            messages &&
+            <List
+              list={messages}
+              deleteChat={deleteChat}
+            />
+          }
 
           {
             tempData?.length > 0 &&
@@ -598,7 +627,7 @@ function Messages() {
         <Settings />
 
         {
-          ragEnabled &&
+          projectDetails?.rag_enabled &&
           <div className="df py-1 pl-2 text-xs absolute bottom-full left-4 sm:left-[68px] text-white/80 bg-border rounded-sm">
             <FaFileAlt className="shrink-0 text-base text-white/50" />
             <p className="w-24 truncate">RAG enabled</p>
