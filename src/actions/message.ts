@@ -15,6 +15,14 @@ export function createMessage(data: any) {
   })
 }
 
+export function pushMessages(data: any) {
+  return sendApiReq({
+    url: endPoints.messagePush,
+    method: "post",
+    data,
+  })
+}
+
 export function updateMessage(data: any) {
   return sendApiReq({
     url: endPoints.message,

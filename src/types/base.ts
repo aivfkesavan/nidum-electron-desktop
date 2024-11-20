@@ -1,6 +1,7 @@
 
 export type Message = {
-  _id: string;
+  id: string;
+  _id?: string;
   role: "user" | "assistant" | "loading" | "web-searched"
   content: string;
   images?: string[];
