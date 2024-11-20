@@ -2,13 +2,13 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 import type { Project } from "../types/base";
 
-import { createProject, deleteProject, getProjectById, getProjectsByUserId, updateProject } from "../actions/project";
+import { createProject, deleteProject, getProjectById, getProjectsMiniByUserId, updateProject } from "../actions/project";
 import { useToast } from "../components/ui/use-toast";
 
-export function useProjectsByUserId() {
-  return useQuery<Project[]>({
+export function useProjectsMiniByUserId() {
+  return useQuery({
     queryKey: ["projects"],
-    queryFn: getProjectsByUserId,
+    queryFn: getProjectsMiniByUserId,
   })
 }
 
@@ -20,14 +20,17 @@ export function useProjectById(_id: string) {
   })
 }
 
-export function useProjectMutaate() {
+export function useProjectMutate() {
   const queryClient = useQueryClient()
   const { toast } = useToast()
 
   return useMutation({
-    mutationFn: (data: any) => !data?._id ? createProject(data) : updateProject(data),
+    mutationFn: (data: Partial<Project>) => !data?._id ? createProject(data) : updateProject(data),
     onSuccess(res, variables) {
       queryClient.invalidateQueries({ queryKey: ["projects"] })
+      if (variables?._id) {
+        queryClient.invalidateQueries({ queryKey: ["project", variables?._id] })
+      }
       toast({ title: `Project ${variables?._id ? "updated" : "created"} successfully` })
     },
     onError(err) {

@@ -1,28 +1,42 @@
+import { useEffect, useState } from "react";
+
+import { useProjectById, useProjectMutate } from "../../../../hooks/use-project";
 import useContextStore from "../../../../store/context";
-import useConvoStore from "../../../../store/conversations";
 
 function useSystemPrompt() {
   const project_id = useContextStore(s => s.project_id)
   const chat_id = useContextStore(s => s.chat_id)
 
-  const webEnabled = useConvoStore(s => s.projects[project_id]?.web_enabled || "")
-  const ragEnabled = useConvoStore(s => s.projects[project_id]?.rag_enabled || "")
+  const { data: project, isLoading } = useProjectById(project_id)
+  const { mutate, isPending } = useProjectMutate()
 
-  const systemPrompt = useConvoStore(s => s.projects[project_id]?.systemPrompt || "")
-  const webPrompt = useConvoStore(s => s.projects[project_id]?.webPrompt || "")
-  const ragPrompt = useConvoStore(s => s.projects[project_id]?.ragPrompt || "")
+  const [val, setVal] = useState("")
 
-  const editProject = useConvoStore(s => s.editProject)
+  const webEnabled = project?.web_enabled
+  const ragEnabled = project?.rag_enabled
+  const key = ragEnabled ? "ragPrompt" : webEnabled ? "webPrompt" : "systemPrompt"
 
-  const onChange = (v: string) => {
-    let key = ragEnabled ? "ragPrompt" : webEnabled ? "webPrompt" : "systemPrompt"
-    editProject(project_id, { [key]: v })
+  useEffect(() => {
+    if (project) {
+      setVal(project?.[key])
+    }
+  }, [project, key])
+
+  const onChange = (v: string) => setVal(v)
+
+  function onSave() {
+    mutate({
+      _id: project_id,
+      [key]: val,
+    })
   }
 
   return {
-    isDisabled: chat_id?.endsWith("-imgGen"),
-    prompt: ragEnabled ? ragPrompt : webEnabled ? webPrompt : systemPrompt,
+    isDisabled: chat_id?.endsWith("-imgGen") || isLoading || isPending,
+    isDirty: project?.[key] !== val,
+    prompt: val,
     onChange,
+    onSave,
   }
 }
 

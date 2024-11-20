@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { IoResizeOutline } from "react-icons/io5";
+import { IoResizeOutline, IoCheckmarkOutline } from "react-icons/io5";
 
 import useSystemPrompt from "./use-system-prompt";
 
@@ -12,7 +12,7 @@ import {
 import Model from "./model";
 
 function SystemPrompt() {
-  const { prompt, isDisabled, onChange } = useSystemPrompt()
+  const { prompt, isDisabled, isDirty, onSave, onChange } = useSystemPrompt()
   const [open, setOpen] = useState(false)
 
   const updateOpen = (e: any) => {
@@ -45,13 +45,24 @@ function SystemPrompt() {
             }
           </AccordionTrigger>
 
-          <AccordionContent className="px-4 py-2">
+          <AccordionContent className="px-4 py-2 relative">
             <textarea
               className="p-2 mb-2 text-xs bg-input/50 resize-none"
               value={prompt}
               onChange={e => onChange(e.target.value)}
               disabled={isDisabled}
             ></textarea>
+
+            {
+              isDirty &&
+              <button
+                onClick={onSave}
+                disabled={isDisabled}
+                className="p-0.5 absolute bottom-4 right-4 bg-green-600"
+              >
+                <IoCheckmarkOutline />
+              </button>
+            }
           </AccordionContent>
         </AccordionItem>
       </Accordion>
