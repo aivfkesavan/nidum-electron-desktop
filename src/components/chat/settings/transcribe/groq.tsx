@@ -1,25 +1,12 @@
-import { FormProvider, useForm } from "react-hook-form";
+import { FormProvider } from "react-hook-form";
 
-import useContextStore from "../../../../store/context";
+import useConfigData from "../use-config-data";
 
 import ControlledInput from "../common/controlled-input";
 import Footer from "../common/footer";
 
 function Groq() {
-  const updateContext = useContextStore(s => s.updateContext)
-  const sttGroqApiKey = useContextStore(s => s.sttGroqApiKey)
-
-  const methods = useForm({
-    defaultValues: {
-      sttGroqApiKey,
-    }
-  })
-  const isDirty = methods?.formState?.isDirty
-
-  function onSave(data: any) {
-    updateContext(data)
-    methods.reset(data)
-  }
+  const { methods, isDirty, onSave } = useConfigData("", ["sttGroqApiKey"])
 
   return (
     <FormProvider {...methods}>

@@ -6,6 +6,7 @@ import { downloadGenerateImg } from "../../../actions/img";
 import useImgGenStore, { ImgGenMsg } from "../../../store/img-gen";
 import { useDownloads } from "../../../components/common/download-manager";
 import useContextStore from "../../../store/context";
+import { useConfig } from "../../../hooks/use-config";
 import { useToast } from "../../../components/ui/use-toast";
 
 import SpeechToText from "../messages/speech-to-text";
@@ -19,8 +20,10 @@ function ImgGenerate() {
   const scrollableRef = useRef<HTMLDivElement>(null)
   const { toast } = useToast()
 
-  const hfImgGenModel = useContextStore(s => s.hfImgGenModel)
-  const hfApiKey = useContextStore(s => s.hfApiKey)
+  const { data: config } = useConfig()
+
+  const hfImgGenModel = config.hfImgGenModel
+  const hfApiKey = config.hfApiKey
 
   const project_id = useContextStore(s => s.project_id)
 
