@@ -8,6 +8,7 @@ import { useStopShareOnAppLeave, useZorkEnable } from "../../hooks/use-device";
 import CheckForUpdate from "./check-for-update";
 // import ImgGenerate from "./img-generate";
 import Header from "./header";
+import Modals from "./modals";
 
 function Chat() {
   // const project_id = useContextStore(s => s.project_id)
@@ -36,6 +37,7 @@ function Chat() {
         <Messages />
       </div>
 
+      <Modals />
       <CheckForUpdate />
     </main>
   )

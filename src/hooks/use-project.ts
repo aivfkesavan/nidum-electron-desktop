@@ -1,10 +1,12 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
+import type { Project } from "../types/base";
+
 import { createProject, deleteProject, getProject, updateProject } from "../actions/project";
 import { useToast } from "../components/ui/use-toast";
 
 export function useProject() {
-  return useQuery({
+  return useQuery<Project[]>({
     queryKey: ["projects"],
     queryFn: getProject,
   })

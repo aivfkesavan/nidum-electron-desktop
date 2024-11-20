@@ -11,14 +11,14 @@ export function useChat(project_id: string) {
   })
 }
 
-export function useChatMutaate() {
+export function useChatMutate() {
   const queryClient = useQueryClient()
   const { toast } = useToast()
 
   return useMutation({
     mutationFn: (data: any) => !data?._id ? createChat(data) : updateChat(data),
     onSuccess(res, variables) {
-      queryClient.invalidateQueries({ queryKey: ["chat", variables?.project_id] })
+      queryClient.invalidateQueries({ queryKey: ["chats", variables?.project_id] })
       toast({ title: `Chat ${variables?._id ? "updated" : "created"} successfully` })
     },
     onError(err) {
@@ -35,7 +35,7 @@ export function useChatDeleteMutate() {
   return useMutation({
     mutationFn: deleteChat,
     onSuccess() {
-      queryClient.invalidateQueries({ queryKey: ["chat"] })
+      queryClient.invalidateQueries({ queryKey: ["chats"] })
       toast({ title: "Chat deleted successfully" })
     },
     onError(err) {

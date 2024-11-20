@@ -1,20 +1,19 @@
-import { useState } from "react"; // useEffect, 
-// import { IoImages } from "react-icons/io5";
+import { useMemo, useState } from "react";
 import { IoSearch } from "react-icons/io5";
-import { nanoid } from "nanoid";
 
-import type { Chat } from '../../../store/conversations';
+import type { Chat } from '../../../types/base';
 
-import { relativeDateFormat } from "../../../utils/date-helper"; // generateSampleChats,
+import { relativeDateFormat } from "../../../utils/date-helper";
 import useContextStore from "../../../store/context";
-import useConvoStore from "../../../store/conversations";
+import useUIStore from "../../../store/ui";
 import { cn } from "../../../lib/utils";
+
+import { useChat, useChatMutate } from "../../../hooks/use-chat";
 
 import Message from '../../../assets/svg/message.svg?react';
 
 import SystemPrompt from "./system-prompt";
 import GoToProject from "./go-to-project";
-import DeleteChat from "./delete-chat";
 import ChatCard from "./chat-card";
 
 type groupedChatsT = Record<string, Chat[]>
@@ -25,42 +24,45 @@ type props = {
 }
 
 function Histories({ isFullScreen, platform }: props) {
-  const { chat_id, project_id, updateContext } = useContextStore() // hfImgGenModel, model_type, 
-  const addChat = useConvoStore(s => s.addChat)
+  const updateContext = useContextStore(s => s.updateContext)
+  const project_id = useContextStore(s => s.project_id)
+  const chat_id = useContextStore(s => s.chat_id)
+
+  const updateModal = useUIStore(s => s.update)
+
+  const { data: chats } = useChat(project_id)
+  const { mutate } = useChatMutate()
 
   const [searchBy, setSearchBy] = useState("")
-  const [modal, setModal] = useState<{ state: string, data: any }>({ state: "", data: null })
 
-  // const addRandomChats = useConvoStore(s => s.addRandomChats)
-
-  const groupedChats: groupedChatsT = useConvoStore(s =>
-    s.chats?.[project_id]?.reduce((prev: any, curr) => {
-      if (curr?.title?.toLowerCase()?.includes(searchBy?.toLowerCase())) {
-        const dateGroup = relativeDateFormat(curr.at)
-        if (!prev[dateGroup]) prev[dateGroup] = []
-        prev[dateGroup].push(curr)
+  const groupedChats: groupedChatsT = useMemo(() => {
+    if (chats) {
+      return chats?.reduce((prev: groupedChatsT, curr: Chat) => {
+        if (curr?.title?.toLowerCase()?.includes(searchBy?.toLowerCase())) {
+          const dateGroup = relativeDateFormat(curr.updatedAt)
+          if (!prev[dateGroup]) prev[dateGroup] = []
+          prev[dateGroup]?.push(curr)
+          return prev
+        }
         return prev
-      }
-      return prev
-    }, {}) || {}
-  )
+      }, {}) || {}
+    }
 
-  // useEffect(() => {
-  //   if (!chat_id) {
-  //     const chats = Object.values(groupedChats)?.[0]
-  //     const isFirstChatNew = chats?.[0]?.title === "New Chat"
-  //     if (isFirstChatNew) {
-  //       updateContext({ chat_id: chats[0]?.id })
-  //     }
-  //   }
-  // }, [groupedChats, chat_id])
-
-  const updateModal = (state: string, data: any = null) => setModal({ state, data })
+    return {}
+  }, [chats])
 
   function addChatTo() {
-    const id = nanoid(10)
-    addChat(project_id, { id, title: "New Chat" })
-    updateContext({ chat_id: id })
+    mutate(
+      {
+        title: "New Chat",
+        project_id,
+      },
+      {
+        onSuccess(res) {
+          updateContext({ chat_id: res?._id })
+        }
+      }
+    )
   }
 
   return (
@@ -95,7 +97,6 @@ function Histories({ isFullScreen, platform }: props) {
           onClick={addChatTo}
         >
           <span className="flex-1">New Chat</span>
-          {/* @ts-ignore */}
           <Message className="size-4 group-hover:stroke-white" />
         </button>
       </div>
@@ -120,11 +121,11 @@ function Histories({ isFullScreen, platform }: props) {
 
             {groupChats?.map((c) => (
               <ChatCard
-                key={c.id}
+                key={c._id}
                 name={c.title}
-                isActive={chat_id === c.id}
-                onDelete={() => updateModal("delete", c.id)}
-                onNavigate={() => updateContext({ chat_id: c.id })}
+                isActive={chat_id === c._id}
+                onDelete={() => updateModal({ open: "delete-chat", data: { _id: c._id } })}
+                onNavigate={() => updateContext({ chat_id: c._id })}
               />
             ))}
           </div>
@@ -132,14 +133,6 @@ function Histories({ isFullScreen, platform }: props) {
       </div>
 
       <SystemPrompt />
-
-      {
-        modal.state === "delete" &&
-        <DeleteChat
-          id={modal.data}
-          closeModel={() => updateModal("")}
-        />
-      }
     </div>
   )
 }

@@ -10,7 +10,7 @@ export function getProject() {
 export function createProject(data: any) {
   return sendApiReq({
     url: endPoints.project,
-    method: "postt",
+    method: "post",
     data,
   })
 }
