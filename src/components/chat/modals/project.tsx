@@ -1,7 +1,8 @@
+import { useEffect } from 'react';
 import { useForm, Controller, useWatch } from 'react-hook-form';
 
+import { useProjectById, useProjectMutate } from '../../../hooks/use-project';
 import { systemDefaultPrompt } from '../../../utils/improve-context';
-import { useProjectMutaate } from '../../../hooks/use-project';
 import useUIStore from '../../../store/ui';
 
 import {
@@ -37,15 +38,17 @@ const list = [
 function Project() {
   const closeModel = useUIStore(s => s.close)
   const open = useUIStore(s => s.open)
-  const data = useUIStore(s => s.data)
+  const project_id = useUIStore(s => s?.data?._id)
 
-  const { register, control, formState: { errors }, handleSubmit } = useForm({
+  const { data: project } = useProjectById(project_id)
+
+  const { register, reset, control, formState: { errors }, handleSubmit } = useForm({
     defaultValues: {
-      name: data?.name || "",
-      other: data?.other || "",
-      category: data?.category || "",
-      description: data?.description || "",
-      systemPrompt: data?.systemPrompt || systemDefaultPrompt,
+      name: "",
+      other: "",
+      category: "",
+      description: "",
+      systemPrompt: systemDefaultPrompt,
     }
   })
 
@@ -54,12 +57,24 @@ function Project() {
     name: "category",
   })
 
-  const { mutate, isPending } = useProjectMutaate()
+  const { mutate, isPending } = useProjectMutate()
+
+  useEffect(() => {
+    if (project) {
+      reset({
+        name: project?.name,
+        other: project?.other,
+        category: project?.category,
+        description: project?.description,
+        systemPrompt: project?.systemPrompt,
+      })
+    }
+  }, [project])
 
   const onSubmit = (payload: any) => {
     const final = { ...payload }
-    if (data?._id) {
-      final._id = data?._id
+    if (project_id) {
+      final._id = project_id
     }
 
     mutate(final, {
@@ -73,7 +88,7 @@ function Project() {
     <Dialog open={open === "project"} onOpenChange={closeModel}>
       <DialogContent className='max-w-md'>
         <DialogHeader>
-          <DialogTitle>{data?._id ? "Edit" : "Create"} Project</DialogTitle>
+          <DialogTitle>{project_id ? "Edit" : "Create"} Project</DialogTitle>
           <DialogDescription></DialogDescription>
         </DialogHeader>
 
@@ -189,7 +204,7 @@ function Project() {
             className='block mx-auto py-1.5 px-6 text-sm font-medium rounded-full bg-input hover:bg-input/70 disabled:opacity-60'
             disabled={isPending}
           >
-            {data?._id ? "Edit" : "Create"} Project
+            {project_id ? "Edit" : "Create"} Project
           </button>
         </form>
       </DialogContent>

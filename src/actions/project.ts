@@ -7,6 +7,12 @@ export function getProjectsByUserId() {
   })
 }
 
+export function getProjectsMiniByUserId() {
+  return sendApiReq({
+    url: endPoints.project,
+  })
+}
+
 export function getProjectById(project_id: string) {
   return sendApiReq({
     url: `${endPoints.project}/${project_id}`,

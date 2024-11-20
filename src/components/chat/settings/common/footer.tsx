@@ -26,7 +26,6 @@ function Footer({ onSave }: props) {
             Save
           </button>
           :
-
           <button
             className="w-20 py-1.5 text-[13px] bg-black/60 hover:bg-input"
             onClick={onSave}

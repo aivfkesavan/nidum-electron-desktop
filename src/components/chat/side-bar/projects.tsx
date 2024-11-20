@@ -8,7 +8,7 @@ import useContextStore from "../../../store/context";
 import useUIStore from "../../../store/ui";
 import { cn } from "../../../lib/utils";
 
-import { useProjectsByUserId } from "../../../hooks/use-project";
+import { useProjectsMiniByUserId } from "../../../hooks/use-project";
 
 import Message from '../../../assets/svg/message.svg?react';
 
@@ -22,7 +22,7 @@ type props = {
 }
 
 function Projects({ isFullScreen, platform }: props) {
-  const { data: projects } = useProjectsByUserId()
+  const { data: projects } = useProjectsMiniByUserId()
 
   const updateContext = useContextStore(s => s.updateContext)
   const project_id = useContextStore(s => s.project_id)
@@ -97,7 +97,7 @@ function Projects({ isFullScreen, platform }: props) {
               <ProjectCard
                 key={p._id}
                 name={p.name}
-                onEdit={() => updateModal({ open: "project", data: p })}
+                onEdit={() => updateModal({ open: "project", data: { _id: p._id } })}
                 onDelete={() => updateModal({ open: "delete-project", data: { _id: p._id } })}
                 onNavigate={() => onNavigate(p._id)}
               />
