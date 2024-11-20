@@ -1,7 +1,7 @@
 import { useEffect, useRef } from "react";
 import useAudioStore from "./use-audio-store";
 import useContextStore from "../../../../store/context";
-import delay from "../../../../utils/delay";
+import { delay } from "../../../../utils";
 
 function useAudio() {
   const isSpeaking = useAudioStore(s => s.isSpeaking)

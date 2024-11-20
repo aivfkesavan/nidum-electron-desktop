@@ -53,12 +53,13 @@ function Messages() {
   const { mutate: chatMutate } = useChatMutate()
 
   const { data: downloadedModels } = useLLamaDownloadedModels()
-  const { data: sharedDevice } = useSharedDevice(sharedAppId, model_type === "Nidum Shared")
   const { data: crawlerData } = useCrawler()
-  const { data: config } = useConfig()
 
-  const { data: projectDetails } = useProjectById(project_id)
-  const { data: messages } = useMessagesChatId(chat_id)
+  const { data: sharedDevice, isLoading: isLoading4 } = useSharedDevice(sharedAppId, model_type === "Nidum Shared")
+
+  const { data: projectDetails, isLoading: isLoading2 } = useProjectById(project_id)
+  const { data: messages, isLoading: isLoading3 } = useMessagesChatId(chat_id)
+  const { data: config, isLoading: isLoading1 } = useConfig()
 
   const queryClient = useQueryClient()
 
@@ -72,7 +73,8 @@ function Messages() {
 
   const { speak } = useAudio()
 
-  const isChatInputDisabled = !project_id
+  const isLoading = isLoading1 || isLoading2 || isLoading3
+  const isChatInputDisabled = !project_id || isLoading || isLoading4
 
   const {
     hfApiKey, hfModel,
@@ -598,6 +600,14 @@ function Messages() {
     <>
       <div className="scroll-y px-6 py-2 mt-2">
         {
+          isLoading &&
+          <div className="dc h-[calc(100%-3rem)]">
+            <div className="loader-2 border-zinc-500"></div>
+          </div>
+        }
+
+        {
+          !isLoading &&
           tempData?.length === 0 &&
           (!messages || messages?.length === 0) &&
           <div className="dc h-[calc(100%-3rem)]">
@@ -611,7 +621,7 @@ function Messages() {
 
         <div className="max-w-4xl w-full mx-auto pt-6 lg:pl-6">
           {
-            messages &&
+            !isLoading && messages &&
             <List
               list={messages}
               deleteChat={deleteChat}

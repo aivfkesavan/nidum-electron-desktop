@@ -3,6 +3,7 @@ import { IoSearch } from "react-icons/io5";
 
 import type { Chat } from '../../../types/base';
 
+import { generateNumberArray } from "../../../utils";
 import { relativeDateFormat } from "../../../utils/date-helper";
 import useContextStore from "../../../store/context";
 import useUIStore from "../../../store/ui";
@@ -12,6 +13,7 @@ import { useChatsByProjectId, useChatMutate } from "../../../hooks/use-chat";
 
 import Message from '../../../assets/svg/message.svg?react';
 
+import { Skeleton } from "../../ui/skeleton";
 import SystemPrompt from "./system-prompt";
 import GoToProject from "./go-to-project";
 import ChatCard from "./chat-card";
@@ -30,7 +32,7 @@ function Histories({ isFullScreen, platform }: props) {
 
   const updateModal = useUIStore(s => s.update)
 
-  const { data: chats } = useChatsByProjectId(project_id)
+  const { data: chats, isLoading } = useChatsByProjectId(project_id)
   const { mutate } = useChatMutate()
 
   const [searchBy, setSearchBy] = useState("")
@@ -115,7 +117,14 @@ function Histories({ isFullScreen, platform }: props) {
       } */}
 
       <div className="scroll-y p-2 border-b">
-        {Object.entries(groupedChats).map(([dateGroup, groupChats]) => (
+        {
+          isLoading &&
+          generateNumberArray(15).map(d => (
+            <Skeleton key={d} className="h-9 mb-1" />
+          ))
+        }
+
+        {!isLoading && Object.entries(groupedChats).map(([dateGroup, groupChats]) => (
           <div key={dateGroup} className="mb-5">
             <h2 className="mb-0.5 pl-2.5 text-xs font-semibold text-white/40">{dateGroup}</h2>
 

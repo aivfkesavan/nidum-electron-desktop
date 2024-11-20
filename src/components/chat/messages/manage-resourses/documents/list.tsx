@@ -3,7 +3,8 @@ import axios from 'axios';
 
 import useContextStore from '../../../../../store/context';
 import useConvoStore from '../../../../../store/conversations';
-import bytesToSize from '../../../../../utils/bytes-to-size';
+
+import { bytesToSize } from '../../../../../utils';
 import constants from '../../../../../utils/constants';
 
 import { Label } from "../../../../../components/ui/label";
