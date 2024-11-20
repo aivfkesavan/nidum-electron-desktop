@@ -9,6 +9,7 @@ import type { Message } from "../../../types/base";
 
 import { createContext, ragDefaultPrompt, duckDuckGoSerach, ragSearch, systemDefaultPrompt, webDefaultPrompt } from "../../../utils/improve-context";
 import { imgToBase64, setImgToBase64Map } from "../../../actions/img";
+import { createChat } from "../../../actions/chat";
 import constants from "../../../utils/constants";
 
 import { useAudio } from "./use-speech";
@@ -18,9 +19,10 @@ import useContextStore, { llm_modelsT } from "../../../store/context";
 import useConvoStore from "../../../store/conversations";
 
 import { useMessageDeleteMutate, useMessagePushMutate, useMessagesChatId } from "../../../hooks/use-message";
+import { useProjectById, useProjectMutate } from "../../../hooks/use-project";
 import { useLLamaDownloadedModels } from "../../../hooks/use-llm-models";
 import { useSharedDevice } from "../../../hooks/use-device";
-import { useProjectById } from "../../../hooks/use-project";
+import { useChatMutate } from "../../../hooks/use-chat";
 import { useCrawler } from "../../../hooks/use-crawler";
 import { useConfig } from "../../../hooks/use-config";
 
@@ -36,16 +38,19 @@ function Messages() {
   const { toast } = useToast()
 
   const updateContext = useContextStore(s => s.updateContext)
+  const llamaModeType = useContextStore(s => s.llamaModeType)
   const sharedAppId = useContextStore(s => s.sharedAppId)
+  const llamaModel = useContextStore(s => s.llamaModel)
   const model_type = useContextStore(s => s.model_type)
   const project_id = useContextStore(s => s.project_id)
   const chat_id = useContextStore(s => s.chat_id)
 
   const filesLen = useConvoStore(s => s.files[project_id]?.length || 0)
-  const editProject = useConvoStore(s => s.editProject)
 
   const { mutate: msgDeleteMutate } = useMessageDeleteMutate()
   const { mutate: msPushgMutate } = useMessagePushMutate()
+  const { mutate: projectMutate } = useProjectMutate()
+  const { mutate: chatMutate } = useChatMutate()
 
   const { data: downloadedModels } = useLLamaDownloadedModels()
   const { data: sharedDevice } = useSharedDevice(sharedAppId, model_type === "Nidum Shared")
@@ -72,7 +77,6 @@ function Messages() {
   const {
     hfApiKey, hfModel,
     groqApiKey, groqModel,
-    llamaModel, llamaModeType,
     sambaNovaApiKey, sambaNovaModel,
     anthropicApiKey, anthropicModel,
     openaiApiKey, openaiModel,
@@ -173,22 +177,22 @@ function Messages() {
         let temContextId = ""
 
         if (!chat_id) {
-          temContextId = nanoid(10)
-
-          // addChat(project_id, {
-          //   id: temContextId,
-          //   title: msg,
-          // })
-
+          const res = await createChat({
+            project_id,
+            title: msg,
+          })
+          temContextId = res?._id
+          queryClient.invalidateQueries({ queryKey: ["chats", project_id] })
           updateContext({ chat_id: temContextId })
         }
 
         if (chat_id && messages?.length === 0) {
           updateContext({ chat_id })
-          // editChat(project_id, {
-          //   id,
-          //   title: msg,
-          // })
+          chatMutate({
+            project_id,
+            _id: chat_id,
+            title: msg,
+          })
         }
 
         const currContextId = temContextId || chat_id
@@ -634,7 +638,7 @@ function Messages() {
 
             <button
               className="shrink-0 p-1 hover:bg-red-400 mr-1"
-              onClick={() => editProject(project_id, { rag_enabled: false })}
+              onClick={() => projectMutate({ rag_enabled: false, _id: project_id })}
             >
               <LuX />
             </button>
