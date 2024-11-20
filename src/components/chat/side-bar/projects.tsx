@@ -1,18 +1,18 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { IoSearch } from "react-icons/io5";
 
-import type { Project } from "../../../store/conversations";
+import type { Project } from "../../../types/base";
 
-import { relativeDateFormat } from "../../../utils/date-helper"; // generateSampleProjects, 
+import { relativeDateFormat } from "../../../utils/date-helper";
 import useContextStore from "../../../store/context";
-import useConvoStore from "../../../store/conversations";
+import useUIStore from "../../../store/ui";
 import { cn } from "../../../lib/utils";
+
+import { useProject } from "../../../hooks/use-project";
 
 import Message from '../../../assets/svg/message.svg?react';
 
-import DeleteProject from "./delete-project";
 import ProjectCard from "./project-card";
-import ProjectModel from "../project-model";
 
 type groupedPrpjectT = Record<string, Project[]>
 
@@ -22,34 +22,37 @@ type props = {
 }
 
 function Projects({ isFullScreen, platform }: props) {
+  const { data: projects } = useProject()
+
   const updateContext = useContextStore(s => s.updateContext)
   const project_id = useContextStore(s => s.project_id)
 
+  const updateModal = useUIStore(s => s.update)
+
   const [searchBy, setSearchBy] = useState("")
-  const [modal, setModal] = useState<{ state: string, data: any }>({ state: "", data: null })
-  const [open, setOpen] = useState(false)
 
-  // const addRandomProjects = useConvoStore(s => s.addRandomProjects)
+  // const chatsMap = useConvoStore(s => s.chats)
 
-  const chatsMap = useConvoStore(s => s.chats)
-  const groupedProjects: groupedPrpjectT = useConvoStore(s =>
-    Object.values(s.projects)?.reduce((prev: any, curr) => {
-      if (curr?.name?.toLowerCase()?.includes(searchBy?.toLowerCase())) {
-        const dateGroup = relativeDateFormat(curr.at)
-        if (!prev[dateGroup]) prev[dateGroup] = []
-        prev[dateGroup].push(curr)
+  const groupedProjects: groupedPrpjectT = useMemo(() => {
+    if (projects) {
+      return projects?.reduce((prev: groupedPrpjectT, curr: Project) => {
+        if (curr?.name?.toLowerCase()?.includes(searchBy?.toLowerCase())) {
+          const dateGroup = relativeDateFormat(curr.updatedAt)
+          if (!prev[dateGroup]) prev[dateGroup] = []
+          prev[dateGroup]?.push(curr)
+          return prev
+        }
         return prev
-      }
-      return prev
-    }, {}) || {}
-  )
+      }, {}) || {}
+    }
 
-  const updateModal = (state: string, data: any = null) => setModal({ state, data })
+    return {}
+  }, [projects])
 
   function onNavigate(id: string) {
     updateContext({
       project_id: id,
-      chat_id: chatsMap?.[id]?.[0]?.id || ""
+      // chat_id: chatsMap?.[id]?.[0]?.id || ""
     })
   }
 
@@ -62,8 +65,6 @@ function Projects({ isFullScreen, platform }: props) {
       <div className={`df p-2 ${isFullScreen ? "pl-10" : platform === "windows" ? "pl-10" : "pl-[102px]"} text-[11px] mt-[5px] font-medium text-white/60`}>
         Projects
       </div>
-
-      {/* <button onClick={() => addRandomProjects(generateSampleProjects())}>Generate</button> */}
 
       <div className="df gap-1 mx-3 mt-2 pl-2 rounded-md border bg-secondary/60">
         <IoSearch className="text-white/30" />
@@ -80,10 +81,9 @@ function Projects({ isFullScreen, platform }: props) {
       <div className="my-2 mx-2.5">
         <button
           className="df w-full px-3 py-2 text-[13px] text-left text-white/70 cursor-pointer rounded-lg group bg-secondary hover:text-white group active:scale-105 transition-all"
-          onClick={() => setOpen(true)}
+          onClick={() => updateModal({ open: "project" })}
         >
           <span className="flex-1">New Project</span>
-          {/* @ts-ignore */}
           <Message className="size-4 group-hover:stroke-white" />
         </button>
       </div>
@@ -95,39 +95,16 @@ function Projects({ isFullScreen, platform }: props) {
 
             {groupProjects?.map((p) => (
               <ProjectCard
-                key={p.id}
+                key={p._id}
                 name={p.name}
-                onEdit={() => updateModal("edit", p)}
-                onDelete={() => updateModal("delete", p.id)}
-                onNavigate={() => onNavigate(p.id)}
+                onEdit={() => updateModal({ open: "project", data: p })}
+                onDelete={() => updateModal({ open: "delete-project", data: { _id: p._id } })}
+                onNavigate={() => onNavigate(p._id)}
               />
             ))}
           </div>
         ))}
       </div>
-
-      {
-        modal.state === "edit" &&
-        <ProjectModel
-          open
-          closeModel={() => updateModal("")}
-          id={modal.data.id}
-          data={modal?.data}
-        />
-      }
-
-      {
-        modal.state === "delete" &&
-        <DeleteProject
-          id={modal.data}
-          closeModel={() => updateModal("")}
-        />
-      }
-
-      <ProjectModel
-        open={open}
-        closeModel={() => setOpen(false)}
-      />
     </div>
   )
 }

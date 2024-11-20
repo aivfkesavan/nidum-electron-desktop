@@ -10,7 +10,7 @@ export function getChat(project_id: string) {
 export function createChat(data: any) {
   return sendApiReq({
     url: endPoints.chat,
-    method: "postt",
+    method: "post",
     data,
   })
 }

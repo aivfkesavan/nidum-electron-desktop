@@ -10,7 +10,7 @@ export function getMessage(chat_id: string) {
 export function createMessage(data: any) {
   return sendApiReq({
     url: endPoints.message,
-    method: "postt",
+    method: "post",
     data,
   })
 }

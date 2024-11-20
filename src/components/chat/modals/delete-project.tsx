@@ -1,6 +1,7 @@
 
+import { useProjectDeleteMutate } from "../../../hooks/use-project";
 import useContextStore from "../../../store/context";
-import useConvoStore from "../../../store/conversations";
+import useUIStore from "../../../store/ui";
 
 import {
   Dialog,
@@ -9,34 +10,36 @@ import {
   DialogHeader,
   DialogTitle,
   DialogFooter,
-} from "../../../components/ui/dialog";
+} from "../../ui/dialog";
 
-type props = {
-  id: string
-  closeModel: () => void
-}
+function DeleteProject() {
+  const closeModel = useUIStore(s => s.close)
+  const data = useUIStore(s => s.data)
+  const open = useUIStore(s => s.open)
 
-function DeleteChat({ id, closeModel }: props) {
-  const project_id = useContextStore(s => s.project_id)
-  const chat_id = useContextStore(s => s.chat_id)
+  const { mutate, isPending } = useProjectDeleteMutate()
+
   const updateContext = useContextStore(s => s.updateContext)
-  const deleteChat = useConvoStore(s => s.deleteChat)
+  const project_id = useContextStore(s => s.project_id)
 
   function onConfirm() {
-    deleteChat(project_id, id)
-    if (chat_id === id) {
-      updateContext({ chat_id: "" })
-    }
-    closeModel()
+    mutate(data?._id, {
+      onSuccess() {
+        if (project_id === data?._id) {
+          updateContext({ project_id: "", chat_id: "" })
+        }
+        closeModel()
+      }
+    })
   }
 
   return (
-    <Dialog open onOpenChange={closeModel}>
+    <Dialog open={open === "delete-project"} onOpenChange={closeModel}>
       <DialogContent className="max-w-sm">
         <DialogHeader>
-          <DialogTitle>Delete Chat</DialogTitle>
+          <DialogTitle>Delete Project</DialogTitle>
           <DialogDescription className="text-white/60">
-            Are you sure you want to delete this chat?
+            Are you sure you want to delete this project?
           </DialogDescription>
         </DialogHeader>
 
@@ -44,6 +47,7 @@ function DeleteChat({ id, closeModel }: props) {
           <button
             className="px-3 py-1.5 text-sm bg-input hover:bg-input/70"
             onClick={closeModel}
+            disabled={isPending}
           >
             Cancel
           </button>
@@ -51,6 +55,7 @@ function DeleteChat({ id, closeModel }: props) {
           <button
             className="px-3 py-1.5 text-sm bg-red-400 hover:bg-red-500"
             onClick={onConfirm}
+            disabled={isPending}
           >
             Delete
           </button>
@@ -60,4 +65,4 @@ function DeleteChat({ id, closeModel }: props) {
   )
 }
 
-export default DeleteChat
+export default DeleteProject

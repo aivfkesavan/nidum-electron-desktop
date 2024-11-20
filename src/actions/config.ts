@@ -10,7 +10,7 @@ export function getConfig() {
 export function createConfig(data: any) {
   return sendApiReq({
     url: endPoints.config,
-    method: "postt",
+    method: "post",
     data,
   })
 }

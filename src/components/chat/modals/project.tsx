@@ -1,6 +1,8 @@
 import { useForm, Controller, useWatch } from 'react-hook-form';
 
-import useConvoStore from '../../../store/conversations';
+import { systemDefaultPrompt } from '../../../utils/improve-context';
+import { useProjectMutaate } from '../../../hooks/use-project';
+import useUIStore from '../../../store/ui';
 
 import {
   Dialog,
@@ -17,7 +19,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "../../../components/ui/select";
-import { systemDefaultPrompt } from '../../../utils/improve-context';
 
 const list = [
   "General",
@@ -33,21 +34,12 @@ const list = [
   "Other"
 ]
 
-type props = {
-  open: boolean
-  closeModel: () => void
-  id?: string
-  data?: {
-    name: string
-    other: string
-    category: string
-    description: string
-    systemPrompt: string
-  }
-}
+function Project() {
+  const closeModel = useUIStore(s => s.close)
+  const open = useUIStore(s => s.open)
+  const data = useUIStore(s => s.data)
 
-function ProjectModel({ data, id, open, closeModel }: props) {
-  const { register, control, formState: { errors }, reset, handleSubmit } = useForm({
+  const { register, control, formState: { errors }, handleSubmit } = useForm({
     defaultValues: {
       name: data?.name || "",
       other: data?.other || "",
@@ -62,37 +54,30 @@ function ProjectModel({ data, id, open, closeModel }: props) {
     name: "category",
   })
 
-  const editProject = useConvoStore(s => s.editProject)
-  const addProject = useConvoStore(s => s.addProject)
+  const { mutate, isPending } = useProjectMutaate()
 
-  const onSubmit = (data: any) => {
-    if (id) editProject(id, data)
-    else addProject(data)
-    resetAndClose()
-  }
+  const onSubmit = (payload: any) => {
+    const final = { ...payload }
+    if (data?._id) {
+      final._id = data?._id
+    }
 
-  function resetAndClose() {
-    reset({
-      name: "",
-      other: "",
-      category: "",
-      description: "",
-      systemPrompt: systemDefaultPrompt,
+    mutate(final, {
+      onSuccess() {
+        closeModel()
+      }
     })
-    closeModel()
   }
 
   return (
-    <Dialog open={open} onOpenChange={resetAndClose}>
+    <Dialog open={open === "project"} onOpenChange={closeModel}>
       <DialogContent className='max-w-md'>
         <DialogHeader>
-          <DialogTitle>{id ? "Edit" : "Create"} Project</DialogTitle>
+          <DialogTitle>{data?._id ? "Edit" : "Create"} Project</DialogTitle>
           <DialogDescription></DialogDescription>
         </DialogHeader>
 
-        <form
-          onSubmit={handleSubmit(onSubmit)}
-        >
+        <form onSubmit={handleSubmit(onSubmit)}>
           <div className='mb-6'>
             <label htmlFor="" className="mb-0.5 text-xs">Name</label>
             <input
@@ -108,7 +93,8 @@ function ProjectModel({ data, id, open, closeModel }: props) {
             />
             {
               errors.name &&
-              <p className='text-xs text-red-400'>{errors.name.message}</p>
+              // @ts-ignore
+              <p className='text-xs text-red-400'>{errors?.name?.message}</p>
             }
           </div>
 
@@ -143,6 +129,7 @@ function ProjectModel({ data, id, open, closeModel }: props) {
             />
             {
               errors.category &&
+              // @ts-ignore
               <p className='text-xs text-red-400'>{errors.category.message}</p>
             }
           </div>
@@ -154,6 +141,7 @@ function ProjectModel({ data, id, open, closeModel }: props) {
               <input
                 type="text"
                 className='px-2.5 py-1.5 text-sm bg-transparent border'
+                maxLength={20}
                 {...register("other", {
                   required: "Other's Name is required",
                   minLength: {
@@ -161,10 +149,10 @@ function ProjectModel({ data, id, open, closeModel }: props) {
                     message: "Minimum 8 charcters need to be filled"
                   }
                 })}
-                maxLength={20}
               />
               {
                 errors?.other &&
+                // @ts-ignore
                 <p className='text-xs text-red-400'>{errors?.other?.message}</p>
               }
             </div>
@@ -184,6 +172,7 @@ function ProjectModel({ data, id, open, closeModel }: props) {
             />
             {
               errors.description &&
+              // @ts-ignore
               <p className='text-xs text-red-400'>{errors.description.message}</p>
             }
           </div>
@@ -198,8 +187,9 @@ function ProjectModel({ data, id, open, closeModel }: props) {
 
           <button
             className='block mx-auto py-1.5 px-6 text-sm font-medium rounded-full bg-input hover:bg-input/70 disabled:opacity-60'
+            disabled={isPending}
           >
-            {id ? "Edit" : "Create"} Project
+            {data?._id ? "Edit" : "Create"} Project
           </button>
         </form>
       </DialogContent>
@@ -207,4 +197,4 @@ function ProjectModel({ data, id, open, closeModel }: props) {
   )
 }
 
-export default ProjectModel
+export default Project
