@@ -3,6 +3,7 @@ import { IoSearch } from "react-icons/io5";
 
 import type { Project } from "../../../types/base";
 
+import { generateNumberArray } from "../../../utils";
 import { relativeDateFormat } from "../../../utils/date-helper";
 import useContextStore from "../../../store/context";
 import useUIStore from "../../../store/ui";
@@ -12,6 +13,7 @@ import { useProjectsMiniByUserId } from "../../../hooks/use-project";
 
 import Message from '../../../assets/svg/message.svg?react';
 
+import { Skeleton } from "../../ui/skeleton";
 import ProjectCard from "./project-card";
 
 type groupedPrpjectT = Record<string, Project[]>
@@ -22,7 +24,7 @@ type props = {
 }
 
 function Projects({ isFullScreen, platform }: props) {
-  const { data: projects } = useProjectsMiniByUserId()
+  const { data: projects, isLoading } = useProjectsMiniByUserId()
 
   const updateContext = useContextStore(s => s.updateContext)
   const project_id = useContextStore(s => s.project_id)
@@ -89,7 +91,14 @@ function Projects({ isFullScreen, platform }: props) {
       </div>
 
       <div className="scroll-y p-2">
-        {Object.entries(groupedProjects).map(([dateGroup, groupProjects]) => (
+        {
+          isLoading &&
+          generateNumberArray(15).map(d => (
+            <Skeleton key={d} className="h-9 mb-1" />
+          ))
+        }
+
+        {!isLoading && Object.entries(groupedProjects).map(([dateGroup, groupProjects]) => (
           <div key={dateGroup} className="mb-5">
             <h2 className="mb-0.5 pl-2.5 text-xs font-semibold text-white/40">{dateGroup}</h2>
 
