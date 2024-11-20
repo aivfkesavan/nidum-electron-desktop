@@ -1,4 +1,3 @@
-import useSystemPrompt from "./use-system-prompt";
 import useUIStore from "../../../../store/ui";
 
 import {
@@ -10,8 +9,11 @@ import {
   DialogTitle,
 } from "../../../../components/ui/dialog";
 
-function Model() {
-  const { prompt, isDisabled, onChange, onSave } = useSystemPrompt()
+type props = {
+  onSave: () => void
+}
+
+function Confirm({ onSave }: props) {
   const closeModel = useUIStore(s => s.close)
 
   return (
@@ -23,12 +25,7 @@ function Model() {
           </DialogTitle>
 
           <DialogDescription>
-            <textarea
-              className="min-h-40 p-2 mb-2 text-[13px] bg-input/60 resize-none"
-              value={prompt}
-              onChange={e => onChange(e.target.value)}
-              disabled={isDisabled}
-            ></textarea>
+            Do you want save changes?
           </DialogDescription>
         </DialogHeader>
 
@@ -42,7 +39,6 @@ function Model() {
 
           <button
             className="w-20 py-1.5 text-[13px] bg-zinc-100 text-zinc-900 hover:bg-zinc-200"
-            disabled={isDisabled}
             onClick={onSave}
           >
             Save
@@ -53,4 +49,4 @@ function Model() {
   )
 }
 
-export default Model
+export default Confirm

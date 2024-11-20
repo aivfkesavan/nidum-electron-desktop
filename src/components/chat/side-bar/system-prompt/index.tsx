@@ -1,7 +1,7 @@
-import { useState } from "react";
-import { IoResizeOutline, IoCheckmarkOutline } from "react-icons/io5";
+import { IoResizeOutline } from "react-icons/io5";
 
 import useSystemPrompt from "./use-system-prompt";
+import useUIStore from "../../../../store/ui";
 
 import {
   Accordion,
@@ -9,15 +9,17 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "../../../../components/ui/accordion";
+import Confirm from "./confirm";
 import Model from "./model";
 
 function SystemPrompt() {
-  const { prompt, isDisabled, isDirty, onSave, onChange } = useSystemPrompt()
-  const [open, setOpen] = useState(false)
+  const { prompt, isDisabled, onSave, onBlur, onChange } = useSystemPrompt()
+  const update = useUIStore(s => s.update)
+  const open = useUIStore(s => s.open)
 
   const updateOpen = (e: any) => {
     e?.stopPropagation?.()
-    setOpen(p => !p)
+    update({ open: "big" })
   }
 
   if (isDisabled) {
@@ -51,27 +53,20 @@ function SystemPrompt() {
               value={prompt}
               onChange={e => onChange(e.target.value)}
               disabled={isDisabled}
+              onBlur={onBlur}
             ></textarea>
-
-            {
-              isDirty &&
-              <button
-                onClick={onSave}
-                disabled={isDisabled}
-                className="p-0.5 absolute bottom-4 right-4 bg-green-600"
-              >
-                <IoCheckmarkOutline />
-              </button>
-            }
           </AccordionContent>
         </AccordionItem>
       </Accordion>
 
       {
-        open &&
-        <Model
-          closeModel={() => updateOpen("")}
-        />
+        open === "big" &&
+        <Model />
+      }
+
+      {
+        open === "confirm" &&
+        <Confirm onSave={onSave} />
       }
     </>
   )
