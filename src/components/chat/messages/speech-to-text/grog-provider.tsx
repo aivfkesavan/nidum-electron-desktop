@@ -1,7 +1,7 @@
 import { LuSendHorizonal, LuX } from "react-icons/lu";
 import { IoMdMic } from "react-icons/io";
 
-import useContextStore from '../../../../store/context';
+import { useConfig } from "../../../../hooks/use-config";
 import { useToast } from '../../../../components/ui/use-toast';
 
 import transcribeAudio from './transcribe';
@@ -13,13 +13,14 @@ type Props = {
 }
 
 function GroqProvider({ disabled, postData }: Props) {
-  const sttGroqApiKey = useContextStore(s => s.sttGroqApiKey)
+  const { data: config } = useConfig()
+  const sttGroqApiKey = config?.sttGroqApiKey
 
   const { isRecording, isSupported, onClk, stopRecording } = useRecord()
   const { toast } = useToast()
 
   const sendAudioTo_STT_API = async (audioBlob: Blob) => {
-    const transcript = await transcribeAudio(audioBlob)
+    const transcript = await transcribeAudio(audioBlob, sttGroqApiKey)
     postData(transcript, true)
   }
 

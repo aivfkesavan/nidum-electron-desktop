@@ -16,11 +16,11 @@ export function useInitDevice() {
   })
 }
 
-export function useSharedDevice(appId: string) {
+export function useSharedDevice(appId: string, enabled: boolean) {
   return useQuery({
     queryKey: ["device", appId],
     queryFn: () => getSharedDevice(appId),
-    enabled: !!appId,
+    enabled: !!appId && enabled,
   })
 }
 

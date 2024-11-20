@@ -1,31 +1,13 @@
-import { FormProvider, useForm } from "react-hook-form";
+import { FormProvider } from "react-hook-form";
 
-import { useLLMModels } from "../../../../hooks/use-llm-models";
-import useContextStore from "../../../../store/context";
+import useConfigData from "../use-config-data";
 
 import ControlledSelect from "../common/controlled-select";
 import ControlledInput from "../common/controlled-input";
 import Footer from "../common/footer";
 
 function Groq() {
-  const updateContext = useContextStore(s => s.updateContext)
-  const groqApiKey = useContextStore(s => s.groqApiKey)
-  const groqModel = useContextStore(s => s.groqModel)
-
-  const { isLoading, data: models } = useLLMModels("groq")
-
-  const methods = useForm({
-    defaultValues: {
-      groqApiKey,
-      groqModel,
-    }
-  })
-  const isDirty = methods?.formState?.isDirty
-
-  function onSave(data: any) {
-    updateContext(data)
-    methods.reset(data)
-  }
+  const { methods, models, isLoading, isDirty, onSave } = useConfigData("groq", ["groqApiKey", "groqModel"])
 
   if (isLoading) {
     return <div className="dc h-80"><span className="loader-2"></span></div>

@@ -1,31 +1,13 @@
-import { FormProvider, useForm } from "react-hook-form";
+import { FormProvider } from "react-hook-form";
 
-import { useLLMModels } from "../../../../hooks/use-llm-models";
-import useContextStore from "../../../../store/context";
+import useConfigData from "../use-config-data";
 
 import ControlledSelect from "../common/controlled-select";
 import ControlledInput from "../common/controlled-input";
 import Footer from "../common/footer";
 
 function OpenAI() {
-  const updateContext = useContextStore(s => s.updateContext)
-  const openaiApiKey = useContextStore(s => s.openaiApiKey)
-  const openaiModel = useContextStore(s => s.openaiModel)
-
-  const { isLoading, data: models } = useLLMModels("openai")
-
-  const methods = useForm({
-    defaultValues: {
-      openaiApiKey,
-      openaiModel,
-    }
-  })
-  const isDirty = methods?.formState?.isDirty
-
-  function onSave(data: any) {
-    updateContext(data)
-    methods.reset(data)
-  }
+  const { methods, models, isLoading, isDirty, onSave } = useConfigData("openai", ["openaiApiKey", "openaiModel"])
 
   if (isLoading) {
     return <div className="dc h-80"><span className="loader-2"></span></div>

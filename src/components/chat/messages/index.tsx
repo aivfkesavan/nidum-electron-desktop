@@ -14,10 +14,12 @@ import { useAudio } from "./use-speech";
 import { useToast } from "../../../components/ui/use-toast";
 
 import useContextStore, { llm_modelsT } from "../../../store/context";
+import useConvoStore from "../../../store/conversations";
+
 import { useLLamaDownloadedModels } from "../../../hooks/use-llm-models";
 import { useSharedDevice } from "../../../hooks/use-device";
-import useConvoStore from "../../../store/conversations";
 import { useCrawler } from "../../../hooks/use-crawler";
+import { useConfig } from "../../../hooks/use-config";
 
 import ManageResourses from "./manage-resourses";
 import SpeechToText from "./speech-to-text";
@@ -30,18 +32,11 @@ import logo from '../../../assets/imgs/logo.png';
 function Messages() {
   const { toast } = useToast()
 
-  const {
-    updateContext, project_id, chat_id: id,
-
-    model_type,
-    sharedAppId,
-    hfApiKey, hfModel,
-    groqApiKey, groqModel,
-    llamaModel, llamaModeType,
-    sambaNovaApiKey, sambaNovaModel,
-    anthropicApiKey, anthropicModel,
-    openaiApiKey, openaiModel,
-  } = useContextStore()
+  const updateContext = useContextStore(s => s.updateContext)
+  const sharedAppId = useContextStore(s => s.sharedAppId)
+  const model_type = useContextStore(s => s.model_type)
+  const project_id = useContextStore(s => s.project_id)
+  const id = useContextStore(s => s.chat_id)
 
   const projectdetails = useConvoStore(s => s.projects[project_id] || null)
   const filesLen = useConvoStore(s => s.files[project_id]?.length || 0)
@@ -56,8 +51,9 @@ function Messages() {
   const ragEnabled = useConvoStore(s => s.projects[project_id]?.rag_enabled)
 
   const { data: downloadedModels } = useLLamaDownloadedModels()
-  const { data: sharedDevice } = useSharedDevice(sharedAppId)
+  const { data: sharedDevice } = useSharedDevice(sharedAppId, model_type === "Nidum Shared")
   const { data: crawlerData } = useCrawler()
+  const { data: config } = useConfig()
 
   const [tempData, setTempData] = useState<Message[]>([])
   const [loading, setLoading] = useState(false)
@@ -71,6 +67,15 @@ function Messages() {
 
   const data = useConvoStore(s => s.messages?.[id] || [])
   const isChatInputDisabled = !project_id
+
+  const {
+    hfApiKey, hfModel,
+    groqApiKey, groqModel,
+    llamaModel, llamaModeType,
+    sambaNovaApiKey, sambaNovaModel,
+    anthropicApiKey, anthropicModel,
+    openaiApiKey, openaiModel,
+  } = config || {}
 
   useEffect(() => {
     init()

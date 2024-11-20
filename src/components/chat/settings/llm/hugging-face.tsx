@@ -1,36 +1,15 @@
-import { FormProvider, useForm } from "react-hook-form";
+import { FormProvider } from "react-hook-form";
 
-import { useLLMModels } from "../../../../hooks/use-llm-models";
-import useContextStore from "../../../../store/context";
+import useConfigData from "../use-config-data";
 
 import ControlledSelect from "../common/controlled-select";
 import ControlledInput from "../common/controlled-input";
 import Footer from "../common/footer";
 
 function HuggingFace() {
-  const updateContext = useContextStore(s => s.updateContext)
-  // const hfImgGenModel = useContextStore(s => s.hfImgGenModel)
-  const hfApiKey = useContextStore(s => s.hfApiKey)
-  const hfModel = useContextStore(s => s.hfModel)
+  const { methods, models, isLoading, isDirty, onSave } = useConfigData("hf", ["hfApiKey", "hfModel"])
 
-  // const { isLoading: isLoading2, data: models2 } = useLLMModels("hf-img-gen")
-  const { isLoading, data: models } = useLLMModels("hf")
-
-  const methods = useForm({
-    defaultValues: {
-      // hfImgGenModel,
-      hfApiKey,
-      hfModel,
-    }
-  })
-  const isDirty = methods?.formState?.isDirty
-
-  function onSave(data: any) {
-    updateContext(data)
-    methods.reset(data)
-  }
-
-  if (isLoading) { // || isLoading2
+  if (isLoading) {
     return <div className="dc h-80"><span className="loader-2"></span></div>
   }
 

@@ -1,7 +1,5 @@
-import useContextStore from "../../../../store/context";
 
-async function transcribeAudio(audioBlob: Blob): Promise<string> {
-  const GROQ_API_KEY = useContextStore.getState().sttGroqApiKey
+async function transcribeAudio(audioBlob: Blob, sttGroqApiKey: string): Promise<string> {
   const API_URL = 'https://api.groq.com/openai/v1/audio/transcriptions'
 
   const formData = new FormData()
@@ -11,11 +9,12 @@ async function transcribeAudio(audioBlob: Blob): Promise<string> {
   formData.append('response_format', 'json')
   formData.append('language', 'en')
 
+
   try {
     const response = await fetch(API_URL, {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${GROQ_API_KEY}`,
+        'Authorization': `Bearer ${sttGroqApiKey}`,
       },
       body: formData,
     })
