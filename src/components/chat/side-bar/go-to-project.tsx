@@ -18,7 +18,7 @@ function GoToProject() {
       <Tooltip>
         <TooltipTrigger
           className="p-0.5 absolute top-1.5 right-3 text-white/60 transition-colors hover:bg-secondary"
-          onClick={() => updateContext({ project_id: "" })}
+          onClick={() => updateContext({ project_id: "", chat_id: "" })}
         >
           <TbArrowBackUp className="text-base" />
         </TooltipTrigger>

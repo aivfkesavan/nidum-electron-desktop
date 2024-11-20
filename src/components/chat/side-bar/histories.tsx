@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { IoSearch } from "react-icons/io5";
 
 import type { Chat } from '../../../types/base';
@@ -36,6 +36,12 @@ function Histories({ isFullScreen, platform }: props) {
   const { mutate } = useChatMutate()
 
   const [searchBy, setSearchBy] = useState("")
+
+  useEffect(() => {
+    if (!chat_id && chats && chats?.length) {
+      updateContext({ chat_id: chats?.[0]?._id })
+    }
+  }, [chat_id, chats])
 
   const groupedChats: groupedChatsT = useMemo(() => {
     if (chats) {
