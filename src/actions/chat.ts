@@ -1,9 +1,18 @@
 import { endPoints } from "../services/end-points";
 import sendApiReq from "../services/send-api-req";
 
-export function getChatsByProjectId(project_id: string) {
+type payT = {
+  project_id: string
+  pageParam: number
+}
+export const chatLimit = 20
+export function getChatsByProjectId(payload: payT) {
   return sendApiReq({
-    url: `${endPoints.chat}/${project_id}`,
+    url: `${endPoints.chat}/${payload.project_id}`,
+    params: {
+      skip: payload.pageParam * chatLimit,
+      limit: chatLimit,
+    }
   })
 }
 

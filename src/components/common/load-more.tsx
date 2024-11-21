@@ -5,7 +5,6 @@ function LoadMore({ fn = () => { } }) {
   const [observerRef, isVisible] = useObserver()
 
   useEffect(() => {
-    console.log(isVisible)
     if (isVisible) {
       fn?.()
     }

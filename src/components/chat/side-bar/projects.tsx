@@ -1,5 +1,6 @@
 import { useMemo, useState } from "react";
 import { IoSearch } from "react-icons/io5";
+import { LuLoader } from "react-icons/lu";
 
 import type { Project } from "../../../types/base";
 
@@ -15,6 +16,7 @@ import Message from '../../../assets/svg/message.svg?react';
 
 import { Skeleton } from "../../ui/skeleton";
 import ProjectCard from "./project-card";
+import LoadMore from "../../common/load-more";
 
 type groupedPrpjectT = Record<string, Project[]>
 
@@ -24,7 +26,13 @@ type props = {
 }
 
 function Projects({ isFullScreen, platform }: props) {
-  const { data: projects, isLoading } = useProjectsMiniByUserId()
+  const {
+    data: projects,
+    isLoading,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+  } = useProjectsMiniByUserId()
 
   const updateContext = useContextStore(s => s.updateContext)
   const project_id = useContextStore(s => s.project_id)
@@ -113,6 +121,16 @@ function Projects({ isFullScreen, platform }: props) {
             ))}
           </div>
         ))}
+
+        {
+          isFetchingNextPage &&
+          <LuLoader className=" mx-auto my-2 animate-spin duration-1_5s" />
+        }
+
+        {
+          !isLoading && hasNextPage && !isFetchingNextPage &&
+          <LoadMore fn={() => fetchNextPage()} />
+        }
       </div>
     </div>
   )

@@ -7,9 +7,14 @@ export function getProjectsByUserId() {
   })
 }
 
-export function getProjectsMiniByUserId() {
+export const projectLimit = 20
+export function getProjectsMiniByUserId(pageParam: number) {
   return sendApiReq({
     url: endPoints.project,
+    params: {
+      skip: pageParam * projectLimit,
+      limit: projectLimit,
+    }
   })
 }
 

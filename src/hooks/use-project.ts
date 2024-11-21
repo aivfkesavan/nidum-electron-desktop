@@ -1,14 +1,19 @@
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useInfiniteQuery, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 import type { Project } from "../types/base";
 
-import { createProject, deleteProject, getProjectById, getProjectsMiniByUserId, updateProject } from "../actions/project";
+import { createProject, deleteProject, getProjectById, getProjectsMiniByUserId, projectLimit, updateProject } from "../actions/project";
 import { useToast } from "../components/ui/use-toast";
 
 export function useProjectsMiniByUserId() {
-  return useQuery({
+  return useInfiniteQuery({
     queryKey: ["projects"],
-    queryFn: getProjectsMiniByUserId,
+    queryFn: ({ pageParam }) => getProjectsMiniByUserId(pageParam),
+    initialPageParam: 0,
+    getNextPageParam: (lastPage, allPages, lastPageNum) => {
+      return lastPage?.length < projectLimit ? undefined : lastPageNum + 1
+    },
+    select: res => res?.pages?.flat(),
   })
 }
 
