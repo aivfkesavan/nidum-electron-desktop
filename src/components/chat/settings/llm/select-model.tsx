@@ -44,16 +44,11 @@ function SelectModel() {
       >
         <div className="df gap-4 px-4 py-2.5 rounded-md cursor-pointer hover:bg-input/30">
           <div className="dc size-8 shrink-0 relative">
-            {
-              typeof found.logo === "string" ?
-                <img
-                  className="w-8"
-                  src={found.logo}
-                  alt={found.title}
-                />
-                :
-                <found.logo className="text-3xl" />
-            }
+            <img
+              className="w-8"
+              src={found.logo}
+              alt={found.title}
+            />
             {
               found.title === "Local" &&
               <OnlineStatus className="absolute top-0 -right-2" />
@@ -88,16 +83,11 @@ function SelectModel() {
                 }}
               >
                 <div className="dc size-8 relative">
-                  {
-                    typeof l.logo === "string" ?
-                      <img
-                        className="w-8"
-                        src={l.logo}
-                        alt={l.title}
-                      />
-                      :
-                      <l.logo className="text-3xl" />
-                  }
+                  <img
+                    className="w-8"
+                    src={l.logo}
+                    alt={l.title}
+                  />
                   {
                     l.title === "Local" &&
                     <OnlineStatus className="absolute top-0 -right-2" />

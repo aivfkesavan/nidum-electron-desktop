@@ -50,16 +50,11 @@ function ModelSelect() {
           >
             <div className="df">
               <div className="dc size-8 relative mr-2">
-                {
-                  typeof model.logo === "string" ?
-                    <img
-                      className="w-7"
-                      src={model.logo}
-                      alt={model.title}
-                    />
-                    :
-                    <model.logo className="text-2xl" />
-                }
+                <img
+                  className="w-7"
+                  src={model.logo}
+                  alt={model.title}
+                />
                 {model.title === "Local" &&
                   <OnlineStatus className="absolute top-0 -right-0.5" />
                 }
