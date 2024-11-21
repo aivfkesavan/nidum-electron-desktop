@@ -51,10 +51,26 @@ const useContextStore = create<state & actions>()(persist(set => ({
   clear: () => set({ ...initPayload }),
 }),
   {
-    version: 5,
+    version: 6,
     name: 'context-storage',
     migrate(persistedState: any, version) {
-      if (!version || version < 5) {
+      if (!version || version < 6) {
+        if (persistedState.ollamaModel) {
+          persistedState.llamaModel = persistedState.ollamaModel
+          persistedState.llamaModeType = persistedState.llamaModeType
+          persistedState.model_type = persistedState.model_type === "Ollama" ? "Local" : persistedState.model_type
+
+          delete persistedState.ollamaModel
+          delete persistedState.ollamaModeType
+          delete persistedState.ollamaUrl
+          delete persistedState.embedding_type
+          delete persistedState.ollamEmbeddingUrl
+          delete persistedState.ollamaEmbeddingModel
+          delete persistedState.vb_type
+          delete persistedState.qdrantDBUrl
+          delete persistedState.qdrantDBApiKey
+        }
+
         delete persistedState.groqApiKey
         delete persistedState.groqModel
         delete persistedState.hfApiKey
