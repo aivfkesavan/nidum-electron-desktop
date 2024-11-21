@@ -51,11 +51,11 @@ const useContextStore = create<state & actions>()(persist(set => ({
   clear: () => set({ ...initPayload }),
 }),
   {
-    version: 6,
+    version: 7,
     name: 'context-storage',
     migrate(persistedState: any, version) {
-      if (!version || version < 6) {
-        if (persistedState.ollamaModel) {
+      if (!version || version < 7) {
+        if (persistedState?.hasOwnProperty("ollamaModel")) {
           persistedState.llamaModel = persistedState.ollamaModel
           persistedState.llamaModeType = persistedState.llamaModeType
           persistedState.model_type = persistedState.model_type === "Ollama" ? "Local" : persistedState.model_type
