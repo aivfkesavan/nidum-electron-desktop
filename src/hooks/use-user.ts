@@ -246,6 +246,7 @@ export function useRemoveInviteMutate() {
 }
 
 export function useLogoutMutate() {
+  const clearContext = useContextStore(s => s.clear)
   const clearAuth = useAuthStore(s => s.clear)
   const { toast } = useToast()
 
@@ -253,6 +254,7 @@ export function useLogoutMutate() {
     mutationFn: logout,
     onSuccess() {
       clearAuth()
+      clearContext()
       toast({ title: "User logged out successfully" })
     },
     onError(err) {
