@@ -57,7 +57,7 @@ function Projects({ isFullScreen, platform }: props) {
     }
 
     return {}
-  }, [projects])
+  }, [projects, searchBy])
 
   function onNavigate(id: string) {
     updateContext({

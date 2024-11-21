@@ -1,5 +1,6 @@
 import { usePreviewLinks } from "../../../../hooks/use-crawler";
 import { Skeleton } from "../../../ui/skeleton";
+import Image from "./image";
 
 type props = {
   url: string
@@ -37,10 +38,8 @@ function LinkCard({ url, isBig }: props) {
         <div className="my-1 line-clamp-3 opacity-70">{metadata?.description}</div>
       }
       <div className="df gap-1">
-        <img
-          className="size-4 rounded-full"
-          src={metadata?.favicon}
-        />
+        <Image src={metadata?.favicon} />
+
         <p className="flex-1 truncate">{metadata?.siteName || url}</p>
       </div>
     </a>

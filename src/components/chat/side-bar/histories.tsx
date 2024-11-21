@@ -65,7 +65,7 @@ function Histories({ isFullScreen, platform }: props) {
     }
 
     return {}
-  }, [chats])
+  }, [chats, searchBy])
 
   function addChatTo() {
     mutate(
