@@ -7,6 +7,7 @@ type authState = {
   token: string;
   isLoggedIn: boolean;
   isGoogleAuth: boolean;
+  initialsed: boolean;
 }
 
 type actions = {
@@ -20,6 +21,7 @@ const payload = {
   token: '',
   isLoggedIn: false,
   isGoogleAuth: false,
+  initialsed: false,
 }
 
 const useAuthStore = create<authState & actions>()((persist((set) => ({

@@ -51,10 +51,10 @@ const useContextStore = create<state & actions>()(persist(set => ({
   clear: () => set({ ...initPayload }),
 }),
   {
-    version: 4,
+    version: 5,
     name: 'context-storage',
     migrate(persistedState: any, version) {
-      if (!version || version < 4) {
+      if (!version || version < 5) {
         delete persistedState.groqApiKey
         delete persistedState.groqModel
         delete persistedState.hfApiKey
@@ -66,6 +66,7 @@ const useContextStore = create<state & actions>()(persist(set => ({
         delete persistedState.openaiApiKey
         delete persistedState.openaiModel
         delete persistedState.sttGroqApiKey
+        delete persistedState.hfImgGenModel
       }
 
       return persistedState
