@@ -20,14 +20,18 @@ export function useCheckInit() {
   })
 
   useEffect(() => {
-    if (data?._chat_id) {
-      updateContext({
-        chat_id: data?.chat_id,
-        project_id: data?.project_id,
-      })
+    if (data?.chat_id) {
+      setTimeout(() => {
+        updateContext({
+          chat_id: data?.chat_id,
+          project_id: data?.project_id,
+        })
+      }, 200)
     }
     if (data) {
-      updateAuth({ initialsed: true })
+      setTimeout(() => {
+        updateAuth({ initialsed: true })
+      }, 200)
     }
   }, [data])
 
