@@ -44,7 +44,17 @@ const useConvoStore = create<state & actions>()(persist(immer(set => ({
 })),
   {
     name: 'convo-storage',
-    version: 1,
+    version: 2,
+    migrate(persistedState: any, version) {
+      if (!version || version < 2) {
+        delete persistedState.initialised
+        delete persistedState.projects
+        delete persistedState.chats
+        delete persistedState.messages
+      }
+
+      return persistedState
+    },
   }
 ))
 
