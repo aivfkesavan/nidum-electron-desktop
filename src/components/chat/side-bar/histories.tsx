@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { IoSearch } from "react-icons/io5";
+import { LuLoader } from "react-icons/lu";
 
 import type { Chat } from '../../../types/base';
 
@@ -17,6 +18,7 @@ import { Skeleton } from "../../ui/skeleton";
 import SystemPrompt from "./system-prompt";
 import GoToProject from "./go-to-project";
 import ChatCard from "./chat-card";
+import LoadMore from "../../common/load-more";
 
 type groupedChatsT = Record<string, Chat[]>
 
@@ -32,16 +34,22 @@ function Histories({ isFullScreen, platform }: props) {
 
   const updateModal = useUIStore(s => s.update)
 
-  const { data: chats, isLoading } = useChatsByProjectId(project_id)
+  const {
+    data: chats,
+    isLoading,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+  } = useChatsByProjectId(project_id)
   const { mutate } = useChatMutate()
 
   const [searchBy, setSearchBy] = useState("")
 
-  useEffect(() => {
-    if (!chat_id && chats && chats?.length) {
-      updateContext({ chat_id: chats?.[0]?._id })
-    }
-  }, [chat_id, chats])
+  // useEffect(() => {
+  //   if (!chat_id && chats && chats?.length) {
+  //     updateContext({ chat_id: chats?.[0]?._id })
+  //   }
+  // }, [chat_id, chats])
 
   const groupedChats: groupedChatsT = useMemo(() => {
     if (chats) {
@@ -145,6 +153,16 @@ function Histories({ isFullScreen, platform }: props) {
             ))}
           </div>
         ))}
+
+        {
+          isFetchingNextPage &&
+          <LuLoader className=" mx-auto my-2 animate-spin duration-1_5s" />
+        }
+
+        {
+          !isLoading && hasNextPage && !isFetchingNextPage &&
+          <LoadMore fn={() => fetchNextPage()} />
+        }
       </div>
 
       <SystemPrompt />

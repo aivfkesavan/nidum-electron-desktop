@@ -1,14 +1,19 @@
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useInfiniteQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 
-import { createChat, deleteChat, getChatsByProjectId, updateChat } from "../actions/chat";
+import { chatLimit, createChat, deleteChat, getChatsByProjectId, updateChat } from "../actions/chat";
 import { useToast } from "../components/ui/use-toast";
 import { Chat } from "../types/base";
 
 export function useChatsByProjectId(project_id: string) {
-  return useQuery<Chat[]>({
+  return useInfiniteQuery({
     queryKey: ["chats", project_id],
-    queryFn: () => getChatsByProjectId(project_id),
+    queryFn: ({ pageParam }) => getChatsByProjectId({ project_id, pageParam }),
     enabled: !!project_id,
+    initialPageParam: 0,
+    getNextPageParam: (lastPage, allPages, lastPageNum) => {
+      return lastPage?.length < chatLimit ? undefined : lastPageNum + 1
+    },
+    select: res => res?.pages?.flat(),
   })
 }
 
