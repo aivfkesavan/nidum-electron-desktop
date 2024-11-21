@@ -42,6 +42,7 @@ export function useLoginMutate() {
     updateAuth({
       ...data,
       isLoggedIn: true,
+      initialsed: true,
     })
 
     navigate("/", { replace: true })
@@ -119,6 +120,7 @@ export function useGoogleLoginMutate() {
         token: res?.token,
         isLoggedIn: true,
         isGoogleAuth: true,
+        initialsed: true,
       })
 
       navigate("/", { replace: true })

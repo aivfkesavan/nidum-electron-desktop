@@ -76,25 +76,25 @@ function Local() {
         {
           models?.map((m: any) => (
             <div
-              key={m.name}
+              key={m?.name}
               className="p-4 mb-2 text-xs border rounded-md"
             >
               <div className="df mb-2">
-                <RadioGroupItem value={m.file_name} id={m.file_name} />
-                <Label htmlFor={m.file_name} className="mr-auto cursor-pointer">{m.name}</Label>
+                <RadioGroupItem value={m?.file_name} id={m?.file_name} />
+                <Label htmlFor={m?.file_name} className="mr-auto cursor-pointer">{m?.name}</Label>
                 {
-                  downloaded?.some((d: any) => d?.id === m.id)
+                  downloaded?.some((d: any) => d?.id === m?.id)
                     ? (
                       <button
                         className="-mt-1 -mr-1 p-0.5 text-base hover:bg-input"
-                        onClick={() => updateModel(m.file_name)}
+                        onClick={() => updateModel(m?.file_name)}
                       >
                         <MdOutlineDeleteOutline />
                       </button>
                     ) :
-                    downloads[m.id] ?
+                    downloads[m?.id] ?
                       <p className="shrink-0 text-[11px] text-white/70">
-                        {downloads[m.id]?.progress}%
+                        {downloads[m?.id]?.progress}%
                       </p>
                       :
                       <button
@@ -109,13 +109,13 @@ function Local() {
 
               <div className="text-[10px] text-white/80">
                 <div className="df justify-between my-1.5">
-                  <p>Size: {m.size}</p>
+                  <p>Size: {m?.size}</p>
 
-                  <p className="w-fit px-2 py-0.5 rounded-full bg-input capitalize">{m.category}</p>
+                  <p className="w-fit px-2 py-0.5 rounded-full bg-input capitalize">{m?.category}</p>
                 </div>
 
                 <div className="text-[11px] text-white/60 line-clamp-2">
-                  {m.description}
+                  {m?.description}
                 </div>
               </div>
             </div>
