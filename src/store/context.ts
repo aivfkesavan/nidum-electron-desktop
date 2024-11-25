@@ -1,7 +1,7 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 
-export type llm_modelsT = "Local" | "Nidum Shared" | "Groq" | "Nidum" | "Hugging Face" | "SambaNova Systems" | "Anthropic" | "OpenAI";
+export type llm_modelsT = "Local" | "Nidum Shared" | "Groq" | "Nidum" | "Hugging Face" | "SambaNova Systems" | "Anthropic" | "OpenAI" | "Ollama";
 
 type state = {
   project_id: string;
@@ -11,6 +11,8 @@ type state = {
   llamaModel: string;
   llamaModeType: "" | "vision";
   sharedAppId: string;
+  ollamaUrl: string;
+  ollamaModel: string;
 
   voice: string;
 
@@ -34,6 +36,8 @@ const initPayload: state = {
   llamaModel: "",
   llamaModeType: "",
   sharedAppId: "",
+  ollamaUrl: "",
+  ollamaModel: "",
 
   voice: "Google UK English Female",
 

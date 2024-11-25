@@ -2,6 +2,7 @@ import type { llm_modelsT } from "../store/context";
 
 import anthropic from '../assets/imgs/anthropic.png';
 import sambanova from '../assets/imgs/sambanova.png';
+import ollama from '../assets/imgs/ollama.png';
 import openai from '../assets/imgs/openai.png';
 import local from '../assets/imgs/local.png';
 import logo from '../assets/imgs/logo.png';
@@ -58,12 +59,12 @@ const llmModels: listT[] = [
     title: "Anthropic",
     para: "Inference API from Anthropic"
   },
-  // {
-  //   id: "8",
-  //   logo: "/logo.png",
-  //   title: "Nidum",
-  //   para: "Best uncensored inferencing for Agents and Tools"
-  // },
+  {
+    id: "8",
+    logo: ollama,
+    title: "Ollama",
+    para: "Run AI models locally on your machine"
+  },
 ]
 
 export default llmModels

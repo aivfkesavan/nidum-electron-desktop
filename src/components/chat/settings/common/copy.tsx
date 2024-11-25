@@ -25,6 +25,7 @@ function Copy({ val = "" }: props) {
       <button
         className="p-1 mr-2 bg-zinc-800"
         onClick={() => onCopyClk(val)}
+        type="button"
       >
         {
           copied ? <LuCheck /> : <BiCopy />

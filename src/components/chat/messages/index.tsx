@@ -32,13 +32,13 @@ import logo from '../../../assets/imgs/logo.png';
 function Messages() {
   const { toast } = useToast()
 
-  const updateContext = useContextStore(s => s.updateContext)
-  const llamaModeType = useContextStore(s => s.llamaModeType)
-  const sharedAppId = useContextStore(s => s.sharedAppId)
-  const llamaModel = useContextStore(s => s.llamaModel)
-  const model_type = useContextStore(s => s.model_type)
-  const project_id = useContextStore(s => s.project_id)
-  const chat_id = useContextStore(s => s.chat_id)
+  const {
+    updateContext,
+    model_type, sharedAppId,
+    llamaModeType, llamaModel,
+    ollamaModel, ollamaUrl,
+    project_id, chat_id,
+  } = useContextStore()
 
   const projectDetails = useConvoStore(s => s.projects[project_id] || null)
   const filesLen = useConvoStore(s => s.files[project_id]?.length || 0)
@@ -143,6 +143,10 @@ function Messages() {
         }
         else if (model_type === "Nidum Shared") {
           if (!sharedDevice?.modelName) return toast({ title: "Provider not selected model" })
+        }
+        else if (model_type === "Ollama") {
+          if (!ollamaUrl) return toast({ title: "Please provide Ollama base url" })
+          if (!ollamaModel) return toast({ title: "Please choose a Ollama Model" })
         }
 
         setFiles([])
@@ -296,6 +300,7 @@ function Messages() {
           "SambaNova Systems": `${constants.backendUrl}/ai/sambanova`,
           Anthropic: "https://api.anthropic.com/v1/messages",
           OpenAI: "https://api.openai.com/v1/chat/completions",
+          "Ollama": `${ollamaUrl}/api/chat`,
         }
 
         let url = urls?.[model_type as keyof typeof urls]
@@ -364,6 +369,10 @@ function Messages() {
         if (model_type === "OpenAI") {
           payload.model = openaiModel
           headers.Authorization = `Bearer ${openaiApiKey}`
+        }
+
+        if (model_type === "Ollama") {
+          payload.model = ollamaModel
         }
 
         abortController.current = new AbortController()
@@ -444,7 +453,7 @@ function Messages() {
               }
 
               const decoded = new TextDecoder().decode(result.value)
-              const resArr = decoded?.split("data: ")
+              const resArr = model_type === "Ollama" ? [decoded] : decoded?.split("data: ")
 
               if (halfData) {
                 resArr[0] = halfData + resArr[0]
@@ -456,7 +465,7 @@ function Messages() {
                   if (model_type === "Anthropic" && res.startsWith("event:")) {
                     continue
                   }
-                  if (!res.endsWith("}\n\n")) {
+                  if (model_type !== "Ollama" && !res.endsWith("}\n\n")) {
                     halfData = res
                     continue
                   }
@@ -470,6 +479,9 @@ function Messages() {
                   }
                   else if (model_type === "Anthropic") {
                     text = json?.delta?.text || ""
+                    finishReason = ""
+                  } else if (model_type === "Ollama") {
+                    text = json?.message?.content || ""
                     finishReason = ""
                   } else {
                     text = json?.choices?.[0]?.delta?.content || ""

@@ -5,9 +5,9 @@ import HuggingFace from "./hugging-face";
 import NidumShared from "./nidum-shared";
 import SambavaNova from "./sambanova";
 import Anthropic from "./anthropic";
-// import Nidum from "./nidum";
-import Local from "./local";
+import Ollama from "./ollama";
 import OpenAI from "./openai";
+import Local from "./local";
 import Groq from "./groq";
 
 function Model() {
@@ -45,9 +45,9 @@ function Model() {
         modelType === "OpenAI" && <OpenAI />
       }
 
-      {/* {
-        modelType === "Nidum" && <Nidum />
-      } */}
+      {
+        modelType === "Ollama" && <Ollama />
+      }
     </>
   )
 }
