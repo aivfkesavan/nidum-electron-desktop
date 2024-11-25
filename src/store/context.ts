@@ -39,7 +39,7 @@ const initPayload: state = {
   ollamaUrl: "",
   ollamaModel: "",
 
-  voice: "Google UK English Female",
+  voice: "",
 
   stt_type: "System native",
   nativeSttModelsDownloaded: "",
@@ -55,10 +55,10 @@ const useContextStore = create<state & actions>()(persist(set => ({
   clear: () => set({ ...initPayload }),
 }),
   {
-    version: 7,
+    version: 8,
     name: 'context-storage',
     migrate(persistedState: any, version) {
-      if (!version || version < 7) {
+      if (!version || version < 8) {
         if (persistedState?.hasOwnProperty("ollamaModel")) {
           persistedState.llamaModel = persistedState.ollamaModel
           persistedState.llamaModeType = persistedState.llamaModeType
@@ -87,6 +87,10 @@ const useContextStore = create<state & actions>()(persist(set => ({
         delete persistedState.openaiModel
         delete persistedState.sttGroqApiKey
         delete persistedState.hfImgGenModel
+
+        if (persistedState.voice === "Google UK English Female") {
+          persistedState.voice = ""
+        }
       }
 
       return persistedState

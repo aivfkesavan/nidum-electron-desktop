@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import { FormProvider, useForm } from "react-hook-form";
 
 import useContextStore from "../../../../store/context";
@@ -17,21 +18,33 @@ function Native() {
       voice,
     }
   })
-  const isDirty = methods?.formState?.isDirty
+
+  useEffect(() => {
+    if (!voice && voices && voices?.[0]?.name) {
+      const name = voices?.[0]?.name
+      updateContext({ voice: name })
+      methods.setValue("voice", name)
+    }
+  }, [voice, voices])
 
   function onSave(data: any) {
     updateContext(data)
     methods.reset(data)
   }
 
+  const isDirty = methods?.formState?.isDirty
+
   return (
     <FormProvider {...methods}>
       <form onSubmit={methods.handleSubmit(onSave)}>
-        <ControlledSelect
-          name="voice"
-          label="Voice"
-          list={voices?.map(v => ({ id: v.name, name: v.name }))}
-        />
+        {
+          voices &&
+          <ControlledSelect
+            name="voice"
+            label="Voice"
+            list={voices?.map(v => ({ id: v.name, name: v.name }))}
+          />
+        }
 
         {isDirty && <Footer />}
       </form>
