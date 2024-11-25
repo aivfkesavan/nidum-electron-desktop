@@ -104,6 +104,38 @@ export function useLoginMutate() {
   })
 }
 
+export function useGoogleSignupMutate() {
+  const navigate = useNavigate()
+
+  const { toast } = useToast()
+
+  return useMutation({
+    // @ts-ignore
+    mutationFn: window?.electronAPI?.googleSignup,
+    onSuccess(res: any) {
+      if (res?.error) {
+        toast({ title: res?.message || "Something went wrong!!!" })
+
+      } else {
+        navigate("/login", { replace: true })
+        toast({ title: "User account created successfully" })
+      }
+    },
+    onError(err) {
+      let hasError = err?.message
+      if (hasError) {
+        toast({ title: hasError })
+
+      } else {
+        toast({
+          title: "Something went wrong!!!",
+          description: "Try again, later.",
+        })
+      }
+    }
+  })
+}
+
 export function useGoogleLoginMutate() {
   const updateAuth = useAuthStore(s => s.update)
 
@@ -115,23 +147,27 @@ export function useGoogleLoginMutate() {
     // @ts-ignore
     mutationFn: window?.electronAPI?.googleLogin,
     onSuccess(res: any) {
-      updateAuth({
-        _id: res?._id,
-        email: res?.email,
-        token: res?.token,
-        isLoggedIn: true,
-        isGoogleAuth: true,
-      })
+      if (res?.error) {
+        toast({ title: res?.message || "Something went wrong!!!" })
 
-      navigate("/", { replace: true })
-      toast({ title: "User loggedin successfully" })
+      } else {
+        updateAuth({
+          _id: res?._id,
+          email: res?.email,
+          token: res?.token,
+          isLoggedIn: true,
+          isGoogleAuth: true,
+        })
+
+        navigate("/", { replace: true })
+        toast({ title: "User loggedin successfully" })
+      }
     },
     onError(err) {
       let hasError = err?.message
       if (hasError) {
         toast({ title: hasError })
-      }
-      else {
+      } else {
         toast({
           title: "Something went wrong!!!",
           description: "Try again, later.",

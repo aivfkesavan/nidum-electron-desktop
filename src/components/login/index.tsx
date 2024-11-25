@@ -5,7 +5,7 @@ import { Link } from "react-router-dom";
 
 import { useLoginMutate } from "../../hooks/use-user";
 
-import GoogleBtn from "../common/google-btn";
+import { GooglLoginBtn } from "../common/google-btn";
 import logo from '../../assets/imgs/logo.png';
 
 function Login() {
@@ -32,7 +32,7 @@ function Login() {
           className="w-20 mx-auto"
         />
 
-        <h1 className="mt-4 mb-8 text-xl font-semibold text-center">Welcome back</h1>
+        <h1 className="mt-4 mb-8 text-xl font-semibold text-center">Welcome</h1>
 
         <form onSubmit={handleSubmit(onSubmit)}>
           <div className="relative mb-6">
@@ -124,7 +124,7 @@ function Login() {
           <span className="px-2 bg-[#171717] z-[1]">Or</span>
         </div>
 
-        <GoogleBtn />
+        <GooglLoginBtn />
 
         <div className="mt-6 text-xs text-center text-zinc-400">
           Don't have an account? <Link to="/signup" replace className="text-zinc-300 hover:underline">Sign up</Link>
