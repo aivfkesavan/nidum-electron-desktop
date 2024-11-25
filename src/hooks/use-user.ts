@@ -31,7 +31,7 @@ export function useInvites() {
 export function useLoginMutate() {
   const updateLogin = useLoginStore(s => s.update)
   const updateAuth = useAuthStore(s => s.update)
-  const data = useLoginStore(s => s.data)
+  // const data = useLoginStore(s => s.data)
 
   const isOnline = useOnlineStatus()
   const navigate = useNavigate()
@@ -48,30 +48,31 @@ export function useLoginMutate() {
     toast({ title: "User loggedin successfully" })
   }
 
-  async function offlineLogin(payload: { email: string, password: string }) {
-    const isAlreadyLoggedIn = data?.find(d => d.email === payload.email)
-    if (isAlreadyLoggedIn) {
-      if (isAlreadyLoggedIn.password === payload.password) {
-        onLoginSuccess({
-          _id: isAlreadyLoggedIn?._id,
-          email: isAlreadyLoggedIn?.email,
-          token: isAlreadyLoggedIn?.token,
-        })
-      } else {
-        toast({ title: "Password not found" })
-      }
-    } else {
-      toast({
-        title: "User not found",
-        description: "Please check your network"
-      })
-    }
-  }
+  // async function offlineLogin(payload: { email: string, password: string }) {
+  //   const isAlreadyLoggedIn = data?.find(d => d.email === payload.email)
+  //   if (isAlreadyLoggedIn) {
+  //     if (isAlreadyLoggedIn.password === payload.password) {
+  //       onLoginSuccess({
+  //         _id: isAlreadyLoggedIn?._id,
+  //         email: isAlreadyLoggedIn?.email,
+  //         token: isAlreadyLoggedIn?.token,
+  //       })
+  //     } else {
+  //       toast({ title: "Password not found" })
+  //     }
+  //   } else {
+  //     toast({
+  //       title: "User not found",
+  //       description: "Please check your network"
+  //     })
+  //   }
+  // }
 
   return useMutation({
-    mutationFn: isOnline ? login : offlineLogin,
+    // mutationFn: isOnline ? login : offlineLogin,
+    mutationFn: login,
     onSuccess(res, variables) {
-      if (!isOnline) return;
+      // if (!isOnline) return;
       updateLogin({
         _id: res?._id,
         token: res?.token,
@@ -87,7 +88,8 @@ export function useLoginMutate() {
     onError(err, variables) {
       let hasError = err?.message
       if (!isOnline || hasError === "Network Error") {
-        offlineLogin(variables)
+        // offlineLogin(variables)
+        toast({ title: "Please check your network connection to log in" })
       }
       else if (hasError) {
         toast({ title: hasError })
@@ -248,6 +250,8 @@ export function useLogoutMutate() {
   const clearAuth = useAuthStore(s => s.clear)
   const { toast } = useToast()
 
+  const isOnline = useOnlineStatus()
+
   return useMutation({
     mutationFn: logout,
     onSuccess() {
@@ -256,8 +260,11 @@ export function useLogoutMutate() {
       toast({ title: "User logged out successfully" })
     },
     onError(err) {
-      console.log(err)
-      toast({ title: err?.message || "Something went wrong!" })
+      if (!isOnline || err?.message === "Network Error") {
+        toast({ title: "Please check your network connection to log out" })
+      } else {
+        toast({ title: err?.message || "Something went wrong!" })
+      }
     }
   })
 }
