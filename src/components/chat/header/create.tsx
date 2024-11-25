@@ -1,5 +1,7 @@
-import { useChatMutate } from "../../../hooks/use-chat";
+import { nanoid } from "nanoid";
+
 import useContextStore from '../../../store/context';
+import useConvoStore from "../../../store/conversations";
 import useUIStore from "../../../store/ui";
 
 import Message from '../../../assets/svg/message.svg?react';
@@ -15,24 +17,15 @@ import {
 function Create() {
   const updateModal = useUIStore(s => s.update)
 
-  const updateContext = useContextStore(s => s.updateContext)
   const project_id = useContextStore(s => s.project_id)
-
-  const { mutate, isPending } = useChatMutate()
+  const updateContext = useContextStore(s => s.updateContext)
+  const addChat = useConvoStore(s => s.addChat)
 
   const onClk = () => {
     if (project_id) {
-      mutate(
-        {
-          project_id,
-          title: "New Chat",
-        },
-        {
-          onSuccess(res) {
-            updateContext({ chat_id: res?._id })
-          }
-        }
-      )
+      const id = nanoid(10)
+      addChat(project_id, { id, title: "New Chat" })
+      updateContext({ chat_id: id })
       return
     }
 
@@ -44,7 +37,6 @@ function Create() {
       <Tooltip>
         <TooltipTrigger
           onClick={onClk}
-          disabled={isPending}
           className="non-draggable ml-auto"
         >
           <Message />
