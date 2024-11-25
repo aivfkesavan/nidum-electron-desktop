@@ -1,7 +1,7 @@
+import { useState } from "react";
 import { IoResizeOutline } from "react-icons/io5";
 
 import useSystemPrompt from "./use-system-prompt";
-import useUIStore from "../../../../store/ui";
 
 import {
   Accordion,
@@ -9,17 +9,15 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "../../../../components/ui/accordion";
-import Confirm from "./confirm";
 import Model from "./model";
 
 function SystemPrompt() {
-  const { prompt, isDisabled, onSave, onBlur, onChange } = useSystemPrompt()
-  const update = useUIStore(s => s.update)
-  const open = useUIStore(s => s.open)
+  const { prompt, isDisabled, onChange } = useSystemPrompt()
+  const [open, setOpen] = useState(false)
 
   const updateOpen = (e: any) => {
     e?.stopPropagation?.()
-    update({ open: "big" })
+    setOpen(p => !p)
   }
 
   if (isDisabled) {
@@ -47,26 +45,22 @@ function SystemPrompt() {
             }
           </AccordionTrigger>
 
-          <AccordionContent className="px-4 py-2 relative">
+          <AccordionContent className="px-4 py-2">
             <textarea
               className="p-2 mb-2 text-xs bg-input/50 resize-none"
               value={prompt}
               onChange={e => onChange(e.target.value)}
               disabled={isDisabled}
-              onBlur={onBlur}
             ></textarea>
           </AccordionContent>
         </AccordionItem>
       </Accordion>
 
       {
-        open === "big" &&
-        <Model />
-      }
-
-      {
-        open === "confirm" &&
-        <Confirm onSave={onSave} />
+        open &&
+        <Model
+          closeModel={() => updateOpen("")}
+        />
       }
     </>
   )

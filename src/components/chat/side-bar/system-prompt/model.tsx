@@ -1,18 +1,19 @@
 import useSystemPrompt from "./use-system-prompt";
-import useUIStore from "../../../../store/ui";
 
 import {
   Dialog,
   DialogContent,
   DialogDescription,
-  DialogFooter,
   DialogHeader,
   DialogTitle,
 } from "../../../../components/ui/dialog";
 
-function Model() {
-  const { prompt, isDisabled, onChange, onSave } = useSystemPrompt()
-  const closeModel = useUIStore(s => s.close)
+type props = {
+  closeModel: () => void
+}
+
+function Model({ closeModel }: props) {
+  const { prompt, isDisabled, onChange } = useSystemPrompt()
 
   return (
     <Dialog open onOpenChange={closeModel}>
@@ -31,23 +32,6 @@ function Model() {
             ></textarea>
           </DialogDescription>
         </DialogHeader>
-
-        <DialogFooter>
-          <button
-            onClick={closeModel}
-            className="w-20 py-1.5 text-[13px] text-white/70 border hover:text-white bg-input"
-          >
-            Cancel
-          </button>
-
-          <button
-            className="w-20 py-1.5 text-[13px] bg-zinc-100 text-zinc-900 hover:bg-zinc-200"
-            disabled={isDisabled}
-            onClick={onSave}
-          >
-            Save
-          </button>
-        </DialogFooter>
       </DialogContent>
     </Dialog>
   )

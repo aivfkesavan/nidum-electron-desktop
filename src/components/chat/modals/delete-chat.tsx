@@ -1,6 +1,5 @@
-
-import { useChatDeleteMutate } from "../../../hooks/use-chat";
 import useContextStore from "../../../store/context";
+import useConvoStore from "../../../store/conversations";
 import useUIStore from "../../../store/ui";
 
 import {
@@ -18,26 +17,17 @@ function DeleteChat() {
   const open = useUIStore(s => s.open)
 
   const updateContext = useContextStore(s => s.updateContext)
+  const deleteChat = useConvoStore(s => s.deleteChat)
+
   const project_id = useContextStore(s => s.project_id)
   const chat_id = useContextStore(s => s.chat_id)
 
-  const { mutate, isPending } = useChatDeleteMutate()
-
   function onConfirm() {
-    mutate(
-      {
-        _id: data?._id,
-        project_id
-      },
-      {
-        onSuccess() {
-          if (chat_id === data?._id) {
-            updateContext({ chat_id: "" })
-          }
-          closeModel()
-        }
-      }
-    )
+    deleteChat(project_id, data?.id)
+    if (chat_id === data?.id) {
+      updateContext({ chat_id: "" })
+    }
+    closeModel()
   }
 
   return (
@@ -53,7 +43,6 @@ function DeleteChat() {
         <DialogFooter>
           <button
             onClick={closeModel}
-            disabled={isPending}
             className="px-3 py-1.5 text-sm bg-input hover:bg-input/70"
           >
             Cancel
@@ -61,7 +50,6 @@ function DeleteChat() {
 
           <button
             onClick={onConfirm}
-            disabled={isPending}
             className="px-3 py-1.5 text-sm bg-red-400 hover:bg-red-500"
           >
             Delete

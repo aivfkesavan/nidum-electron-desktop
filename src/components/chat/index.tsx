@@ -1,10 +1,8 @@
 import { useEffect } from "react";
-
 import Messages from "./messages";
 import SideBar from "./side-bar";
 
 import { useStopShareOnAppLeave, useZorkEnable } from "../../hooks/use-device";
-import { useCheckInit } from "../../hooks/use-check-init";
 // import useContextStore from "@store/context";
 
 import CheckForUpdate from "./check-for-update";
@@ -15,8 +13,6 @@ import Modals from "./modals";
 function Chat() {
   // const project_id = useContextStore(s => s.project_id)
   // const chat_id = useContextStore(s => s.chat_id)
-
-  useCheckInit()
 
   useZorkEnable()
 

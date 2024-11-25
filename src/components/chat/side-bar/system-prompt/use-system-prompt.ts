@@ -1,59 +1,28 @@
-import { useEffect, useState } from "react";
-
-import { useProjectById, useProjectMutate } from "../../../../hooks/use-project";
 import useContextStore from "../../../../store/context";
-import useUIStore from "../../../../store/ui";
+import useConvoStore from "../../../../store/conversations";
 
 function useSystemPrompt() {
-  const updateModel = useUIStore(s => s.update)
-  const closeModel = useUIStore(s => s.close)
-
   const project_id = useContextStore(s => s.project_id)
   const chat_id = useContextStore(s => s.chat_id)
 
-  const { data: project, isLoading } = useProjectById(project_id)
-  const { mutate, isPending } = useProjectMutate()
+  const webEnabled = useConvoStore(s => s.projects[project_id]?.web_enabled || "")
+  const ragEnabled = useConvoStore(s => s.projects[project_id]?.rag_enabled || "")
 
-  const [val, setVal] = useState("")
+  const systemPrompt = useConvoStore(s => s.projects[project_id]?.systemPrompt || "")
+  const webPrompt = useConvoStore(s => s.projects[project_id]?.webPrompt || "")
+  const ragPrompt = useConvoStore(s => s.projects[project_id]?.ragPrompt || "")
 
-  const webEnabled = project?.web_enabled
-  const ragEnabled = project?.rag_enabled
-  const key = ragEnabled ? "ragPrompt" : webEnabled ? "webPrompt" : "systemPrompt"
+  const editProject = useConvoStore(s => s.editProject)
 
-  useEffect(() => {
-    if (project) {
-      setVal(project?.[key])
-    }
-  }, [project, key])
-
-  const onChange = (v: string) => setVal(v)
-
-  function onBlur() {
-    if (val !== project?.[key]) {
-      updateModel({ open: "confirm" })
-    }
-  }
-
-  function onSave() {
-    mutate(
-      {
-        _id: project_id,
-        [key]: val,
-      },
-      {
-        onSuccess() {
-          closeModel()
-        }
-      }
-    )
+  const onChange = (v: string) => {
+    let key = ragEnabled ? "ragPrompt" : webEnabled ? "webPrompt" : "systemPrompt"
+    editProject(project_id, { [key]: v })
   }
 
   return {
-    isDisabled: chat_id?.endsWith("-imgGen") || isLoading || isPending,
-    prompt: val,
+    isDisabled: chat_id?.endsWith("-imgGen"),
+    prompt: ragEnabled ? ragPrompt : webEnabled ? webPrompt : systemPrompt,
     onChange,
-    onBlur,
-    onSave,
   }
 }
 

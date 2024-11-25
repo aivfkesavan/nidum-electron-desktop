@@ -1,24 +1,20 @@
-import { useEffect, useMemo, useState } from "react";
+import { useState } from "react"; // useEffect, 
 import { IoSearch } from "react-icons/io5";
-import { LuLoader } from "react-icons/lu";
+import { nanoid } from "nanoid";
 
-import type { Chat } from '../../../types/base';
+import type { Chat } from '../../../store/conversations';
 
-import { generateNumberArray } from "../../../utils";
 import { relativeDateFormat } from "../../../utils/date-helper";
 import useContextStore from "../../../store/context";
+import useConvoStore from "../../../store/conversations";
 import useUIStore from "../../../store/ui";
 import { cn } from "../../../lib/utils";
 
-import { useChatsByProjectId, useChatMutate } from "../../../hooks/use-chat";
-
 import Message from '../../../assets/svg/message.svg?react';
 
-import { Skeleton } from "../../ui/skeleton";
 import SystemPrompt from "./system-prompt";
 import GoToProject from "./go-to-project";
 import ChatCard from "./chat-card";
-import LoadMore from "../../common/load-more";
 
 type groupedChatsT = Record<string, Chat[]>
 
@@ -28,57 +24,39 @@ type props = {
 }
 
 function Histories({ isFullScreen, platform }: props) {
-  const updateContext = useContextStore(s => s.updateContext)
-  const project_id = useContextStore(s => s.project_id)
-  const chat_id = useContextStore(s => s.chat_id)
+  const { chat_id, project_id, updateContext } = useContextStore() // hfImgGenModel, model_type, 
+  const addChat = useConvoStore(s => s.addChat)
 
   const updateModal = useUIStore(s => s.update)
 
-  const {
-    data: chats,
-    isLoading,
-    fetchNextPage,
-    hasNextPage,
-    isFetchingNextPage,
-  } = useChatsByProjectId(project_id)
-  const { mutate } = useChatMutate()
-
   const [searchBy, setSearchBy] = useState("")
 
-  // useEffect(() => {
-  //   if (!chat_id && chats && chats?.length) {
-  //     updateContext({ chat_id: chats?.[0]?._id })
-  //   }
-  // }, [chat_id, chats])
-
-  const groupedChats: groupedChatsT = useMemo(() => {
-    if (chats) {
-      return chats?.reduce((prev: groupedChatsT, curr: Chat) => {
-        if (curr?.title?.toLowerCase()?.includes(searchBy?.toLowerCase())) {
-          const dateGroup = relativeDateFormat(curr.updatedAt)
-          if (!prev[dateGroup]) prev[dateGroup] = []
-          prev[dateGroup]?.push(curr)
-          return prev
-        }
+  const groupedChats: groupedChatsT = useConvoStore(s =>
+    s.chats?.[project_id]?.reduce((prev: any, curr) => {
+      if (curr?.title?.toLowerCase()?.includes(searchBy?.toLowerCase())) {
+        const dateGroup = relativeDateFormat(curr.at)
+        if (!prev[dateGroup]) prev[dateGroup] = []
+        prev[dateGroup].push(curr)
         return prev
-      }, {}) || {}
-    }
+      }
+      return prev
+    }, {}) || {}
+  )
 
-    return {}
-  }, [chats, searchBy])
+  // useEffect(() => {
+  //   if (!chat_id) {
+  //     const chats = Object.values(groupedChats)?.[0]
+  //     const isFirstChatNew = chats?.[0]?.title === "New Chat"
+  //     if (isFirstChatNew) {
+  //       updateContext({ chat_id: chats[0]?.id })
+  //     }
+  //   }
+  // }, [groupedChats, chat_id])
 
   function addChatTo() {
-    mutate(
-      {
-        title: "New Chat",
-        project_id,
-      },
-      {
-        onSuccess(res) {
-          updateContext({ chat_id: res?._id })
-        }
-      }
-    )
+    const id = nanoid(10)
+    addChat(project_id, { id, title: "New Chat" })
+    updateContext({ chat_id: id })
   }
 
   return (
@@ -92,8 +70,6 @@ function Histories({ isFullScreen, platform }: props) {
 
         <GoToProject />
       </div>
-
-      {/* <button onClick={() => addRandomChats(project_id, generateSampleChats())}>Generate</button> */}
 
       <div className="df gap-1 mx-3 mt-2 pl-2 rounded-md border bg-secondary/60">
         <IoSearch className="text-white/30" />
@@ -131,38 +107,21 @@ function Histories({ isFullScreen, platform }: props) {
       } */}
 
       <div className="scroll-y p-2 border-b">
-        {
-          isLoading &&
-          generateNumberArray(15).map(d => (
-            <Skeleton key={d} className="h-9 mb-1" />
-          ))
-        }
-
-        {!isLoading && Object.entries(groupedChats).map(([dateGroup, groupChats]) => (
+        {Object.entries(groupedChats).map(([dateGroup, groupChats]) => (
           <div key={dateGroup} className="mb-5">
             <h2 className="mb-0.5 pl-2.5 text-xs font-semibold text-white/40">{dateGroup}</h2>
 
             {groupChats?.map((c) => (
               <ChatCard
-                key={c._id}
+                key={c.id}
                 name={c.title}
-                isActive={chat_id === c._id}
-                onDelete={() => updateModal({ open: "delete-chat", data: { _id: c._id } })}
-                onNavigate={() => updateContext({ chat_id: c._id })}
+                isActive={chat_id === c.id}
+                onDelete={() => updateModal({ open: "delete-chat", data: { id: c.id } })}
+                onNavigate={() => updateContext({ chat_id: c.id })}
               />
             ))}
           </div>
         ))}
-
-        {
-          isFetchingNextPage &&
-          <LuLoader className=" mx-auto my-2 animate-spin duration-1_5s" />
-        }
-
-        {
-          !isLoading && hasNextPage && !isFetchingNextPage &&
-          <LoadMore fn={() => fetchNextPage()} />
-        }
       </div>
 
       <SystemPrompt />

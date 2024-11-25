@@ -4,14 +4,11 @@ import { useForm } from "react-hook-form";
 import { Link } from "react-router-dom";
 
 import { useLoginMutate } from "../../hooks/use-user";
-import useContextStore from "../../store/context";
 
 import GoogleBtn from "../common/google-btn";
 import logo from '../../assets/imgs/logo.png';
 
 function Login() {
-  const updateContext = useContextStore(s => s.updateContext)
-
   const { register, formState: { errors, isSubmitting }, handleSubmit } = useForm({
     defaultValues: {
       email: "",
@@ -24,18 +21,7 @@ function Login() {
 
   const updateShowPass = () => setShowPass(p => !p)
 
-  const onSubmit = (data: any) => {
-    mutate(data, {
-      onSuccess(res) {
-        if (res?.project_id) {
-          updateContext({
-            project_id: res?.project_id,
-            chat_id: res?.chat_id,
-          })
-        }
-      }
-    })
-  }
+  const onSubmit = (data: any) => mutate(data)
 
   return (
     <section className='dc min-h-screen animate-enter-opacity'>

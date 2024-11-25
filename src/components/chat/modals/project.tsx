@@ -1,8 +1,7 @@
-import { useEffect } from 'react';
 import { useForm, Controller, useWatch } from 'react-hook-form';
 
-import { useProjectById, useProjectMutate } from '../../../hooks/use-project';
 import { systemDefaultPrompt } from '../../../utils/improve-context';
+import useConvoStore from '../../../store/conversations';
 import useUIStore from '../../../store/ui';
 
 import {
@@ -38,17 +37,17 @@ const list = [
 function Project() {
   const closeModel = useUIStore(s => s.close)
   const open = useUIStore(s => s.open)
-  const project_id = useUIStore(s => s?.data?._id)
 
-  const { data: project } = useProjectById(project_id)
+  const project_id = useUIStore(s => s?.data?.id)
+  const project = useUIStore(s => s.data)
 
-  const { register, reset, control, formState: { errors }, handleSubmit } = useForm({
+  const { register, control, formState: { errors }, handleSubmit } = useForm({
     defaultValues: {
-      name: "",
-      other: "",
-      category: "",
-      description: "",
-      systemPrompt: systemDefaultPrompt,
+      name: project?.name || "",
+      other: project?.other || "",
+      category: project?.category || "",
+      description: project?.description || "",
+      systemPrompt: project?.systemPrompt || systemDefaultPrompt,
     }
   })
 
@@ -57,31 +56,13 @@ function Project() {
     name: "category",
   })
 
-  const { mutate, isPending } = useProjectMutate()
+  const editProject = useConvoStore(s => s.editProject)
+  const addProject = useConvoStore(s => s.addProject)
 
-  useEffect(() => {
-    if (project) {
-      reset({
-        name: project?.name,
-        other: project?.other,
-        category: project?.category,
-        description: project?.description,
-        systemPrompt: project?.systemPrompt,
-      })
-    }
-  }, [project])
-
-  const onSubmit = (payload: any) => {
-    const final = { ...payload }
-    if (project_id) {
-      final._id = project_id
-    }
-
-    mutate(final, {
-      onSuccess() {
-        closeModel()
-      }
-    })
+  const onSubmit = (data: any) => {
+    if (project_id) editProject(project_id, data)
+    else addProject(data)
+    closeModel()
   }
 
   return (
@@ -200,10 +181,7 @@ function Project() {
             />
           </div>
 
-          <button
-            className='block mx-auto py-1.5 px-6 text-sm font-medium rounded-full bg-input hover:bg-input/70 disabled:opacity-60'
-            disabled={isPending}
-          >
+          <button className='block mx-auto py-1.5 px-6 text-sm font-medium rounded-full bg-input hover:bg-input/70 disabled:opacity-60'>
             {project_id ? "Edit" : "Create"} Project
           </button>
         </form>

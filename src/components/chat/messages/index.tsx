@@ -1,15 +1,13 @@
 import { useEffect, useRef, useState } from "react";
 import { FaFileAlt, FaSquare } from "react-icons/fa";
-import { useQueryClient } from "@tanstack/react-query";
 import { LuSend } from "react-icons/lu";
 import { nanoid } from "nanoid";
 import { LuX } from "react-icons/lu";
 
-import type { Message } from "../../../types/base";
+import type { Message } from "../../../store/conversations";
 
 import { createContext, ragDefaultPrompt, duckDuckGoSerach, ragSearch, systemDefaultPrompt, webDefaultPrompt } from "../../../utils/improve-context";
 import { imgToBase64, setImgToBase64Map } from "../../../actions/img";
-import { createChat } from "../../../actions/chat";
 import constants from "../../../utils/constants";
 
 import { useAudio } from "./use-speech";
@@ -18,11 +16,8 @@ import { useToast } from "../../../components/ui/use-toast";
 import useContextStore, { llm_modelsT } from "../../../store/context";
 import useConvoStore from "../../../store/conversations";
 
-import { useMessageDeleteMutate, useMessagePushMutate, useMessagesChatId } from "../../../hooks/use-message";
-import { useProjectById, useProjectMutate } from "../../../hooks/use-project";
 import { useLLamaDownloadedModels } from "../../../hooks/use-llm-models";
 import { useSharedDevice } from "../../../hooks/use-device";
-import { useChatMutate } from "../../../hooks/use-chat";
 import { useCrawler } from "../../../hooks/use-crawler";
 import { useConfig } from "../../../hooks/use-config";
 
@@ -45,23 +40,19 @@ function Messages() {
   const project_id = useContextStore(s => s.project_id)
   const chat_id = useContextStore(s => s.chat_id)
 
+  const projectDetails = useConvoStore(s => s.projects[project_id] || null)
   const filesLen = useConvoStore(s => s.files[project_id]?.length || 0)
-
-  const { mutate: msgDeleteMutate } = useMessageDeleteMutate()
-  const { mutate: msPushgMutate } = useMessagePushMutate()
-  const { mutate: projectMutate } = useProjectMutate()
-  const { mutate: chatMutate } = useChatMutate()
+  const pushIntoMessages = useConvoStore(s => s.pushIntoMessages)
+  const deleteMessage = useConvoStore(s => s.deleteMessage)
+  const editProject = useConvoStore(s => s.editProject)
+  const editChat = useConvoStore(s => s.editChat)
+  const addChat = useConvoStore(s => s.addChat)
+  const init = useConvoStore(s => s.init)
 
   const { data: downloadedModels } = useLLamaDownloadedModels()
+  const { data: sharedDevice } = useSharedDevice(sharedAppId, model_type === "Nidum Shared")
   const { data: crawlerData } = useCrawler()
-
-  const { data: sharedDevice, isLoading: isLoading4 } = useSharedDevice(sharedAppId, model_type === "Nidum Shared")
-
-  const { data: projectDetails, isLoading: isLoading2 } = useProjectById(project_id)
-  const { data: messages, isLoading: isLoading3 } = useMessagesChatId(chat_id)
-  const { data: config, isLoading: isLoading1 } = useConfig()
-
-  const queryClient = useQueryClient()
+  const { data: config } = useConfig()
 
   const [tempData, setTempData] = useState<Message[]>([])
   const [loading, setLoading] = useState(false)
@@ -73,8 +64,8 @@ function Messages() {
 
   const { speak } = useAudio()
 
-  const isLoading = isLoading1 || isLoading2 || isLoading3
-  const isChatInputDisabled = !project_id || isLoading || isLoading4
+  const data = useConvoStore(s => s.messages?.[chat_id] || [])
+  const isChatInputDisabled = !project_id
 
   const {
     hfApiKey, hfModel,
@@ -85,6 +76,10 @@ function Messages() {
   } = config || {}
 
   useEffect(() => {
+    init()
+  }, [])
+
+  useEffect(() => {
     setTempData([])
     setLoading(false)
     setFiles([])
@@ -92,7 +87,7 @@ function Messages() {
 
   useEffect(() => {
     scrollableRef?.current?.scrollIntoView({ behavior: "instant", block: "end" })
-  }, [messages?.length, tempData])
+  }, [data.length, tempData])
 
   function num(n: string | number, defaultVal: number) {
     return (n || n === 0) ? Number(n) : defaultVal
@@ -114,29 +109,6 @@ function Messages() {
       }
       reader.onerror = error => reject(error)
     })
-  }
-
-  function pushIntoMessages(currContextId: string, messages: Message[]) {
-    msPushgMutate(
-      {
-        chat_id: currContextId,
-        messages,
-      },
-      {
-        onSuccess(res) {
-          queryClient.setQueryData(["messages", currContextId], (old: any) => {
-            const payload = [...old]
-            payload[payload?.length - 2]._id = res?.ids?.[0]
-            payload[payload?.length - 1]._id = res?.ids?.[1]
-            return payload
-          })
-        }
-      }
-    )
-    queryClient.setQueryData(
-      ["messages", currContextId],
-      (old: any) => [...old, ...messages]
-    )
   }
 
   // @ts-ignore
@@ -179,20 +151,20 @@ function Messages() {
         let temContextId = ""
 
         if (!chat_id) {
-          const res = await createChat({
-            project_id,
+          temContextId = nanoid(10)
+
+          addChat(project_id, {
+            id: temContextId,
             title: msg,
           })
-          temContextId = res?._id
-          queryClient.invalidateQueries({ queryKey: ["chats", project_id] })
+
           updateContext({ chat_id: temContextId })
         }
 
-        if (chat_id && messages?.length === 0) {
+        if (chat_id && data?.length === 0) {
           updateContext({ chat_id })
-          chatMutate({
-            project_id,
-            _id: chat_id,
+          editChat(project_id, {
+            id: chat_id,
             title: msg,
           })
         }
@@ -231,10 +203,10 @@ function Messages() {
         let dataMap: any = []
         const onlyAllwedInputs = ["user", "assistant"]
 
-        if (messages) {
+        if (data) {
           if (model_type === "Local") {
             if (llamaModeType === "vision") {
-              dataMap = await Promise.all(messages?.filter(d => onlyAllwedInputs.includes(d.role))?.map(async ({ id, _id, ...rest }) => {
+              dataMap = await Promise.all(data?.filter(d => onlyAllwedInputs.includes(d.role))?.map(async ({ id, ...rest }) => {
                 if (rest?.images && rest?.images?.length > 0) {
                   const base64Files = await Promise.all(rest.images.map(imgToBase64))
                   rest.images = base64Files
@@ -243,7 +215,7 @@ function Messages() {
               }))
 
             } else {
-              dataMap = messages?.filter(d => onlyAllwedInputs.includes(d.role))?.map(d => {
+              dataMap = data?.filter(d => onlyAllwedInputs.includes(d.role))?.map(d => {
                 let is_user = d.role === "user"
                 if (is_user) {
                   return {
@@ -259,8 +231,7 @@ function Messages() {
             }
 
           } else {
-            dataMap = messages?.filter(d => onlyAllwedInputs.includes(d.role))
-              ?.map(({ role, content }) => ({ role, content }))
+            dataMap = data?.filter(d => onlyAllwedInputs.includes(d.role))?.map(({ id, images, ...rest }) => rest)
           }
         }
 
@@ -435,7 +406,7 @@ function Messages() {
           finalOutput.push(botReply)
           setTempData([])
           setLoading(false)
-          pushIntoMessages(currContextId, finalOutput)
+          pushIntoMessages(project_id, currContextId, finalOutput)
           if (needAutoPlay) {
             speak(botReply.id, botReply.content)
           }
@@ -465,7 +436,7 @@ function Messages() {
                 finalOutput.push(botReply)
                 setTempData([])
                 setLoading(false)
-                pushIntoMessages(currContextId, finalOutput)
+                pushIntoMessages(project_id, currContextId, finalOutput)
                 if (needAutoPlay) {
                   speak(botReply.id, botReply.content)
                 }
@@ -532,7 +503,7 @@ function Messages() {
                     finalOutput.push(botReply)
                     setTempData([])
                     setLoading(false)
-                    pushIntoMessages(currContextId, finalOutput)
+                    pushIntoMessages(project_id, currContextId, finalOutput)
                     if (needAutoPlay) {
                       speak(botReply.id, botReply.content)
                     }
@@ -571,7 +542,7 @@ function Messages() {
     try {
       abortController?.current?.abort()
       abortController.current = new AbortController()
-      pushIntoMessages(chat_id, tempData.filter(f => f.role !== "loading"))
+      pushIntoMessages(project_id, chat_id, tempData.filter(f => f.role !== "loading"))
       setLoading(false)
       setTempData([])
     } catch (error) { }
@@ -589,27 +560,14 @@ function Messages() {
     }
   }
 
-  const deleteChat = (_id: string) => {
-    msgDeleteMutate({
-      chat_id,
-      _id
-    })
-  }
+  const deleteChat = (msgId: string) => deleteMessage(chat_id, msgId)
 
   return (
     <>
       <div className="scroll-y px-6 py-2 mt-2">
         {
-          isLoading &&
-          <div className="dc h-[calc(100%-3rem)]">
-            <div className="loader-2 border-zinc-500"></div>
-          </div>
-        }
-
-        {
-          !isLoading &&
           tempData?.length === 0 &&
-          (!messages || messages?.length === 0) &&
+          (!data || data?.length === 0) &&
           <div className="dc h-[calc(100%-3rem)]">
             <img
               className="w-16 opacity-60"
@@ -620,13 +578,10 @@ function Messages() {
         }
 
         <div className="max-w-4xl w-full mx-auto pt-6 lg:pl-6">
-          {
-            !isLoading && messages &&
-            <List
-              list={messages}
-              deleteChat={deleteChat}
-            />
-          }
+          <List
+            list={data}
+            deleteChat={deleteChat}
+          />
 
           {
             tempData?.length > 0 &&
@@ -648,7 +603,7 @@ function Messages() {
 
             <button
               className="shrink-0 p-1 hover:bg-red-400 mr-1"
-              onClick={() => projectMutate({ rag_enabled: false, _id: project_id })}
+              onClick={() => editProject(project_id, { rag_enabled: false })}
             >
               <LuX />
             </button>

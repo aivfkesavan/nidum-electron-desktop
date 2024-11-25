@@ -1,22 +1,17 @@
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import { IoSearch } from "react-icons/io5";
-import { LuLoader } from "react-icons/lu";
 
-import type { Project } from "../../../types/base";
+import type { Project } from "../../../store/conversations";
 
-import { generateNumberArray } from "../../../utils";
-import { relativeDateFormat } from "../../../utils/date-helper";
+import { relativeDateFormat } from "../../../utils/date-helper"; // generateSampleProjects, 
 import useContextStore from "../../../store/context";
+import useConvoStore from "../../../store/conversations";
 import useUIStore from "../../../store/ui";
 import { cn } from "../../../lib/utils";
 
-import { useProjectsMiniByUserId } from "../../../hooks/use-project";
-
 import Message from '../../../assets/svg/message.svg?react';
 
-import { Skeleton } from "../../ui/skeleton";
 import ProjectCard from "./project-card";
-import LoadMore from "../../common/load-more";
 
 type groupedPrpjectT = Record<string, Project[]>
 
@@ -26,43 +21,29 @@ type props = {
 }
 
 function Projects({ isFullScreen, platform }: props) {
-  const {
-    data: projects,
-    isLoading,
-    fetchNextPage,
-    hasNextPage,
-    isFetchingNextPage,
-  } = useProjectsMiniByUserId()
-
   const updateContext = useContextStore(s => s.updateContext)
   const project_id = useContextStore(s => s.project_id)
 
   const updateModal = useUIStore(s => s.update)
-
   const [searchBy, setSearchBy] = useState("")
 
-  // const chatsMap = useConvoStore(s => s.chats)
-
-  const groupedProjects: groupedPrpjectT = useMemo(() => {
-    if (projects) {
-      return projects?.reduce((prev: groupedPrpjectT, curr: Project) => {
-        if (curr?.name?.toLowerCase()?.includes(searchBy?.toLowerCase())) {
-          const dateGroup = relativeDateFormat(curr.updatedAt)
-          if (!prev[dateGroup]) prev[dateGroup] = []
-          prev[dateGroup]?.push(curr)
-          return prev
-        }
+  const chatsMap = useConvoStore(s => s.chats)
+  const groupedProjects: groupedPrpjectT = useConvoStore(s =>
+    Object.values(s.projects)?.reduce((prev: any, curr) => {
+      if (curr?.name?.toLowerCase()?.includes(searchBy?.toLowerCase())) {
+        const dateGroup = relativeDateFormat(curr.at)
+        if (!prev[dateGroup]) prev[dateGroup] = []
+        prev[dateGroup].push(curr)
         return prev
-      }, {}) || {}
-    }
-
-    return {}
-  }, [projects, searchBy])
+      }
+      return prev
+    }, {}) || {}
+  )
 
   function onNavigate(id: string) {
     updateContext({
       project_id: id,
-      // chat_id: chatsMap?.[id]?.[0]?.id || ""
+      chat_id: chatsMap?.[id]?.[0]?.id || ""
     })
   }
 
@@ -99,38 +80,21 @@ function Projects({ isFullScreen, platform }: props) {
       </div>
 
       <div className="scroll-y p-2">
-        {
-          isLoading &&
-          generateNumberArray(15).map(d => (
-            <Skeleton key={d} className="h-9 mb-1" />
-          ))
-        }
-
-        {!isLoading && Object.entries(groupedProjects).map(([dateGroup, groupProjects]) => (
+        {Object.entries(groupedProjects).map(([dateGroup, groupProjects]) => (
           <div key={dateGroup} className="mb-5">
             <h2 className="mb-0.5 pl-2.5 text-xs font-semibold text-white/40">{dateGroup}</h2>
 
             {groupProjects?.map((p) => (
               <ProjectCard
-                key={p._id}
+                key={p.id}
                 name={p.name}
-                onEdit={() => updateModal({ open: "project", data: { _id: p._id } })}
-                onDelete={() => updateModal({ open: "delete-project", data: { _id: p._id } })}
-                onNavigate={() => onNavigate(p._id)}
+                onEdit={() => updateModal({ open: "project", data: p })}
+                onDelete={() => updateModal({ open: "delete-project", data: { id: p.id } })}
+                onNavigate={() => onNavigate(p.id)}
               />
             ))}
           </div>
         ))}
-
-        {
-          isFetchingNextPage &&
-          <LuLoader className=" mx-auto my-2 animate-spin duration-1_5s" />
-        }
-
-        {
-          !isLoading && hasNextPage && !isFetchingNextPage &&
-          <LoadMore fn={() => fetchNextPage()} />
-        }
       </div>
     </div>
   )

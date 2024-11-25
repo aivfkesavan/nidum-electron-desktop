@@ -1,6 +1,5 @@
-
-import { useProjectDeleteMutate } from "../../../hooks/use-project";
 import useContextStore from "../../../store/context";
+import useConvoStore from "../../../store/conversations";
 import useUIStore from "../../../store/ui";
 
 import {
@@ -17,20 +16,16 @@ function DeleteProject() {
   const data = useUIStore(s => s.data)
   const open = useUIStore(s => s.open)
 
-  const { mutate, isPending } = useProjectDeleteMutate()
-
+  const deleteProject = useConvoStore(s => s.deleteProject)
   const updateContext = useContextStore(s => s.updateContext)
   const project_id = useContextStore(s => s.project_id)
 
   function onConfirm() {
-    mutate(data?._id, {
-      onSuccess() {
-        if (project_id === data?._id) {
-          updateContext({ project_id: "", chat_id: "" })
-        }
-        closeModel()
-      }
-    })
+    deleteProject(data?.id)
+    if (project_id === data?.id) {
+      updateContext({ project_id: "", chat_id: "" })
+    }
+    closeModel()
   }
 
   return (
@@ -47,7 +42,6 @@ function DeleteProject() {
           <button
             className="px-3 py-1.5 text-sm bg-input hover:bg-input/70"
             onClick={closeModel}
-            disabled={isPending}
           >
             Cancel
           </button>
@@ -55,7 +49,6 @@ function DeleteProject() {
           <button
             className="px-3 py-1.5 text-sm bg-red-400 hover:bg-red-500"
             onClick={onConfirm}
-            disabled={isPending}
           >
             Delete
           </button>

@@ -1,4 +1,4 @@
-import type { Message } from "../../../types/base";
+import type { Message } from "../../../store/conversations";
 import LinkPreview from "./link-preview";
 import UserQuery from "./user-query";
 import BotReply from "./bot-reply";
@@ -20,7 +20,7 @@ function List({ list = [], isTemp = false, deleteChat = () => { } }: props) {
           isTemp={isTemp}
           response={l.content}
           images={l?.images || []}
-          deleteChat={() => deleteChat(l._id as string)}
+          deleteChat={() => deleteChat(l.id)}
         />
       )
     }
@@ -69,7 +69,7 @@ function List({ list = [], isTemp = false, deleteChat = () => { } }: props) {
         id={l.id}
         isTemp={isTemp}
         response={l.content}
-        deleteChat={() => deleteChat(l._id as string)}
+        deleteChat={() => deleteChat(l.id)}
       />
     )
   })
