@@ -236,8 +236,30 @@ const useConvoStore = create<state & actions>()(persist(immer(set => ({
   }),
 
   deleteMessage: (chat_id, msg_id) => set(state => {
-    // @ts-ignore
-    state.messages[chat_id] = state.messages[chat_id].filter(msg => msg.id !== msg_id)
+    const messages = state.messages[chat_id] || []
+    const targetIndex = messages.findIndex(msg => msg.id === msg_id)
+
+    if (targetIndex === -1) return
+
+    const targetMessage = messages[targetIndex]
+    const toDelete = [targetIndex]
+
+    if (targetMessage?.role === "user") {
+      if (messages[targetIndex + 1]?.role === "web-searched") {
+        toDelete.push(targetIndex + 1, targetIndex + 2)
+      } else {
+        toDelete.push(targetIndex + 1)
+      }
+
+    } else if (targetMessage?.role === "assistant") {
+      if (messages[targetIndex - 1]?.role === "web-searched") {
+        toDelete.push(targetIndex - 1, targetIndex - 2)
+      } else {
+        toDelete.push(targetIndex - 1)
+      }
+    }
+
+    state.messages[chat_id] = messages.filter((msg, i) => !toDelete.includes(i))
   }),
 
   addFile: (projectId, file) => set(state => {
@@ -261,4 +283,4 @@ const useConvoStore = create<state & actions>()(persist(immer(set => ({
   }
 ))
 
-export default useConvoStore;
+export default useConvoStore
