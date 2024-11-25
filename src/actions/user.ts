@@ -39,10 +39,10 @@ export function signup(data: any) {
   })
 }
 
-export function logout() {
+export function logout(deviceId: string) {
   return sendApiReq({
     method: "post",
-    url: endPoints.logout,
+    url: `${endPoints.logout}?deviceId=${deviceId}`,
     data: {}
   })
 }
