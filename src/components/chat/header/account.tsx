@@ -1,6 +1,7 @@
 import { useEffect } from "react";
 
 import { useLogoutMutate } from "../../../hooks/use-user";
+import { useInitDevice } from "../../../hooks/use-device";
 import useAuthStore from "../../../store/auth";
 import useUIStore from "../../../store/ui";
 
@@ -13,6 +14,7 @@ import {
 import Profile from "./profile";
 
 function Account() {
+  const { data: device } = useInitDevice()
   const { mutate, isPending } = useLogoutMutate()
   const update = useUIStore(s => s.update)
   const close = useUIStore(s => s.close)
@@ -41,7 +43,10 @@ function Account() {
             Profile
           </DropdownMenuItem>
 
-          <DropdownMenuItem onClick={() => mutate()}>
+          <DropdownMenuItem
+            onClick={() => mutate(device?._id)}
+            disabled={!device?._id}
+          >
             Logout
           </DropdownMenuItem>
         </DropdownMenuContent>
