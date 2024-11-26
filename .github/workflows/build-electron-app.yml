@@ -65,6 +65,13 @@ jobs:
             exit 1
           fi
           echo "DMG_PATH=$DMG_PATH" >> $GITHUB_ENV
+          # Locate the built PKG file
+          PKG_PATH=$(find "$PWD/dist" -name "*.pkg" -type f | head -n 1)
+          if [ -z "$PKG_PATH" ]; then
+            echo "Error: PKG file not found."
+            exit 1
+          fi
+          echo "PKG_PATH=$PKG_PATH" >> $GITHUB_ENV
           # Notarize the DMG
           xcrun notarytool submit "$DMG_PATH" --wait --apple-id "$APPLE_ID" --password "$APPLE_APP_SPECIFIC_PASSWORD" --team-id "$APPLE_TEAM_ID"
           if [ $? -ne 0 ]; then
@@ -81,8 +88,10 @@ jobs:
         id: check_release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          VERSION: ${{ env.VERSION }}
         run: |
-          if gh release view "v${{ env.VERSION }}" > /dev/null 2>&1; then
+          set -e
+          if gh release view "v${VERSION}" > /dev/null 2>&1; then
             echo "RELEASE_EXISTS=true" >> $GITHUB_ENV
           else
             echo "RELEASE_EXISTS=false" >> $GITHUB_ENV
@@ -102,13 +111,20 @@ jobs:
       - name: Create or Update Release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          VERSION: ${{ env.VERSION }}
+          DMG_PATH: ${{ env.DMG_PATH }}
+          PKG_PATH: ${{ env.PKG_PATH }}
+          ZIP_PATH: ${{ env.ZIP_PATH }}
+          YAML_PATH: ${{ env.YAML_PATH }}
+          RELEASE_EXISTS: ${{ env.RELEASE_EXISTS }}
         run: |
-          if [ "${{ env.RELEASE_EXISTS }}" = "true" ]; then
-            echo "Updating existing release for version v${{ env.VERSION }}"
-            gh release upload "v${{ env.VERSION }}" "${{ env.DMG_PATH }}" "${{ env.ZIP_PATH }}" "${{ env.YAML_PATH }}" --clobber
+          set -e
+          if [ "${RELEASE_EXISTS}" = "true" ]; then
+            echo "Updating existing release for version v${VERSION}"
+            gh release upload "v${VERSION}" "${DMG_PATH}" "${PKG_PATH}" "${ZIP_PATH}" "${YAML_PATH}" --clobber
           else
-            echo "Creating new release for version v${{ env.VERSION }}"
-            gh release create "v${{ env.VERSION }}" "${{ env.DMG_PATH }}" "${{ env.ZIP_PATH }}" "${{ env.YAML_PATH }}" \
-              --title "Release v${{ env.VERSION }}" \
+            echo "Creating new release for version v${VERSION}"
+            gh release create "v${VERSION}" "${DMG_PATH}" "${PKG_PATH}" "${ZIP_PATH}" "${YAML_PATH}" \
+              --title "Release v${VERSION}" \
               --generate-notes
           fi

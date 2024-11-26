@@ -104,7 +104,7 @@
     "url": "https://releases.nidum.ai/download/downloads/"
   },
   "build": {
-    "appId": "com.nidum.ragdrive",
+    "appId": "com.nidum.desktoplocalai",
     "files": [
       "dist/**/*",
       "dist-electron/**/*",
@@ -132,11 +132,13 @@
       "category": "public.app-category.productivity",
       "target": [
         "dmg",
-        "zip"
+        "zip",
+        "pkg"
       ],
       "hardenedRuntime": true,
       "entitlements": "entitlements.mac.plist",
       "entitlementsInherit": "entitlements.mac.inherit.plist",
+      "provisioningProfile": "Mac_App_Store_Connect.provisionprofile",
       "gatekeeperAssess": false,
       "notarize": {
         "teamId": "JCN5972XNZ"
