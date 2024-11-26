@@ -30,11 +30,12 @@ jobs:
       - name: Build Electron App
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: npm run build
+
+      - name: Sign App and Create PKG
+        env:
           APPLE_CERTIFICATE: ${{ secrets.APPLE_CERTIFICATE }}
           APPLE_CERTIFICATE_PASSWORD: ${{ secrets.APPLE_CERTIFICATE_PASSWORD }}
-          APPLE_ID: ${{ secrets.APPLE_ID }}
-          APPLE_APP_SPECIFIC_PASSWORD: ${{ secrets.APPLE_APP_SPECIFIC_PASSWORD }}
-          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
           KEYCHAIN_PASSWORD: ${{ secrets.KEYCHAIN_PASSWORD }}
         run: |
           # Decode and import the Apple certificate
@@ -45,89 +46,57 @@ jobs:
           security import certificate.p12 -k build.keychain -P "$APPLE_CERTIFICATE_PASSWORD" -T /usr/bin/codesign
           security set-key-partition-list -S apple-tool:,apple:,codesign: -s -k "$KEYCHAIN_PASSWORD" build.keychain
           
-          # Build the Electron app
-          npm run build
-          # Verify that the app is correctly signed
+          # Locate the app bundle
           APP_PATH=$(find "$PWD/dist" -name "*.app" -type d | head -n 1)
           if [ -z "$APP_PATH" ]; then
             echo "Error: App not found."
             exit 1
           fi
-          codesign --verify --deep --strict --verbose=2 "$APP_PATH"
-          if [ $? -ne 0 ]; then
-            echo "Error: Code signing verification failed."
-            exit 1
-          fi
-          # Locate the built DMG file
-          DMG_PATH=$(find "$PWD/dist" -name "*.dmg" -type f | head -n 1)
-          if [ -z "$DMG_PATH" ]; then
-            echo "Error: DMG file not found."
-            exit 1
-          fi
-          echo "DMG_PATH=$DMG_PATH" >> $GITHUB_ENV
-          # Locate the built PKG file
-          PKG_PATH=$(find "$PWD/dist" -name "*.pkg" -type f | head -n 1)
-          if [ -z "$PKG_PATH" ]; then
-            echo "Error: PKG file not found."
-            exit 1
-          fi
-          echo "PKG_PATH=$PKG_PATH" >> $GITHUB_ENV
-          # Notarize the DMG
-          xcrun notarytool submit "$DMG_PATH" --wait --apple-id "$APPLE_ID" --password "$APPLE_APP_SPECIFIC_PASSWORD" --team-id "$APPLE_TEAM_ID"
-          if [ $? -ne 0 ]; then
-            echo "Error: Notarization failed."
-            exit 1
-          fi
-          # Staple the notarization ticket
-          xcrun stapler staple "$DMG_PATH"
-          if [ $? -ne 0 ]; then
-            echo "Error: Stapling notarization ticket failed."
-            exit 1
-          fi
+
+          # Sign the app and its components
+          find "$APP_PATH" -type f -perm +111 -exec codesign --force --options runtime --entitlements "path/to/your.entitlements" --sign "Developer ID Application: Your Name (TEAM_ID)" {} \;
+
+          # Sign the app bundle itself
+          codesign --force --options runtime --entitlements "path/to/your.entitlements" --sign "Developer ID Application: Your Name (TEAM_ID)" "$APP_PATH"
+
+          # Create the .pkg file
+          PKG_OUTPUT="$PWD/dist/NidumAI.pkg"
+          pkgbuild --root "$APP_PATH" \
+                   --identifier "com.nidum.desktoplocalai" \
+                   --version "${VERSION}" \
+                   --install-location "/Applications" \
+                   "$PKG_OUTPUT"
+
+          # Sign the .pkg file
+          SIGNED_PKG="$PWD/dist/NidumAI-Signed.pkg"
+          productsign --sign "3rd Party Mac Developer Installer: Your Name (TEAM_ID)" "$PKG_OUTPUT" "$SIGNED_PKG"
+
+          # Verify the signed .pkg
+          spctl -a -vv -t install "$SIGNED_PKG"
+
+          echo "PKG_PATH=$SIGNED_PKG" >> $GITHUB_ENV
 
       - name: Check if Release Exists
         id: check_release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          VERSION: ${{ env.VERSION }}
         run: |
-          set -e
-          if gh release view "v${VERSION}" > /dev/null 2>&1; then
+          if gh release view "v${{ env.VERSION }}" > /dev/null 2>&1; then
             echo "RELEASE_EXISTS=true" >> $GITHUB_ENV
           else
             echo "RELEASE_EXISTS=false" >> $GITHUB_ENV
           fi
 
-      - name: Locate Additional Files
-        id: locate_files
-        run: |
-          # Locate the ZIP and YAML files
-          ZIP_PATH=$(find "$PWD/dist" -name "*.zip" -type f | head -n 1)
-          YAML_PATH=$(find "$PWD/dist" -name "*.yml" -type f | head -n 1)
-          if [ -z "$ZIP_PATH" ] || [ -z "$YAML_PATH" ]; then
-            echo "Error: ZIP or YAML file not found."
-            exit 1
-          fi
-          echo "ZIP_PATH=$ZIP_PATH" >> $GITHUB_ENV
-          echo "YAML_PATH=$YAML_PATH" >> $GITHUB_ENV
-
       - name: Create or Update Release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           VERSION: ${{ env.VERSION }}
-          DMG_PATH: ${{ env.DMG_PATH }}
           PKG_PATH: ${{ env.PKG_PATH }}
-          ZIP_PATH: ${{ env.ZIP_PATH }}
-          YAML_PATH: ${{ env.YAML_PATH }}
-          RELEASE_EXISTS: ${{ env.RELEASE_EXISTS }}
         run: |
-          set -e
           if [ "${RELEASE_EXISTS}" = "true" ]; then
             echo "Updating existing release for version v${VERSION}"
-            gh release upload "v${VERSION}" "${DMG_PATH}" "${PKG_PATH}" "${ZIP_PATH}" "${YAML_PATH}" --clobber
+            gh release upload "v${VERSION}" "${PKG_PATH}" --clobber
           else
             echo "Creating new release for version v${VERSION}"
-            gh release create "v${VERSION}" "${DMG_PATH}" "${PKG_PATH}" "${ZIP_PATH}" "${YAML_PATH}" \
-              --title "Release v${VERSION}" \
-              --generate-notes
+            gh release create "v${VERSION}" "${PKG_PATH}" --title "Release v${VERSION}" --generate-notes
           fi
