@@ -139,7 +139,6 @@
       "entitlements": "entitlements.mac.plist",
       "entitlementsInherit": "entitlements.mac.inherit.plist",
       "provisioningProfile": "Mac_App_Store_Connect.provisionprofile",
-      "minimumSystemVersion": "12.0",
       "gatekeeperAssess": false,
       "notarize": {
         "teamId": "JCN5972XNZ"
