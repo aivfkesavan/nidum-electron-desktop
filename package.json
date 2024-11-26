@@ -132,7 +132,8 @@
       "category": "public.app-category.productivity",
       "target": [
         "dmg",
-        "zip"
+        "zip",
+        "pkg"
       ],
       "hardenedRuntime": true,
       "entitlements": "entitlements.mac.plist",
