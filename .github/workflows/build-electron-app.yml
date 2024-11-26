@@ -54,10 +54,10 @@ jobs:
           fi
 
           # Sign the app and its components
-          find "$APP_PATH" -type f -perm +111 -exec codesign --force --options runtime --entitlements "path/to/your.entitlements" --sign "Developer ID Application: Your Name (TEAM_ID)" {} \;
+          find "$APP_PATH" -type f -perm +111 -exec codesign --force --options runtime --entitlements "path/to/your.entitlements" --sign "Developer ID Application: Pritam Cristpin (JCN5972XNZ)" {} \;
 
           # Sign the app bundle itself
-          codesign --force --options runtime --entitlements "path/to/your.entitlements" --sign "Developer ID Application: Your Name (TEAM_ID)" "$APP_PATH"
+          codesign --force --options runtime --entitlements "path/to/your.entitlements" --sign "Developer ID Application: Pritam Cristpin (JCN5972XNZ)" "$APP_PATH"
 
           # Create the .pkg file
           PKG_OUTPUT="$PWD/dist/NidumAI.pkg"
@@ -69,7 +69,7 @@ jobs:
 
           # Sign the .pkg file
           SIGNED_PKG="$PWD/dist/NidumAI-Signed.pkg"
-          productsign --sign "3rd Party Mac Developer Installer: Your Name (TEAM_ID)" "$PKG_OUTPUT" "$SIGNED_PKG"
+          productsign --sign "3rd Party Mac Developer Installer: Pritam Cristpin (JCN5972XNZ)" "$PKG_OUTPUT" "$SIGNED_PKG"
 
           # Verify the signed .pkg
           spctl -a -vv -t install "$SIGNED_PKG"
