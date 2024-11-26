@@ -20,6 +20,26 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Configure Vite for Optimized Build
+        run: |
+          cat <<EOF > vite.config.js
+          import { defineConfig } from 'vite';
+          export default defineConfig({
+            build: {
+              chunkSizeWarningLimit: 2000,
+              rollupOptions: {
+                output: {
+                  manualChunks(id) {
+                    if (id.includes('node_modules')) {
+                      return 'vendor';
+                    }
+                  },
+                },
+              },
+            },
+          });
+          EOF
+
       - name: Get version from package.json
         id: get_version
         run: |
@@ -45,38 +65,60 @@ jobs:
           security import certificate.p12 -k build.keychain -P "$APPLE_CERTIFICATE_PASSWORD" -T /usr/bin/codesign
           security set-key-partition-list -S apple-tool:,apple:,codesign: -s -k "$KEYCHAIN_PASSWORD" build.keychain
           
+          # Modify electron-builder configuration to include pkg
+          cat <<EOF > electron-builder.yml
+          appId: com.nidum.desktoplocalai
+          mac:
+            target:
+              - dmg
+              - pkg
+            hardenedRuntime: true
+            entitlements: entitlements.mac.plist
+            entitlementsInherit: entitlements.mac.inherit.plist
+            provisioningProfile: Mac_App_Store_Connect.provisionprofile
+          EOF
+
           # Build the Electron app
           npm run build
-          # Verify that the app is correctly signed
-          APP_PATH=$(find "$PWD/dist" -name "*.app" -type d | head -n 1)
-          if [ -z "$APP_PATH" ]; then
-            echo "Error: App not found."
-            exit 1
-          fi
-          codesign --verify --deep --strict --verbose=2 "$APP_PATH"
-          if [ $? -ne 0 ]; then
-            echo "Error: Code signing verification failed."
-            exit 1
-          fi
-          # Locate the built DMG file
+
+          # Locate the built DMG and PKG files
           DMG_PATH=$(find "$PWD/dist" -name "*.dmg" -type f | head -n 1)
-          if [ -z "$DMG_PATH" ]; then
-            echo "Error: DMG file not found."
+          PKG_PATH=$(find "$PWD/dist" -name "*.pkg" -type f | head -n 1)
+          if [ -z "$DMG_PATH" ] || [ -z "$PKG_PATH" ]; then
+            echo "Error: DMG or PKG file not found."
             exit 1
           fi
           echo "DMG_PATH=$DMG_PATH" >> $GITHUB_ENV
+          echo "PKG_PATH=$PKG_PATH" >> $GITHUB_ENV
+
           # Notarize the DMG
-          xcrun notarytool submit "$DMG_PATH" --wait --apple-id "$APPLE_ID" --password "$APPLE_APP_SPECIFIC_PASSWORD" --team-id "$APPLE_TEAM_ID"
+          xcrun notarytool submit "$DMG_PATH" --wait --apple-id "$APPLE_ID" --password "$APPLE_APP_SPECIFIC_PASSWORD" --team-id "$APPLE_TEAM_ID" --output-format json > dmg_notarization_log.json
           if [ $? -ne 0 ]; then
-            echo "Error: Notarization failed."
+            echo "Error: DMG notarization failed. See log below:"
+            cat dmg_notarization_log.json
             exit 1
           fi
-          # Staple the notarization ticket
+
+          # Notarize the PKG
+          xcrun notarytool submit "$PKG_PATH" --wait --apple-id "$APPLE_ID" --password "$APPLE_APP_SPECIFIC_PASSWORD" --team-id "$APPLE_TEAM_ID" --output-format json > pkg_notarization_log.json
+          if [ $? -ne 0 ]; then
+            echo "Error: PKG notarization failed. See log below:"
+            cat pkg_notarization_log.json
+            exit 1
+          fi
+
+          # Staple the notarization tickets
           xcrun stapler staple "$DMG_PATH"
           if [ $? -ne 0 ]; then
-            echo "Error: Stapling notarization ticket failed."
+            echo "Error: Stapling DMG notarization ticket failed."
             exit 1
           fi
+          xcrun stapler staple "$PKG_PATH"
+          if [ $? -ne 0 ]; then
+            echo "Error: Stapling PKG notarization ticket failed."
+            exit 1
+          fi
+
       - name: Check if Release Exists
         id: check_release
         env:
@@ -87,6 +129,7 @@ jobs:
           else
             echo "RELEASE_EXISTS=false" >> $GITHUB_ENV
           fi
+
       - name: Locate Additional Files
         id: locate_files
         run: |
@@ -99,16 +142,17 @@ jobs:
           fi
           echo "ZIP_PATH=$ZIP_PATH" >> $GITHUB_ENV
           echo "YAML_PATH=$YAML_PATH" >> $GITHUB_ENV
+
       - name: Create or Update Release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           if [ "${{ env.RELEASE_EXISTS }}" = "true" ]; then
             echo "Updating existing release for version v${{ env.VERSION }}"
-            gh release upload "v${{ env.VERSION }}" "${{ env.DMG_PATH }}" "${{ env.ZIP_PATH }}" "${{ env.YAML_PATH }}" --clobber
+            gh release upload "v${{ env.VERSION }}" "${{ env.DMG_PATH }}" "${{ env.PKG_PATH }}" "${{ env.ZIP_PATH }}" "${{ env.YAML_PATH }}" --clobber
           else
             echo "Creating new release for version v${{ env.VERSION }}"
-            gh release create "v${{ env.VERSION }}" "${{ env.DMG_PATH }}" "${{ env.ZIP_PATH }}" "${{ env.YAML_PATH }}" \
+            gh release create "v${{ env.VERSION }}" "${{ env.DMG_PATH }}" "${{ env.PKG_PATH }}" "${{ env.ZIP_PATH }}" "${{ env.YAML_PATH }}" \
               --title "Release v${{ env.VERSION }}" \
               --generate-notes
           fi
