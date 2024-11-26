@@ -5,13 +5,17 @@ import { createPath } from "../utils/path-helper";
 
 const router = express.Router()
 
+function num(n, defaultVal) {
+  return (n || n === 0) ? Number(n) : defaultVal
+}
+
 router.post("/", async (req, res) => {
   res.setHeader('Content-Type', 'text/event-stream')
   res.setHeader('Cache-Control', 'no-cache')
   res.setHeader('Connection', 'keep-alive')
 
   try {
-    const { modelName, messages, message } = req.body
+    const { modelName, messages, message, ...restParams } = req.body
     const [systemPrompt, ...rest] = messages
 
     const llama = await getLlama()
@@ -29,7 +33,18 @@ router.post("/", async (req, res) => {
       session.setChatHistory(rest)
     }
 
+    const topP = num(restParams?.top_p, 1)
+    const maxTokens = num(restParams?.max_tokens, 500)
+    const temperature = num(restParams?.temperature, 0.1)
+    const frequencyPenalty = num(restParams?.frequency_penalty, 0)
+
     await session.prompt(message, {
+      topP,
+      maxTokens,
+      temperature,
+      repeatPenalty: {
+        frequencyPenalty
+      },
       onTextChunk: reply => {
         res.write(`data: ${JSON.stringify({ reply })}\n\n`)
       }
@@ -46,7 +61,7 @@ router.post("/", async (req, res) => {
 
 router.post("/2", async (req, res) => {
   try {
-    const { modelName, messages, message } = req.body
+    const { modelName, messages, message, ...restParams } = req.body
     const [systemPrompt, ...rest] = messages
 
     const llama = await getLlama()
@@ -64,7 +79,19 @@ router.post("/2", async (req, res) => {
       session.setChatHistory(rest)
     }
 
-    const content = await session.prompt(message)
+    const topP = num(restParams?.top_p, 1)
+    const maxTokens = num(restParams?.max_tokens, 500)
+    const temperature = num(restParams?.temperature, 0.1)
+    const frequencyPenalty = num(restParams?.frequency_penalty, 0)
+
+    const content = await session.prompt(message, {
+      topP,
+      maxTokens,
+      temperature,
+      repeatPenalty: {
+        frequencyPenalty
+      }
+    })
 
     return res.json({ choices: [{ message: { content } }] })
 
