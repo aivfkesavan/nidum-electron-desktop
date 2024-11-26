@@ -104,7 +104,7 @@
     "url": "https://releases.nidum.ai/download/downloads/"
   },
   "build": {
-    "appId": "com.nidum.ragdrive",
+    "appId": "com.nidum.desktoplocalai",
     "files": [
       "dist/**/*",
       "dist-electron/**/*",
@@ -137,6 +137,8 @@
       "hardenedRuntime": true,
       "entitlements": "entitlements.mac.plist",
       "entitlementsInherit": "entitlements.mac.inherit.plist",
+      "provisioningProfile": "Mac_App_Store_Connect.provisionprofile",
+      "minimumSystemVersion": "12.0",
       "gatekeeperAssess": false,
       "notarize": {
         "teamId": "JCN5972XNZ"
