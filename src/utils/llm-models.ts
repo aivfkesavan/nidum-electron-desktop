@@ -1,5 +1,6 @@
 import type { llm_modelsT } from "../store/context";
 
+import nidumShared from '../assets/imgs/Nidum-Shared.png';
 import anthropic from '../assets/imgs/anthropic.png';
 import sambanova from '../assets/imgs/sambanova.png';
 import ollama from '../assets/imgs/ollama.png';
@@ -25,42 +26,48 @@ const llmModels: listT[] = [
   },
   {
     id: "2",
-    logo: logo,
+    logo: nidumShared,
     title: "Nidum Shared",
     para: "Use AI models that someone is sharing through Nidum"
   },
   {
     id: "3",
+    logo: logo,
+    title: "Nidum Decentralized",
+    para: "Nidum's Decentralized Heterogenous AI Network"
+  },
+  {
+    id: "4",
     logo: sambanova,
     title: "SambaNova Systems",
     para: "Inference API from SambaNova Systems"
   },
   {
-    id: "4",
+    id: "5",
     logo: groq,
     title: "Groq",
     para: "Run inference on Groq LPUs"
   },
   {
-    id: "5",
+    id: "6",
     logo: hf,
     title: "Hugging Face",
     para: "Inference API from Hugging Face (Serverless)"
   },
   {
-    id: "6",
+    id: "7",
     logo: openai,
     title: "OpenAI",
     para: "Inference API from OpenAI"
   },
   {
-    id: "7",
+    id: "8",
     logo: anthropic,
     title: "Anthropic",
     para: "Inference API from Anthropic"
   },
   {
-    id: "8",
+    id: "9",
     logo: ollama,
     title: "Ollama",
     para: "Run AI models locally on your machine"

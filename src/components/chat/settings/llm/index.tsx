@@ -1,5 +1,6 @@
 import useContextStore from "../../../../store/context";
 
+import NidumDecentralised from "./nidum-decentralised";
 import SelectModel from "./select-model";
 import HuggingFace from "./hugging-face";
 import NidumShared from "./nidum-shared";
@@ -23,6 +24,10 @@ function Model() {
 
       {
         modelType === "Nidum Shared" && <NidumShared />
+      }
+
+      {
+        modelType === "Nidum Decentralized" && <NidumDecentralised />
       }
 
       {

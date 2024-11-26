@@ -16,7 +16,7 @@ import { useToast } from "../../../components/ui/use-toast";
 import useContextStore, { llm_modelsT } from "../../../store/context";
 import useConvoStore from "../../../store/conversations";
 
-import { useLLamaDownloadedModels } from "../../../hooks/use-llm-models";
+import { useLLamaDownloadedModels, useNidumDecentralised } from "../../../hooks/use-llm-models";
 import { useSharedDevice } from "../../../hooks/use-device";
 import { useCrawler } from "../../../hooks/use-crawler";
 import { useConfig } from "../../../hooks/use-config";
@@ -49,6 +49,7 @@ function Messages() {
   const addChat = useConvoStore(s => s.addChat)
   const init = useConvoStore(s => s.init)
 
+  const { data: nidumCentralised } = useNidumDecentralised()
   const { data: downloadedModels } = useLLamaDownloadedModels()
   const { data: sharedDevice } = useSharedDevice(sharedAppId, model_type === "Nidum Shared")
   const { data: crawlerData } = useCrawler()
@@ -294,8 +295,8 @@ function Messages() {
         const urls: urlsT = {
           Local: `${constants.backendUrl}/llama-chat`,
           "Nidum Shared": `https://${sharedAppId}.${sharedDevice?.domain}/llama-chat/2`,
+          "Nidum Decentralized": nidumCentralised?.url,
           Groq: "https://api.groq.com/openai/v1/chat/completions",
-          Nidum: "https://nidum2b.tunnelgate.haive.tech/v1/chat/completions",
           "Hugging Face": `https://api-inference.huggingface.co/models/${hfModel}/v1/chat/completions`,
           "SambaNova Systems": `${constants.backendUrl}/ai/sambanova`,
           Anthropic: "https://api.anthropic.com/v1/messages",
@@ -313,7 +314,7 @@ function Messages() {
           top_p: num(projectDetails?.top_p, 1),
           max_tokens: num(projectDetails?.max_tokens, 500),
           temperature: num(projectDetails?.temperature, 0.1),
-          stream: !["Nidum", "Anthropic"].includes(model_type),
+          stream: !["Nidum", "Anthropic", "Nidum Decentralized"].includes(model_type),
           messages: prompt,
         }
 
@@ -325,10 +326,6 @@ function Messages() {
         if (model_type === "Groq") {
           payload.model = groqModel
           headers.Authorization = `Bearer ${groqApiKey}`
-        }
-
-        if (model_type === "Nidum") {
-          payload.model = "nidum_ai_2b"
         }
 
         if (model_type === "Local") {
@@ -375,6 +372,10 @@ function Messages() {
           payload.model = ollamaModel
         }
 
+        if (model_type === "Nidum Decentralized") {
+          payload.model = nidumCentralised?.model
+        }
+
         abortController.current = new AbortController()
 
         const response = await fetch(url, {
@@ -394,9 +395,9 @@ function Messages() {
           return
         }
 
-        if (["Nidum", "Anthropic", "SambaNova Systems", "Nidum Shared"].includes(model_type)) {
+        if (["Nidum", "Anthropic", "SambaNova Systems", "Nidum Shared", "Nidum Decentralized"].includes(model_type)) {
           const res = await response.json()
-          const content = res?.choices?.[0]?.message?.content || res?.content?.[0]?.text || ""
+          const content = res?.choices?.[0]?.message?.content || res?.content?.[0]?.text || res?.message?.content || ""
 
           const finalOutput = [user]
           const botReply: Message = {
