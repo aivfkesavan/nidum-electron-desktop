@@ -1,7 +1,10 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 
-export type llm_modelsT = "Local" | "Nidum Shared" | "Groq" | "Nidum" | "Hugging Face" | "SambaNova Systems" | "Anthropic" | "OpenAI" | "Ollama";
+export type llm_modelsT =
+  "Local" | "Nidum Shared" | "Nidum Decentralized" |
+  "Groq" | "Hugging Face" | "SambaNova Systems" |
+  "Anthropic" | "OpenAI" | "Ollama";
 
 type state = {
   project_id: string;

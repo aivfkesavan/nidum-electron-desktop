@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 
-import { getLLMModels, getLLamaDownloadedModels } from "../actions/llms";
+import { getLLMModels, getLLamaDownloadedModels, getNidumDecentralised } from "../actions/llms";
 
 export type llmT = "llm" | "llm2" | "groq" | "hf" | "hf-img-gen" | "sambanova-systems" | "anthropic" | "openai" | ""
 
@@ -17,5 +17,12 @@ export function useLLamaDownloadedModels() {
   return useQuery({
     queryKey: ["llama-models-downloaded"],
     queryFn: getLLamaDownloadedModels,
+  })
+}
+
+export function useNidumDecentralised() {
+  return useQuery({
+    queryKey: ["nidum-decentralised"],
+    queryFn: getNidumDecentralised,
   })
 }
