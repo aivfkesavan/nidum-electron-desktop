@@ -73,6 +73,6 @@ We welcome contributions! If you’re interested in improving RAGDrive, please r
 
 Special thanks to **lama.cpp**, **node-llama-cpp**, and **DuckDuckGo Search** for their invaluable support and resources.
 
----
+--- 
 
 Happy coding! 🚀
