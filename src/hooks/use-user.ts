@@ -103,40 +103,7 @@ export function useLoginMutate() {
     }
   })
 }
-
-export function useGoogleSignupMutate() {
-  const navigate = useNavigate()
-
-  const { toast } = useToast()
-
-  return useMutation({
-    // @ts-ignore
-    mutationFn: window?.electronAPI?.googleSignup,
-    onSuccess(res: any) {
-      if (res?.error) {
-        toast({ title: res?.message || "Something went wrong!!!" })
-
-      } else {
-        navigate("/login", { replace: true })
-        toast({ title: "User account created successfully" })
-      }
-    },
-    onError(err) {
-      let hasError = err?.message
-      if (hasError) {
-        toast({ title: hasError })
-
-      } else {
-        toast({
-          title: "Something went wrong!!!",
-          description: "Try again, later.",
-        })
-      }
-    }
-  })
-}
-
-export function useGoogleLoginMutate() {
+export function useGoogleAuthMutate() {
   const updateAuth = useAuthStore(s => s.update)
 
   const navigate = useNavigate()
@@ -145,7 +112,7 @@ export function useGoogleLoginMutate() {
 
   return useMutation({
     // @ts-ignore
-    mutationFn: window?.electronAPI?.googleLogin,
+    mutationFn: window?.electronAPI?.googleAuth,
     onSuccess(res: any) {
       if (res?.error) {
         toast({ title: res?.message || "Something went wrong!!!" })

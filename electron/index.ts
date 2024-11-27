@@ -193,8 +193,7 @@ ipcMain.on('app:restart', () => {
   app.exit(0)
 })
 
-ipcMain.handle('auth:google-signup', () => googleAuth("signup"))
-ipcMain.handle('auth:google-login', () => googleAuth("login"))
+ipcMain.handle('auth:google', googleAuth)
 
 if (process.platform === "win32") {
   autoUpdater.autoDownload = false

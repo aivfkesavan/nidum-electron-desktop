@@ -1,37 +1,26 @@
-import { useGoogleLoginMutate, useGoogleSignupMutate } from "../../hooks/use-user";
+import { FaGoogle } from "react-icons/fa";
+
+import { useGoogleAuthMutate } from "../../hooks/use-user";
 import { cn } from "../../lib/utils";
 
 type props = {
   className?: string
 }
 
-export function GooglSignupBtn({ className }: props) {
-  const { mutate, isPending } = useGoogleSignupMutate()
+function GoogleAuthBtn({ className }: props) {
+  const { mutate, isPending } = useGoogleAuthMutate()
 
   return (
     <button
       type='button'
       onClick={() => mutate()}
       disabled={isPending}
-      className={cn("w-full mt-4 py-1.5 text-sm text-zinc-400 border border-zinc-600 hover:bg-zinc-800 disabled:opacity-50", className)}
+      className={cn("dc w-full mt-4 py-1.5 text-sm text-zinc-300 border border-zinc-600 hover:bg-zinc-800 disabled:opacity-50", className)}
     >
-      Sign up with Google
+      <FaGoogle />
+      Continue with Google
     </button>
   )
 }
 
-export function GooglLoginBtn({ className }: props) {
-  const { mutate, isPending } = useGoogleLoginMutate()
-
-  return (
-    <button
-      type='button'
-      onClick={() => mutate()}
-      disabled={isPending}
-      className={cn("w-full mt-4 py-1.5 text-sm text-zinc-400 border border-zinc-600 hover:bg-zinc-800 disabled:opacity-50", className)}
-    >
-      Sign in with Google
-    </button>
-  )
-}
-
+export default GoogleAuthBtn

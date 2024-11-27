@@ -5,7 +5,7 @@ import { Link } from "react-router-dom";
 
 import { useLoginMutate } from "../../hooks/use-user";
 
-import { GooglLoginBtn } from "../common/google-btn";
+import GoogleAuthBtn from "../common/google-btn";
 import logo from '../../assets/imgs/logo.png';
 
 function Login() {
@@ -124,7 +124,7 @@ function Login() {
           <span className="px-2 bg-[#171717] z-[1]">Or</span>
         </div>
 
-        <GooglLoginBtn />
+        <GoogleAuthBtn />
 
         <div className="mt-6 text-xs text-center text-zinc-400">
           Don't have an account? <Link to="/signup" replace className="text-zinc-300 hover:underline">Sign up</Link>
