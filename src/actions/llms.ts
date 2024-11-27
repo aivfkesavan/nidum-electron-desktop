@@ -5,10 +5,6 @@ export async function getLLMModels(llm: string) {
   return axios.get(`https://raw.githubusercontent.com/NidumAI-Inc/catalog/main/${llm}-models.json`).then(r => r.data)
 }
 
-export async function getNidumDecentralised() {
-  return axios.get("https://raw.githubusercontent.com/aivfkesavan/nidum-public/refs/heads/main/nidum-decentralised.json").then(r => r.data)
-}
-
 export async function getModelPath(path: string) {
   return axios.get(`${constants.backendUrl}/llama/model-path/${path}`).then(r => r.data)
 }

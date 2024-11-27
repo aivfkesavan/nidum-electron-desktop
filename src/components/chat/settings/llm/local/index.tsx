@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { MdOutlineFileDownload, MdOutlineDeleteOutline } from "react-icons/md";
+import { MdOutlineFileDownload, MdOutlineDeleteOutline, MdInfoOutline } from "react-icons/md";
 import { useQueryClient } from "@tanstack/react-query";
 
 import { useLLamaDownloadedModels } from "../../../../../hooks/use-llm-models";
@@ -81,7 +81,12 @@ function Local() {
             >
               <div className="df mb-2">
                 <RadioGroupItem value={m?.file_name} id={m?.file_name} />
-                <Label htmlFor={m?.file_name} className="mr-auto cursor-pointer">{m?.name}</Label>
+                <Label htmlFor={m?.file_name} className="cursor-pointer">
+                  {m?.name}
+                </Label>
+                <a href={m?.info_url} target="_blank" className="mr-auto hover:text-blue-300">
+                  <MdInfoOutline />
+                </a>
                 {
                   downloaded?.some((d: any) => d?.id === m?.id)
                     ? (
