@@ -20,33 +20,33 @@ type listT = {
 const llmModels: listT[] = [
   {
     id: "1",
-    logo: local,
-    title: "Local",
-    para: "Run AI models locally on your machine"
-  },
-  {
-    id: "2",
-    logo: nidumShared,
-    title: "Nidum Shared",
-    para: "Use AI models that someone is sharing through Nidum"
-  },
-  {
-    id: "3",
     logo: logo,
     title: "Nidum Decentralized",
     para: "Nidum's Decentralized Heterogenous AI Network"
   },
   {
-    id: "4",
-    logo: sambanova,
-    title: "SambaNova Systems",
-    para: "Inference API from SambaNova Systems"
+    id: "2",
+    logo: local,
+    title: "Local",
+    para: "Run AI models locally on your machine"
   },
   {
-    id: "5",
+    id: "3",
+    logo: nidumShared,
+    title: "Nidum Shared",
+    para: "Use AI models that someone is sharing through Nidum"
+  },
+  {
+    id: "4",
     logo: groq,
     title: "Groq",
     para: "Run inference on Groq LPUs"
+  },
+  {
+    id: "5",
+    logo: ollama,
+    title: "Ollama",
+    para: "Run AI models locally on your machine"
   },
   {
     id: "6",
@@ -56,21 +56,21 @@ const llmModels: listT[] = [
   },
   {
     id: "7",
-    logo: openai,
-    title: "OpenAI",
-    para: "Inference API from OpenAI"
+    logo: sambanova,
+    title: "SambaNova Systems",
+    para: "Inference API from SambaNova Systems"
   },
   {
     id: "8",
-    logo: anthropic,
-    title: "Anthropic",
-    para: "Inference API from Anthropic"
+    logo: openai,
+    title: "OpenAI",
+    para: "Big Daddy of AI - ChatGPT"
   },
   {
     id: "9",
-    logo: ollama,
-    title: "Ollama",
-    para: "Run AI models locally on your machine"
+    logo: anthropic,
+    title: "Anthropic",
+    para: "The prodigal contender - Claude"
   },
 ]
 
