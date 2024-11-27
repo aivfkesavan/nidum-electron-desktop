@@ -31,7 +31,7 @@ function FileUpload() {
           <DialogTitle className="text-left">
             Manage Resources
           </DialogTitle>
-          <DialogDescription className=" text-xs text-white/60">Manage documents and web crawlers</DialogDescription>
+          <DialogDescription className=" text-xs text-white/60">Manage documents</DialogDescription>
         </DialogHeader>
 
         <Documents />

@@ -75,6 +75,7 @@ router.post("/go-public", async (req, res) => {
 
   } catch (error) {
     console.log("Unexpected error:", error);
+    logger.error(`${JSON.stringify(error)}, ${error?.message}`)
     res.status(500).json({ error: error.message });
   }
 })
@@ -88,6 +89,7 @@ router.post("/stop", async (req, res) => {
 
   } catch (error) {
     console.log("Unexpected error:", error);
+    logger.error(`${JSON.stringify(error)}, ${error?.message}`)
     res.json({ error: error.message });
   }
 })
@@ -108,6 +110,7 @@ router.post("/disable", async (req, res) => {
 
   } catch (error) {
     console.log("Unexpected error:", error);
+    logger.error(`${JSON.stringify(error)}, ${error?.message}`)
     res.status(500).json({ error: error.message });
   }
 })
