@@ -16,7 +16,7 @@ import { useToast } from "../../../components/ui/use-toast";
 import useContextStore, { llm_modelsT } from "../../../store/context";
 import useConvoStore from "../../../store/conversations";
 
-import { useLLamaDownloadedModels, useNidumDecentralised } from "../../../hooks/use-llm-models";
+import { useLLMModels, useLLamaDownloadedModels } from "../../../hooks/use-llm-models";
 import { useSharedDevice } from "../../../hooks/use-device";
 import { useCrawler } from "../../../hooks/use-crawler";
 import { useConfig } from "../../../hooks/use-config";
@@ -49,7 +49,7 @@ function Messages() {
   const addChat = useConvoStore(s => s.addChat)
   const init = useConvoStore(s => s.init)
 
-  const { data: nidumCentralised } = useNidumDecentralised()
+  const { data: nidumCentralised } = useLLMModels("nidum-decentralised")
   const { data: downloadedModels } = useLLamaDownloadedModels()
   const { data: sharedDevice } = useSharedDevice(sharedAppId, model_type === "Nidum Shared")
   const { data: crawlerData } = useCrawler()

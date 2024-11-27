@@ -1,7 +1,7 @@
-import { useNidumDecentralised } from "../../../../hooks/use-llm-models";
+import { useLLMModels } from "../../../../hooks/use-llm-models";
 
 function NidumDecentralised() {
-  const { data: nidumCentralised } = useNidumDecentralised()
+  const { data: nidumCentralised } = useLLMModels("nidum-decentralised")
 
   return (
     <>
