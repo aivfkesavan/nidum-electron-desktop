@@ -1,6 +1,6 @@
 import { BrowserWindow } from "electron";
 
-async function googleAuth(type: "login" | "signup") {
+async function googleAuth() {
   const authWindow = new BrowserWindow({
     width: 500,
     height: 600,
@@ -12,7 +12,7 @@ async function googleAuth(type: "login" | "signup") {
 
   return new Promise((resolve, reject) => {
     const backendUrl = "https://apiv1.chain.nidum.ai/api" // http://localhost:5000/api
-    authWindow.loadURL(`${backendUrl}/auth/google?type=${type}`)
+    authWindow.loadURL(`${backendUrl}/auth/google`)
 
     authWindow.webContents.on('did-finish-load', async () => {
       const currentUrl = authWindow.webContents.getURL()

@@ -21,6 +21,5 @@ contextBridge.exposeInMainWorld("ipcRenderer", {
 
 contextBridge.exposeInMainWorld('electronAPI', {
   restartApp: () => ipcRenderer.send('app:restart'),
-  googleSignup: () => ipcRenderer.invoke('auth:google-signup'),
-  googleLogin: () => ipcRenderer.invoke('auth:google-login'),
+  googleAuth: () => ipcRenderer.invoke('auth:google'),
 })

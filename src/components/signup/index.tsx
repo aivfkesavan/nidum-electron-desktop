@@ -6,7 +6,7 @@ import { useForm } from 'react-hook-form';
 import { resendOtp as resendOtpAction, signup, verifyOtp as verifyOtpAction } from '../../actions/user';
 import { useToast } from '../ui/use-toast';
 
-import { GooglSignupBtn } from '../common/google-btn';
+import GoogleAuthBtn from '../common/google-btn';
 import logo from '../../assets/imgs/logo.png';
 
 type dataType = { firstName: string, lastName: string, email: string, password: string, otp: string }
@@ -293,7 +293,7 @@ function Signup() {
               <span className="px-2 bg-[#171717] z-[1]">Or</span>
             </div>
 
-            <GooglSignupBtn />
+            <GoogleAuthBtn />
 
             <div className="mt-5 text-xs text-center text-zinc-400">
               Already have an account? <Link to="/login" replace className="text-zinc-300 hover:underline">Log in</Link>
