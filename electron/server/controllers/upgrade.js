@@ -1,20 +1,17 @@
 import { createWriteStream } from 'fs';
-import { exec } from 'child_process';
 import express from 'express';
 import axios from 'axios';
 import path from 'path';
 import fs from 'fs/promises';
-import util from 'util'
 import os from 'os';
 
 import packageJson from '../../../package.json';
 
 import isLatestSemantic from '../utils/is-latest-semantic.js'
+import { execPromise } from '../utils/run-command.js';
 import { createPath } from '../utils/path-helper';
 
 const router = express.Router()
-
-const execPromise = util.promisify(exec);
 
 router.get('/is-latest-version-available', async (req, res) => {
   try {
