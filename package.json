@@ -12,7 +12,7 @@
     "start:build": "electron ./dist-electron",
     "prebuild": "rimraf ./dist ./dist-electron ./release",
     "build": "tsc && vite build && electron-builder",
-    "build-win": "tsc && vite build && electron-builder --win --x64",
+    "build-win": "npm run prebuild && tsc && vite build && electron-builder --win --x64",
     "clean": "rm -rf ./node_modules ./dist ./dist-electron ./release ./models"
   },
   "dependencies": {
