@@ -5,7 +5,7 @@ import fsn from 'fs';
 import os from 'os';
 
 import { createPath, getRoot } from './path-helper';
-import { runCommand } from './run-command';
+import { execPromise } from './run-command';
 import downloadFile from './download-file';
 import logger from './logger';
 
@@ -213,9 +213,9 @@ export async function crawlWebsite({ urls, folderName }) {
 
     if (PUPPETEER_URL) {
       await downloadFile(PUPPETEER_URL, zipPath)
-      await runCommand(`unzip ${zipPath} -d ${INSTALL_DIR}`)
-      await runCommand(`rm ${zipPath}`)
-      await runCommand(`chmod +x "${CHROMIUM_EXEC}"`)
+      await execPromise(`unzip ${zipPath} -d ${INSTALL_DIR}`)
+      await execPromise(`rm ${zipPath}`)
+      await execPromise(`chmod +x "${CHROMIUM_EXEC}"`)
     }
   }
 
