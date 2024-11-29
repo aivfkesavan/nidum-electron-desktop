@@ -1,4 +1,7 @@
 import { exec, spawn } from 'child_process';
+import util from 'util';
+
+export const execPromise = util.promisify(exec)
 
 export function runCommand(command) {
   return new Promise((resolve, reject) => {

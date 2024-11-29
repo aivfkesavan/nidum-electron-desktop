@@ -5,7 +5,7 @@ import path from 'path';
 import os from 'os';
 import 'dotenv/config';
 
-import { runCommand, runCommandInBg } from '../utils/run-command';
+import { execPromise, runCommandInBg } from '../utils/run-command';
 import logger from '../utils/logger';
 import delay from '../utils/delay';
 
@@ -25,6 +25,9 @@ const zrokBinary = process.env.NODE_ENV === "development"
   ? path.join(__dirname, "..", "public", "bin")
   : path.join(process.resourcesPath, "bin");
 
+const stopZrokCmd = os.platform() === "win32" ? "taskkill /F /IM nidum.exe" : "pkill nidum"
+const zrokPath = path.join(zrokBinary, zrokStart)
+
 async function isLiveCheck(appId) {
   const response = await fetch(`https://${appId}.chain.nidum.ai/health`)
   const status = response.status
@@ -35,14 +38,14 @@ router.post("/enable", async (req, res) => {
   try {
     const { appId } = req.body
 
-    const config = `${zrokBinary.replace(/ /g, '\\ ')}/${zrokStart} config set apiEndpoint https://api.chain.nidum.ai`;
-    await runCommand(config)
+    const config = `${path.join(zrokBinary.replace(/ /g, '\\ '), zrokStart)} config set apiEndpoint https://api.chain.nidum.ai`;
+    await execPromise(config)
 
-    const enable = `"${path.join(zrokBinary, zrokStart)}" enable xIoAvryd2Svl`;
-    await runCommand(enable)
+    const enable = `${zrokPath} enable xIoAvryd2Svl`;
+    await execPromise(enable)
 
-    const reserve = `"${path.join(zrokBinary, zrokStart)}" reserve public http://localhost:4000 --unique-name ${appId}`;
-    await runCommand(reserve)
+    const reserve = `${zrokPath} reserve public http://localhost:4000 --unique-name ${appId}`;
+    await execPromise(reserve)
 
     return res.json({ msg: "Success" })
 
@@ -58,13 +61,19 @@ router.post("/go-public", async (req, res) => {
     const { appId } = req.body
 
     try {
-      const stop = "pkill nidum"
-      await runCommand(stop)
+      await execPromise(stopZrokCmd)
     } catch (error) {
       console.log("error on killing")
     }
-    const share = `"${path.join(zrokBinary, zrokStart)}" share reserved -p ${appId} --headless`;
-    await runCommandInBg(share)
+
+    if (os.platform() === "win32") {
+      const share = `Start-Process -FilePath ${zrokPath} -ArgumentList 'share reserved -p ${appId} --headless' -NoNewWindow`;
+      execPromise(share, { shell: "powershell.exe" })
+
+    } else {
+      const share = `${zrokPath} share reserved -p ${appId} --headless`;
+      await runCommandInBg(share)
+    }
 
     await delay(5000)
 
@@ -82,8 +91,7 @@ router.post("/go-public", async (req, res) => {
 
 router.post("/stop", async (req, res) => {
   try {
-    const stop = "pkill nidum"
-    await runCommand(stop)
+    await execPromise(stopZrokCmd)
 
     return res.json({ msg: "Success" })
 
@@ -97,8 +105,8 @@ router.post("/stop", async (req, res) => {
 router.post("/disable", async (req, res) => {
   try {
     try {
-      const disable = `"${path.join(zrokBinary, zrokStart)}" disable`;
-      await runCommand(disable)
+      const disable = `${zrokPath} disable`;
+      await execPromise(disable)
     } catch (error) {
       console.log(error)
     }
