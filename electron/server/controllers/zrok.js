@@ -41,10 +41,10 @@ router.post("/enable", async (req, res) => {
     const config = `${path.join(zrokBinary.replace(/ /g, '\\ '), zrokStart)} config set apiEndpoint https://api.chain.nidum.ai`;
     await execPromise(config)
 
-    const enable = `${zrokPath} enable xIoAvryd2Svl`;
+    const enable = `"${zrokPath}" enable xIoAvryd2Svl`;
     await execPromise(enable)
 
-    const reserve = `${zrokPath} reserve public http://localhost:4000 --unique-name ${appId}`;
+    const reserve = `"${zrokPath}" reserve public http://localhost:4000 --unique-name ${appId}`;
     await execPromise(reserve)
 
     return res.json({ msg: "Success" })
@@ -71,7 +71,7 @@ router.post("/go-public", async (req, res) => {
       execPromise(share, { shell: "powershell.exe" })
 
     } else {
-      const share = `${zrokPath} share reserved -p ${appId} --headless`;
+      const share = `"${zrokPath}" share reserved -p ${appId} --headless`;
       await runCommandInBg(share)
     }
 
@@ -105,7 +105,7 @@ router.post("/stop", async (req, res) => {
 router.post("/disable", async (req, res) => {
   try {
     try {
-      const disable = `${zrokPath} disable`;
+      const disable = `"${zrokPath}" disable`;
       await execPromise(disable)
     } catch (error) {
       console.log(error)
