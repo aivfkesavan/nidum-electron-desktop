@@ -23,8 +23,8 @@ export const endPoints = {
   removeInvites: "/user/invites/remove",
 
   // device
-  initDevice: "/device/init", // :appId
-  sharedDevice: "/device/shared", // :appId
+  initDevice: "/device/init", // :deviceId
+  sharedDevice: "/device/shared", // :deviceId
   device: "/device",
 
   config: "/config",

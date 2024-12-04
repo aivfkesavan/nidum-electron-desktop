@@ -22,6 +22,7 @@ import useAuthStore from "../../../store/auth";
 
 import { useLLMModels, useLLamaDownloadedModels } from "../../../hooks/use-llm-models";
 import { useSharedDevice } from "../../../hooks/use-device";
+import useOnlineStatus from "../../../hooks/use-online-status";
 import { useCrawler } from "../../../hooks/use-crawler";
 import { useConfig } from "../../../hooks/use-config";
 
@@ -62,6 +63,7 @@ function Messages() {
   const { data: sharedDevice } = useSharedDevice(sharedAppId, model_type === "Nidum Shared")
   const { data: crawlerData } = useCrawler()
   const { data: config } = useConfig()
+  const isOnline = useOnlineStatus()
 
   const [tempData, setTempData] = useState<Message[]>([])
   const [loading, setLoading] = useState(false)
@@ -173,6 +175,7 @@ function Messages() {
 
           navigate(`/p/${project_id}/c/${temContextId}`)
           sessionStorage.setItem("msg", msg)
+          // @ts-ignore
           return
         }
 
@@ -440,6 +443,7 @@ function Messages() {
           if (needAutoPlay) {
             speak(botReply.id, botReply.content)
           }
+          // @ts-ignore
           return
         }
 
@@ -457,6 +461,7 @@ function Messages() {
           setTempData([])
           setLoading(false)
           toast({ title: errMsg || "Something went wrong!" })
+          // @ts-ignore
           return
         }
 
@@ -515,6 +520,7 @@ function Messages() {
                 if (needAutoPlay) {
                   speak(botReply.id, botReply.content)
                 }
+                // @ts-ignore
                 return;
               }
 
@@ -559,6 +565,7 @@ function Messages() {
                     setTempData([])
                     setLoading(false)
                     toast({ title: "Please use new chat" })
+                    // @ts-ignore
                     return
                   }
                   botRes += text
@@ -585,6 +592,7 @@ function Messages() {
                     if (needAutoPlay) {
                       speak(botReply.id, botReply.content)
                     }
+                    // @ts-ignore
                     return;
                   }
 
@@ -613,7 +621,8 @@ function Messages() {
       setLoading(false)
       setTempData([])
       if (error?.name !== "AbortError") {
-        toast({ title: "Something went wrong!" })
+        console.log(isOnline)
+        toast({ title: !isOnline ? "Device is not connected to the internet." : "Something went wrong!" })
       }
     }
   }

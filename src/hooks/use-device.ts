@@ -1,39 +1,39 @@
 import { useEffect } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
-import { enableZrok, getInitDevice, getSharedDevice, goPublic, stopPublicShare, updateDevice } from "../actions/device";
+import { getInitDevice, getSharedDevice, goPublic, nidumChainEnable, nidumChainReserve, nidumChainUrlConfig, stopPublicShare, updateDevice } from "../actions/device";
 import useDeviceStore from "../store/device";
 
 import { useToast } from "../hooks/use-toast";
 
 export function useInitDevice() {
-  const appId = useDeviceStore(s => s.appId)
+  const deviceId = useDeviceStore(s => s.deviceId)
 
   return useQuery({
-    queryKey: ["device", appId],
-    queryFn: () => getInitDevice(appId),
-    enabled: !!appId,
+    queryKey: ["device", deviceId],
+    queryFn: () => getInitDevice(deviceId),
+    enabled: !!deviceId,
   })
 }
 
-export function useSharedDevice(appId: string, enabled: boolean) {
+export function useSharedDevice(deviceId: string, enabled: boolean) {
   return useQuery({
-    queryKey: ["device", appId],
-    queryFn: () => getSharedDevice(appId),
-    enabled: !!appId && enabled,
+    queryKey: ["device", deviceId],
+    queryFn: () => getSharedDevice(deviceId),
+    enabled: !!deviceId && enabled,
   })
 }
 
 export function useDeviceMutate() {
   const queryClient = useQueryClient()
-  const appId = useDeviceStore(s => s.appId)
+  const deviceId = useDeviceStore(s => s.deviceId)
 
   const { toast } = useToast()
 
   return useMutation({
     mutationFn: updateDevice,
     onSuccess() {
-      queryClient.invalidateQueries({ queryKey: ["device", appId] })
+      queryClient.invalidateQueries({ queryKey: ["device", deviceId] })
       toast({ title: "Device details updated successfully" })
     },
     onError(err) {
@@ -43,36 +43,53 @@ export function useDeviceMutate() {
   })
 }
 
-export function useZorkEnable() {
-  const isZrokSetuped = useDeviceStore(s => s.isZrokSetuped)
-  const appId = useDeviceStore(s => s.appId)
+export function useNidumChainSetup() {
+  const isNidumUrlConfigured = useDeviceStore(s => s.isNidumUrlConfigured)
+  const isNidumReserved = useDeviceStore(s => s.isNidumReserved)
+  const isNidumEnabled = useDeviceStore(s => s.isNidumEnabled)
+  const deviceId = useDeviceStore(s => s.deviceId)
   const update = useDeviceStore(s => s.update)
 
-  const { data } = useQuery({
-    queryKey: ["zrok-setup"],
-    queryFn: () => enableZrok(appId),
-    enabled: !isZrokSetuped,
-    retry: false,
+  const { data: step1 } = useQuery({
+    queryKey: ["nidum-chain-url-config"],
+    queryFn: nidumChainUrlConfig,
+    enabled: !isNidumUrlConfigured,
+  })
+
+  const { data: step2 } = useQuery({
+    queryKey: ["nidum-chain-enable"],
+    queryFn: nidumChainEnable,
+    enabled: isNidumUrlConfigured && !isNidumEnabled,
+  })
+
+  const { data: step3 } = useQuery({
+    queryKey: ["nidum-chain-reserve"],
+    queryFn: () => nidumChainReserve(deviceId),
+    enabled: isNidumEnabled && !isNidumReserved,
   })
 
   useEffect(() => {
-    if (data) {
-      update({ isZrokSetuped: true })
+    if (step1 || step2 || step3) {
+      update({
+        isNidumUrlConfigured: !!step1?.msg,
+        isNidumEnabled: !!step2?.msg,
+        isNidumReserved: !!step3?.msg,
+      })
     }
-  }, [data])
+  }, [step1, step2, step3])
 }
 
 export function useGoPublicMutate() {
   const update = useDeviceStore(s => s.update)
-  const appId = useDeviceStore(s => s.appId)
+  const deviceId = useDeviceStore(s => s.deviceId)
 
   const { toast } = useToast()
 
   return useMutation({
-    mutationFn: () => goPublic(appId),
+    mutationFn: () => goPublic(deviceId),
     onSuccess() {
       toast({ title: "Public share enabled" })
-      update({ isPublicShared: true })
+      update({ isNidumSharedPublic: true })
     },
     onError(err) {
       console.log(err)
@@ -90,7 +107,7 @@ export function useStopShareMutate() {
     mutationFn: stopPublicShare,
     onSuccess() {
       toast({ title: "Stoped public share" })
-      update({ isPublicShared: false })
+      update({ isNidumSharedPublic: false })
     },
     onError(err) {
       console.log(err)
@@ -101,14 +118,14 @@ export function useStopShareMutate() {
 
 export function useStopShareOnAppLeave() {
   const update = useDeviceStore(s => s.update)
-  const isPublicShared = useDeviceStore(s => s.isPublicShared)
+  const isNidumSharedPublic = useDeviceStore(s => s.isNidumSharedPublic)
 
   useEffect(() => {
     return () => {
-      if (isPublicShared) {
+      if (isNidumSharedPublic) {
         stopPublicShare()
-        update({ isPublicShared: false })
+        update({ isNidumSharedPublic: false })
       }
     }
-  }, [isPublicShared])
+  }, [isNidumSharedPublic])
 }

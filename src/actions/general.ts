@@ -4,12 +4,12 @@ import { deleteDevice } from "./device";
 import constants from "../utils/constants";
 
 type resetAppT = {
-  appId: string
+  deviceId: string
   includeModels: boolean
 }
 export async function resetApp(data: resetAppT) {
   try {
-    await axios.post(`${constants.backendUrl}/zrok/disable`)
+    await axios.post(`${constants.backendUrl}/nidum-chain/disable`)
   } catch (error) {
     console.log(error)
   }
@@ -21,7 +21,7 @@ export async function resetApp(data: resetAppT) {
   }
 
   try {
-    await deleteDevice(data.appId)
+    await deleteDevice(data.deviceId)
   } catch (error) {
     console.log(error)
   }

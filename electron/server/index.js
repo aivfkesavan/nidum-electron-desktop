@@ -2,6 +2,7 @@ import express from 'express';
 import cors from "cors";
 
 import { checkPathsSetup } from './utils/path-helper';
+import nidumShare from "./controllers/nidum-share";
 import duckduckgo from "./controllers/duckduckgo";
 import webcrawler from "./controllers/webcrawler";
 import llamaChat from "./controllers/llama-chat";
@@ -10,7 +11,6 @@ import whisper from "./controllers/whisper";
 import general from "./controllers/general";
 import llama from "./controllers/llama";
 import image from "./controllers/image";
-import zrok from "./controllers/zrok";
 import doc from "./controllers/doc";
 import ai from "./controllers/ai";
 
@@ -28,9 +28,9 @@ app.get("/health", (req, res) => {
 
 app.use("/ai", ai)
 app.use("/doc", doc)
-app.use("/zrok", zrok)
 app.use("/llama", llama)
 app.use("/image", image)
+app.use("/nidum-chain", nidumShare)
 app.use("/whisper", whisper)
 app.use("/general", general)
 app.use("/upgrade", upgrade)

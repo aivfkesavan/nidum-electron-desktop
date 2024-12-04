@@ -2,7 +2,9 @@ import { useEffect } from "react";
 
 import { useLogoutMutate } from "../../../hooks/use-user";
 import { useInitDevice } from "../../../hooks/use-device";
+import useOnlineStatus from "../../../hooks/use-online-status";
 import useAuthStore from "../../../store/auth";
+import { useToast } from "../../../hooks/use-toast";
 import useUIStore from "../../../store/ui";
 
 import {
@@ -17,6 +19,8 @@ function Account() {
   const { mutate, isPending } = useLogoutMutate()
   const update = useUIStore(s => s.update)
   const close = useUIStore(s => s.close)
+  const isOnline = useOnlineStatus()
+  const { toast } = useToast()
 
   const email = useAuthStore(s => s.email)
 
@@ -25,6 +29,11 @@ function Account() {
       close()
     }
   }, [])
+
+  function onClk() {
+    if (!isOnline) return toast({ title: "Kindly ensure an internet connection to continue." })
+    return mutate(device?._id)
+  }
 
   return (
     <DropdownMenu>
@@ -45,7 +54,7 @@ function Account() {
         </DropdownMenuItem>
 
         <DropdownMenuItem
-          onClick={() => mutate(device?._id)}
+          onClick={onClk}
           disabled={!device?._id}
         >
           Logout

@@ -1,6 +1,8 @@
 import { useState } from "react";
 
 import { useAccountDeleteConfirmMutate, useReqAccountDeleteMutate } from "../../../../hooks/use-user";
+import useOnlineStatus from "../../../../hooks/use-online-status";
+import { useToast } from "../../../../hooks/use-toast";
 
 import {
   AlertDialog,
@@ -20,6 +22,8 @@ function Delete() {
 
   const { mutate: mutateDelete, isPending: isPending2 } = useAccountDeleteConfirmMutate()
   const { mutate: mutateReq, isPending: isPending1 } = useReqAccountDeleteMutate()
+  const isOnline = useOnlineStatus()
+  const { toast } = useToast()
 
   function onReq() {
     mutateReq(null, {
@@ -35,6 +39,7 @@ function Delete() {
 
   function onClk(e: any) {
     e?.preventDefault()
+    if (!isOnline) return toast({ title: "Kindly ensure an internet connection to continue." })
     showDelete ? onDelete() : onReq()
   }
 

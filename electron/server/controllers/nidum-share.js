@@ -28,29 +28,51 @@ const zrokBinary = process.env.NODE_ENV === "development"
 const stopZrokCmd = os.platform() === "win32" ? "taskkill /F /IM nidum.exe" : "pkill nidum"
 const zrokPath = path.join(zrokBinary, zrokStart)
 
-async function isLiveCheck(appId) {
-  const response = await fetch(`https://${appId}.chain.nidum.ai/health`)
+async function isLiveCheck(deviceId) {
+  const response = await fetch(`https://${deviceId}.chain.nidum.ai/health`)
   const status = response.status
   return status === 200
 }
 
-router.post("/enable", async (req, res) => {
+router.post("/url-config", async (req, res) => {
   try {
-    const { appId } = req.body
-
     const config = `${path.join(zrokBinary.replace(/ /g, '\\ '), zrokStart)} config set apiEndpoint https://api.chain.nidum.ai`;
     await execPromise(config)
 
+    return res.json({ msg: "Success" })
+
+  } catch (error) {
+    console.log(error);
+    logger.error(`${JSON.stringify(error)}, ${error?.message}`)
+    res.status(500).json({ error: error.message });
+  }
+})
+
+router.post("/enable", async (req, res) => {
+  try {
     const enable = `"${zrokPath}" enable xIoAvryd2Svl`;
     await execPromise(enable)
 
-    const reserve = `"${zrokPath}" reserve public http://localhost:4000 --unique-name ${appId}`;
+    return res.json({ msg: "Success" })
+
+  } catch (error) {
+    console.log(error);
+    logger.error(`${JSON.stringify(error)}, ${error?.message}`)
+    res.status(500).json({ error: error.message });
+  }
+})
+
+router.post("/reserve", async (req, res) => {
+  try {
+    const { deviceId } = req.body
+
+    const reserve = `"${zrokPath}" reserve public http://localhost:4000 --unique-name ${deviceId}`;
     await execPromise(reserve)
 
     return res.json({ msg: "Success" })
 
   } catch (error) {
-    console.log("Unexpected error:", error);
+    console.log(error);
     logger.error(`${JSON.stringify(error)}, ${error?.message}`)
     res.status(500).json({ error: error.message });
   }
@@ -58,7 +80,7 @@ router.post("/enable", async (req, res) => {
 
 router.post("/go-public", async (req, res) => {
   try {
-    const { appId } = req.body
+    const { deviceId } = req.body
 
     try {
       await execPromise(stopZrokCmd)
@@ -67,23 +89,23 @@ router.post("/go-public", async (req, res) => {
     }
 
     if (os.platform() === "win32") {
-      const share = `Start-Process -FilePath ${zrokPath} -ArgumentList 'share reserved -p ${appId} --headless' -NoNewWindow`;
+      const share = `Start-Process -FilePath ${zrokPath} -ArgumentList 'share reserved -p ${deviceId} --headless' -NoNewWindow`;
       execPromise(share, { shell: "powershell.exe" })
 
     } else {
-      const share = `"${zrokPath}" share reserved -p ${appId} --headless`;
+      const share = `"${zrokPath}" share reserved -p ${deviceId} --headless`;
       await runCommandInBg(share)
     }
 
     await delay(5000)
 
-    const isLive = await isLiveCheck(appId)
+    const isLive = await isLiveCheck(deviceId)
     if (isLive) return res.json({ msg: "Success" })
 
     return res.status(400).json({ msg: "not success" })
 
   } catch (error) {
-    console.log("Unexpected error:", error);
+    console.log(error);
     logger.error(`${JSON.stringify(error)}, ${error?.message}`)
     res.status(500).json({ error: error.message });
   }
@@ -96,7 +118,7 @@ router.post("/stop", async (req, res) => {
     return res.json({ msg: "Success" })
 
   } catch (error) {
-    console.log("Unexpected error:", error);
+    console.log(error);
     logger.error(`${JSON.stringify(error)}, ${error?.message}`)
     res.json({ error: error.message });
   }
@@ -117,7 +139,7 @@ router.post("/disable", async (req, res) => {
     return res.json({ msg: "Success" })
 
   } catch (error) {
-    console.log("Unexpected error:", error);
+    console.log(error);
     logger.error(`${JSON.stringify(error)}, ${error?.message}`)
     res.status(500).json({ error: error.message });
   }
