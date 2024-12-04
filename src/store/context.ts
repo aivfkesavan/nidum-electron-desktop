@@ -1,5 +1,7 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
+import { immer } from 'zustand/middleware/immer';
+import useAuthStore from './auth';
 
 export type llm_modelsT =
   "Local" | "Nidum Shared" | "Nidum Decentralized" |
@@ -11,11 +13,12 @@ type state = {
   chat_id: string;
 
   model_type: llm_modelsT
+  model_mode: "" | "vision";
   llamaModel: string;
-  llamaModeType: "" | "vision";
   sharedAppId: string;
   ollamaUrl: string;
   ollamaModel: string;
+  nidumDecentralisedModel: string;
 
   voice: string;
 
@@ -26,8 +29,14 @@ type state = {
   tts_type: "System native";
 }
 
+type storeState = {
+  data: Record<string, state> // user_id
+}
+
 type actions = {
+  init: () => void
   updateContext: (v: Partial<state>) => void
+  clearByUser: () => void
   clear: () => void
 }
 
@@ -36,11 +45,12 @@ const initPayload: state = {
   chat_id: "",
 
   model_type: "Local",
+  model_mode: "",
   llamaModel: "",
-  llamaModeType: "",
   sharedAppId: "",
   ollamaUrl: "",
   ollamaModel: "",
+  nidumDecentralisedModel: "",
 
   voice: "",
 
@@ -51,54 +61,54 @@ const initPayload: state = {
   tts_type: "System native",
 }
 
-const useContextStore = create<state & actions>()(persist(set => ({
-  ...initPayload,
+const useContextStore = create<storeState & actions>()(persist(immer(set => ({
+  data: {},
 
-  updateContext: val => set(val),
-  clear: () => set({ ...initPayload }),
-}),
+  init: () => {
+    const user_id = useAuthStore.getState()._id
+
+    set((state) => {
+      if (!state.data[user_id]) {
+        state.data[user_id] = { ...initPayload }
+      }
+    })
+  },
+
+  updateContext: (val) => {
+    const user_id = useAuthStore.getState()._id
+
+    set((state) => {
+      if (!state.data[user_id]) {
+        state.data[user_id] = { ...initPayload }
+      }
+      state.data[user_id] = {
+        ...state.data[user_id],
+        ...val,
+      };
+    })
+  },
+
+  clearByUser: () => set((state) => {
+    const user_id = useAuthStore.getState()._id
+
+    if (state.data[user_id]) {
+      delete state.data[user_id]
+    }
+  }),
+
+  clear: () => set({ data: {} }),
+})),
   {
-    version: 8,
+    version: 9,
     name: 'context-storage',
     migrate(persistedState: any, version) {
-      if (!version || version < 8) {
-        if (persistedState?.hasOwnProperty("ollamaModel")) {
-          persistedState.llamaModel = persistedState.ollamaModel
-          persistedState.llamaModeType = persistedState.llamaModeType
-          persistedState.model_type = persistedState.model_type === "Ollama" ? "Local" : persistedState.model_type
-
-          delete persistedState.ollamaModel
-          delete persistedState.ollamaModeType
-          delete persistedState.ollamaUrl
-          delete persistedState.embedding_type
-          delete persistedState.ollamEmbeddingUrl
-          delete persistedState.ollamaEmbeddingModel
-          delete persistedState.vb_type
-          delete persistedState.qdrantDBUrl
-          delete persistedState.qdrantDBApiKey
-        }
-
-        delete persistedState.groqApiKey
-        delete persistedState.groqModel
-        delete persistedState.hfApiKey
-        delete persistedState.hfModel
-        delete persistedState.sambaNovaApiKey
-        delete persistedState.sambaNovaModel
-        delete persistedState.anthropicApiKey
-        delete persistedState.anthropicModel
-        delete persistedState.openaiApiKey
-        delete persistedState.openaiModel
-        delete persistedState.sttGroqApiKey
-        delete persistedState.hfImgGenModel
-
-        if (persistedState.voice === "Google UK English Female") {
-          persistedState.voice = ""
-        }
+      if (!version || version < 9) {
+        return { data: {} }
       }
 
       return persistedState
     },
   })
-);
+)
 
 export default useContextStore;

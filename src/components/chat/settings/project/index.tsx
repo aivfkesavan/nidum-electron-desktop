@@ -3,6 +3,7 @@ import { useState } from "react";
 import useContextStore from "../../../../store/context";
 import { useCrawler } from "../../../../hooks/use-crawler";
 import useConvoStore from "../../../../store/conversations";
+import useAuthStore from "../../../../store/auth";
 
 import {
   Select,
@@ -19,12 +20,13 @@ import Footer from "../common/footer";
 function Chat() {
   const editProject = useConvoStore(s => s.editProject)
 
-  const project_id = useContextStore(s => s.project_id)
+  const user_id = useAuthStore(s => s._id)
+  const project_id = useContextStore(s => s?.data?.[user_id]?.project_id)
   const { data: crawlerData } = useCrawler()
 
-  const projectMap = useConvoStore(s => s.projects)
-  const hasFiles = useConvoStore(s => s.files[project_id]?.length)
-  const projects = useConvoStore(s => Object.values(s.projects))
+  const projectMap = useConvoStore(s => s?.data?.[user_id]?.projects)
+  const hasFiles = useConvoStore(s => s?.data?.[user_id]?.files[project_id]?.length)
+  const projects = useConvoStore(s => Object.values(s?.data?.[user_id]?.projects))
 
   const [selected, setSelected] = useState(project_id || "")
   const [details, setDetails] = useState(projectMap[project_id] || {
@@ -66,6 +68,13 @@ function Chat() {
       [key]: val,
       [alterKey]: false,
     }))
+
+    setTimeout(() => {
+      const el = document.querySelector("#settings-cont")
+      if (el) {
+        el.scrollTop = el.scrollHeight
+      }
+    }, 10)
   }
 
   const hasChanges = JSON.stringify(details) !== JSON.stringify(initialDetails)

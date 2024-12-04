@@ -2,6 +2,7 @@ import { useEffect } from "react";
 import { FormProvider, useForm } from "react-hook-form";
 
 import useContextStore from "../../../../store/context";
+import useAuthStore from "../../../../store/auth";
 import useVoices from "./use-voices";
 
 import ControlledSelect from "../common/controlled-select";
@@ -11,7 +12,8 @@ function Native() {
   const voices = useVoices()
 
   const updateContext = useContextStore(s => s.updateContext)
-  const voice = useContextStore(s => s.voice)
+  const user_id = useAuthStore(s => s._id)
+  const voice = useContextStore(s => s?.data?.[user_id]?.voice)
 
   const methods = useForm({
     defaultValues: {

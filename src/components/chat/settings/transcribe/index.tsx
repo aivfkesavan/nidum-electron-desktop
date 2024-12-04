@@ -1,11 +1,13 @@
 import useContextStore from "../../../../store/context";
+import useAuthStore from "../../../../store/auth";
 
 import SelectModel from "./select-model";
 import Native from "./native";
 import Groq from "./groq";
 
 function Transcribe() {
-  const sttType = useContextStore(s => s.stt_type)
+  const user_id = useAuthStore(s => s._id)
+  const sttType = useContextStore(s => s?.data?.[user_id]?.stt_type)
 
   return (
     <>

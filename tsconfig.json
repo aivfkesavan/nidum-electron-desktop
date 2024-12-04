@@ -22,7 +22,6 @@
         "noEmit": true,
         "jsx": "react-jsx",
         "strict": false,
-        "strictNullChecks": true,
         "noImplicitAny": true,
         "noImplicitReturns": true,
         "noImplicitThis": true,

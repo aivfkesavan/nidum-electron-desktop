@@ -3,6 +3,9 @@ import Messages from "./messages";
 import SideBar from "./side-bar";
 
 import { useStopShareOnAppLeave, useZorkEnable } from "../../hooks/use-device";
+import useConvoStore from "../../store/conversations";
+import useAuthStore from "../../store/auth";
+import { findLatest } from "../../utils";
 // import useContextStore from "@store/context";
 
 import CheckForUpdate from "./check-for-update";
@@ -13,6 +16,17 @@ import Modals from "./modals";
 function Chat() {
   // const project_id = useContextStore(s => s.project_id)
   // const chat_id = useContextStore(s => s.chat_id)
+
+  const user_id = useAuthStore(s => s._id)
+  const convo = useConvoStore(s => s.data?.[user_id] || null)
+  const init = useConvoStore(s => s.init)
+
+  useEffect(() => {
+    console.log("at convo stor from index")
+    if (!convo?.projects || Object.keys(convo?.projects).length === 0) {
+      init()
+    }
+  }, [])
 
   useZorkEnable()
 

@@ -10,9 +10,11 @@ import Ollama from "./ollama";
 import OpenAI from "./openai";
 import Local from "./local";
 import Groq from "./groq";
+import useAuthStore from "../../../../store/auth";
 
 function Model() {
-  const modelType = useContextStore(s => s.model_type)
+  const user_id = useAuthStore(s => s._id)
+  const modelType = useContextStore(s => s?.data?.[user_id]?.model_type)
 
   return (
     <>

@@ -2,7 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 
 import { getLLMModels, getLLamaDownloadedModels } from "../actions/llms";
 
-export type llmT = "llm" | "llm2" | "groq" | "hf" | "hf-img-gen" | "sambanova-systems" | "anthropic" | "openai" | "nidum-decentralised" | ""
+export type llmT = "llm" | "llm2" | "groq" | "hf" | "hf-img-gen" | "sambanova-systems" | "anthropic" | "openai" | "nidum-decentralised" | "nidum-decentralised2" | ""
 
 export function useLLMModels(llm: llmT) {
   return useQuery({

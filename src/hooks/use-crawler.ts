@@ -4,9 +4,11 @@ import { crawleWeb, deletedCrawledLinks, getCrawledLinks, getLinkPreview } from 
 import useContextStore from "../store/context";
 import { groupLinks, sortUrlsByPathname } from "../utils/url-helper";
 import { useToast } from "../components/ui/use-toast";
+import useAuthStore from "../store/auth";
 
 export function useCrawler() {
-  const projectId = useContextStore(s => s.project_id)
+  const user_id = useAuthStore(s => s._id)
+  const projectId = useContextStore(s => s?.data?.[user_id]?.project_id)
 
   return useQuery({
     queryKey: ["get-crawled-list", projectId],

@@ -107,7 +107,7 @@ function Settings() {
           }
         </div>
 
-        <div className="h-96 -mr-6 pr-6 overflow-y-auto">
+        <div id="settings-cont" className="h-96 -mr-6 pr-6 overflow-y-auto">
           {list?.find(l => l.title === selected)?.child}
         </div>
       </DialogContent>

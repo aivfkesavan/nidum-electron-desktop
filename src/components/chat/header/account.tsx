@@ -11,7 +11,6 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "../../ui/dropdown-menu";
-import Profile from "./profile";
 
 function Account() {
   const { data: device } = useInitDevice()
@@ -20,7 +19,6 @@ function Account() {
   const close = useUIStore(s => s.close)
 
   const email = useAuthStore(s => s.email)
-  const open = useUIStore(s => s.open)
 
   useEffect(() => {
     return () => {
@@ -29,34 +27,31 @@ function Account() {
   }, [])
 
   return (
-    <>
-      <DropdownMenu>
-        <DropdownMenuTrigger
-          className="dc size-6 non-draggable bg-zinc-600 rounded-full uppercase"
-          disabled={isPending}
+    <DropdownMenu>
+      <DropdownMenuTrigger
+        className="dc size-6 non-draggable bg-zinc-600 rounded-full uppercase"
+        disabled={isPending}
+      >
+        {email[0]}
+      </DropdownMenuTrigger>
+
+      <DropdownMenuContent>
+        <DropdownMenuItem onClick={() => update({ open: "download" })}>
+          Downloads
+        </DropdownMenuItem>
+
+        <DropdownMenuItem onClick={() => update({ open: "profile" })}>
+          Profile
+        </DropdownMenuItem>
+
+        <DropdownMenuItem
+          onClick={() => mutate(device?._id)}
+          disabled={!device?._id}
         >
-          {email[0]}
-        </DropdownMenuTrigger>
-
-        <DropdownMenuContent>
-          <DropdownMenuItem onClick={() => update({ open: "profile" })}>
-            Profile
-          </DropdownMenuItem>
-
-          <DropdownMenuItem
-            onClick={() => mutate(device?._id)}
-            disabled={!device?._id}
-          >
-            Logout
-          </DropdownMenuItem>
-        </DropdownMenuContent>
-      </DropdownMenu>
-
-      {
-        open === "profile" &&
-        <Profile />
-      }
-    </>
+          Logout
+        </DropdownMenuItem>
+      </DropdownMenuContent>
+    </DropdownMenu>
   )
 }
 

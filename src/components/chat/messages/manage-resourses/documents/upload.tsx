@@ -6,12 +6,15 @@ import axios from 'axios';
 
 import useContextStore from '../../../../../store/context';
 import useConvoStore from '../../../../../store/conversations';
+import useAuthStore from '../../../../../store/auth';
 import constants from '../../../../../utils/constants';
 
 function Upload() {
   const [loading, setLoading] = useState(false)
-  const project_id = useContextStore(s => s.project_id)
-  const oldFiles = useConvoStore(s => s.files[project_id])
+
+  const user_id = useAuthStore(s => s._id)
+  const project_id = useContextStore(s => s?.data?.[user_id]?.project_id)
+  const oldFiles = useConvoStore(s => s?.data?.[user_id]?.files[project_id])
   const addFile = useConvoStore(s => s.addFile)
 
   const [files, setFiles] = useState<File[]>([])

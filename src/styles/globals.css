@@ -201,6 +201,11 @@
   transform-origin: left;
 }
 
+.temp .mark-down-wrap > :last-child::after {
+  content: "";
+  @apply inline-block size-2.5 ml-1 animate-blink rounded-full bg-current;
+}
+
 @keyframes mic-bg-animation {
   0% {
     transform: scale(1, 1);

@@ -3,6 +3,8 @@ import { MdOutlineDeleteOutline } from "react-icons/md";
 
 import { useCrawler, useDeleteCrawledLinks } from "../../../../../hooks/use-crawler";
 import useContextStore from "../../../../../store/context";
+import useAuthStore from "../../../../../store/auth";
+
 import TooltipLable from "./tooltip-lable";
 
 type props = {
@@ -32,7 +34,8 @@ function Card({ url, checked, onCheck }: props) {
 }
 
 function List() {
-  const projectId = useContextStore(s => s.project_id)
+  const user_id = useAuthStore(s => s._id)
+  const projectId = useContextStore(s => s?.data?.[user_id]?.project_id)
 
   const { data, isLoading } = useCrawler()
   const { mutate: mutateDelete, isPending } = useDeleteCrawledLinks()

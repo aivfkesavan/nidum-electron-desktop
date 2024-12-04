@@ -1,5 +1,6 @@
 import useContextStore from "../../../store/context";
 import useConvoStore from "../../../store/conversations";
+import useAuthStore from "../../../store/auth";
 import useUIStore from "../../../store/ui";
 
 import {
@@ -18,7 +19,9 @@ function DeleteProject() {
 
   const deleteProject = useConvoStore(s => s.deleteProject)
   const updateContext = useContextStore(s => s.updateContext)
-  const project_id = useContextStore(s => s.project_id)
+
+  const user_id = useAuthStore(s => s._id)
+  const project_id = useContextStore(s => s?.data?.[user_id]?.project_id)
 
   function onConfirm() {
     deleteProject(data?.id)

@@ -7,6 +7,7 @@ import { useDownloads } from "../../../../common/download-manager";
 import { useLLMModels } from "../../../../../hooks/use-llm-models";
 import useContextStore from "../../../../../store/context";
 import { useToast } from "../../../../ui/use-toast";
+import useAuthStore from "../../../../../store/auth";
 
 import { RadioGroup, RadioGroupItem } from "../../../../ui/radio-group";
 import { Label } from "../../../../ui/label";
@@ -15,7 +16,9 @@ import Footer from "../../common/footer";
 
 function Local() {
   const { downloads, downloadModel } = useDownloads()
-  const llamaModel = useContextStore(s => s.llamaModel)
+
+  const user_id = useAuthStore(s => s._id)
+  const llamaModel = useContextStore(s => s?.data?.[user_id]?.llamaModel)
 
   const updateContext = useContextStore(s => s.updateContext)
 
@@ -47,8 +50,8 @@ function Local() {
   function onSave() {
     if (downloaded?.some((d: any) => d?.fileName?.includes(selected))) {
       const visionModels = ["llava:7b"]
-      const llamaModeType = visionModels.includes(selected) ? "vision" : ""
-      updateContext({ llamaModel: selected, llamaModeType })
+      const model_mode = visionModels.includes(selected) ? "vision" : ""
+      updateContext({ llamaModel: selected, model_mode })
 
     } else {
       toast({
@@ -66,13 +69,23 @@ function Local() {
     setModel("")
   }
 
+  function onSelect(v: string) {
+    setSelected(v)
+    setTimeout(() => {
+      const el = document.querySelector("#settings-cont")
+      if (el) {
+        el.scrollTop = el.scrollHeight
+      }
+    }, 10)
+  }
+
   if (isLoading || isLoading2) {
     return <div className="dc h-80"><span className="loader-2"></span></div>
   }
 
   return (
     <>
-      <RadioGroup value={selected} onValueChange={setSelected} className="my-4">
+      <RadioGroup value={selected} onValueChange={onSelect} className="my-4">
         {
           models?.map((m: any) => (
             <div

@@ -6,6 +6,7 @@ import { downloadGenerateImg } from "../../../actions/img";
 import useImgGenStore, { ImgGenMsg } from "../../../store/img-gen";
 import { useDownloads } from "../../../components/common/download-manager";
 import useContextStore from "../../../store/context";
+import useAuthStore from "../../../store/auth";
 import { useConfig } from "../../../hooks/use-config";
 import { useToast } from "../../../components/ui/use-toast";
 
@@ -25,7 +26,8 @@ function ImgGenerate() {
   const hfImgGenModel = config.hfImgGenModel
   const hfApiKey = config.hfApiKey
 
-  const project_id = useContextStore(s => s.project_id)
+  const user_id = useAuthStore(s => s._id)
+  const project_id = useContextStore(s => s?.data?.[user_id]?.project_id)
 
   const { generateImage } = useDownloads()
 

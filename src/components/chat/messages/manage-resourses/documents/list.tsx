@@ -3,6 +3,7 @@ import axios from 'axios';
 
 import useContextStore from '../../../../../store/context';
 import useConvoStore from '../../../../../store/conversations';
+import useAuthStore from '../../../../../store/auth';
 import { bytesToSize } from '../../../../../utils';
 import constants from '../../../../../utils/constants';
 
@@ -11,9 +12,10 @@ import { Label } from "../../../../../components/ui/label";
 function List() {
   const deleteFile = useConvoStore(s => s.deleteFile)
 
-  const projectId = useContextStore(s => s.project_id)
-  const chatId = useContextStore(s => s.chat_id)
-  const files = useConvoStore(s => s.files[projectId] || [])
+  const user_id = useAuthStore(s => s._id)
+  const projectId = useContextStore(s => s?.data?.[user_id]?.project_id)
+  const chatId = useContextStore(s => s?.data?.[user_id]?.chat_id)
+  const files = useConvoStore(s => s?.data?.[user_id]?.files[projectId] || [])
 
   const { mutate, isPending } = useMutation({
     mutationFn: ({ name }: any) => axios.delete(`${constants.backendUrl}/doc/${projectId}/${name}`),

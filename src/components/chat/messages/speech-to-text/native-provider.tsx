@@ -7,6 +7,7 @@ import { LuX } from "react-icons/lu";
 import { convertToWav } from "../../../../utils/audio-help";
 import useContextStore from "../../../../store/context";
 import { useToast } from "../../../../components/ui/use-toast";
+import useAuthStore from "../../../../store/auth";
 import useRecord from "./use-record";
 
 type props = {
@@ -16,7 +17,8 @@ type props = {
 
 function NativeProvider({ disabled, postData }: props) {
   const [loading, setLoading] = useState(false)
-  const nativeSttModel = useContextStore(s => s.nativeSttModel)
+  const user_id = useAuthStore(s => s._id)
+  const nativeSttModel = useContextStore(s => s?.data?.[user_id]?.nativeSttModel)
 
   const { isRecording, isSupported, onClk, stopRecording } = useRecord()
   const { toast } = useToast()

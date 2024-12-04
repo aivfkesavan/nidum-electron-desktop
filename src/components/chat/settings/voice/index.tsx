@@ -1,10 +1,12 @@
 import useContextStore from "../../../../store/context";
+import useAuthStore from "../../../../store/auth";
 
 import SelectModel from "./select-model";
 import Native from "./native";
 
 function Voice() {
-  const tts_type = useContextStore(s => s.tts_type)
+  const user_id = useAuthStore(s => s._id)
+  const tts_type = useContextStore(s => s?.data?.[user_id]?.tts_type)
 
   return (
     <>

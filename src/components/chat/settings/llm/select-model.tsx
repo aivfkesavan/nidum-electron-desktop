@@ -3,6 +3,7 @@ import { BiExpandAlt } from "react-icons/bi";
 
 import useContextStore from "../../../../store/context";
 import useDeviceStore from "../../../../store/device";
+import useAuthStore from "../../../../store/auth";
 import { useToast } from "../../../ui/use-toast";
 import llmModels from "../../../../utils/llm-models";
 import { cn } from "../../../../lib/utils";
@@ -16,8 +17,9 @@ import OnlineStatus from "../../../common/online-status";
 
 function SelectModel() {
   const updateContext = useContextStore(s => s.updateContext)
-  const model_type = useContextStore(s => s.model_type)
-  const chat_id = useContextStore(s => s.chat_id)
+  const user_id = useAuthStore(s => s._id)
+  const model_type = useContextStore(s => s?.data?.[user_id]?.model_type)
+  const chat_id = useContextStore(s => s?.data?.[user_id]?.chat_id)
 
   const isPublicShared = useDeviceStore(s => s.isPublicShared)
 

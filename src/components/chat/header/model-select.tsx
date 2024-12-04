@@ -5,6 +5,7 @@ import { cn } from "../../../lib/utils";
 
 import useIsFullScreenCheck from "../../../hooks/use-is-full-screen-check";
 import useContextStore from "../../../store/context";
+import useAuthStore from "../../../store/auth";
 import usePlatform from "../../../hooks/use-platform";
 
 import {
@@ -19,9 +20,11 @@ function ModelSelect() {
   const isFullScreen = useIsFullScreenCheck()
   const platform = usePlatform()
 
+  const user_id = useAuthStore(s => s._id)
+
   const updateContext = useContextStore(s => s.updateContext)
-  const model_type = useContextStore(s => s.model_type)
-  const chat_id = useContextStore(s => s.chat_id)
+  const model_type = useContextStore(s => s?.data?.[user_id]?.model_type)
+  const chat_id = useContextStore(s => s?.data?.[user_id]?.chat_id)
 
   const handleModelSelect = (title: string) => {
     let payload: any = { model_type: title }
