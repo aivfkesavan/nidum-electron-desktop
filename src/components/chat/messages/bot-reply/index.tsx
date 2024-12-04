@@ -4,11 +4,11 @@ import { TbLoader2 } from "react-icons/tb";
 
 import { useAudioStore, useAudio } from "../use-speech";
 import useClipboardCopy from "../../../../hooks/use-clipboard-copy";
-
-import logo from '../../../../assets/imgs/logo.png';
+import { cn } from "../../../../lib/utils";
 
 import MarkdownParser from "./markdown-parse";
-import { cn } from "../../../../lib/utils";
+
+import logo from '../../../../assets/imgs/logo.png';
 
 type props = {
   id: string

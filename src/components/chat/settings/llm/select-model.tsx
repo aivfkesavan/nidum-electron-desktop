@@ -1,25 +1,28 @@
 import { useState } from "react";
 import { BiExpandAlt } from "react-icons/bi";
+import { useParams } from "react-router-dom";
 
 import useContextStore from "../../../../store/context";
 import useDeviceStore from "../../../../store/device";
 import useAuthStore from "../../../../store/auth";
-import { useToast } from "../../../ui/use-toast";
+import { useToast } from "../../../../hooks/use-toast";
 import llmModels from "../../../../utils/llm-models";
 import { cn } from "../../../../lib/utils";
 
 import {
   Dialog,
   DialogContent,
+  DialogTitle,
   DialogTrigger,
 } from "../../../../components/ui/dialog";
 import OnlineStatus from "../../../common/online-status";
 
 function SelectModel() {
-  const updateContext = useContextStore(s => s.updateContext)
+  const { chat_id = "" } = useParams()
   const user_id = useAuthStore(s => s._id)
+
+  const updateContext = useContextStore(s => s.updateContext)
   const model_type = useContextStore(s => s?.data?.[user_id]?.model_type)
-  const chat_id = useContextStore(s => s?.data?.[user_id]?.chat_id)
 
   const isPublicShared = useDeviceStore(s => s.isPublicShared)
 
@@ -67,6 +70,8 @@ function SelectModel() {
       </DialogTrigger>
 
       <DialogContent>
+        <DialogTitle className="sr-only">LLM model</DialogTitle>
+
         <div className="mt-3">
           {
             llmModels.map(l => (

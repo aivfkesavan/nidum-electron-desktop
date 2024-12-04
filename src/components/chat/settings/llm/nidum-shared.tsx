@@ -11,8 +11,9 @@ import { Label } from "../../../ui/label";
 import Footer from "../common/footer";
 
 function NidumShared() {
-  const updateContext = useContextStore(s => s.updateContext)
   const user_id = useAuthStore(s => s._id)
+
+  const updateContext = useContextStore(s => s.updateContext)
   const sharedAppId = useContextStore(s => s?.data?.[user_id]?.sharedAppId)
 
   const [selected, setSelected] = useState(sharedAppId || "")

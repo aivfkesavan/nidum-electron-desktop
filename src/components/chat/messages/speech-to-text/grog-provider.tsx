@@ -2,7 +2,7 @@ import { LuSendHorizonal, LuX } from "react-icons/lu";
 import { IoMdMic } from "react-icons/io";
 
 import { useConfig } from "../../../../hooks/use-config";
-import { useToast } from '../../../../components/ui/use-toast';
+import { useToast } from '../../../../hooks/use-toast';
 
 import transcribeAudio from './transcribe';
 import useRecord from './use-record';

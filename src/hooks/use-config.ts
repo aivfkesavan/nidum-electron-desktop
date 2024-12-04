@@ -1,7 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 import { createConfig, deleteConfig, getConfig, updateConfig } from "../actions/config";
-import { useToast } from "../components/ui/use-toast";
+import { useToast } from "../hooks/use-toast";
 
 export function useConfig() {
   return useQuery({

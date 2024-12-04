@@ -1,7 +1,5 @@
 import { IoIosAttach } from "react-icons/io";
-
-import useContextStore from "../../../../store/context";
-import useAuthStore from "../../../../store/auth";
+import { useParams } from "react-router-dom";
 
 // import { Tabs, TabsContent, TabsList, TabsTrigger } from "../../../../components/ui/tabs";
 import {
@@ -16,8 +14,7 @@ import {
 import Documents from "./documents";
 
 function FileUpload() {
-  const user_id = useAuthStore(s => s._id)
-  const project_id = useContextStore(s => s?.data?.[user_id]?.project_id)
+  const { project_id = "" } = useParams()
 
   return (
     <Dialog>

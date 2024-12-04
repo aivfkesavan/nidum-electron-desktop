@@ -5,14 +5,15 @@ import useContextStore from "../../../../store/context";
 import useAuthStore from "../../../../store/auth";
 import { cn } from "../../../../lib/utils";
 
-import logo from '../../../../assets/imgs/logo.png';
-import groq from '../../../../assets/imgs/groq.png';
-
 import {
   Dialog,
   DialogContent,
+  DialogTitle,
   DialogTrigger,
 } from "../../../../components/ui/dialog";
+
+import groq from '../../../../assets/imgs/groq.png';
+import logo from '../../../../assets/imgs/logo.png';
 
 type listT = {
   id: string
@@ -63,6 +64,8 @@ function SelectModel() {
       </DialogTrigger>
 
       <DialogContent>
+        <DialogTitle className="sr-only">Select transcriber</DialogTitle>
+
         <div className="mt-3">
           {
             list.map(l => (

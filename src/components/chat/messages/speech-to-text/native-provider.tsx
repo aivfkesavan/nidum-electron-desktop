@@ -6,7 +6,7 @@ import { LuX } from "react-icons/lu";
 
 import { convertToWav } from "../../../../utils/audio-help";
 import useContextStore from "../../../../store/context";
-import { useToast } from "../../../../components/ui/use-toast";
+import { useToast } from "../../../../hooks/use-toast";
 import useAuthStore from "../../../../store/auth";
 import useRecord from "./use-record";
 

@@ -1,8 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { LuChevronLeft, LuChevronRight } from "react-icons/lu";
-
-import useContextStore from '../../../../store/context';
-import useAuthStore from '../../../../store/auth';
+import { useParams } from 'react-router-dom';
 import constants from '../../../../utils/constants';
 
 import { Button } from "../../../../components/ui/button";
@@ -11,14 +9,14 @@ import {
   CarouselContent,
   CarouselItem,
 } from "../../../../components/ui/carousel";
+import Image from './image';
 
 type props = {
   images: string[]
 }
 
 function ImageCard({ images }: props) {
-  const user_id = useAuthStore(s => s._id)
-  const chat_id = useContextStore(s => s?.data?.[user_id]?.chat_id)
+  const { chat_id = "" } = useParams()
 
   const [api, setApi] = useState<any>(null)
   const [current, setCurrent] = useState(0)
@@ -79,10 +77,8 @@ function ImageCard({ images }: props) {
           {
             images?.map(src => (
               <CarouselItem key={src}>
-                <img
+                <Image
                   src={`${constants.backendUrl}/image/img_${chat_id}/${src}`}
-                  className="w-full h-60 object-cover rounded-md"
-                  alt=""
                 />
               </CarouselItem>
             ))

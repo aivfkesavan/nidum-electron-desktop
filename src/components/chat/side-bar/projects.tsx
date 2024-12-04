@@ -1,10 +1,10 @@
 import { useState } from "react";
+import { useNavigate, useParams } from "react-router-dom";
 import { IoSearch } from "react-icons/io5";
 
 import type { Project } from "../../../store/conversations";
 
-import { relativeDateFormat } from "../../../utils/date-helper"; // generateSampleProjects, 
-import useContextStore from "../../../store/context";
+import { relativeDateFormat } from "../../../utils/date-helper";
 import useConvoStore from "../../../store/conversations";
 import useAuthStore from "../../../store/auth";
 import useUIStore from "../../../store/ui";
@@ -22,15 +22,14 @@ type props = {
 }
 
 function Projects({ isFullScreen, platform }: props) {
-  const user_id = useAuthStore(s => s._id)
+  const { project_id = "" } = useParams()
+  const navigate = useNavigate()
 
-  const updateContext = useContextStore(s => s.updateContext)
-  const project_id = useContextStore(s => s?.data?.[user_id]?.project_id)
+  const user_id = useAuthStore(s => s._id)
 
   const updateModal = useUIStore(s => s.update)
   const [searchBy, setSearchBy] = useState("")
 
-  const chatsMap = useConvoStore(s => s?.data?.[user_id]?.chats)
   const groupedProjects: groupedPrpjectT = useConvoStore(s => {
     if (s?.data?.[user_id]) {
       return Object.values(s?.data?.[user_id]?.projects)?.reduce((prev: any, curr) => {
@@ -47,10 +46,7 @@ function Projects({ isFullScreen, platform }: props) {
   })
 
   function onNavigate(id: string) {
-    updateContext({
-      project_id: id,
-      chat_id: chatsMap?.[id]?.[0]?.id || ""
-    })
+    navigate(`/p/${id}`)
   }
 
   return (

@@ -4,7 +4,7 @@ import { IoEye, IoEyeOff } from "react-icons/io5";
 import { useForm } from 'react-hook-form';
 
 import { resendOtp as resendOtpAction, signup, verifyOtp as verifyOtpAction } from '../../actions/user';
-import { useToast } from '../ui/use-toast';
+import { useToast } from '../../hooks/use-toast';
 
 import GoogleAuthBtn from '../common/google-btn';
 import logo from '../../assets/imgs/logo.png';

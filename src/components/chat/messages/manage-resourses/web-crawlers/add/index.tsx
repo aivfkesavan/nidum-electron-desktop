@@ -1,16 +1,14 @@
 import { useState } from "react";
+import { useParams } from "react-router-dom";
 
 import { sortUrlsByPathname } from "../../../../../../utils/url-helper";
-import useContextStore from '../../../../../../store/context';
 import { useAddCrawl } from "../../../../../../hooks/use-crawler";
-import useAuthStore from "../../../../../../store/auth";
 
 import TooltipLable from "../tooltip-lable";
 import GetLinks from "./get-links";
 
 function Add() {
-  const user_id = useAuthStore(s => s._id)
-  const projectId = useContextStore(s => s?.data?.[user_id]?.project_id)
+  const { project_id = "" } = useParams()
 
   const [includedLinks, setIncludedLinks] = useState<string[]>([])
   const [links, setLinks] = useState<string[]>([])
@@ -28,7 +26,7 @@ function Add() {
     mutate(
       {
         urls: includedLinks,
-        folderName: projectId
+        folderName: project_id
       },
       {
         onSettled() {

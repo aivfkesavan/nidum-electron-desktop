@@ -11,7 +11,8 @@ import useConvoStore from "../store/conversations";
 import useLoginStore from "../store/login";
 import useAuthStore from "../store/auth";
 
-import { useToast } from "../components/ui/use-toast";
+import { findLatest } from "../utils";
+import { useToast } from "../hooks/use-toast";
 
 export function useSharedServers() {
   return useQuery({
@@ -31,7 +32,9 @@ export function useInvites() {
 export function useLoginMutate() {
   const updateLogin = useLoginStore(s => s.update)
   const updateAuth = useAuthStore(s => s.update)
+  const initConvo = useConvoStore(s => s.init)
   // const data = useLoginStore(s => s.data)
+  const init = useContextStore(s => s.init)
 
   const isOnline = useOnlineStatus()
   const navigate = useNavigate()
@@ -44,7 +47,17 @@ export function useLoginMutate() {
       isLoggedIn: true,
     })
 
-    navigate("/", { replace: true })
+    init()
+    initConvo()
+    const convo = useConvoStore.getState().data[data?._id]
+    const latestProjectId = findLatest(Object.values(convo.projects))
+    const chats = convo.chats[latestProjectId.id]
+    const latestChatId = findLatest(chats)
+    let to = `/p/${latestProjectId?.id}`
+    if (chats?.length === 1 || chats?.[0]?.title === "New Chat") {
+      to = to + `/c/${latestChatId?.id}`
+    }
+    navigate(to, { replace: true })
     toast({ title: "User loggedin successfully" })
   }
 
@@ -103,8 +116,11 @@ export function useLoginMutate() {
     }
   })
 }
+
 export function useGoogleAuthMutate() {
   const updateAuth = useAuthStore(s => s.update)
+  const initConvo = useConvoStore(s => s.init)
+  const init = useContextStore(s => s.init)
 
   const navigate = useNavigate()
 
@@ -125,8 +141,18 @@ export function useGoogleAuthMutate() {
           isLoggedIn: true,
           isGoogleAuth: true,
         })
+        init()
+        initConvo()
+        const convo = useConvoStore.getState().data[res?._id]
+        const latestProjectId = findLatest(Object.values(convo.projects))
+        const chats = convo.chats[latestProjectId.id]
+        const latestChatId = findLatest(chats)
+        let to = `/p/${latestProjectId?.id}`
+        if (chats?.length === 1 || chats?.[0]?.title === "New Chat") {
+          to = to + `/c/${latestChatId?.id}`
+        }
 
-        navigate("/", { replace: true })
+        navigate(to, { replace: true })
         toast({ title: "User loggedin successfully" })
       }
     },
@@ -249,7 +275,6 @@ export function useRemoveInviteMutate() {
 }
 
 export function useLogoutMutate() {
-  const clearContext = useContextStore(s => s.clear)
   const clearAuth = useAuthStore(s => s.clear)
   const { toast } = useToast()
 
@@ -259,7 +284,6 @@ export function useLogoutMutate() {
     mutationFn: logout,
     onSuccess() {
       clearAuth()
-      clearContext()
       toast({ title: "User logged out successfully" })
     },
     onError(err) {
@@ -276,10 +300,10 @@ export function useResetApp(showToast: boolean = true) {
   const { toast } = useToast()
   const navigate = useNavigate()
 
-  const clearContext = useContextStore(s => s.clear)
+  const clearContext = useContextStore(s => s.clearByUser)
   const clearDevice = useDeviceStore(s => s.clear)
   const clearLogins = useLoginStore(s => s.clear)
-  const clearConvo = useConvoStore(s => s.clear)
+  const clearConvo = useConvoStore(s => s.clearByUser)
   const clearAuth = useAuthStore(s => s.clear)
 
   return useMutation({
@@ -287,9 +311,9 @@ export function useResetApp(showToast: boolean = true) {
     onSuccess() {
       clearDevice()
       clearLogins()
-      clearAuth()
       clearContext()
       clearConvo()
+      clearAuth()
       navigate("/login", { replace: true })
       if (showToast) {
         toast({ title: "App data reseted successfully" })

@@ -86,7 +86,7 @@
   }
 
   body {
-    @apply bg-background text-foreground transition-all;
+    @apply bg-background text-foreground transition-all antialiased;
     font-feature-settings: "rlig" 1, "calt" 1;
   }
 }

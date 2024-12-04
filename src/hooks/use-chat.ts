@@ -1,7 +1,7 @@
 import { useInfiniteQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 
 import { chatLimit, createChat, deleteChat, getChatsByProjectId, updateChat } from "../actions/chat";
-import { useToast } from "../components/ui/use-toast";
+import { useToast } from "../hooks/use-toast";
 import { Chat } from "../types/base";
 
 export function useChatsByProjectId(project_id: string) {

@@ -9,9 +9,6 @@ export type llm_modelsT =
   "Anthropic" | "OpenAI" | "Ollama";
 
 type state = {
-  project_id: string;
-  chat_id: string;
-
   model_type: llm_modelsT
   model_mode: "" | "vision";
   llamaModel: string;
@@ -41,9 +38,6 @@ type actions = {
 }
 
 const initPayload: state = {
-  project_id: "",
-  chat_id: "",
-
   model_type: "Local",
   model_mode: "",
   llamaModel: "",
@@ -84,7 +78,7 @@ const useContextStore = create<storeState & actions>()(persist(immer(set => ({
       state.data[user_id] = {
         ...state.data[user_id],
         ...val,
-      };
+      }
     })
   },
 
@@ -99,16 +93,15 @@ const useContextStore = create<storeState & actions>()(persist(immer(set => ({
   clear: () => set({ data: {} }),
 })),
   {
-    version: 9,
+    version: 11,
     name: 'context-storage',
-    migrate(persistedState: any, version) {
-      if (!version || version < 9) {
+    migrate: (persistedState: any, version) => {
+      if (!version || version < 11) {
         return { data: {} }
       }
-
       return persistedState
     },
-  })
-)
+  }
+))
 
-export default useContextStore;
+export default useContextStore

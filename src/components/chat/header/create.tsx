@@ -1,8 +1,5 @@
-import { nanoid } from "nanoid";
+import { useLocation, useNavigate, useParams } from "react-router-dom";
 
-import useContextStore from '../../../store/context';
-import useConvoStore from "../../../store/conversations";
-import useAuthStore from "../../../store/auth";
 import useUIStore from "../../../store/ui";
 
 import Message from '../../../assets/svg/message.svg?react';
@@ -12,22 +9,20 @@ import {
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
-  TooltipPortal,
 } from "../../../components/ui/tooltip";
 
 function Create() {
-  const updateModal = useUIStore(s => s.update)
+  const { project_id = "" } = useParams()
+  const { pathname } = useLocation()
+  const navigate = useNavigate()
 
-  const user_id = useAuthStore(s => s._id)
-  const project_id = useContextStore(s => s?.data?.[user_id]?.project_id)
-  const updateContext = useContextStore(s => s.updateContext)
-  const addChat = useConvoStore(s => s.addChat)
+  const updateModal = useUIStore(s => s.update)
 
   const onClk = () => {
     if (project_id) {
-      const id = nanoid(10)
-      addChat(project_id, { id, title: "New Chat" })
-      updateContext({ chat_id: id })
+      if (pathname !== `/p/${project_id}`) {
+        navigate(`/p/${project_id}`)
+      }
       return
     }
 
@@ -39,16 +34,14 @@ function Create() {
       <Tooltip>
         <TooltipTrigger
           onClick={onClk}
-          className="non-draggable ml-auto"
+          className="non-draggable ml-auto active:scale-105"
         >
           <Message />
         </TooltipTrigger>
 
-        <TooltipPortal>
-          <TooltipContent side="left" className="text-[10px]">
-            Create new {project_id ? "chat" : "project"}
-          </TooltipContent>
-        </TooltipPortal>
+        <TooltipContent side="left" className="text-[10px]">
+          Create new {project_id ? "chat" : "project"}
+        </TooltipContent>
       </Tooltip>
     </TooltipProvider>
   )

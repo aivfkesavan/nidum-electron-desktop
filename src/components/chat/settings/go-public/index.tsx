@@ -5,7 +5,7 @@ import { useInitDevice, useDeviceMutate, useGoPublicMutate, useStopShareMutate }
 import { useAddInviteMutate, useInvites, useRemoveInviteMutate } from "../../../../hooks/use-user";
 import useDeviceStore from "../../../../store/device";
 import useContextStore from "../../../../store/context";
-import { useToast } from "../../../ui/use-toast";
+import { useToast } from "../../../../hooks/use-toast";
 import useAuthStore from "../../../../store/auth";
 
 function GoPublic() {

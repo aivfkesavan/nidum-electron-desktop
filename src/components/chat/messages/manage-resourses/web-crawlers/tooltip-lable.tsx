@@ -1,7 +1,6 @@
 import {
   Tooltip,
   TooltipContent,
-  TooltipPortal,
   TooltipProvider,
   TooltipTrigger,
 } from "../../../../ui/tooltip";
@@ -24,11 +23,10 @@ function TooltipLable({ url, htmlFor }: props) {
             {pathname}
           </label>
         </TooltipTrigger>
-        <TooltipPortal>
-          <TooltipContent>
-            {pathname}
-          </TooltipContent>
-        </TooltipPortal>
+
+        <TooltipContent>
+          {pathname}
+        </TooltipContent>
       </Tooltip>
     </TooltipProvider>
   )

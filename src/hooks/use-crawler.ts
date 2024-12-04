@@ -1,19 +1,17 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useParams } from "react-router-dom";
 
 import { crawleWeb, deletedCrawledLinks, getCrawledLinks, getLinkPreview } from "../actions/webcrawler";
-import useContextStore from "../store/context";
 import { groupLinks, sortUrlsByPathname } from "../utils/url-helper";
-import { useToast } from "../components/ui/use-toast";
-import useAuthStore from "../store/auth";
+import { useToast } from "../hooks/use-toast";
 
 export function useCrawler() {
-  const user_id = useAuthStore(s => s._id)
-  const projectId = useContextStore(s => s?.data?.[user_id]?.project_id)
+  const { project_id = "" } = useParams()
 
   return useQuery({
-    queryKey: ["get-crawled-list", projectId],
-    queryFn: () => getCrawledLinks(projectId),
-    enabled: !!projectId,
+    queryKey: ["get-crawled-list", project_id],
+    queryFn: () => getCrawledLinks(project_id),
+    enabled: !!project_id,
     select: res => {
       const data = groupLinks(res)
       Object.keys(data).forEach(key => {

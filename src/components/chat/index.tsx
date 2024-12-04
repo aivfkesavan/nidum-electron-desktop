@@ -12,30 +12,47 @@ import CheckForUpdate from "./check-for-update";
 // import ImgGenerate from "./img-generate";
 import Header from "./header";
 import Modals from "./modals";
+import { useNavigate } from "react-router-dom";
 
 function Chat() {
   // const project_id = useContextStore(s => s.project_id)
   // const chat_id = useContextStore(s => s.chat_id)
+
+  const navigate = useNavigate()
 
   const user_id = useAuthStore(s => s._id)
   const convo = useConvoStore(s => s.data?.[user_id] || null)
   const init = useConvoStore(s => s.init)
 
   useEffect(() => {
-    console.log("at convo stor from index")
-    if (!convo?.projects || Object.keys(convo?.projects).length === 0) {
-      init()
+    const pathname = window.location.pathname
+    if (pathname === "/") {
+      if (convo?.projects && Object.keys(convo?.projects).length) {
+        const latestProjectId = findLatest(Object.values(convo?.projects))
+        const chats = convo?.chats[latestProjectId?.id]
+        const latestChatId = findLatest(chats)
+        let to = `/p/${latestProjectId?.id}`
+        if (chats?.length === 1 || chats?.[0]?.title === "New Chat") {
+          to = to + `/c/${latestChatId?.id}`
+        }
+        navigate(to)
+      } else {
+        init()
+        window.location.reload()
+      }
     }
+  }, [])
+
+  useEffect(() => {
+    if (document.body.clientWidth > 768) {
+      document.body.classList.add("open")
+    }
+    document.documentElement.style.setProperty('--sidebar-width', '240px')
   }, [])
 
   useZorkEnable()
 
   useStopShareOnAppLeave()
-
-  useEffect(() => {
-    document.body.classList.add("open")
-    document.documentElement.style.setProperty('--sidebar-width', '240px')
-  }, [])
 
   return (
     <main className="app-wrapper transition-all">

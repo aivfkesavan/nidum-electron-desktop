@@ -1,7 +1,7 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 
 import { deleteDownloadedModel } from "../../../../../actions/llms";
-import { useToast } from "../../../../ui/use-toast";
+import { useToast } from "../../../../../hooks/use-toast";
 
 import {
   Dialog,
