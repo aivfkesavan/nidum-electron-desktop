@@ -2,6 +2,7 @@ import { useState } from "react";
 import { FormProvider, useForm } from "react-hook-form";
 
 import useContextStore from "../../../../store/context";
+import useAuthStore from "../../../../store/auth";
 import { useToast } from "../../../../components/ui/use-toast";
 import { cn } from "../../../../lib/utils";
 
@@ -31,9 +32,11 @@ const list: any = {
 }
 
 function Ollama() {
+  const user_id = useAuthStore(s => s._id)
+
   const updateContext = useContextStore(s => s.updateContext)
-  const ollamaModel = useContextStore(s => s.ollamaModel)
-  const ollamaUrl = useContextStore(s => s.ollamaUrl)
+  const ollamaModel = useContextStore(s => s?.data?.[user_id]?.ollamaModel)
+  const ollamaUrl = useContextStore(s => s?.data?.[user_id]?.ollamaUrl)
 
   const methods = useForm({
     defaultValues: {

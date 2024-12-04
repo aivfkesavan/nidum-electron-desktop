@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { FaFileAlt, FaSquare } from "react-icons/fa";
+import { Ollama } from 'ollama/browser';
 import { LuSend } from "react-icons/lu";
 import { nanoid } from "nanoid";
 import { LuX } from "react-icons/lu";
@@ -8,6 +9,7 @@ import type { Message } from "../../../store/conversations";
 
 import { createContext, ragDefaultPrompt, duckDuckGoSerach, ragSearch, systemDefaultPrompt, webDefaultPrompt } from "../../../utils/improve-context";
 import { imgToBase64, setImgToBase64Map } from "../../../actions/img";
+import { genMongoId } from "../../../utils";
 import constants from "../../../utils/constants";
 
 import { useAudio } from "./use-speech";
@@ -15,6 +17,7 @@ import { useToast } from "../../../components/ui/use-toast";
 
 import useContextStore, { llm_modelsT } from "../../../store/context";
 import useConvoStore from "../../../store/conversations";
+import useAuthStore from "../../../store/auth";
 
 import { useLLMModels, useLLamaDownloadedModels } from "../../../hooks/use-llm-models";
 import { useSharedDevice } from "../../../hooks/use-device";
@@ -32,16 +35,21 @@ import logo from '../../../assets/imgs/logo.png';
 function Messages() {
   const { toast } = useToast()
 
-  const {
-    updateContext,
-    model_type, sharedAppId,
-    llamaModeType, llamaModel,
-    ollamaModel, ollamaUrl,
-    project_id, chat_id,
-  } = useContextStore()
+  const user_id = useAuthStore(s => s._id)
 
-  const projectDetails = useConvoStore(s => s.projects[project_id] || null)
-  const filesLen = useConvoStore(s => s.files[project_id]?.length || 0)
+  const model_type = useContextStore(s => s?.data?.[user_id]?.model_type)
+  const sharedAppId = useContextStore(s => s?.data?.[user_id]?.sharedAppId)
+  const model_mode = useContextStore(s => s?.data?.[user_id]?.model_mode)
+  const llamaModel = useContextStore(s => s?.data?.[user_id]?.llamaModel)
+  const ollamaModel = useContextStore(s => s?.data?.[user_id]?.ollamaModel)
+  const ollamaUrl = useContextStore(s => s?.data?.[user_id]?.ollamaUrl)
+  const project_id = useContextStore(s => s?.data?.[user_id]?.project_id)
+  const chat_id = useContextStore(s => s?.data?.[user_id]?.chat_id)
+
+  const updateContext = useContextStore(s => s.updateContext)
+
+  const projectDetails = useConvoStore(s => s?.data?.[user_id]?.projects[project_id] || null)
+  const filesLen = useConvoStore(s => s?.data?.[user_id]?.files[project_id]?.length || 0)
   const pushIntoMessages = useConvoStore(s => s.pushIntoMessages)
   const deleteMessage = useConvoStore(s => s.deleteMessage)
   const editProject = useConvoStore(s => s.editProject)
@@ -49,7 +57,7 @@ function Messages() {
   const addChat = useConvoStore(s => s.addChat)
   const init = useConvoStore(s => s.init)
 
-  const { data: nidumCentralised } = useLLMModels("nidum-decentralised")
+  const { data: nidumCentralised } = useLLMModels("nidum-decentralised2")
   const { data: downloadedModels } = useLLamaDownloadedModels()
   const { data: sharedDevice } = useSharedDevice(sharedAppId, model_type === "Nidum Shared")
   const { data: crawlerData } = useCrawler()
@@ -60,12 +68,12 @@ function Messages() {
   const [message, setMessage] = useState('')
   const [files, setFiles] = useState<File[]>([])
 
-  const abortController = useRef(new AbortController())
+  const abortController = useRef<AbortController | Ollama>(new AbortController())
   const scrollableRef = useRef<HTMLDivElement>(null)
 
   const { speak } = useAudio()
 
-  const data = useConvoStore(s => s.messages?.[chat_id] || [])
+  const data = useConvoStore(s => s?.data?.[user_id]?.messages?.[chat_id] || [])
   const isChatInputDisabled = !project_id
 
   const {
@@ -85,10 +93,6 @@ function Messages() {
     setLoading(false)
     setFiles([])
   }, [chat_id])
-
-  useEffect(() => {
-    scrollableRef?.current?.scrollIntoView({ behavior: "instant", block: "end" })
-  }, [data.length, tempData])
 
   function num(n: string | number, defaultVal: number) {
     return (n || n === 0) ? Number(n) : defaultVal
@@ -156,7 +160,7 @@ function Messages() {
         let temContextId = ""
 
         if (!chat_id) {
-          temContextId = nanoid(10)
+          temContextId = genMongoId()
 
           addChat(project_id, {
             id: temContextId,
@@ -181,9 +185,9 @@ function Messages() {
           content: msg,
         }
 
-        // if (files?.length > 0) {
-        //   user.images = files.map(f => f.name)
-        // }
+        if (files?.length > 0) {
+          user.images = files.map(f => f.name)
+        }
 
         const initial = [user]
         const webSearchId = nanoid(10)
@@ -209,32 +213,29 @@ function Messages() {
         const onlyAllwedInputs = ["user", "assistant"]
 
         if (data) {
-          if (model_type === "Local") {
-            if (llamaModeType === "vision") {
-              dataMap = await Promise.all(data?.filter(d => onlyAllwedInputs.includes(d.role))?.map(async ({ id, ...rest }) => {
-                if (rest?.images && rest?.images?.length > 0) {
-                  const base64Files = await Promise.all(rest.images.map(imgToBase64))
-                  rest.images = base64Files
-                }
-                return rest
-              }))
-
-            } else {
-              dataMap = data?.filter(d => onlyAllwedInputs.includes(d.role))?.map(d => {
-                let is_user = d.role === "user"
-                if (is_user) {
-                  return {
-                    type: "user",
-                    text: d.content
-                  }
-                }
+          if (model_mode === "vision" && model_type === "Nidum Decentralized") {
+            dataMap = await Promise.all(data?.filter(d => onlyAllwedInputs.includes(d.role))?.map(async ({ id, ...rest }) => {
+              if (rest?.images && rest?.images?.length > 0) {
+                const base64Files = await Promise.all(rest.images.map(imgToBase64))
+                rest.images = base64Files
+              }
+              return rest
+            }))
+          }
+          else if (model_type === "Local") {
+            dataMap = data?.filter(d => onlyAllwedInputs.includes(d.role))?.map(d => {
+              let is_user = d.role === "user"
+              if (is_user) {
                 return {
-                  type: "model",
-                  response: [d.content],
+                  type: "user",
+                  text: d.content
                 }
-              })
-            }
-
+              }
+              return {
+                type: "model",
+                response: [d.content],
+              }
+            })
           } else {
             dataMap = data?.filter(d => onlyAllwedInputs.includes(d.role))?.map(({ id, images, ...rest }) => rest)
           }
@@ -301,7 +302,7 @@ function Messages() {
           "SambaNova Systems": `${constants.backendUrl}/ai/sambanova`,
           Anthropic: "https://api.anthropic.com/v1/messages",
           OpenAI: "https://api.openai.com/v1/chat/completions",
-          "Ollama": `${ollamaUrl}/api/chat`,
+          Ollama: `${ollamaUrl}/api/chat`,
         }
 
         let url = urls?.[model_type as keyof typeof urls]
@@ -319,7 +320,7 @@ function Messages() {
         }
 
         if (model_type !== "Anthropic") {
-          payload.n = num(projectDetails?.n, 1)
+          // payload.n = num(projectDetails?.n, 1)
           payload.frequency_penalty = num(projectDetails?.frequency_penalty, 0)
         }
 
@@ -341,6 +342,7 @@ function Messages() {
         if (model_type === "Hugging Face") {
           payload.model = hfModel
           headers.Authorization = `Bearer ${hfApiKey}`
+          headers["x-use-cache"] = "false"
           if (payload.top_p === 0) {
             payload.top_p = 0.1
           }
@@ -378,6 +380,64 @@ function Messages() {
 
         abortController.current = new AbortController()
 
+        if (model_type === "Nidum Decentralized") {
+          const ollama = new Ollama({ host: url })
+          const response = await ollama.chat({
+            model: payload.model,
+            messages: payload.messages,
+            stream: true,
+            options: {
+              temperature: payload?.temperature,
+              top_p: payload?.top_p,
+              frequency_penalty: payload?.frequency_penalty,
+              num_ctx: payload?.max_tokens
+            },
+          })
+
+          abortController.current = ollama
+
+          let botRes = ""
+          for await (const part of response) {
+            botRes = botRes + part.message.content || ""
+
+            const botReply: Message = {
+              role: "assistant",
+              content: botRes,
+              id: nanoid(5),
+            }
+
+            setTempData(prev => prev.map(p => {
+              if (p.role === "assistant" || p.role === "loading") {
+                return botReply
+              }
+              return p
+            }))
+          }
+
+          const finalOutput = [user]
+          const botReply: Message = {
+            role: "assistant",
+            content: botRes,
+            id: nanoid(10),
+          }
+          if (webSearchedData?.length > 0) {
+            finalOutput.push({
+              id: webSearchId,
+              role: "web-searched",
+              content: "",
+              webSearched: webSearchedData,
+            })
+          }
+          finalOutput.push(botReply)
+          setTempData([])
+          setLoading(false)
+          pushIntoMessages(project_id, currContextId, finalOutput)
+          if (needAutoPlay) {
+            speak(botReply.id, botReply.content)
+          }
+          return
+        }
+
         const response = await fetch(url, {
           signal: abortController.current.signal,
           method: "POST",
@@ -395,7 +455,7 @@ function Messages() {
           return
         }
 
-        if (["Nidum", "Anthropic", "SambaNova Systems", "Nidum Shared", "Nidum Decentralized"].includes(model_type)) {
+        if (["Nidum", "Anthropic", "SambaNova Systems", "Nidum Shared"].includes(model_type)) {
           const res = await response.json()
           const content = res?.choices?.[0]?.message?.content || res?.content?.[0]?.text || res?.message?.content || ""
 
@@ -547,7 +607,9 @@ function Messages() {
     } catch (error) {
       setLoading(false)
       setTempData([])
-      toast({ title: "Something went wrong!" })
+      if (error?.name !== "AbortError") {
+        toast({ title: "Something went wrong!" })
+      }
     }
   }
 
@@ -635,7 +697,7 @@ function Messages() {
           />
 
           {
-            model_type === "Local" && llamaModeType === "vision" &&
+            model_mode === "vision" && model_type === "Nidum Decentralized" &&
             <ImageUpload
               files={files}
               loading={loading}

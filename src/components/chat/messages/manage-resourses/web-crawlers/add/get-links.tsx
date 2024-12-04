@@ -7,6 +7,7 @@ import { getSubLinks } from '../../../../../../actions/webcrawler';
 import useContextStore from '../../../../../../store/context';
 import { useAddCrawl } from '../../../../../../hooks/use-crawler';
 import { useToast } from '../../../../../ui/use-toast';
+import useAuthStore from '../../../../../../store/auth';
 
 import { Switch } from '../../../../../ui/switch';
 
@@ -15,7 +16,8 @@ type props = {
 }
 
 function GetLinks({ updateLinks }: props) {
-  const projectId = useContextStore(s => s.project_id)
+  const user_id = useAuthStore(s => s._id)
+  const projectId = useContextStore(s => s?.data?.[user_id]?.project_id)
 
   // const { data: crawledLinks, isLoading } = useCrawler()
   const { toast } = useToast()

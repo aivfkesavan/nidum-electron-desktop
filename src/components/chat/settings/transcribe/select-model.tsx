@@ -2,6 +2,7 @@ import { useState } from "react";
 import { BiExpandAlt } from "react-icons/bi";
 
 import useContextStore from "../../../../store/context";
+import useAuthStore from "../../../../store/auth";
 import { cn } from "../../../../lib/utils";
 
 import logo from '../../../../assets/imgs/logo.png';
@@ -36,8 +37,9 @@ const list: listT[] = [
 ]
 
 function SelectModel() {
+  const user_id = useAuthStore(s => s._id)
   const updateContext = useContextStore(s => s.updateContext)
-  const stt_type = useContextStore(s => s.stt_type)
+  const stt_type = useContextStore(s => s?.data?.[user_id]?.stt_type)
 
   const [open, setOpen] = useState(false)
 

@@ -1,17 +1,18 @@
-import { nanoid } from 'nanoid';
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import { immer } from 'zustand/middleware/immer';
 import dayjs from 'dayjs';
 
+import useAuthStore from './auth';
 import { ragDefaultPrompt, systemDefaultPrompt, webDefaultPrompt } from '../utils/improve-context';
+import { genMongoId } from '../utils';
 
 export type Message = {
   id: string;
   role: "user" | "assistant" | "loading" | "web-searched"
   content: string;
   images?: string[];
-  webSearched?: string[]
+  webSearched?: string[];
 }
 
 export type Chat = {
@@ -25,13 +26,12 @@ export type Project = {
   name: string;
   description: string;
   category: string;
-  other: string
+  other: string;
   systemPrompt: string;
   webPrompt: string;
   ragPrompt: string;
   frequency_penalty: number;
   temperature: number;
-  // tokenLimit: number;
   max_tokens: number;
   top_p: number;
   n: number;
@@ -48,11 +48,14 @@ type FileT = {
 }
 
 type state = {
-  initialised: boolean
   projects: Record<string, Project>; // project_id
   files: Record<string, FileT[]>; // project_id
   chats: Record<string, Chat[]>; // project_id
   messages: Record<string, Message[]>; // chat_id
+}
+
+type storeState = {
+  data: Record<string, state>; // user_id
 }
 
 type addProjectType = {
@@ -73,17 +76,19 @@ type actions = {
   editChat: (projectId: string, chat: Partial<Chat>) => void;
   deleteChat: (project_id: string, chat_id: string) => void;
 
-  pushIntoMessages: (project_id: string, chat_id: string, payload: Message | Message[]) => void
+  pushIntoMessages: (project_id: string, chat_id: string, payload: Message | Message[]) => void;
   deleteMessage: (chat_id: string, msg_id: string) => void;
 
   addFile: (projectId: string, file: FileT) => void;
   deleteFile: (project_id: string, file_id: string) => void;
 
-  clear: () => void
+  clearByUser: () => void
+  clear: () => void;
 }
 
+
 const createDefaultProject = (): [string, Project] => {
-  const id = "default-project"
+  const id = genMongoId()
   return [id, {
     id,
     name: "Default Project",
@@ -102,40 +107,48 @@ const createDefaultProject = (): [string, Project] => {
     web_enabled: false,
     rag_enabled: false,
     at: dayjs().toISOString(),
-  }];
+  }]
 }
 
 const createDefaultChat = (): Chat => ({
-  id: "default-chat",
+  id: genMongoId(),
   title: "Default Chat",
   at: dayjs().toISOString(),
 })
 
-const initPayload = {
-  initialised: false,
-  projects: {},
-  chats: {},
-  messages: {},
-  files: {},
-}
+const useConvoStore = create<storeState & actions>()(persist(immer(set => ({
+  data: {},
 
-const useConvoStore = create<state & actions>()(persist(immer(set => ({
-  ...initPayload,
-
-  init: () => set(state => {
-    if (!state.initialised && Object.keys(state.projects).length === 0) {
+  init: () => set(s => {
+    const user_id = useAuthStore.getState()._id
+    let state = s.data[user_id]
+    if (!state || Object.keys(state.projects)?.length === 0) {
+      s.data[user_id] = {
+        projects: {},
+        chats: {},
+        messages: {},
+        files: {}
+      }
       const [defaultProjectId, defaultProject] = createDefaultProject();
-      state.projects[defaultProjectId] = defaultProject;
+      s.data[user_id].projects = {
+        [defaultProjectId]: defaultProject
+      }
 
       const defaultChat = createDefaultChat();
-      state.chats[defaultProjectId] = [defaultChat];
-      state.messages[defaultChat.id] = [];
-      state.initialised = true
+      s.data[user_id].chats = {
+        [defaultProjectId]: [defaultChat]
+      }
+      s.data[user_id].messages = {
+        [defaultChat.id]: []
+      }
     }
   }),
 
-  addProject: (project) => set(state => {
-    const id = nanoid(10)
+  addProject: (project) => set(s => {
+    const user_id = useAuthStore.getState()._id
+    let state = s.data[user_id]
+
+    const id = genMongoId()
     state.projects[id] = {
       id,
       ...project,
@@ -153,13 +166,16 @@ const useConvoStore = create<state & actions>()(persist(immer(set => ({
     }
 
     state.chats[id] = [{
-      id: nanoid(10),
+      id: genMongoId(),
       title: "New Chat",
       at: dayjs().toISOString(),
     }]
   }),
 
-  editProject: (project_id, details) => set(state => {
+  editProject: (project_id, details) => set(s => {
+    const user_id = useAuthStore.getState()._id
+    let state = s.data[user_id]
+
     // @ts-ignore
     state.projects[project_id] = Object.assign(state.projects[project_id], {
       ...details,
@@ -167,7 +183,10 @@ const useConvoStore = create<state & actions>()(persist(immer(set => ({
     })
   }),
 
-  deleteProject: (project_id) => set(state => {
+  deleteProject: (project_id) => set(s => {
+    const user_id = useAuthStore.getState()._id
+    let state = s.data[user_id]
+
     const ids = state.chats[project_id]?.map(c => c.id) || []
     ids.forEach(id => {
       delete state.messages[id]
@@ -177,7 +196,10 @@ const useConvoStore = create<state & actions>()(persist(immer(set => ({
     delete state.projects[project_id]
   }),
 
-  addChat: (projectId, chat) => set(state => {
+  addChat: (projectId, chat) => set(s => {
+    const user_id = useAuthStore.getState()._id
+    let state = s.data[user_id]
+
     // @ts-ignore
     state.projects[projectId].at = dayjs().toISOString()
     if (!state.chats[projectId]) {
@@ -190,7 +212,10 @@ const useConvoStore = create<state & actions>()(persist(immer(set => ({
     })
   }),
 
-  editChat: (projectId, chat) => set(state => {
+  editChat: (projectId, chat) => set(s => {
+    const user_id = useAuthStore.getState()._id
+    let state = s.data[user_id]
+
     if (state.chats[projectId]) {
       // @ts-ignore
       state.projects[projectId].at = dayjs().toISOString()
@@ -206,13 +231,19 @@ const useConvoStore = create<state & actions>()(persist(immer(set => ({
     }
   }),
 
-  deleteChat: (project_id, chat_id) => set(state => {
+  deleteChat: (project_id, chat_id) => set(s => {
+    const user_id = useAuthStore.getState()._id
+    let state = s.data[user_id]
+
     delete state.messages[chat_id]
     // @ts-ignore
     state.chats[project_id] = state.chats[project_id].filter(c => c.id !== chat_id)
   }),
 
-  pushIntoMessages: (project_id, chat_id, msg) => set(state => {
+  pushIntoMessages: (project_id, chat_id, msg) => set(s => {
+    const user_id = useAuthStore.getState()._id
+    let state = s.data[user_id]
+
     if (!state.messages[chat_id]) {
       state.messages[chat_id] = []
     }
@@ -235,7 +266,10 @@ const useConvoStore = create<state & actions>()(persist(immer(set => ({
     }
   }),
 
-  deleteMessage: (chat_id, msg_id) => set(state => {
+  deleteMessage: (chat_id, msg_id) => set(s => {
+    const user_id = useAuthStore.getState()._id
+    let state = s.data[user_id]
+
     const messages = state.messages[chat_id] || []
     const targetIndex = messages.findIndex(msg => msg.id === msg_id)
 
@@ -262,7 +296,10 @@ const useConvoStore = create<state & actions>()(persist(immer(set => ({
     state.messages[chat_id] = messages.filter((msg, i) => !toDelete.includes(i))
   }),
 
-  addFile: (projectId, file) => set(state => {
+  addFile: (projectId, file) => set(s => {
+    const user_id = useAuthStore.getState()._id
+    let state = s.data[user_id]
+
     if (!state.files[projectId]) {
       state.files[projectId] = []
     }
@@ -270,16 +307,33 @@ const useConvoStore = create<state & actions>()(persist(immer(set => ({
     state.files[projectId].push(file)
   }),
 
-  deleteFile: (project_id, file_id) => set(state => {
+  deleteFile: (project_id, file_id) => set(s => {
+    const user_id = useAuthStore.getState()._id
+    let state = s.data[user_id]
+
     // @ts-ignore
     state.files[project_id] = state.files[project_id].filter(c => c.id !== file_id)
   }),
 
-  clear: () => set({ ...initPayload }),
+  clearByUser: () => set((state) => {
+    const user_id = useAuthStore.getState()._id
+
+    if (state.data[user_id]) {
+      delete state.data[user_id]
+    }
+  }),
+
+  clear: () => set({ data: {} }),
 })),
   {
     name: 'convo-storage',
-    version: 3,
+    version: 4,
+    migrate: (persistedState: any, version) => {
+      if (!version || version < 4) {
+        return { data: {} }
+      }
+      return persistedState
+    },
   }
 ))
 

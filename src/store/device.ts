@@ -29,7 +29,14 @@ const useDeviceStore = create<authState & actions>()((persist((set) => ({
   clear: () => set({ ...payload, appId: nanoid() }),
 }),
   {
-    name: 'device-storage'
+    name: 'device-storage',
+    version: 1,
+    migrate: (persistedState: any, version) => {
+      if (!version || version < 3) {
+        return { ...payload }
+      }
+      return persistedState
+    },
   }
 )))
 

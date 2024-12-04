@@ -3,6 +3,7 @@ import { LuRefreshCcw } from "react-icons/lu";
 
 import { useSharedServers } from "../../../../hooks/use-user";
 import useContextStore from "../../../../store/context";
+import useAuthStore from "../../../../store/auth";
 
 import { RadioGroup, RadioGroupItem } from "../../../ui/radio-group";
 import OnlineStatus from "../../../common/online-status";
@@ -11,7 +12,8 @@ import Footer from "../common/footer";
 
 function NidumShared() {
   const updateContext = useContextStore(s => s.updateContext)
-  const sharedAppId = useContextStore(s => s.sharedAppId)
+  const user_id = useAuthStore(s => s._id)
+  const sharedAppId = useContextStore(s => s?.data?.[user_id]?.sharedAppId)
 
   const [selected, setSelected] = useState(sharedAppId || "")
 
@@ -19,6 +21,16 @@ function NidumShared() {
 
   function onSave() {
     updateContext({ sharedAppId: selected })
+  }
+
+  function onSelect(v: string) {
+    setSelected(v)
+    setTimeout(() => {
+      const el = document.querySelector("#settings-cont")
+      if (el) {
+        el.scrollTop = el.scrollHeight
+      }
+    }, 10)
   }
 
   if (isLoading) {
@@ -41,7 +53,7 @@ function NidumShared() {
 
       {
         data?.invites?.length > 0 &&
-        <RadioGroup value={selected} onValueChange={setSelected} className="my-4">
+        <RadioGroup value={selected} onValueChange={onSelect} className="my-4">
           {
             data?.invites?.map((inv: any) => (
               <div key={inv?._id} className="p-4 mb-4 border rounded-md">

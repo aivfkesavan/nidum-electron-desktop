@@ -8,7 +8,7 @@ function MarkdownParse({ response = "" }) {
       wrapperElement={{
         "data-color-mode": "dark"
       }}
-      className='[&_ul]:list-decimal [&_ol]:list-decimal'
+      className='mark-down-wrap [&_ul]:list-decimal [&_ol]:list-decimal'
     />
   )
 }

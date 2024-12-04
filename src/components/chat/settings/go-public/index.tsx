@@ -6,14 +6,17 @@ import { useAddInviteMutate, useInvites, useRemoveInviteMutate } from "../../../
 import useDeviceStore from "../../../../store/device";
 import useContextStore from "../../../../store/context";
 import { useToast } from "../../../ui/use-toast";
+import useAuthStore from "../../../../store/auth";
 
 function GoPublic() {
   const [deviceName, setDeviceName] = useState("")
   const [emailTo, setEmailTo] = useState("")
 
+  const user_id = useAuthStore(s => s._id)
+
   const isPublicShared = useDeviceStore(s => s.isPublicShared)
-  const model_type = useContextStore(s => s.model_type)
-  const llamModel = useContextStore(s => s.llamaModel)
+  const model_type = useContextStore(s => s?.data?.[user_id]?.model_type)
+  const llamModel = useContextStore(s => s?.data?.[user_id]?.llamaModel)
 
   const { toast } = useToast()
 

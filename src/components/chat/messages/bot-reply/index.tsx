@@ -8,6 +8,7 @@ import useClipboardCopy from "../../../../hooks/use-clipboard-copy";
 import logo from '../../../../assets/imgs/logo.png';
 
 import MarkdownParser from "./markdown-parse";
+import { cn } from "../../../../lib/utils";
 
 type props = {
   id: string
@@ -29,7 +30,7 @@ function BotReply({ id, response, isTemp = false, deleteChat = () => { } }: prop
 
   return (
     <div className="mb-6 group">
-      <div className="w-fit max-w-[88%] py-2 ml-9 relative">
+      <div className={cn("w-fit max-w-[88%] py-2 ml-9 relative", isTemp ? "temp" : "")}>
         <div className="dc size-7 absolute top-1 -left-9 border rounded-full">
           <img
             alt=""

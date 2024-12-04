@@ -2,6 +2,8 @@ import { useState, useEffect, useCallback } from 'react';
 import { LuChevronLeft, LuChevronRight } from "react-icons/lu";
 
 import useContextStore from '../../../../store/context';
+import useAuthStore from '../../../../store/auth';
+import constants from '../../../../utils/constants';
 
 import { Button } from "../../../../components/ui/button";
 import {
@@ -9,14 +11,14 @@ import {
   CarouselContent,
   CarouselItem,
 } from "../../../../components/ui/carousel";
-import constants from '../../../../utils/constants';
 
 type props = {
   images: string[]
 }
 
 function ImageCard({ images }: props) {
-  const chat_id = useContextStore(s => s.chat_id)
+  const user_id = useAuthStore(s => s._id)
+  const chat_id = useContextStore(s => s?.data?.[user_id]?.chat_id)
 
   const [api, setApi] = useState<any>(null)
   const [current, setCurrent] = useState(0)

@@ -4,6 +4,7 @@ import { MdDownloadDone, MdOutlineFileDownload } from "react-icons/md";
 import { useDownloads } from "../../../../components/common/download-manager";
 import useContextStore from "../../../../store/context";
 import { useToast } from "../../../../components/ui/use-toast";
+import useAuthStore from "../../../../store/auth";
 
 import { RadioGroup, RadioGroupItem } from "../../../../components/ui/radio-group";
 import { Label } from "../../../../components/ui/label";
@@ -29,8 +30,10 @@ const models = [
 
 function Native() {
   const { downloads, downloadXenovaModels } = useDownloads() // downloadWhisperModel, 
-  const downloaded = useContextStore(s => s?.nativeSttModelsDownloaded?.split(","))
-  const nativeSttModel = useContextStore(s => s.nativeSttModel)
+  const user_id = useAuthStore(s => s._id)
+
+  const downloaded = useContextStore(s => s?.data?.[user_id]?.nativeSttModelsDownloaded?.split(","))
+  const nativeSttModel = useContextStore(s => s?.data?.[user_id]?.nativeSttModel)
   const updateContext = useContextStore(s => s.updateContext)
   const { toast } = useToast()
 

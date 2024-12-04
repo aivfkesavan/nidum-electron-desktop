@@ -2,6 +2,7 @@ import { nanoid } from "nanoid";
 
 import useContextStore from '../../../store/context';
 import useConvoStore from "../../../store/conversations";
+import useAuthStore from "../../../store/auth";
 import useUIStore from "../../../store/ui";
 
 import Message from '../../../assets/svg/message.svg?react';
@@ -17,7 +18,8 @@ import {
 function Create() {
   const updateModal = useUIStore(s => s.update)
 
-  const project_id = useContextStore(s => s.project_id)
+  const user_id = useAuthStore(s => s._id)
+  const project_id = useContextStore(s => s?.data?.[user_id]?.project_id)
   const updateContext = useContextStore(s => s.updateContext)
   const addChat = useConvoStore(s => s.addChat)
 

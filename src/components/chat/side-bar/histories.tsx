@@ -7,6 +7,7 @@ import type { Chat } from '../../../store/conversations';
 import { relativeDateFormat } from "../../../utils/date-helper";
 import useContextStore from "../../../store/context";
 import useConvoStore from "../../../store/conversations";
+import useAuthStore from "../../../store/auth";
 import useUIStore from "../../../store/ui";
 import { cn } from "../../../lib/utils";
 
@@ -24,34 +25,32 @@ type props = {
 }
 
 function Histories({ isFullScreen, platform }: props) {
-  const { chat_id, project_id, updateContext } = useContextStore() // hfImgGenModel, model_type, 
+  const user_id = useAuthStore(s => s._id)
+
+  const updateContext = useContextStore(s => s.updateContext)
   const addChat = useConvoStore(s => s.addChat)
+
+  const project_id = useContextStore(s => s?.data?.[user_id]?.project_id)
+  const chat_id = useContextStore(s => s?.data?.[user_id]?.chat_id)
 
   const updateModal = useUIStore(s => s.update)
 
   const [searchBy, setSearchBy] = useState("")
 
-  const groupedChats: groupedChatsT = useConvoStore(s =>
-    s.chats?.[project_id]?.reduce((prev: any, curr) => {
-      if (curr?.title?.toLowerCase()?.includes(searchBy?.toLowerCase())) {
-        const dateGroup = relativeDateFormat(curr.at)
-        if (!prev[dateGroup]) prev[dateGroup] = []
-        prev[dateGroup].push(curr)
+  const groupedChats: groupedChatsT = useConvoStore(s => {
+    if (s?.data?.[user_id]?.chats) {
+      return s?.data?.[user_id]?.chats?.[project_id]?.reduce((prev: any, curr) => {
+        if (curr?.title?.toLowerCase()?.includes(searchBy?.toLowerCase())) {
+          const dateGroup = relativeDateFormat(curr.at)
+          if (!prev[dateGroup]) prev[dateGroup] = []
+          prev[dateGroup].push(curr)
+          return prev
+        }
         return prev
-      }
-      return prev
-    }, {}) || {}
-  )
-
-  // useEffect(() => {
-  //   if (!chat_id) {
-  //     const chats = Object.values(groupedChats)?.[0]
-  //     const isFirstChatNew = chats?.[0]?.title === "New Chat"
-  //     if (isFirstChatNew) {
-  //       updateContext({ chat_id: chats[0]?.id })
-  //     }
-  //   }
-  // }, [groupedChats, chat_id])
+      }, {}) || {}
+    }
+    return {}
+  })
 
   function addChatTo() {
     const id = nanoid(10)

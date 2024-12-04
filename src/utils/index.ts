@@ -1,3 +1,4 @@
+import { customAlphabet } from "nanoid";
 
 export const delay = (ms: number = 1000) => new Promise(res => setTimeout(res, ms))
 
@@ -19,4 +20,21 @@ export function bytesToSize(bytes: number): string {
   const size: string = (bytes / Math.pow(1024, exponent)).toFixed(2);
 
   return size + " " + units[exponent];
+}
+
+export function genMongoId() {
+  const hexAlphabet = '0123456789abcdef'
+  const timestamp = Math.floor(Date.now() / 1000).toString(16).padStart(8, '0')
+
+  const randomPart = customAlphabet(hexAlphabet, 16)()
+  return timestamp + randomPart
+}
+
+type item = {
+  at: string
+}
+export function findLatest<T extends item>(items: T[]): T {
+  return items.reduce((latest, current) => {
+    return current.at > latest.at ? current : latest;
+  }, items[0])
 }

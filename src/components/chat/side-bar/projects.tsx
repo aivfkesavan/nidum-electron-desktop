@@ -6,6 +6,7 @@ import type { Project } from "../../../store/conversations";
 import { relativeDateFormat } from "../../../utils/date-helper"; // generateSampleProjects, 
 import useContextStore from "../../../store/context";
 import useConvoStore from "../../../store/conversations";
+import useAuthStore from "../../../store/auth";
 import useUIStore from "../../../store/ui";
 import { cn } from "../../../lib/utils";
 
@@ -21,24 +22,29 @@ type props = {
 }
 
 function Projects({ isFullScreen, platform }: props) {
+  const user_id = useAuthStore(s => s._id)
+
   const updateContext = useContextStore(s => s.updateContext)
-  const project_id = useContextStore(s => s.project_id)
+  const project_id = useContextStore(s => s?.data?.[user_id]?.project_id)
 
   const updateModal = useUIStore(s => s.update)
   const [searchBy, setSearchBy] = useState("")
 
-  const chatsMap = useConvoStore(s => s.chats)
-  const groupedProjects: groupedPrpjectT = useConvoStore(s =>
-    Object.values(s.projects)?.reduce((prev: any, curr) => {
-      if (curr?.name?.toLowerCase()?.includes(searchBy?.toLowerCase())) {
-        const dateGroup = relativeDateFormat(curr.at)
-        if (!prev[dateGroup]) prev[dateGroup] = []
-        prev[dateGroup].push(curr)
+  const chatsMap = useConvoStore(s => s?.data?.[user_id]?.chats)
+  const groupedProjects: groupedPrpjectT = useConvoStore(s => {
+    if (s?.data?.[user_id]) {
+      return Object.values(s?.data?.[user_id]?.projects)?.reduce((prev: any, curr) => {
+        if (curr?.name?.toLowerCase()?.includes(searchBy?.toLowerCase())) {
+          const dateGroup = relativeDateFormat(curr.at)
+          if (!prev[dateGroup]) prev[dateGroup] = []
+          prev[dateGroup].push(curr)
+          return prev
+        }
         return prev
-      }
-      return prev
-    }, {}) || {}
-  )
+      }, {}) || {}
+    }
+    return {}
+  })
 
   function onNavigate(id: string) {
     updateContext({

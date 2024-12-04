@@ -1,5 +1,6 @@
 import useContextStore from "../../../store/context";
 import useConvoStore from "../../../store/conversations";
+import useAuthStore from "../../../store/auth";
 import useUIStore from "../../../store/ui";
 
 import {
@@ -19,8 +20,9 @@ function DeleteChat() {
   const updateContext = useContextStore(s => s.updateContext)
   const deleteChat = useConvoStore(s => s.deleteChat)
 
-  const project_id = useContextStore(s => s.project_id)
-  const chat_id = useContextStore(s => s.chat_id)
+  const user_id = useAuthStore(s => s._id)
+  const project_id = useContextStore(s => s?.data?.[user_id]?.project_id)
+  const chat_id = useContextStore(s => s?.data?.[user_id]?.chat_id)
 
   function onConfirm() {
     deleteChat(project_id, data?.id)
