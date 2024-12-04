@@ -67,10 +67,10 @@ function NidumShared() {
                   inv?.devices?.map((dev: any) => (
                     <Label
                       key={dev?._id}
-                      htmlFor={dev?.appId}
+                      htmlFor={dev?.deviceId}
                       className="df w-full p-3 mb-2 border rounded-md cursor-pointer"
                     >
-                      <RadioGroupItem value={dev?.appId} id={dev?.appId} />
+                      <RadioGroupItem value={dev?.deviceId} id={dev?.deviceId} />
                       {dev?.name}
                       <OnlineStatus isOnline={dev?.isServerOn} />
                     </Label>

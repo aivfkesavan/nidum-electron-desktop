@@ -3,8 +3,9 @@ import { LuX } from "react-icons/lu";
 
 import { useInitDevice, useDeviceMutate, useGoPublicMutate, useStopShareMutate } from "../../../../hooks/use-device";
 import { useAddInviteMutate, useInvites, useRemoveInviteMutate } from "../../../../hooks/use-user";
-import useDeviceStore from "../../../../store/device";
+import useOnlineStatus from "../../../../hooks/use-online-status";
 import useContextStore from "../../../../store/context";
+import useDeviceStore from "../../../../store/device";
 import { useToast } from "../../../../hooks/use-toast";
 import useAuthStore from "../../../../store/auth";
 
@@ -14,10 +15,12 @@ function GoPublic() {
 
   const user_id = useAuthStore(s => s._id)
 
-  const isPublicShared = useDeviceStore(s => s.isPublicShared)
+  const isNidumSharedPublic = useDeviceStore(s => s.isNidumSharedPublic)
+  const isNidumSetuped = useDeviceStore(s => s.isNidumEnabled && s.isNidumReserved && s.isNidumUrlConfigured)
   const model_type = useContextStore(s => s?.data?.[user_id]?.model_type)
   const llamModel = useContextStore(s => s?.data?.[user_id]?.llamaModel)
 
+  const isOnline = useOnlineStatus()
   const { toast } = useToast()
 
   const { data: device, isLoading: isLoading1 } = useInitDevice()
@@ -52,9 +55,10 @@ function GoPublic() {
   }
 
   function onClk() {
-    if (!isPublicShared) {
+    if (!isNidumSharedPublic) {
       if (model_type !== "Local") return toast({ title: "Choose Local AI server to go public" })
       if (!llamModel) return toast({ title: "Please choose a model to go public" })
+      if (!isOnline) return toast({ title: "Kindly ensure an internet connection to continue." })
       return mutateGoPublic()
     }
     return mutateStop()
@@ -69,6 +73,11 @@ function GoPublic() {
         <div className="text-xs text-center">Checking device status</div>
       }
 
+      {
+        !isNidumSetuped &&
+        <div className="mb-0.5 text-xs text-center">Setup not completed</div>
+      }
+
       <div className="dc mb-8">
         <input
           className="max-w-60 px-3 py-2 text-sm bg-zinc-700/50"
@@ -78,11 +87,12 @@ function GoPublic() {
         />
 
         <button
-          className={`dc w-36 px-4 py-1.5 text-[13px] ${isPublicShared ? "bg-red-500 hover:bg-red-600" : "bg-green-500 hover:bg-green-600"}`}
           onClick={onClk}
+          disabled={!isNidumSetuped}
+          className={`dc w-36 px-4 py-1.5 text-[13px] ${isNidumSharedPublic ? "bg-red-500 hover:bg-red-600" : "bg-green-500 hover:bg-green-600"}`}
         >
           {(isPending4 || isPending5) && <span className="loader-2 size-4 border-2"></span>}
-          {isPublicShared ? "Stop Sharing" : "Go Public"}
+          {isNidumSharedPublic ? "Stop Sharing" : "Go Public"}
         </button>
       </div>
 

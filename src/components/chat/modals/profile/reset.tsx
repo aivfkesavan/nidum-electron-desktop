@@ -1,7 +1,9 @@
 import { useState } from "react";
 
 import { useResetApp } from "../../../../hooks/use-user";
+import useOnlineStatus from "../../../../hooks/use-online-status";
 import useDeviceStore from "../../../../store/device";
+import { useToast } from "../../../../hooks/use-toast";
 
 import {
   AlertDialog,
@@ -20,12 +22,15 @@ function Reset() {
   // const [incxludeModels, setIncludeModels] = useState(false)
   const [showConfirm, setShowConfirm] = useState(false)
   const { mutate, isPending } = useResetApp(true)
-  const appId = useDeviceStore(s => s.appId)
+  const deviceId = useDeviceStore(s => s.deviceId)
+  const isOnline = useOnlineStatus()
+  const { toast } = useToast()
 
   function onReset(e: any) {
     e?.preventDefault()
+    if (!isOnline) return toast({ title: "Kindly ensure an internet connection to continue." })
     if (!showConfirm) return setShowConfirm(true)
-    mutate({ includeModels: true, appId })
+    mutate({ includeModels: true, deviceId })
   }
 
   return (

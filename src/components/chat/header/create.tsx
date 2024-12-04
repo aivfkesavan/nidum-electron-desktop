@@ -34,7 +34,7 @@ function Create() {
       <Tooltip>
         <TooltipTrigger
           onClick={onClk}
-          className="non-draggable ml-auto active:scale-105"
+          className="non-draggable active:scale-105"
         >
           <Message />
         </TooltipTrigger>

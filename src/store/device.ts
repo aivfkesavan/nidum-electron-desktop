@@ -6,9 +6,11 @@ const alphabet = 'abcdefghijklmnopqrstuvwxyz0123456789'; // lowercase and digits
 const nanoid = customAlphabet(alphabet, 20);
 
 type authState = {
-  appId: string;
-  isZrokSetuped: boolean
-  isPublicShared: boolean
+  deviceId: string;
+  isNidumEnabled: boolean
+  isNidumReserved: boolean
+  isNidumUrlConfigured: boolean
+  isNidumSharedPublic: boolean
 }
 
 type actions = {
@@ -17,22 +19,24 @@ type actions = {
 }
 
 const payload = {
-  appId: nanoid(),
-  isZrokSetuped: false,
-  isPublicShared: false,
+  deviceId: nanoid(),
+  isNidumEnabled: false,
+  isNidumReserved: false,
+  isNidumUrlConfigured: false,
+  isNidumSharedPublic: false,
 }
 
 const useDeviceStore = create<authState & actions>()((persist((set) => ({
   ...payload,
 
   update: (payload: Partial<authState>) => set({ ...payload }),
-  clear: () => set({ ...payload, appId: nanoid() }),
+  clear: () => set({ ...payload, deviceId: nanoid() }),
 }),
   {
     name: 'device-storage',
-    version: 1,
+    version: 4,
     migrate: (persistedState: any, version) => {
-      if (!version || version < 3) {
+      if (!version || version < 4) {
         return { ...payload }
       }
       return persistedState

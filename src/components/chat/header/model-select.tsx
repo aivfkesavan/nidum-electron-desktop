@@ -39,7 +39,7 @@ function ModelSelect() {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger
-        className={`non-draggable df gap-px pl-28 [.open_&]:pl-0 text-sm transition-all ${isFullScreen || platform === "windows" ? "-translate-x-20 [.open_&]:translate-x-0" : ""}`}
+        className={`non-draggable df gap-px pl-28 [.open_&]:pl-0 mr-auto text-sm transition-all ${isFullScreen || platform === "windows" ? "-translate-x-20 [.open_&]:translate-x-0" : ""}`}
       >
         AI Server: {model_type} <LuChevronRight className="opacity-50" />
       </DropdownMenuTrigger>

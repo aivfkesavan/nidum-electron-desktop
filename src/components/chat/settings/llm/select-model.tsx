@@ -24,7 +24,7 @@ function SelectModel() {
   const updateContext = useContextStore(s => s.updateContext)
   const model_type = useContextStore(s => s?.data?.[user_id]?.model_type)
 
-  const isPublicShared = useDeviceStore(s => s.isPublicShared)
+  const isNidumSharedPublic = useDeviceStore(s => s.isNidumSharedPublic)
 
   const { toast } = useToast()
 
@@ -34,7 +34,7 @@ function SelectModel() {
 
   function onClk(e: any) {
     e?.preventDefault()
-    if (isPublicShared) {
+    if (isNidumSharedPublic) {
       return toast({ title: "Stop 'Go Public' feature to change server" })
     }
     return setOpen(true)
