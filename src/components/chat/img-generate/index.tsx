@@ -1,14 +1,13 @@
 import { useEffect, useRef, useState } from "react";
+import { useParams } from "react-router-dom";
 import { LuSend } from "react-icons/lu";
 import { nanoid } from "nanoid";
 
 import { downloadGenerateImg } from "../../../actions/img";
 import useImgGenStore, { ImgGenMsg } from "../../../store/img-gen";
 import { useDownloads } from "../../../components/common/download-manager";
-import useContextStore from "../../../store/context";
-import useAuthStore from "../../../store/auth";
 import { useConfig } from "../../../hooks/use-config";
-import { useToast } from "../../../components/ui/use-toast";
+import { useToast } from "../../../hooks/use-toast";
 
 import SpeechToText from "../messages/speech-to-text";
 import Settings from "../settings";
@@ -18,6 +17,7 @@ import List from "./list";
 import logo from '../../../assets/imgs/logo.png';
 
 function ImgGenerate() {
+  const { project_id = "" } = useParams()
   const scrollableRef = useRef<HTMLDivElement>(null)
   const { toast } = useToast()
 
@@ -25,9 +25,6 @@ function ImgGenerate() {
 
   const hfImgGenModel = config.hfImgGenModel
   const hfApiKey = config.hfApiKey
-
-  const user_id = useAuthStore(s => s._id)
-  const project_id = useContextStore(s => s?.data?.[user_id]?.project_id)
 
   const { generateImage } = useDownloads()
 

@@ -1,4 +1,5 @@
 import { LuChevronRight } from "react-icons/lu";
+import { useParams } from "react-router-dom";
 
 import llmModels from "../../../utils/llm-models";
 import { cn } from "../../../lib/utils";
@@ -24,7 +25,8 @@ function ModelSelect() {
 
   const updateContext = useContextStore(s => s.updateContext)
   const model_type = useContextStore(s => s?.data?.[user_id]?.model_type)
-  const chat_id = useContextStore(s => s?.data?.[user_id]?.chat_id)
+
+  const { chat_id = "" } = useParams()
 
   const handleModelSelect = (title: string) => {
     let payload: any = { model_type: title }

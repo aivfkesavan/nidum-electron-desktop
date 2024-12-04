@@ -5,13 +5,14 @@ import useContextStore from "../../../../store/context";
 import useAuthStore from "../../../../store/auth";
 import { cn } from "../../../../lib/utils";
 
-import logo from '../../../../assets/imgs/logo.png';
-
 import {
   Dialog,
   DialogContent,
+  DialogTitle,
   DialogTrigger,
 } from "../../../../components/ui/dialog";
+
+import logo from '../../../../assets/imgs/logo.png';
 
 type listT = {
   id: string
@@ -31,6 +32,7 @@ const list: listT[] = [
 
 function SelectModel() {
   const user_id = useAuthStore(s => s._id)
+
   const updateContext = useContextStore(s => s.updateContext)
   const tts_type = useContextStore(s => s?.data?.[user_id]?.tts_type)
 
@@ -56,6 +58,8 @@ function SelectModel() {
       </DialogTrigger>
 
       <DialogContent>
+        <DialogTitle className="sr-only">Select voice type</DialogTitle>
+
         <div className="mt-3">
           {
             list.map(l => (

@@ -6,7 +6,7 @@ import { useLLamaDownloadedModels } from "../../../../../hooks/use-llm-models";
 import { useDownloads } from "../../../../common/download-manager";
 import { useLLMModels } from "../../../../../hooks/use-llm-models";
 import useContextStore from "../../../../../store/context";
-import { useToast } from "../../../../ui/use-toast";
+import { useToast } from "../../../../../hooks/use-toast";
 import useAuthStore from "../../../../../store/auth";
 
 import { RadioGroup, RadioGroupItem } from "../../../../ui/radio-group";

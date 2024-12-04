@@ -1,9 +1,11 @@
 import { useCallback, Dispatch, SetStateAction, useEffect } from 'react';
 import { useDropzone, FileRejection } from 'react-dropzone';
+import { useNavigate, useParams } from 'react-router-dom';
 import { BiImageAdd, BiX } from "react-icons/bi";
+import { nanoid } from 'nanoid';
 
 import { deleteImg, uploadImg } from '../../../../actions/img';
-import { nanoid } from 'nanoid';
+import { genMongoId } from '../../../../utils';
 
 type props = {
   files: File[]
@@ -13,6 +15,9 @@ type props = {
 }
 
 function ImageUpload({ message, loading, files, setFiles }: props) {
+  const { project_id = "", chat_id = "" } = useParams()
+  const navigate = useNavigate()
+
   const acceptedFileTypes = {
     'image/*': ['.png', ".jpg", ".jpeg", ".webp"],
   }
@@ -84,7 +89,14 @@ function ImageUpload({ message, loading, files, setFiles }: props) {
         !message && !loading &&
         <div
           className="dc w-8 h-8 p-0 shrink-0 absolute right-1 top-1 text-xl rounded-full bg-secondary text-white/70 cursor-pointer hover:bg-input disabled:cursor-not-allowed"
-          {...getRootProps()}
+          {...getRootProps({
+            onClick() {
+              if (!chat_id) {
+                const temContextId = genMongoId()
+                navigate(`/p/${project_id}/c/${temContextId}`)
+              }
+            }
+          })}
         >
           <input {...getInputProps()} />
 

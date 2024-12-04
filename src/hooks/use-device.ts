@@ -4,7 +4,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { enableZrok, getInitDevice, getSharedDevice, goPublic, stopPublicShare, updateDevice } from "../actions/device";
 import useDeviceStore from "../store/device";
 
-import { useToast } from "../components/ui/use-toast";
+import { useToast } from "../hooks/use-toast";
 
 export function useInitDevice() {
   const appId = useDeviceStore(s => s.appId)

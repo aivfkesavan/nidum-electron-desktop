@@ -1,10 +1,8 @@
 import { useId, useState } from "react";
 import { MdOutlineDeleteOutline } from "react-icons/md";
+import { useParams } from "react-router-dom";
 
 import { useCrawler, useDeleteCrawledLinks } from "../../../../../hooks/use-crawler";
-import useContextStore from "../../../../../store/context";
-import useAuthStore from "../../../../../store/auth";
-
 import TooltipLable from "./tooltip-lable";
 
 type props = {
@@ -34,8 +32,7 @@ function Card({ url, checked, onCheck }: props) {
 }
 
 function List() {
-  const user_id = useAuthStore(s => s._id)
-  const projectId = useContextStore(s => s?.data?.[user_id]?.project_id)
+  const { project_id = "" } = useParams()
 
   const { data, isLoading } = useCrawler()
   const { mutate: mutateDelete, isPending } = useDeleteCrawledLinks()
@@ -50,7 +47,7 @@ function List() {
     mutateDelete(
       {
         urls,
-        folderName: projectId,
+        folderName: project_id,
       },
       {
         onSuccess() {

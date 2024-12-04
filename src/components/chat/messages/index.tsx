@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import { useNavigate, useParams } from "react-router-dom";
 import { FaFileAlt, FaSquare } from "react-icons/fa";
 import { Ollama } from 'ollama/browser';
 import { LuSend } from "react-icons/lu";
@@ -13,7 +14,7 @@ import { genMongoId } from "../../../utils";
 import constants from "../../../utils/constants";
 
 import { useAudio } from "./use-speech";
-import { useToast } from "../../../components/ui/use-toast";
+import { useToast } from "../../../hooks/use-toast";
 
 import useContextStore, { llm_modelsT } from "../../../store/context";
 import useConvoStore from "../../../store/conversations";
@@ -35,6 +36,7 @@ import logo from '../../../assets/imgs/logo.png';
 function Messages() {
   const { toast } = useToast()
 
+  const navigate = useNavigate()
   const user_id = useAuthStore(s => s._id)
 
   const model_type = useContextStore(s => s?.data?.[user_id]?.model_type)
@@ -43,10 +45,9 @@ function Messages() {
   const llamaModel = useContextStore(s => s?.data?.[user_id]?.llamaModel)
   const ollamaModel = useContextStore(s => s?.data?.[user_id]?.ollamaModel)
   const ollamaUrl = useContextStore(s => s?.data?.[user_id]?.ollamaUrl)
-  const project_id = useContextStore(s => s?.data?.[user_id]?.project_id)
-  const chat_id = useContextStore(s => s?.data?.[user_id]?.chat_id)
+  const nidumDecentralisedModel = useContextStore(s => s?.data?.[user_id]?.nidumDecentralisedModel)
 
-  const updateContext = useContextStore(s => s.updateContext)
+  const { project_id = "", chat_id = "" } = useParams()
 
   const projectDetails = useConvoStore(s => s?.data?.[user_id]?.projects[project_id] || null)
   const filesLen = useConvoStore(s => s?.data?.[user_id]?.files[project_id]?.length || 0)
@@ -55,7 +56,6 @@ function Messages() {
   const editProject = useConvoStore(s => s.editProject)
   const editChat = useConvoStore(s => s.editChat)
   const addChat = useConvoStore(s => s.addChat)
-  const init = useConvoStore(s => s.init)
 
   const { data: nidumCentralised } = useLLMModels("nidum-decentralised2")
   const { data: downloadedModels } = useLLamaDownloadedModels()
@@ -85,13 +85,17 @@ function Messages() {
   } = config || {}
 
   useEffect(() => {
-    init()
-  }, [])
-
-  useEffect(() => {
     setTempData([])
     setLoading(false)
     setFiles([])
+  }, [chat_id])
+
+  useEffect(() => {
+    const msg = sessionStorage.getItem("msg")
+    if (msg && chat_id) {
+      sessionStorage.removeItem("msg")
+      postData(msg)
+    }
   }, [chat_id])
 
   function num(n: string | number, defaultVal: number) {
@@ -167,11 +171,12 @@ function Messages() {
             title: msg,
           })
 
-          updateContext({ chat_id: temContextId })
+          navigate(`/p/${project_id}/c/${temContextId}`)
+          sessionStorage.setItem("msg", msg)
+          return
         }
 
         if (chat_id && data?.length === 0) {
-          updateContext({ chat_id })
           editChat(project_id, {
             id: chat_id,
             title: msg,
@@ -315,7 +320,7 @@ function Messages() {
           top_p: num(projectDetails?.top_p, 1),
           max_tokens: num(projectDetails?.max_tokens, 500),
           temperature: num(projectDetails?.temperature, 0.1),
-          stream: !["Nidum", "Anthropic", "Nidum Decentralized"].includes(model_type),
+          stream: !["Nidum", "Anthropic"].includes(model_type),
           messages: prompt,
         }
 
@@ -375,7 +380,7 @@ function Messages() {
         }
 
         if (model_type === "Nidum Decentralized") {
-          payload.model = nidumCentralised?.model
+          payload.model = nidumDecentralisedModel || nidumCentralised?.models?.[0]?.id
         }
 
         abortController.current = new AbortController()

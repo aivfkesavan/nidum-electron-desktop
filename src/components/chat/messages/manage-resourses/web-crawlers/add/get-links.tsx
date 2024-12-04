@@ -1,13 +1,12 @@
 import { useState } from 'react';
 import { useMutation } from '@tanstack/react-query';
+import { useParams } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 
 import { getSubLinks } from '../../../../../../actions/webcrawler';
 // import { useCrawler } from '../../../../../../hooks/use-crawler';
-import useContextStore from '../../../../../../store/context';
 import { useAddCrawl } from '../../../../../../hooks/use-crawler';
-import { useToast } from '../../../../../ui/use-toast';
-import useAuthStore from '../../../../../../store/auth';
+import { useToast } from '../../../../../../hooks/use-toast';
 
 import { Switch } from '../../../../../ui/switch';
 
@@ -16,8 +15,7 @@ type props = {
 }
 
 function GetLinks({ updateLinks }: props) {
-  const user_id = useAuthStore(s => s._id)
-  const projectId = useContextStore(s => s?.data?.[user_id]?.project_id)
+  const { project_id = "" } = useParams()
 
   // const { data: crawledLinks, isLoading } = useCrawler()
   const { toast } = useToast()
@@ -51,7 +49,7 @@ function GetLinks({ updateLinks }: props) {
       mutateaAdd(
         {
           urls: [data.url],
-          folderName: projectId
+          folderName: project_id
         },
         {
           onSettled() {

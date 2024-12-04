@@ -1,26 +1,27 @@
 import { useMutation } from '@tanstack/react-query';
+import { useParams } from 'react-router-dom';
 import axios from 'axios';
 
-import useContextStore from '../../../../../store/context';
 import useConvoStore from '../../../../../store/conversations';
 import useAuthStore from '../../../../../store/auth';
+
 import { bytesToSize } from '../../../../../utils';
 import constants from '../../../../../utils/constants';
 
 import { Label } from "../../../../../components/ui/label";
 
 function List() {
+  const { project_id = "", chat_id = "" } = useParams()
+
   const deleteFile = useConvoStore(s => s.deleteFile)
 
   const user_id = useAuthStore(s => s._id)
-  const projectId = useContextStore(s => s?.data?.[user_id]?.project_id)
-  const chatId = useContextStore(s => s?.data?.[user_id]?.chat_id)
-  const files = useConvoStore(s => s?.data?.[user_id]?.files[projectId] || [])
+  const files = useConvoStore(s => s?.data?.[user_id]?.files[project_id] || [])
 
   const { mutate, isPending } = useMutation({
-    mutationFn: ({ name }: any) => axios.delete(`${constants.backendUrl}/doc/${projectId}/${name}`),
+    mutationFn: ({ name }: any) => axios.delete(`${constants.backendUrl}/doc/${project_id}/${name}`),
     onSuccess(res, variables) {
-      deleteFile(projectId, variables.id)
+      deleteFile(project_id, variables.id)
     }
   })
 
@@ -56,7 +57,7 @@ function List() {
       }
 
       {
-        !chatId &&
+        !chat_id &&
         <div className='mt-6 text-xs text-white/60'>Choose a chat to add/change attachment</div>
       }
 

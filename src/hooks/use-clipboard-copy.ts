@@ -12,7 +12,6 @@ function useClipboardCopy() {
     }, 2500)
   }
 
-  // @ts-ignore
   const onTextClk = () => selectTextRef?.current?.select?.()
 
   return { copied, onCopyClk, selectTextRef, onTextClk }

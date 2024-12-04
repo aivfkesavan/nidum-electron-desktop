@@ -1,11 +1,9 @@
-import useAuthStore from "../store/auth";
-import useContextStore from "../store/context";
 import constants from "../utils/constants";
 import axios from "axios";
 
 function getFolderName() {
-  const user_id = useAuthStore.getState()?._id
-  const chat_id = useContextStore.getState()?.data?.[user_id]?.chat_id
+  const pathname = window.location.hash
+  const chat_id = pathname.split('/')?.[4]
   return `img_${chat_id}`
 }
 

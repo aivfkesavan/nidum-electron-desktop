@@ -1,6 +1,6 @@
-import useContextStore from "../../../store/context";
+import { useNavigate, useParams } from "react-router-dom";
+
 import useConvoStore from "../../../store/conversations";
-import useAuthStore from "../../../store/auth";
 import useUIStore from "../../../store/ui";
 
 import {
@@ -17,17 +17,15 @@ function DeleteChat() {
   const data = useUIStore(s => s.data)
   const open = useUIStore(s => s.open)
 
-  const updateContext = useContextStore(s => s.updateContext)
   const deleteChat = useConvoStore(s => s.deleteChat)
 
-  const user_id = useAuthStore(s => s._id)
-  const project_id = useContextStore(s => s?.data?.[user_id]?.project_id)
-  const chat_id = useContextStore(s => s?.data?.[user_id]?.chat_id)
+  const { project_id = "", chat_id = "" } = useParams()
+  const navigate = useNavigate()
 
   function onConfirm() {
     deleteChat(project_id, data?.id)
     if (chat_id === data?.id) {
-      updateContext({ chat_id: "" })
+      navigate(`/p/${project_id}`)
     }
     closeModel()
   }

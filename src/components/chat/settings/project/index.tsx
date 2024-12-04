@@ -1,6 +1,6 @@
 import { useState } from "react";
+import { useParams } from "react-router-dom";
 
-import useContextStore from "../../../../store/context";
 import { useCrawler } from "../../../../hooks/use-crawler";
 import useConvoStore from "../../../../store/conversations";
 import useAuthStore from "../../../../store/auth";
@@ -19,10 +19,11 @@ import Footer from "../common/footer";
 
 function Chat() {
   const editProject = useConvoStore(s => s.editProject)
+  const { project_id = "" } = useParams()
+
+  const { data: crawlerData } = useCrawler()
 
   const user_id = useAuthStore(s => s._id)
-  const project_id = useContextStore(s => s?.data?.[user_id]?.project_id)
-  const { data: crawlerData } = useCrawler()
 
   const projectMap = useConvoStore(s => s?.data?.[user_id]?.projects)
   const hasFiles = useConvoStore(s => s?.data?.[user_id]?.files[project_id]?.length)

@@ -1,12 +1,11 @@
-import useContextStore from "../../../../store/context";
+import { useParams } from "react-router-dom";
 import useConvoStore from "../../../../store/conversations";
 import useAuthStore from "../../../../store/auth";
 
 function useSystemPrompt() {
-  const user_id = useAuthStore(s => s._id)
+  const { project_id = "", chat_id = "" } = useParams()
 
-  const project_id = useContextStore(s => s?.data?.[user_id]?.project_id)
-  const chat_id = useContextStore(s => s?.data?.[user_id]?.chat_id)
+  const user_id = useAuthStore(s => s._id)
 
   const webEnabled = useConvoStore(s => s?.data?.[user_id]?.projects[project_id]?.web_enabled || "")
   const ragEnabled = useConvoStore(s => s?.data?.[user_id]?.projects[project_id]?.rag_enabled || "")

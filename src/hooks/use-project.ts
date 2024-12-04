@@ -3,7 +3,7 @@ import { useInfiniteQuery, useMutation, useQuery, useQueryClient } from "@tansta
 import type { Project } from "../types/base";
 
 import { createProject, deleteProject, getProjectById, getProjectsMiniByUserId, projectLimit, updateProject } from "../actions/project";
-import { useToast } from "../components/ui/use-toast";
+import { useToast } from "../hooks/use-toast";
 
 export function useProjectsMiniByUserId() {
   return useInfiniteQuery({

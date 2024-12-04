@@ -3,7 +3,7 @@ import { MdDownloadDone, MdOutlineFileDownload } from "react-icons/md";
 
 import { useDownloads } from "../../../../components/common/download-manager";
 import useContextStore from "../../../../store/context";
-import { useToast } from "../../../../components/ui/use-toast";
+import { useToast } from "../../../../hooks/use-toast";
 import useAuthStore from "../../../../store/auth";
 
 import { RadioGroup, RadioGroupItem } from "../../../../components/ui/radio-group";

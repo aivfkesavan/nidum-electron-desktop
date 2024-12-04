@@ -1,11 +1,10 @@
-import { useState } from "react"; // useEffect, 
+import { useState } from "react";
+import { useLocation, useNavigate, useParams } from "react-router-dom";
 import { IoSearch } from "react-icons/io5";
-import { nanoid } from "nanoid";
 
 import type { Chat } from '../../../store/conversations';
 
 import { relativeDateFormat } from "../../../utils/date-helper";
-import useContextStore from "../../../store/context";
 import useConvoStore from "../../../store/conversations";
 import useAuthStore from "../../../store/auth";
 import useUIStore from "../../../store/ui";
@@ -25,13 +24,12 @@ type props = {
 }
 
 function Histories({ isFullScreen, platform }: props) {
+  const { project_id = "", chat_id = "" } = useParams()
+  const { pathname } = useLocation()
+
   const user_id = useAuthStore(s => s._id)
 
-  const updateContext = useContextStore(s => s.updateContext)
-  const addChat = useConvoStore(s => s.addChat)
-
-  const project_id = useContextStore(s => s?.data?.[user_id]?.project_id)
-  const chat_id = useContextStore(s => s?.data?.[user_id]?.chat_id)
+  const navigate = useNavigate()
 
   const updateModal = useUIStore(s => s.update)
 
@@ -53,9 +51,9 @@ function Histories({ isFullScreen, platform }: props) {
   })
 
   function addChatTo() {
-    const id = nanoid(10)
-    addChat(project_id, { id, title: "New Chat" })
-    updateContext({ chat_id: id })
+    if (pathname !== `/p/${project_id}`) {
+      navigate(`/p/${project_id}`)
+    }
   }
 
   return (
@@ -116,7 +114,12 @@ function Histories({ isFullScreen, platform }: props) {
                 name={c.title}
                 isActive={chat_id === c.id}
                 onDelete={() => updateModal({ open: "delete-chat", data: { id: c.id } })}
-                onNavigate={() => updateContext({ chat_id: c.id })}
+                onNavigate={() => {
+                  navigate(`/p/${project_id}/c/${c.id}`)
+                  if (document.body.clientWidth < 768) {
+                    document.body.classList.remove("open")
+                  }
+                }}
               />
             ))}
           </div>

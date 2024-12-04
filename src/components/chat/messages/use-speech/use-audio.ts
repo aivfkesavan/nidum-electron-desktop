@@ -5,11 +5,12 @@ import useAuthStore from "../../../../store/auth";
 import { delay } from "../../../../utils";
 
 function useAudio() {
+  const user_id = useAuthStore(s => s._id)
+
   const isSpeaking = useAudioStore(s => s.isSpeaking)
   const update = useAudioStore(s => s.update)
   const clear = useAudioStore(s => s.clear)
   const utteranceRef = useRef<SpeechSynthesisUtterance | null>(null)
-  const user_id = useAuthStore(s => s._id)
   const voice = useContextStore(s => s?.data?.[user_id]?.voice)
 
   useEffect(() => {
