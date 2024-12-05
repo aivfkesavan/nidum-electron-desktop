@@ -5,6 +5,7 @@ import SideBar from "./side-bar";
 
 import { useStopShareOnAppLeave, useNidumChainSetup } from "../../hooks/use-device";
 import { useLLMModels, useLLamaDownloadedModels } from "../../hooks/use-llm-models";
+import { useOfflineLoginCorrection } from "../../hooks/use-user";
 import useConvoStore from "../../store/conversations";
 import useAuthStore from "../../store/auth";
 import { findLatest } from "../../utils";
@@ -50,6 +51,8 @@ function Chat() {
     }
     document.documentElement.style.setProperty('--sidebar-width', '240px')
   }, [])
+
+  useOfflineLoginCorrection()
 
   useNidumChainSetup()
 

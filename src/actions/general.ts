@@ -1,6 +1,6 @@
 import axios from "axios";
 
-import { deleteDevice } from "./device";
+import { deleteDevice, disableZrok } from "./device";
 import constants from "../utils/constants";
 
 type resetAppT = {
@@ -9,7 +9,7 @@ type resetAppT = {
 }
 export async function resetApp(data: resetAppT) {
   try {
-    await axios.post(`${constants.backendUrl}/nidum-chain/disable`)
+    await disableZrok(data.deviceId)
   } catch (error) {
     console.log(error)
   }

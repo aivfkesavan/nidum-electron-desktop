@@ -36,7 +36,6 @@ function SelectModel() {
 
   function onClk(e: any) {
     e?.preventDefault()
-    if (!isOnline) return toast({ title: "Kindly ensure an internet connection to continue." })
     if (isNidumSharedPublic) return toast({ title: "Stop 'Go Public' feature to change server" })
     return setOpen(true)
   }

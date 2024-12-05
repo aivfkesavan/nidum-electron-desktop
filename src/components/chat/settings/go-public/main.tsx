@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 
-import { useInitDevice, useDeviceMutate, useGoPublicMutate, useStopShareMutate } from "../../../../hooks/use-device";
+import { useInitDevice, useDeviceMutate, useGoPublicMutate, useStopShareMutate, usePublicShareCheck } from "../../../../hooks/use-device";
 import useOnlineStatus from "../../../../hooks/use-online-status";
 import useContextStore from "../../../../store/context";
 import useDeviceStore from "../../../../store/device";
@@ -25,6 +25,8 @@ function Main() {
 
   const { mutate: mutateGoPublic, isPending: isPending4 } = useGoPublicMutate()
   const { mutate: mutateStop, isPending: isPending5 } = useStopShareMutate()
+
+  usePublicShareCheck()
 
   useEffect(() => {
     if (device) {

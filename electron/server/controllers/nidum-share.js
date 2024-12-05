@@ -145,6 +145,17 @@ router.post("/stop", async (req, res) => {
 
 router.post("/disable", async (req, res) => {
   try {
+    const { deviceId } = req.body
+
+    if (deviceId) {
+      try {
+        const release = `"${zrokPath}" release ${deviceId}`;
+        await execPromise(release)
+      } catch (error) {
+        console.log(error)
+      }
+    }
+
     try {
       const disable = `"${zrokPath}" disable`;
       await execPromise(disable)

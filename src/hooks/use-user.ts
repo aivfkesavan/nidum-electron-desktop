@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
 
@@ -41,7 +42,7 @@ export function useLoginMutate() {
 
   const { toast } = useToast()
 
-  function onLoginSuccess(data: { _id: string, email: string, token: string }) {
+  function onLoginSuccess(data: { _id: string, email: string, token: string, isOfflineLogin: boolean }) {
     updateAuth({
       ...data,
       isLoggedIn: true,
@@ -69,6 +70,7 @@ export function useLoginMutate() {
           _id: isAlreadyLoggedIn?._id,
           email: isAlreadyLoggedIn?.email,
           token: isAlreadyLoggedIn?.token,
+          isOfflineLogin: true,
         })
       } else {
         toast({ title: "Password not found" })
@@ -96,6 +98,7 @@ export function useLoginMutate() {
         _id: res?._id,
         email: variables?.email,
         token: res?.token,
+        isOfflineLogin: false,
       })
     },
     onError(err, variables) {
@@ -115,6 +118,37 @@ export function useLoginMutate() {
       }
     }
   })
+}
+
+export function useOfflineLoginCorrection() {
+  const updateAuth = useAuthStore(s => s.update)
+  const isOnline = useOnlineStatus()
+
+  const data = useLoginStore(s => s.data)
+
+  const isOfflineLogin = useAuthStore(s => s.isOfflineLogin)
+  const email = useAuthStore(s => s.email)
+
+  const { mutate } = useMutation({
+    mutationFn: login,
+    onSuccess(res) {
+      updateAuth({
+        token: res?.token,
+        isOfflineLogin: false,
+      })
+    },
+    onError() {
+    }
+  })
+
+  useEffect(() => {
+    if (isOfflineLogin && isOnline && email && data) {
+      const password = data?.find(d => d.email === email)?.password
+      if (password) {
+        mutate({ email, password })
+      }
+    }
+  }, [isOfflineLogin, isOnline, email, data])
 }
 
 export function useGoogleAuthMutate() {
