@@ -51,7 +51,7 @@ export function nidumChainSetupStaus() {
 export async function nidumChainSetupFlow(deviceId: string, disable?: boolean) {
   try {
     if (disable) {
-      await disableZrok()
+      await disableZrok(deviceId)
     }
     await nidumChainUrlConfig()
     await nidumChainEnable()
@@ -66,10 +66,16 @@ export function goPublic(deviceId: string) {
   return axios.post(`${constants.backendUrl}/nidum-chain/go-public`, { deviceId }).then(r => r.data)
 }
 
+export async function isLiveCheck(deviceId: string) {
+  const response = await fetch(`https://${deviceId}.chain.nidum.ai/health`)
+  const status = response.status
+  return status === 200
+}
+
 export function stopPublicShare() {
   return axios.post(`${constants.backendUrl}/nidum-chain/stop`).then(r => r.data)
 }
 
-export function disableZrok() {
-  return axios.post(`${constants.backendUrl}/nidum-chain/disable`).then(r => r.data)
+export function disableZrok(deviceId: string) {
+  return axios.post(`${constants.backendUrl}/nidum-chain/disable`, { deviceId }).then(r => r.data)
 }

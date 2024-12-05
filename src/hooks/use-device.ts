@@ -1,7 +1,7 @@
 import { useEffect } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
-import { getInitDevice, getSharedDevice, goPublic, nidumChainSetupFlow, nidumChainSetupStaus, stopPublicShare, updateDevice } from "../actions/device";
+import { getInitDevice, getSharedDevice, goPublic, isLiveCheck, nidumChainSetupFlow, nidumChainSetupStaus, stopPublicShare, updateDevice } from "../actions/device";
 import useDeviceStore from "../store/device";
 
 import { useToast } from "../hooks/use-toast";
@@ -13,6 +13,7 @@ export function useInitDevice() {
     queryKey: ["device", deviceId],
     queryFn: () => getInitDevice(deviceId),
     enabled: !!deviceId,
+    gcTime: Infinity,
   })
 }
 
@@ -130,6 +131,26 @@ export function useStopShareMutate() {
       toast({ title: err?.message || "Something went wrong!" })
     }
   })
+}
+
+export function usePublicShareCheck() {
+  const isNidumSharedPublic = useDeviceStore(s => s.isNidumSharedPublic)
+  const deviceId = useDeviceStore(s => s.deviceId)
+  const update = useDeviceStore(s => s.update)
+
+  const { data, isLoading, isFetching } = useQuery({
+    queryKey: ["live-check", deviceId],
+    queryFn: () => isLiveCheck(deviceId),
+    enabled: isNidumSharedPublic,
+    refetchInterval: isNidumSharedPublic ? 3000 : false,
+  })
+
+  useEffect(() => {
+    if (!isLoading && !isFetching && !data && isNidumSharedPublic) {
+      update({ isNidumSharedPublic: false })
+      stopPublicShare()
+    }
+  }, [isLoading, isFetching, data, isNidumSharedPublic])
 }
 
 export function useStopShareOnAppLeave() {
