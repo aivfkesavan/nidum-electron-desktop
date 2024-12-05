@@ -1,146 +1,25 @@
-import { useEffect, useState } from "react";
-import { LuX } from "react-icons/lu";
 
-import { useInitDevice, useDeviceMutate, useGoPublicMutate, useStopShareMutate } from "../../../../hooks/use-device";
-import { useAddInviteMutate, useInvites, useRemoveInviteMutate } from "../../../../hooks/use-user";
-import useOnlineStatus from "../../../../hooks/use-online-status";
-import useContextStore from "../../../../store/context";
-import useDeviceStore from "../../../../store/device";
-import { useToast } from "../../../../hooks/use-toast";
-import useAuthStore from "../../../../store/auth";
+import { useNidumChainSetupStatus } from "../../../../hooks/use-device";
+
+import TryAgain from "./try-again";
+import Invite from "./invite";
+import Main from "./main";
 
 function GoPublic() {
-  const [deviceName, setDeviceName] = useState("")
-  const [emailTo, setEmailTo] = useState("")
+  const { data: chainSetupStatus, isLoading } = useNidumChainSetupStatus()
 
-  const user_id = useAuthStore(s => s._id)
-
-  const isNidumSharedPublic = useDeviceStore(s => s.isNidumSharedPublic)
-  const isNidumSetuped = useDeviceStore(s => s.isNidumEnabled && s.isNidumReserved && s.isNidumUrlConfigured)
-  const model_type = useContextStore(s => s?.data?.[user_id]?.model_type)
-  const llamModel = useContextStore(s => s?.data?.[user_id]?.llamaModel)
-
-  const isOnline = useOnlineStatus()
-  const { toast } = useToast()
-
-  const { data: device, isLoading: isLoading1 } = useInitDevice()
-  const { data: invites, isLoading: isLoading2 } = useInvites()
-
-  const { mutate: mutateRemove, isPending: isPending2 } = useRemoveInviteMutate()
-  const { mutate: mutateDevice, isPending: isPending3 } = useDeviceMutate()
-  const { mutate: mutateAdd, isPending: isPending1 } = useAddInviteMutate()
-
-  const { mutate: mutateGoPublic, isPending: isPending4 } = useGoPublicMutate()
-  const { mutate: mutateStop, isPending: isPending5 } = useStopShareMutate()
-
-  useEffect(() => {
-    if (device) {
-      setDeviceName(device?.name || "")
-    }
-  }, [device])
-
-  useEffect(() => {
-    if (device && llamModel && llamModel !== device?.modelName) {
-      mutateDevice({
-        _id: device?._id,
-        modelName: llamModel,
-      })
-    }
-  }, [llamModel, device])
-
-  function onBlur(name: string) {
-    if (name !== device?.name) {
-      mutateDevice({ _id: device?._id, name })
-    }
+  if (isLoading) {
+    return <div className="dc h-60"><span className="loader-2 size-4 border-2"></span></div>
   }
 
-  function onClk() {
-    if (!isNidumSharedPublic) {
-      if (model_type !== "Local") return toast({ title: "Choose Local AI server to go public" })
-      if (!llamModel) return toast({ title: "Please choose a model to go public" })
-      if (!isOnline) return toast({ title: "Kindly ensure an internet connection to continue." })
-      return mutateGoPublic()
-    }
-    return mutateStop()
+  if (!chainSetupStatus?.["nidum-chain-url-config"] || !chainSetupStatus?.["nidum-chain-enable"] || !chainSetupStatus?.["nidum-chain-reserve"]) {
+    return <TryAgain />
   }
-
-  const loading = isPending1 || isPending2 || isLoading1 || isLoading2 || isPending3 || isPending4 || isPending5
 
   return (
     <>
-      {
-        isLoading1 &&
-        <div className="text-xs text-center">Checking device status</div>
-      }
-
-      {
-        !isNidumSetuped &&
-        <div className="mb-0.5 text-xs text-center">Setup not completed</div>
-      }
-
-      <div className="dc mb-8">
-        <input
-          className="max-w-60 px-3 py-2 text-sm bg-zinc-700/50"
-          value={deviceName}
-          onChange={e => setDeviceName(e.target.value)}
-          onBlur={e => onBlur(e.target.value)}
-        />
-
-        <button
-          onClick={onClk}
-          disabled={!isNidumSetuped}
-          className={`dc w-36 px-4 py-1.5 text-[13px] ${isNidumSharedPublic ? "bg-red-500 hover:bg-red-600" : "bg-green-500 hover:bg-green-600"}`}
-        >
-          {(isPending4 || isPending5) && <span className="loader-2 size-4 border-2"></span>}
-          {isNidumSharedPublic ? "Stop Sharing" : "Go Public"}
-        </button>
-      </div>
-
-      <div className="dc text-xs">
-        <p className="shrink-0">Invite a friend</p>
-        <input
-          type="email"
-          className="w-full max-w-[280px] px-2.5 py-1.5 bg-zinc-700/30"
-          placeholder="john@gmail.com"
-          value={emailTo}
-          disabled={loading}
-          onChange={e => setEmailTo(e.target.value)}
-        />
-        <button
-          className="dc w-16 px-2 py-1 bg-zinc-200 text-zinc-800 hover:bg-zinc-300"
-          disabled={!emailTo || loading}
-          onClick={() => {
-            mutateAdd(emailTo, {
-              onSettled() {
-                setEmailTo("")
-              }
-            })
-          }}
-        >
-          {isPending1 && <span className="loader-2 size-3 shrink-0 border-2 border-zinc-800"></span>}
-          Invite
-        </button>
-      </div>
-
-      <div className="max-w-md mt-8 w-full mx-auto">
-        {
-          invites?.map((l: string) => (
-            <div
-              key={l}
-              className="df pl-2 mb-1 text-sm hover:bg-zinc-700/50 rounded-sm"
-            >
-              <p className="flex-1">{l}</p>
-              <button
-                onClick={() => mutateRemove(l)}
-                disabled={loading}
-                className="p-1 hover:bg-red-500"
-              >
-                <LuX />
-              </button>
-            </div>
-          ))
-        }
-      </div>
+      <Main />
+      <Invite />
     </>
   )
 }

@@ -1,7 +1,7 @@
 import { useEffect } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
-import { getInitDevice, getSharedDevice, goPublic, nidumChainEnable, nidumChainReserve, nidumChainUrlConfig, stopPublicShare, updateDevice } from "../actions/device";
+import { getInitDevice, getSharedDevice, goPublic, nidumChainEnable, nidumChainReserve, nidumChainSetupStaus, nidumChainUrlConfig, stopPublicShare, updateDevice } from "../actions/device";
 import useDeviceStore from "../store/device";
 
 import { useToast } from "../hooks/use-toast";
@@ -77,6 +77,13 @@ export function useNidumChainSetup() {
       })
     }
   }, [step1, step2, step3])
+}
+
+export function useNidumChainSetupStatus() {
+  return useQuery({
+    queryKey: ["nidum-chain-setup-status"],
+    queryFn: nidumChainSetupStaus,
+  })
 }
 
 export function useGoPublicMutate() {

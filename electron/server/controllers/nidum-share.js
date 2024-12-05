@@ -6,8 +6,10 @@ import os from 'os';
 import 'dotenv/config';
 
 import { execPromise, runCommandInBg } from '../utils/run-command';
+import { getConfigPath } from '../utils/path-helper';
 import logger from '../utils/logger';
 import delay from '../utils/delay';
+import { readJSON, updateJSONObj, writeJSON } from '../utils/json-helper';
 
 const router = express.Router();
 
@@ -28,6 +30,8 @@ const zrokBinary = process.env.NODE_ENV === "development"
 const stopZrokCmd = os.platform() === "win32" ? "taskkill /F /IM nidum.exe" : "pkill nidum"
 const zrokPath = path.join(zrokBinary, zrokStart)
 
+const configPath = getConfigPath()
+
 async function isLiveCheck(deviceId) {
   const response = await fetch(`https://${deviceId}.chain.nidum.ai/health`)
   const status = response.status
@@ -38,6 +42,7 @@ router.post("/url-config", async (req, res) => {
   try {
     const config = `${path.join(zrokBinary.replace(/ /g, '\\ '), zrokStart)} config set apiEndpoint https://api.chain.nidum.ai`;
     await execPromise(config)
+    await updateJSONObj(configPath, { "nidum-chain-url-config": true })
 
     return res.json({ msg: "Success" })
 
@@ -52,6 +57,7 @@ router.post("/enable", async (req, res) => {
   try {
     const enable = `"${zrokPath}" enable xIoAvryd2Svl`;
     await execPromise(enable)
+    await updateJSONObj(configPath, { "nidum-chain-enable": true })
 
     return res.json({ msg: "Success" })
 
@@ -68,8 +74,21 @@ router.post("/reserve", async (req, res) => {
 
     const reserve = `"${zrokPath}" reserve public http://localhost:4000 --unique-name ${deviceId}`;
     await execPromise(reserve)
+    await updateJSONObj(configPath, { "nidum-chain-reserve": true })
 
     return res.json({ msg: "Success" })
+
+  } catch (error) {
+    console.log(error);
+    logger.error(`${JSON.stringify(error)}, ${error?.message}`)
+    res.status(500).json({ error: error.message });
+  }
+})
+
+router.post("/setup-status", async (req, res) => {
+  try {
+    const data = await readJSON(configPath)
+    return res.json(data)
 
   } catch (error) {
     console.log(error);
@@ -135,6 +154,7 @@ router.post("/disable", async (req, res) => {
     const homeDirectory = os.homedir()
     const zrokFolder = path.join(homeDirectory, ".zrok")
     await fs.rm(zrokFolder, { recursive: true })
+    await writeJSON(configPath, {})
 
     return res.json({ msg: "Success" })
 
