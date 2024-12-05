@@ -151,11 +151,15 @@ router.post("/disable", async (req, res) => {
     } catch (error) {
       console.log(error)
     }
-    const homeDirectory = os.homedir()
-    const zrokFolder = path.join(homeDirectory, ".zrok")
-    await fs.rm(zrokFolder, { recursive: true })
-    await writeJSON(configPath, {})
+    try {
+      const homeDirectory = os.homedir()
+      const zrokFolder = path.join(homeDirectory, ".zrok")
+      await fs.rm(zrokFolder, { recursive: true })
+      await writeJSON(configPath, {})
 
+    } catch (error) {
+      console.log("no file")
+    }
     return res.json({ msg: "Success" })
 
   } catch (error) {

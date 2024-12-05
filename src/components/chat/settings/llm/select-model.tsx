@@ -2,6 +2,7 @@ import { useState } from "react";
 import { BiExpandAlt } from "react-icons/bi";
 import { useParams } from "react-router-dom";
 
+import useOnlineStatus from "../../../../hooks/use-online-status";
 import useContextStore from "../../../../store/context";
 import useDeviceStore from "../../../../store/device";
 import useAuthStore from "../../../../store/auth";
@@ -26,6 +27,7 @@ function SelectModel() {
 
   const isNidumSharedPublic = useDeviceStore(s => s.isNidumSharedPublic)
 
+  const isOnline = useOnlineStatus()
   const { toast } = useToast()
 
   const [open, setOpen] = useState(false)
@@ -34,9 +36,8 @@ function SelectModel() {
 
   function onClk(e: any) {
     e?.preventDefault()
-    if (isNidumSharedPublic) {
-      return toast({ title: "Stop 'Go Public' feature to change server" })
-    }
+    if (!isOnline) return toast({ title: "Kindly ensure an internet connection to continue." })
+    if (isNidumSharedPublic) return toast({ title: "Stop 'Go Public' feature to change server" })
     return setOpen(true)
   }
 
@@ -74,39 +75,41 @@ function SelectModel() {
 
         <div className="mt-3">
           {
-            llmModels.map(l => (
-              <div
-                key={l.id}
-                className={cn("df gap-4 mb-4 pl-8 -ml-6 last:mb-0 group cursor-pointer border-l-2 border-transparent hover:border-l-white", {
-                  "border-white": l.title === model_type
-                })}
-                onClick={() => {
-                  let payload: any = { model_type: l.title }
-                  if (chat_id.endsWith("-imgGen")) {
-                    payload.chat_id = ""
-                  }
-                  updateContext(payload)
-                  setOpen(false)
-                }}
-              >
-                <div className="dc size-8 relative">
-                  <img
-                    className="w-8"
-                    src={l.logo}
-                    alt={l.title}
-                  />
-                  {
-                    l.title === "Local" &&
-                    <OnlineStatus className="absolute top-0 -right-2" />
-                  }
-                </div>
+            llmModels
+              .filter((_, i) => !isOnline ? i === 1 || i === 4 : true)
+              .map(l => (
+                <div
+                  key={l.id}
+                  className={cn("df gap-4 mb-4 pl-8 -ml-6 last:mb-0 group cursor-pointer border-l-2 border-transparent hover:border-l-white", {
+                    "border-white": l.title === model_type
+                  })}
+                  onClick={() => {
+                    let payload: any = { model_type: l.title }
+                    if (chat_id.endsWith("-imgGen")) {
+                      payload.chat_id = ""
+                    }
+                    updateContext(payload)
+                    setOpen(false)
+                  }}
+                >
+                  <div className="dc size-8 relative">
+                    <img
+                      className="w-8"
+                      src={l.logo}
+                      alt={l.title}
+                    />
+                    {
+                      l.title === "Local" &&
+                      <OnlineStatus className="absolute top-0 -right-2" />
+                    }
+                  </div>
 
-                <div className="">
-                  <p className="text-sm group-hover:underline">{l.title}</p>
-                  <p className="text-xs text-white/70">{l.para}</p>
+                  <div className="">
+                    <p className="text-sm group-hover:underline">{l.title}</p>
+                    <p className="text-xs text-white/70">{l.para}</p>
+                  </div>
                 </div>
-              </div>
-            ))
+              ))
           }
         </div>
       </DialogContent>

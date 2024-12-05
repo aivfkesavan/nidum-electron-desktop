@@ -23,7 +23,7 @@
         "jsx": "react-jsx",
         "strict": false,
         "noImplicitAny": true,
-        "noImplicitReturns": true,
+        "noImplicitReturns": false,
         "noImplicitThis": true,
         "noImplicitOverride": true,
         "allowJs": true,

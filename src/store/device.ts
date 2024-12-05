@@ -7,9 +7,6 @@ const nanoid = customAlphabet(alphabet, 20);
 
 type authState = {
   deviceId: string;
-  isNidumEnabled: boolean
-  isNidumReserved: boolean
-  isNidumUrlConfigured: boolean
   isNidumSharedPublic: boolean
 }
 
@@ -20,9 +17,6 @@ type actions = {
 
 const payload = {
   deviceId: nanoid(),
-  isNidumEnabled: false,
-  isNidumReserved: false,
-  isNidumUrlConfigured: false,
   isNidumSharedPublic: false,
 }
 
@@ -34,9 +28,9 @@ const useDeviceStore = create<authState & actions>()((persist((set) => ({
 }),
   {
     name: 'device-storage',
-    version: 4,
+    version: 5,
     migrate: (persistedState: any, version) => {
-      if (!version || version < 4) {
+      if (!version || version < 5) {
         return { ...payload }
       }
       return persistedState

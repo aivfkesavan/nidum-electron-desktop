@@ -1,3 +1,4 @@
+import { useMemo } from "react";
 import { HiOutlineInformationCircle } from "react-icons/hi2";
 import { MdOutlineRecordVoiceOver, MdPublic } from "react-icons/md";
 import { GoProjectRoadmap } from "react-icons/go";
@@ -5,6 +6,7 @@ import { RiVoiceprintFill } from "react-icons/ri";
 import { FaLinode } from "react-icons/fa";
 
 import useSttValidCheck from "../../../hooks/use-stt-valid-check";
+import useOnlineStatus from "../../../hooks/use-online-status";
 import useUIStore from "../../../store/ui";
 
 import {
@@ -19,57 +21,71 @@ import {
 import SettingIcon from '../../../assets/svg/settings.svg?react';
 
 import Transcribe from "./transcribe";
+import GoPublic from "./go-public";
 import Project from "./project";
 import Voice from "./voice";
 import About from "./about";
 import LLM from "./llm";
-import GoPublic from "./go-public";
-
-const list = [
-  {
-    id: "1",
-    title: "Project",
-    logo: <GoProjectRoadmap className="text-base" />,
-    child: <Project />,
-  },
-  {
-    id: "2",
-    title: "AI Model",
-    logo: <FaLinode className="text-base" />,
-    child: <LLM />,
-  },
-  {
-    id: "6",
-    title: "Go Public",
-    logo: <MdPublic className="text-base" />,
-    child: <GoPublic />,
-  },
-  {
-    id: "3",
-    title: "Speech to Text",
-    logo: <MdOutlineRecordVoiceOver className="text-base" />,
-    child: <Transcribe />,
-  },
-  {
-    id: "4",
-    title: "Text to Speech",
-    logo: <RiVoiceprintFill className="text-base" />,
-    child: <Voice />,
-  },
-  {
-    id: "5",
-    title: "About",
-    logo: <HiOutlineInformationCircle className="text-base" />,
-    child: <About />,
-  },
-]
 
 function Settings() {
   const update = useUIStore(s => s.update)
   const selected = useUIStore(s => s.data || "Project")
   const open = useUIStore(s => s.open)
 
+  const isOnline = useOnlineStatus()
   const isSupported = useSttValidCheck()
+
+  const list = useMemo(() => {
+    const final = [
+      {
+        id: "1",
+        title: "Project",
+        logo: <GoProjectRoadmap className="text-base" />,
+        child: <Project />,
+      },
+      {
+        id: "2",
+        title: "AI Model",
+        logo: <FaLinode className="text-base" />,
+        child: <LLM />,
+      },
+    ]
+
+    if (isOnline) {
+      final.push({
+        id: "6",
+        title: "Go Public",
+        logo: <MdPublic className="text-base" />,
+        child: <GoPublic />,
+      })
+    }
+
+    if (isSupported) {
+      final.push({
+        id: "3",
+        title: "Speech to Text",
+        logo: <MdOutlineRecordVoiceOver className="text-base" />,
+        child: <Transcribe />,
+      })
+    }
+
+    final.push(
+      {
+        id: "4",
+        title: "Text to Speech",
+        logo: <RiVoiceprintFill className="text-base" />,
+        child: <Voice />,
+      },
+      {
+        id: "5",
+        title: "About",
+        logo: <HiOutlineInformationCircle className="text-base" />,
+        child: <About />,
+      }
+    )
+
+    return final
+  }, [isSupported, isOnline])
 
   function onOpenChange(val: boolean) {
     update({
@@ -92,18 +108,16 @@ function Settings() {
 
         <div className="mini-scroll-bar flex items-center gap-2 py-2 overflow-x-auto">
           {
-            list
-              .filter(l => isSupported ? true : l.title !== "Transcription")
-              .map(l => (
-                <button
-                  key={l.id}
-                  onClick={() => update({ data: l.title })}
-                  className={`df text-nowrap text-xs text-left hover:bg-input ${selected === l.title ? "bg-input text-white [&_svg]:stroke-white" : " text-white/60 [&_svg]:stroke-white/60"}`}
-                >
-                  {l.logo}
-                  {l.title}
-                </button>
-              ))
+            list.map(l => (
+              <button
+                key={l.id}
+                onClick={() => update({ data: l.title })}
+                className={`df text-nowrap text-xs text-left hover:bg-input ${selected === l.title ? "bg-input text-white [&_svg]:stroke-white" : " text-white/60 [&_svg]:stroke-white/60"}`}
+              >
+                {l.logo}
+                {l.title}
+              </button>
+            ))
           }
         </div>
 

@@ -48,6 +48,20 @@ export function nidumChainSetupStaus() {
   return axios.post(`${constants.backendUrl}/nidum-chain/setup-status`).then(r => r.data)
 }
 
+export async function nidumChainSetupFlow(deviceId: string, disable?: boolean) {
+  try {
+    if (disable) {
+      await disableZrok()
+    }
+    await nidumChainUrlConfig()
+    await nidumChainEnable()
+    await nidumChainReserve(deviceId)
+
+  } catch (error) {
+    console.log(error)
+  }
+}
+
 export function goPublic(deviceId: string) {
   return axios.post(`${constants.backendUrl}/nidum-chain/go-public`, { deviceId }).then(r => r.data)
 }

@@ -37,7 +37,6 @@ function Delete() {
     mutateDelete(Number(otp))
   }
 
-  // @ts-ignore
   function onClk(e: any) {
     e?.preventDefault()
     if (!isOnline) return toast({ title: "Kindly ensure an internet connection to continue." })

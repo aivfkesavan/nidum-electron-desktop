@@ -5,6 +5,7 @@ import llmModels from "../../../utils/llm-models";
 import { cn } from "../../../lib/utils";
 
 import useIsFullScreenCheck from "../../../hooks/use-is-full-screen-check";
+import useOnlineStatus from "../../../hooks/use-online-status";
 import useContextStore from "../../../store/context";
 import useAuthStore from "../../../store/auth";
 import usePlatform from "../../../hooks/use-platform";
@@ -21,6 +22,7 @@ function ModelSelect() {
   const isFullScreen = useIsFullScreenCheck()
   const platform = usePlatform()
 
+  const isOnline = useOnlineStatus()
   const user_id = useAuthStore(s => s._id)
 
   const updateContext = useContextStore(s => s.updateContext)
@@ -45,32 +47,36 @@ function ModelSelect() {
       </DropdownMenuTrigger>
 
       <DropdownMenuContent className="p-1 min-w-48">
-        {llmModels.map(model => (
-          <DropdownMenuItem
-            key={model.id}
-            className={cn("p-2", {
-              "bg-input/50": model.title === model_type
-            })}
-            onClick={() => handleModelSelect(model.title)}
-          >
-            <div className="df">
-              <div className="dc size-8 relative mr-2">
-                <img
-                  className="w-7"
-                  src={model.logo}
-                  alt={model.title}
-                />
-                {model.title === "Local" &&
-                  <OnlineStatus className="absolute top-0 -right-0.5" />
-                }
-              </div>
-              <div>
-                <p className="text-sm">{model.title}</p>
-                <p className="text-[10px] text-white/70">{model.para}</p>
-              </div>
-            </div>
-          </DropdownMenuItem>
-        ))}
+        {
+          llmModels
+            .filter((_, i) => !isOnline ? i === 1 || i === 4 : true)
+            .map(model => (
+              <DropdownMenuItem
+                key={model.id}
+                className={cn("p-2", {
+                  "bg-input/50": model.title === model_type
+                })}
+                onClick={() => handleModelSelect(model.title)}
+              >
+                <div className="df">
+                  <div className="dc size-8 relative mr-2">
+                    <img
+                      className="w-7"
+                      src={model.logo}
+                      alt={model.title}
+                    />
+                    {model.title === "Local" &&
+                      <OnlineStatus className="absolute top-0 -right-0.5" />
+                    }
+                  </div>
+                  <div>
+                    <p className="text-sm">{model.title}</p>
+                    <p className="text-[10px] text-white/70">{model.para}</p>
+                  </div>
+                </div>
+              </DropdownMenuItem>
+            ))
+        }
       </DropdownMenuContent>
     </DropdownMenu>
   )

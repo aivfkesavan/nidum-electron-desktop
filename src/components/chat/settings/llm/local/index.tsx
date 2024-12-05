@@ -5,6 +5,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { useLLamaDownloadedModels } from "../../../../../hooks/use-llm-models";
 import { useDownloads } from "../../../../common/download-manager";
 import { useLLMModels } from "../../../../../hooks/use-llm-models";
+import useOnlineStatus from "../../../../../hooks/use-online-status";
 import useContextStore from "../../../../../store/context";
 import { useToast } from "../../../../../hooks/use-toast";
 import useAuthStore from "../../../../../store/auth";
@@ -16,6 +17,7 @@ import Footer from "../../common/footer";
 
 function Local() {
   const { downloads, downloadModel } = useDownloads()
+  const isOnline = useOnlineStatus()
 
   const user_id = useAuthStore(s => s._id)
   const llamaModel = useContextStore(s => s?.data?.[user_id]?.llamaModel)
@@ -117,8 +119,13 @@ function Local() {
                       :
                       <button
                         className="-mt-1 -mr-1 p-0.5 text-base hover:bg-input"
-                        onClick={() => download(m)}
-                      // disabled={isLoading}
+                        onClick={() => {
+                          if (!isOnline) {
+                            toast({ title: "Kindly ensure an internet connection to continue." })
+                          } else {
+                            download(m)
+                          }
+                        }}
                       >
                         <MdOutlineFileDownload />
                       </button>

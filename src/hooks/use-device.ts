@@ -1,7 +1,7 @@
 import { useEffect } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
-import { getInitDevice, getSharedDevice, goPublic, nidumChainEnable, nidumChainReserve, nidumChainSetupStaus, nidumChainUrlConfig, stopPublicShare, updateDevice } from "../actions/device";
+import { getInitDevice, getSharedDevice, goPublic, nidumChainSetupFlow, nidumChainSetupStaus, stopPublicShare, updateDevice } from "../actions/device";
 import useDeviceStore from "../store/device";
 
 import { useToast } from "../hooks/use-toast";
@@ -44,45 +44,54 @@ export function useDeviceMutate() {
 }
 
 export function useNidumChainSetup() {
-  const isNidumUrlConfigured = useDeviceStore(s => s.isNidumUrlConfigured)
-  const isNidumReserved = useDeviceStore(s => s.isNidumReserved)
-  const isNidumEnabled = useDeviceStore(s => s.isNidumEnabled)
   const deviceId = useDeviceStore(s => s.deviceId)
-  const update = useDeviceStore(s => s.update)
 
-  const { data: step1 } = useQuery({
-    queryKey: ["nidum-chain-url-config"],
-    queryFn: nidumChainUrlConfig,
-    enabled: !isNidumUrlConfigured,
+  const { isLoading, data } = useQuery({
+    queryKey: ["nidum-chain-setup-status"],
+    queryFn: nidumChainSetupStaus,
+    enabled: !!deviceId,
   })
 
-  const { data: step2 } = useQuery({
-    queryKey: ["nidum-chain-enable"],
-    queryFn: nidumChainEnable,
-    enabled: isNidumUrlConfigured && !isNidumEnabled,
-  })
-
-  const { data: step3 } = useQuery({
-    queryKey: ["nidum-chain-reserve"],
-    queryFn: () => nidumChainReserve(deviceId),
-    enabled: isNidumEnabled && !isNidumReserved,
+  const { mutate } = useMutation({
+    mutationFn: (disable: boolean) => nidumChainSetupFlow(deviceId, disable),
   })
 
   useEffect(() => {
-    if (step1 || step2 || step3) {
-      update({
-        isNidumUrlConfigured: !!step1?.msg,
-        isNidumEnabled: !!step2?.msg,
-        isNidumReserved: !!step3?.msg,
-      })
+    if (data) {
+      const isSuccess = data?.["nidum-chain-url-config"] && data?.["nidum-chain-enable"] && data?.["nidum-chain-reserve"]
+      if (!isSuccess) {
+        mutate(Object.keys(data).length === 0)
+      }
     }
-  }, [step1, step2, step3])
+  }, [data])
+
+  return {
+    isLoading,
+    data,
+  }
 }
 
 export function useNidumChainSetupStatus() {
   return useQuery({
     queryKey: ["nidum-chain-setup-status"],
     queryFn: nidumChainSetupStaus,
+  })
+}
+
+export function useNidumChainSetupRetry() {
+  const queryClient = useQueryClient()
+  const deviceId = useDeviceStore(s => s.deviceId)
+
+  const { toast } = useToast()
+
+  return useMutation({
+    mutationFn: () => nidumChainSetupFlow(deviceId, true),
+    onSuccess() {
+      queryClient.invalidateQueries({ queryKey: ["nidum-chain-setup-status"] })
+    },
+    onError(err) {
+      toast({ title: "Setup failed again" })
+    }
   })
 }
 

@@ -1,14 +1,11 @@
-import { useState } from "react";
 import { LuRefreshCw, LuWifi } from 'react-icons/lu';
 
-function TryAgain() {
-  const [isRetrying, setIsRetrying] = useState(false)
+import { useNidumChainSetupRetry } from '../../../../hooks/use-device';
 
-  const handleRetry = () => {
-    setTimeout(() => {
-      setIsRetrying(false)
-    }, 2000)
-  }
+function TryAgain() {
+  const { mutate, isPending } = useNidumChainSetupRetry()
+
+  const handleRetry = () => mutate()
 
   return (
     <div className="pt-6">
@@ -30,10 +27,10 @@ function TryAgain() {
           <button
             className="dc mx-auto px-4 py-1 text-sm rounded-full bg-zinc-700 text-white hover:bg-zinc-700/50 relative group"
             onClick={handleRetry}
-            disabled={isRetrying}
+            disabled={isPending}
           >
-            <LuRefreshCw className={isRetrying ? "animate-spin" : ""} />
-            {isRetrying ? "Retrying..." : "Try Again"}
+            <LuRefreshCw className={isPending ? "animate-spin" : ""} />
+            {isPending ? "Retrying..." : "Try Again"}
           </button>
         </div>
       </div>

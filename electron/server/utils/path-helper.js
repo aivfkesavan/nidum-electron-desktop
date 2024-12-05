@@ -2,6 +2,8 @@ import { existsSync, mkdirSync, writeFileSync } from 'fs';
 import path from 'path';
 import os from 'os';
 
+import packageJson from '../../../package.json';
+
 const homeDirectory = os.homedir()
 
 const mainPath = ".nidum"
@@ -23,7 +25,7 @@ export function getWhisperPath() {
 }
 
 export function getConfigPath() {
-  return createPath(["config-v1.json"])
+  return createPath([`config-${packageJson?.version?.replaceAll(".", "_")}.json`])
 }
 
 export function checkIsDirExists(directoryPath = "") {
