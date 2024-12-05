@@ -41,12 +41,14 @@ function Messages() {
   const user_id = useAuthStore(s => s._id)
 
   const model_type = useContextStore(s => s?.data?.[user_id]?.model_type)
-  const sharedAppId = useContextStore(s => s?.data?.[user_id]?.sharedAppId)
   const model_mode = useContextStore(s => s?.data?.[user_id]?.model_mode)
+  const sharedAppId = useContextStore(s => s?.data?.[user_id]?.sharedAppId)
   const llamaModel = useContextStore(s => s?.data?.[user_id]?.llamaModel)
   const ollamaModel = useContextStore(s => s?.data?.[user_id]?.ollamaModel)
   const ollamaUrl = useContextStore(s => s?.data?.[user_id]?.ollamaUrl)
   const nidumDecentralisedModel = useContextStore(s => s?.data?.[user_id]?.nidumDecentralisedModel)
+
+  const updateContext = useContextStore(s => s.updateContext)
 
   const { project_id = "", chat_id = "" } = useParams()
 
@@ -100,6 +102,15 @@ function Messages() {
     }
   }, [chat_id])
 
+  useEffect(() => {
+    if (!isOnline && !loading) {
+      if (!["Local", "Ollama"].includes(model_type)) {
+        updateContext({ model_type: "Local", model_mode: "" })
+        toast({ title: "Choosed Local AI Server due to connection error" })
+      }
+    }
+  }, [isOnline, loading, model_type])
+
   function num(n: string | number, defaultVal: number) {
     return (n || n === 0) ? Number(n) : defaultVal
   }
@@ -122,7 +133,6 @@ function Messages() {
     })
   }
 
-  // @ts-ignore
   const postData = async (msg: string, needAutoPlay: boolean = false) => {
     try {
       if (msg && projectDetails) {
@@ -175,7 +185,6 @@ function Messages() {
 
           navigate(`/p/${project_id}/c/${temContextId}`)
           sessionStorage.setItem("msg", msg)
-          // @ts-ignore
           return
         }
 
@@ -200,7 +209,7 @@ function Messages() {
         const initial = [user]
         const webSearchId = nanoid(10)
 
-        if (projectDetails?.web_enabled) {
+        if (isOnline && projectDetails?.web_enabled) {
           const webSearch: Message = {
             id: webSearchId,
             role: "web-searched",
@@ -252,7 +261,7 @@ function Messages() {
         let systemPrompt = projectDetails?.systemPrompt || systemDefaultPrompt
         let webSearchedData: string[] = []
 
-        if (projectDetails?.web_enabled && !projectDetails?.rag_enabled) {
+        if (isOnline && projectDetails?.web_enabled && !projectDetails?.rag_enabled) {
           const searchResult = await duckDuckGoSerach(msg)
           if (searchResult?.length > 0) {
             webSearchedData = searchResult.map((f: any) => f.href)
@@ -443,7 +452,6 @@ function Messages() {
           if (needAutoPlay) {
             speak(botReply.id, botReply.content)
           }
-          // @ts-ignore
           return
         }
 
@@ -461,7 +469,6 @@ function Messages() {
           setTempData([])
           setLoading(false)
           toast({ title: errMsg || "Something went wrong!" })
-          // @ts-ignore
           return
         }
 
@@ -520,7 +527,6 @@ function Messages() {
                 if (needAutoPlay) {
                   speak(botReply.id, botReply.content)
                 }
-                // @ts-ignore
                 return;
               }
 
@@ -565,7 +571,6 @@ function Messages() {
                     setTempData([])
                     setLoading(false)
                     toast({ title: "Please use new chat" })
-                    // @ts-ignore
                     return
                   }
                   botRes += text
@@ -592,7 +597,6 @@ function Messages() {
                     if (needAutoPlay) {
                       speak(botReply.id, botReply.content)
                     }
-                    // @ts-ignore
                     return;
                   }
 

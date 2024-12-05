@@ -24,7 +24,6 @@ function GroqProvider({ disabled, postData }: Props) {
     postData(transcript, true)
   }
 
-  // @ts-ignore
   const onClick = () => {
     if (!sttGroqApiKey) return toast({ title: "Please provide groq api key" })
     onClk(sendAudioTo_STT_API)

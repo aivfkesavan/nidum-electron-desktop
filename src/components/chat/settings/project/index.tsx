@@ -1,9 +1,11 @@
 import { useState } from "react";
 import { useParams } from "react-router-dom";
 
+import useOnlineStatus from "../../../../hooks/use-online-status";
 import { useCrawler } from "../../../../hooks/use-crawler";
 import useConvoStore from "../../../../store/conversations";
 import useAuthStore from "../../../../store/auth";
+import { useToast } from "../../../../hooks/use-toast";
 
 import {
   Select,
@@ -22,6 +24,9 @@ function Chat() {
   const { project_id = "" } = useParams()
 
   const { data: crawlerData } = useCrawler()
+  const isOnline = useOnlineStatus()
+
+  const { toast } = useToast()
 
   const user_id = useAuthStore(s => s._id)
 
@@ -63,6 +68,9 @@ function Chat() {
   }
 
   function onChangeRag(key: "rag_enabled" | "web_enabled", val: boolean) {
+    if (!isOnline && key === "web_enabled" && val) {
+      return toast({ title: "Kindly ensure an internet connection to continue." })
+    }
     let alterKey = key === "rag_enabled" ? "web_enabled" : "rag_enabled"
     setDetails(pr => ({
       ...pr,

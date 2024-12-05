@@ -3,6 +3,7 @@ import { MdDownloadDone, MdOutlineFileDownload } from "react-icons/md";
 
 import { useDownloads } from "../../../../components/common/download-manager";
 import useContextStore from "../../../../store/context";
+import useOnlineStatus from "../../../../hooks/use-online-status";
 import { useToast } from "../../../../hooks/use-toast";
 import useAuthStore from "../../../../store/auth";
 
@@ -35,6 +36,8 @@ function Native() {
   const downloaded = useContextStore(s => s?.data?.[user_id]?.nativeSttModelsDownloaded?.split(","))
   const nativeSttModel = useContextStore(s => s?.data?.[user_id]?.nativeSttModel)
   const updateContext = useContextStore(s => s.updateContext)
+
+  const isOnline = useOnlineStatus()
   const { toast } = useToast()
 
   const [selected, setSelected] = useState(nativeSttModel || "")
@@ -101,7 +104,13 @@ function Native() {
                       :
                       <button
                         className="-mt-1 -mr-1 p-0.5 text-base hover:bg-input"
-                        onClick={() => downloadIt(m.name)}
+                        onClick={() => {
+                          if (!isOnline) {
+                            toast({ title: "Kindly ensure an internet connection to continue." })
+                          } else {
+                            downloadIt(m.name)
+                          }
+                        }}
                       >
                         <MdOutlineFileDownload />
                       </button>

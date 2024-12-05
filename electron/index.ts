@@ -23,10 +23,10 @@ let serverApp: any;
 
 if (process.defaultApp) {
   if (process.argv.length >= 2) {
-    app.setAsDefaultProtocolClient('ragdrive', process.execPath, [path.resolve(process.argv[1] as string)])
+    app.setAsDefaultProtocolClient('nidum', process.execPath, [path.resolve(process.argv[1] as string)])
   }
 } else {
-  app.setAsDefaultProtocolClient('ragdrive')
+  app.setAsDefaultProtocolClient('nidum')
 }
 
 function createWindow() {
@@ -132,12 +132,12 @@ if (!gotTheLock) {
                   type: 'info',
                   title: 'Help',
                   message: 'For assistance, you can reach us at info@nidum.ai or visit our website.',
-                  detail: 'Visit https://ragdrive.com/ for more information.',
+                  detail: 'Visit https://nidum.com/ for more information.',
                   buttons: ['Open Website', 'Close'],
                 }).then((result) => {
                   // If the user clicks 'Open Website', open the URL
                   if (result.response === 0) {
-                    shell.openExternal('https://ragdrive.com/');
+                    shell.openExternal('https://nidum.com/');
                   }
                 });
               },

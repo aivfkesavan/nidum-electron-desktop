@@ -63,7 +63,6 @@ function useAudio() {
         }
         utteranceRef.current.onerror = () => clear()
 
-        // @ts-ignore
         utteranceRef.current.voice = englishVoices.find(s => s.name === voice) || englishVoices[0]
 
         synth.speak(utteranceRef.current)

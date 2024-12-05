@@ -40,7 +40,6 @@ function ImgGenerate() {
     scrollableRef?.current?.scrollIntoView({ behavior: "instant", block: "end" })
   }, [messages?.[project_id]?.length])
 
-  // @ts-ignore
   const postData = async (inputs: string, dummy: boolean) => {
     try {
       if (inputs) {

@@ -51,7 +51,6 @@ function NativeProvider({ disabled, postData }: props) {
     }
   }
 
-  // @ts-ignore
   const onClick = () => {
     if (!nativeSttModel) return toast({ title: "Please select whisper model" })
     onClk(sendAudioToServer)
