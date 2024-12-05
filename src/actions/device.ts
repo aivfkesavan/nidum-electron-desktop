@@ -44,6 +44,10 @@ export function nidumChainReserve(deviceId: string) {
   return axios.post(`${constants.backendUrl}/nidum-chain/reserve`, { deviceId }).then(r => r.data)
 }
 
+export function nidumChainSetupStaus() {
+  return axios.post(`${constants.backendUrl}/nidum-chain/setup-status`).then(r => r.data)
+}
+
 export function goPublic(deviceId: string) {
   return axios.post(`${constants.backendUrl}/nidum-chain/go-public`, { deviceId }).then(r => r.data)
 }

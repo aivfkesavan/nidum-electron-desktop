@@ -22,6 +22,10 @@ export function getWhisperPath() {
   return createPath(["whisper"])
 }
 
+export function getConfigPath() {
+  return createPath(["config-v1.json"])
+}
+
 export function checkIsDirExists(directoryPath = "") {
   if (!existsSync(directoryPath)) {
     try {
@@ -49,8 +53,17 @@ function modelsPathCheck() {
   }
 }
 
+function configPathCheck() {
+  const configPath = getConfigPath()
+
+  if (!existsSync(configPath)) {
+    writeFileSync(configPath, JSON.stringify({}))
+  }
+}
+
 export function checkPathsSetup() {
   const directoryPath = getRoot()
   checkIsDirExists(directoryPath)
   modelsPathCheck()
+  configPathCheck()
 }
