@@ -1,8 +1,10 @@
 import { useEffect } from "react";
-import Messages from "./messages";
+import { Outlet, useNavigate } from "react-router-dom";
+// import Messages from "./messages";
 import SideBar from "./side-bar";
 
 import { useStopShareOnAppLeave, useNidumChainSetup } from "../../hooks/use-device";
+import { useLLMModels, useLLamaDownloadedModels } from "../../hooks/use-llm-models";
 import useConvoStore from "../../store/conversations";
 import useAuthStore from "../../store/auth";
 import { findLatest } from "../../utils";
@@ -12,7 +14,6 @@ import CheckForUpdate from "./check-for-update";
 // import ImgGenerate from "./img-generate";
 import Header from "./header";
 import Modals from "./modals";
-import { useNavigate } from "react-router-dom";
 
 function Chat() {
   // const project_id = useContextStore(s => s.project_id)
@@ -54,6 +55,9 @@ function Chat() {
 
   useStopShareOnAppLeave()
 
+  useLLamaDownloadedModels()
+  useLLMModels("llm2")
+
   return (
     <main className="app-wrapper transition-all">
       <SideBar />
@@ -65,7 +69,8 @@ function Chat() {
             ? <ImgGenerate />
             : <Messages key={chat_id} />
         } */}
-        <Messages />
+        {/* <Messages /> */}
+        <Outlet />
       </div>
 
       <Modals />
