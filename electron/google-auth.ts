@@ -40,7 +40,7 @@ async function googleAuth() {
     })
 
     authWindow.on('closed', () => {
-      reject(new Error('Auth window was closed prematurely'))
+      reject('Auth window was closed prematurely')
     })
   })
 }

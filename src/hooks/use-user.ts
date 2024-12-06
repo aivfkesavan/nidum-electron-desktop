@@ -192,6 +192,7 @@ export function useGoogleAuthMutate() {
     },
     onError(err) {
       let hasError = err?.message
+      if (hasError?.endsWith("prematurely")) return
       if (hasError) {
         toast({ title: hasError })
       } else {
