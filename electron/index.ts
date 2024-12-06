@@ -1,6 +1,7 @@
 import { app, shell, BrowserWindow, ipcMain, Menu, dialog } from "electron";
 import { fileURLToPath } from "node:url";
 import { autoUpdater } from 'electron-updater';
+import log from 'electron-log';
 import path from "node:path";
 
 import googleAuth from "./google-auth";
@@ -31,7 +32,7 @@ if (process.defaultApp) {
 
 function createWindow() {
   serverApp = server.listen(4000, () => {
-    console.log("connected")
+    log.info("connected")
   })
   const icon = process.platform === "win32" ? "icon.ico" : "icon.icns"
   win = new BrowserWindow({
@@ -87,7 +88,7 @@ function createWindow() {
 
   win.on("close", () => {
     if (serverApp) {
-      console.log("closig serverApp....")
+      log.info("closig serverApp....")
       serverApp?.close?.()
     }
   })
@@ -111,11 +112,9 @@ if (!gotTheLock) {
   app.whenReady().then(() => {
     createWindow()
 
-    if (process.platform === "win32") {
-      setTimeout(() => {
-        autoUpdater.checkForUpdatesAndNotify()
-      }, 5000)
-    }
+    setTimeout(() => {
+      autoUpdater.checkForUpdatesAndNotify()
+    }, 5000)
 
     // Add the custom "Help" menu only for macOS (darwin)
     if (process.platform === 'darwin') {
@@ -195,72 +194,70 @@ ipcMain.on('app:restart', () => {
 
 ipcMain.handle('auth:google', googleAuth)
 
-if (process.platform === "win32") {
-  autoUpdater.autoDownload = false
-  autoUpdater.autoInstallOnAppQuit = true
-  autoUpdater.setFeedURL({
-    provider: 'generic',
-    url: 'https://releases.nidum.ai/download/downloads/',
+autoUpdater.autoDownload = false
+autoUpdater.autoInstallOnAppQuit = true
+autoUpdater.setFeedURL({
+  provider: 'generic',
+  url: 'https://releases.nidum.ai/download/downloads/',
+})
+
+autoUpdater.on('checking-for-update', () => {
+  log.info('Checking for updates...')
+})
+
+autoUpdater.on('update-available', (info) => {
+  log.info('Update available.')
+  log.info(`Latest version available: ${info.version}`)
+  log.info('Prompting user to download the update...')
+
+  dialog.showMessageBox({
+    type: 'info',
+    title: 'Update Available',
+    message: 'A new version is available. Do you want to download it now?',
+    buttons: ['Download', 'Cancel']
+  }).then((result) => {
+    const buttonIndex = result.response
+
+    if (buttonIndex === 0) {
+      log.info('User chose to download the update.')
+      autoUpdater.downloadUpdate()
+    } else {
+      log.info('User canceled the update download.')
+    }
   })
+})
 
-  autoUpdater.on('checking-for-update', () => {
-    console.log('Checking for updates...')
+autoUpdater.on('update-not-available', (info) => {
+  log.info('No updates available.')
+  log.info(`Checked version: ${info.version}`)
+})
+
+autoUpdater.on('error', (err) => {
+  log.info('Error in auto-updater:', err)
+})
+
+autoUpdater.on('download-progress', (progressObj) => {
+  log.info(`Download speed: ${progressObj.bytesPerSecond} B/s`)
+  log.info(`Downloaded ${progressObj.percent}%`)
+  log.info(`${progressObj.transferred} bytes out of ${progressObj.total} bytes.`)
+})
+
+autoUpdater.on('update-downloaded', (info) => {
+  log.info('Update downloaded.')
+  log.info(`Downloaded version: ${info.version}`)
+  log.info('Prompting user to restart the application...')
+
+  dialog.showMessageBox({
+    type: 'info',
+    title: 'Update Ready',
+    message: 'A new version has been downloaded. Restart the application to apply the updates.',
+    buttons: ['Restart', 'Later']
+  }).then((returnValue) => {
+    if (returnValue.response === 0) {
+      log.info('User chose to restart the application to install the update.')
+      autoUpdater.quitAndInstall(false, true)
+    } else {
+      log.info('User chose to install the update later.')
+    }
   })
-
-  autoUpdater.on('update-available', (info) => {
-    // console.log('Update available.')
-    // console.log(`Latest version available: ${info.version}`)
-    // console.log('Prompting user to download the update...')
-
-    dialog.showMessageBox({
-      type: 'info',
-      title: 'Update Available',
-      message: 'A new version is available. Do you want to download it now?',
-      buttons: ['Download', 'Cancel']
-    }).then((result) => {
-      const buttonIndex = result.response
-
-      if (buttonIndex === 0) {
-        // console.log('User chose to download the update.')
-        autoUpdater.downloadUpdate()
-      } else {
-        console.log('User canceled the update download.')
-      }
-    })
-  })
-
-  autoUpdater.on('update-not-available', (info) => {
-    console.log('No updates available.')
-    console.log(`Checked version: ${info.version}`)
-  })
-
-  autoUpdater.on('error', (err) => {
-    console.log('Error in auto-updater:', err)
-  })
-
-  autoUpdater.on('download-progress', (progressObj) => {
-    console.log(`Download speed: ${progressObj.bytesPerSecond} B/s`)
-    console.log(`Downloaded ${progressObj.percent}%`)
-    console.log(`${progressObj.transferred} bytes out of ${progressObj.total} bytes.`)
-  })
-
-  autoUpdater.on('update-downloaded', (info) => {
-    console.log('Update downloaded.')
-    console.log(`Downloaded version: ${info.version}`)
-    console.log('Prompting user to restart the application...')
-
-    dialog.showMessageBox({
-      type: 'info',
-      title: 'Update Ready',
-      message: 'A new version has been downloaded. Restart the application to apply the updates.',
-      buttons: ['Restart', 'Later']
-    }).then((returnValue) => {
-      if (returnValue.response === 0) {
-        console.log('User chose to restart the application to install the update.')
-        autoUpdater.quitAndInstall(false, true)
-      } else {
-        console.log('User chose to install the update later.')
-      }
-    })
-  })
-}
+})

@@ -281,7 +281,7 @@ function Messages() {
           }))
         }
 
-        if (projectDetails?.rag_enabled && (filesLen > 0 || Object.keys(crawlerData)?.length > 0)) {
+        if (isOnline && projectDetails?.rag_enabled && (filesLen > 0 || Object.keys(crawlerData)?.length > 0)) {
           const searchReult = await ragSearch(msg)
           systemPrompt = createContext({
             base: projectDetails?.ragPrompt || ragDefaultPrompt,
@@ -689,7 +689,7 @@ function Messages() {
         <Settings />
 
         {
-          projectDetails?.rag_enabled &&
+          isOnline && projectDetails?.rag_enabled &&
           <div className="df py-1 pl-2 text-xs absolute bottom-full left-4 sm:left-[68px] text-white/80 bg-border rounded-sm">
             <FaFileAlt className="shrink-0 text-base text-white/50" />
             <p className="w-24 truncate">RAG enabled</p>
@@ -750,7 +750,7 @@ function Messages() {
           disabled={isChatInputDisabled}
         />
 
-        <ManageResourses />
+        {isOnline && <ManageResourses />}
       </div>
     </>
   )

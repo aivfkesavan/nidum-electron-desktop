@@ -1,7 +1,7 @@
 {
   "name": "NidumAI",
   "private": true,
-  "version": "2.0.11",
+  "version": "2.0.10",
   "productName": "Nidum AI",
   "description": "Nidum AI",
   "author": "nidum info@nidum.ai",
@@ -41,6 +41,7 @@
     "cors": "^2.8.5",
     "dayjs": "^1.11.13",
     "dotenv": "^16.4.5",
+    "electron-log": "^5.2.4",
     "electron-updater": "^6.3.9",
     "embla-carousel-react": "^8.3.0",
     "express": "^4.21.1",
