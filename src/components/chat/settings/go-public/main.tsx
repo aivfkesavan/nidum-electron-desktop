@@ -66,9 +66,9 @@ function Main() {
         <div className="text-xs text-center">Checking device status</div>
       }
 
-      <div className="dc mb-8">
+      <div className="df mb-6">
         <input
-          className="max-w-60 px-3 py-2 text-sm bg-zinc-700/50"
+          className="w-full px-3 py-1.5 text-sm bg-zinc-700/50"
           value={deviceName}
           onChange={e => setDeviceName(e.target.value)}
           onBlur={e => onBlur(e.target.value)}

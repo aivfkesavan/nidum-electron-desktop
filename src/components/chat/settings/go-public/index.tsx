@@ -19,8 +19,10 @@ function GoPublic() {
 
   return (
     <>
-      <Main />
-      <Invite />
+      <div className="p-6 m-4 rounded-lg border shadow shadow-zinc-800">
+        <Main />
+        <Invite />
+      </div>
       <Configurations />
     </>
   )
