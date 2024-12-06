@@ -76,7 +76,7 @@ function Main() {
 
         <button
           onClick={onClk}
-          className={`dc w-36 px-4 py-1.5 text-[13px] ${isNidumSharedPublic ? "bg-red-500 hover:bg-red-600" : "bg-green-500 hover:bg-green-600"}`}
+          className={`dc w-36 shrink-0 px-4 py-1.5 text-[13px] ${isNidumSharedPublic ? "bg-red-500 hover:bg-red-600" : "bg-green-500 hover:bg-green-600"}`}
         >
           {(isPending4 || isPending5) && <span className="loader-2 size-4 border-2"></span>}
           {isNidumSharedPublic ? "Stop Sharing" : "Go Public"}

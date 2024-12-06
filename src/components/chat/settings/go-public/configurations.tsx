@@ -44,10 +44,10 @@ function Configurations() {
     <Accordion value={val} type="single" collapsible>
       <AccordionItem value="1" className="p-6 m-4 mt-8 rounded-lg border shadow shadow-zinc-800">
         <AccordionTrigger
-          className="p-0 text-sm text-zinc-400 font-medium"
+          className="p-0 text-sm text-zinc-400 font-medium hover:text-zinc-300 hover:no-underline"
           onClick={scrollDown}
         >
-          Troubleshoot
+          Troubleshoot Nidum Network Issues
         </AccordionTrigger>
 
         <AccordionContent>
