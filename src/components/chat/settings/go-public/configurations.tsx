@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { LuRefreshCw } from "react-icons/lu";
 
 import { useNidumChainSetupRetry } from "../../../../hooks/use-device";
@@ -11,20 +12,40 @@ import {
 } from "../../../ui/accordion";
 
 function Configurations() {
+  const [val, setVal] = useState("")
+
   const { mutate, isPending } = useNidumChainSetupRetry()
   const { toast } = useToast()
 
   const handleRetry = () => mutate(null, {
     onSuccess() {
       toast({ title: "Configurations updated successfully" })
+      setVal("")
+      setTimeout(() => {
+        const el = document.querySelector("#settings-cont")
+        if (el) {
+          el.scrollTop = 0
+        }
+      }, 20)
     }
   })
 
+  function scrollDown() {
+    setVal(p => p === "" ? "1" : "")
+    setTimeout(() => {
+      const el = document.querySelector("#settings-cont")
+      if (el) {
+        el.scrollTop = el.scrollHeight
+      }
+    }, 200)
+  }
+
   return (
-    <Accordion type="single" collapsible>
-      <AccordionItem value="item-1" className="max-w-md w-full mb-8 mt-8 mx-auto border-0">
+    <Accordion value={val} type="single" collapsible>
+      <AccordionItem value="1" className="p-6 m-4 mt-8 rounded-lg border shadow shadow-zinc-800">
         <AccordionTrigger
-          className="p-0 mt-4 text-sm text-zinc-400 font-medium"
+          className="p-0 text-sm text-zinc-400 font-medium"
+          onClick={scrollDown}
         >
           Troubleshoot
         </AccordionTrigger>
@@ -40,7 +61,7 @@ function Configurations() {
           </ol>
 
           <button
-            className="dc px-4 py-1.5 ml-4 text-xs rounded-full bg-zinc-700 text-white hover:bg-zinc-700/50 relative group"
+            className="dc mx-auto px-4 py-1.5 text-xs rounded-full bg-zinc-700 text-white hover:bg-zinc-700/50 relative group"
             onClick={handleRetry}
             disabled={isPending}
           >
