@@ -11,7 +11,6 @@ import useAuthStore from "../../store/auth";
 import { findLatest } from "../../utils";
 // import useContextStore from "@store/context";
 
-import CheckForUpdate from "./check-for-update";
 // import ImgGenerate from "./img-generate";
 import Header from "./header";
 import Modals from "./modals";
@@ -77,7 +76,6 @@ function Chat() {
       </div>
 
       <Modals />
-      <CheckForUpdate />
     </main>
   )
 }

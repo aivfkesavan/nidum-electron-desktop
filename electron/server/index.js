@@ -6,7 +6,6 @@ import nidumShare from "./controllers/nidum-share";
 import duckduckgo from "./controllers/duckduckgo";
 import webcrawler from "./controllers/webcrawler";
 import llamaChat from "./controllers/llama-chat";
-import upgrade from "./controllers/upgrade";
 import whisper from "./controllers/whisper";
 import general from "./controllers/general";
 import llama from "./controllers/llama";
@@ -33,7 +32,6 @@ app.use("/image", image)
 app.use("/nidum-chain", nidumShare)
 app.use("/whisper", whisper)
 app.use("/general", general)
-app.use("/upgrade", upgrade)
 app.use("/llama-chat", llamaChat)
 app.use("/duckduckgo", duckduckgo)
 app.use("/web-crawler", webcrawler)
