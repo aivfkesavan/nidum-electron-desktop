@@ -5,7 +5,7 @@ import { Link } from "react-router-dom";
 
 import { useLoginMutate } from "../../hooks/use-user";
 
-import GoogleAuthBtn from "../common/google-btn";
+// import GoogleAuthBtn from "../common/google-btn";
 import logo from '../../assets/imgs/logo.png';
 
 function Login() {
@@ -119,12 +119,12 @@ function Login() {
           <Link to="/forget-pass" replace className="text-zinc-300 hover:underline">Forgot Password</Link>
         </div>
 
-        <div className="mb-2 text-xs text-center isolate relative text-zinc-400">
+        {/* <div className="mb-2 text-xs text-center isolate relative text-zinc-400">
           <span className="absolute top-2 inset-x-0 h-px bg-zinc-700 z-[-1]"></span>
           <span className="px-2 bg-[#171717] z-[1]">Or</span>
-        </div>
+        </div> */}
 
-        <GoogleAuthBtn />
+        {/* <GoogleAuthBtn /> */}
 
         <div className="mt-6 text-xs text-center text-zinc-400">
           Don't have an account? <Link to="/signup" replace className="text-zinc-300 hover:underline">Sign up</Link>
