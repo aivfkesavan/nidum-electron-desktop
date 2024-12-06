@@ -23,12 +23,12 @@ const list = [
   {
     title: "Android",
     icon: TiVendorAndroid,
-    link: "https://releases.nidum.ai/download/downloads/nidum-ai-v1.0.4.apk",
+    link: "https://releases.nidum.ai/download/downloads/latest.apk",
   },
   {
     title: "Mac",
     icon: GrApple,
-    link: "https://releases.nidum.ai/download/downloads/Nidum.AI-v-2.0.11-b.dmg",
+    link: "https://releases.nidum.ai/download/downloads/latest.dmg",
   },
   {
     title: "Web",

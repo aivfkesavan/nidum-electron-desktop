@@ -1,10 +1,8 @@
 import { createContext, useContext, useState } from "react";
-import { useMutation } from "@tanstack/react-query";
 import { pipeline } from '@huggingface/transformers';
 import { toast } from 'sonner';
 
 import { generateImg, generateImgT } from "../../actions/img";
-import { installLatestDMG } from "../../actions/upgrade";
 import constants from "../../utils/constants";
 
 type Downloads = {
@@ -49,7 +47,6 @@ type DownloadContextType = {
   isDownloading: boolean
   generateImage: (v: GenerateImageType) => void
   downloadModel: (v: downloadModelProps1) => void
-  downloadLatestExec: (link: string) => void
   downloadXenovaModels: (v: downloadModelProps) => void
   downloadWhisperModel: (v: downloadWhisperModelProps) => void
 }
@@ -69,38 +66,6 @@ export const useDownloads = (): DownloadContextType => {
 
 export function DownloadProvider({ children }: props) {
   const [downloads, setDownloads] = useState<Downloads>({})
-  const { mutate } = useMutation({
-    mutationFn: (fileName: string) => installLatestDMG(fileName),
-    onSuccess() {
-      toast.success("New version installed", {
-        description: "Restart the application to use the latest version.",
-        descriptionClassName: "mt-1 text-xs",
-        closeButton: true,
-        richColors: true,
-        className: "py-2.5",
-        position: "top-center",
-        duration: 10000,
-        id: "latest-v",
-        action: {
-          label: 'Close',
-          onClick: () => {
-            // @ts-ignore
-            window?.electronAPI?.restartApp()
-          }
-        },
-      })
-    },
-    onError() {
-      toast.error("Installing latest version", {
-        description: "Cannot install the downloaded version, please try again later",
-        className: "py-2",
-        richColors: false,
-        position: "top-center",
-        duration: 1000,
-        id: "latest-v",
-      })
-    }
-  })
 
   const downloadModel = async ({ id, model, fileName, lable, onSuccess, onError }: downloadModelProps1) => {
     try {
@@ -265,73 +230,6 @@ export function DownloadProvider({ children }: props) {
     }
   }
 
-  function extractFilename(url: string) {
-    const pathname = new URL(url).pathname;
-    return pathname.split('/').pop();
-  }
-
-  async function downloadLatestExec(downloadUrl: string) {
-    try {
-      const response = await fetch(`${constants.backendUrl}/upgrade/dowload-dmg?url=${downloadUrl}`, {
-        method: "GET",
-        cache: "no-store",
-        headers: { 'Content-Type': 'application/json' },
-      })
-
-      const reader = response.body?.getReader()
-      const decoder = new TextDecoder()
-
-      while (true) {
-        const { done, value } = await reader?.read() || {}
-        if (done) {
-          setTimeout(() => {
-            const fileName = extractFilename(downloadUrl)
-            toast.loading("Installing latest version", {
-              description: "",
-              className: "py-2",
-              richColors: true,
-              position: "top-center",
-              duration: Infinity,
-              id: "latest-v",
-            })
-            mutate(fileName as string)
-          }, 1500)
-          break
-        }
-
-        const chunk = decoder?.decode(value)
-        const lines = chunk?.split('\n\n')
-
-        lines?.forEach(line => {
-          if (line?.startsWith('data: ')) {
-            const data = JSON?.parse(line?.slice(6))
-            if (data) {
-              toast.loading("Downloading latest version", {
-                className: "py-2",
-                description: `Progress: ${data?.progress || 0}%`,
-                richColors: false,
-                position: "top-center",
-                duration: Infinity,
-                id: "latest-v",
-              })
-            }
-          }
-        })
-      }
-
-    } catch (error) {
-      console.log(error)
-      toast.error("Downloading latest version", {
-        description: "Cannot complete download, please try again later",
-        className: "py-2",
-        richColors: false,
-        position: "top-center",
-        duration: 1000,
-        id: "latest-v",
-      })
-    }
-  }
-
   async function downloadXenovaModels({ name, initiater, onSuccess, onError }: downloadModelProps) {
     let modelName = name?.replace(/^Xenova\//, '').replace(/\.en$/, '').replace(/-/g, ' ').split(' ').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ')
     try {
@@ -408,7 +306,6 @@ export function DownloadProvider({ children }: props) {
         generateImage,
         downloadModel,
         downloadWhisperModel,
-        downloadLatestExec,
         downloadXenovaModels,
       }}
     >
