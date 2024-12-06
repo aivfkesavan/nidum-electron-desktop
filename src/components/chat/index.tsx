@@ -27,8 +27,8 @@ function Chat() {
   const init = useConvoStore(s => s.init)
 
   useEffect(() => {
-    const pathname = window.location.pathname
-    if (pathname === "/") {
+    const pathname = window.location.hash
+    if (!pathname || pathname === "#/") {
       if (convo?.projects && Object.keys(convo?.projects).length) {
         const latestProjectId = findLatest(Object.values(convo?.projects))
         const chats = convo?.chats[latestProjectId?.id]

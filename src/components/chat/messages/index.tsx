@@ -104,7 +104,7 @@ function Messages() {
 
   useEffect(() => {
     if (!isOnline && !loading) {
-      if (!["Local", "Ollama"].includes(model_type)) {
+      if (!["Local"].includes(model_type)) { // "Ollama"
         updateContext({ model_type: "Local", model_mode: "" })
         toast({ title: "Choosed Local AI Server due to connection error" })
       }

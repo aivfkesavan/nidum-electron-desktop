@@ -4,6 +4,7 @@ import { useNidumChainSetupStatus } from "../../../../hooks/use-device";
 import TryAgain from "./try-again";
 import Invite from "./invite";
 import Main from "./main";
+import Configurations from "./configurations";
 
 function GoPublic() {
   const { data: chainSetupStatus, isLoading } = useNidumChainSetupStatus()
@@ -20,6 +21,7 @@ function GoPublic() {
     <>
       <Main />
       <Invite />
+      <Configurations />
     </>
   )
 }
