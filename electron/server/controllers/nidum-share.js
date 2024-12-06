@@ -55,7 +55,7 @@ router.post("/url-config", async (req, res) => {
 
 router.post("/enable", async (req, res) => {
   try {
-    const enable = `"${zrokPath}" enable xIoAvryd2Svl`;
+    const enable = `"${zrokPath}" enable IuWuU5fe1A54`;
     await execPromise(enable)
     await updateJSONObj(configPath, { "nidum-chain-enable": true })
 
@@ -162,6 +162,7 @@ router.post("/disable", async (req, res) => {
     } catch (error) {
       console.log(error)
     }
+
     try {
       const homeDirectory = os.homedir()
       const zrokFolder = path.join(homeDirectory, ".zrok")
