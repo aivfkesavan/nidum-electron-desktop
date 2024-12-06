@@ -1,6 +1,6 @@
 
 export const root = {
-  liveBackendBaseUrl: "https://apiv1.chain.nidum.ai/api" // http://localhost:5000/api
+  liveBackendBaseUrl: "https://apiv2.chain.nidum.ai/api" // http://localhost:5000/api
 }
 
 export const endPoints = {
