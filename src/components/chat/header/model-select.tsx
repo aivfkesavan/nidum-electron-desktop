@@ -49,7 +49,7 @@ function ModelSelect() {
       <DropdownMenuContent className="p-1 min-w-48">
         {
           llmModels
-            .filter((_, i) => !isOnline ? i === 1 || i === 4 : true)
+            .filter((_, i) => !isOnline ? i === 1 : true) // || i === 4
             .map(model => (
               <DropdownMenuItem
                 key={model.id}

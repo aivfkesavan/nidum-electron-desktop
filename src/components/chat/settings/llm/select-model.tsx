@@ -36,7 +36,7 @@ function SelectModel() {
 
   function onClk(e: any) {
     e?.preventDefault()
-    if (isNidumSharedPublic) return toast({ title: "Stop 'Go Public' feature to change server" })
+    if (isNidumSharedPublic && isOnline) return toast({ title: "Stop 'Go Public' feature to change server" })
     return setOpen(true)
   }
 
@@ -75,7 +75,7 @@ function SelectModel() {
         <div className="mt-3">
           {
             llmModels
-              .filter((_, i) => !isOnline ? i === 1 || i === 4 : true)
+              .filter((_, i) => !isOnline ? i === 1 : true) // || i === 4
               .map(l => (
                 <div
                   key={l.id}

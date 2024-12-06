@@ -91,7 +91,7 @@ export function useNidumChainSetupRetry() {
       queryClient.invalidateQueries({ queryKey: ["nidum-chain-setup-status"] })
     },
     onError(err) {
-      toast({ title: "Setup failed again" })
+      toast({ title: "Setup failed" })
     }
   })
 }

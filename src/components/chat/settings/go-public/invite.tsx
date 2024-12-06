@@ -14,7 +14,7 @@ function Invite() {
   const loading = isLoading || isPending1 || isPending2
 
   return (
-    <>
+    <div className="py-4 border-y">
       <div className="dc text-xs">
         <p className="shrink-0">Invite a friend</p>
         <input
@@ -60,7 +60,7 @@ function Invite() {
           ))
         }
       </div>
-    </>
+    </div>
   )
 }
 
