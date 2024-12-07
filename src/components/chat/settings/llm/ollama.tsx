@@ -104,7 +104,7 @@ function Ollama() {
           <AccordionItem value="1" className=" border-0">
             <AccordionTrigger
               type="button"
-              className="p-0 mt-4 text-sm text-zinc-400 font-medium"
+              className="p-0 mt-4 text-sm text-zinc-400 font-medium [&>svg]:rotate-180 [&[data-state=open]>svg]:rotate-0"
             >
               Instructions
             </AccordionTrigger>

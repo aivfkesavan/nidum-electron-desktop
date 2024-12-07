@@ -22,7 +22,7 @@ const llmModels: listT[] = [
     id: "1",
     logo: logo,
     title: "Nidum Decentralized",
-    para: "Nidum's Decentralized Heterogenous AI Network"
+    para: "Nidum AI: Decentralized, diverse, unrestricted AI, powered by Nidum AI"
   },
   {
     id: "2",
