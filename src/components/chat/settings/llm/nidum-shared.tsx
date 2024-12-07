@@ -49,7 +49,7 @@ function NidumShared() {
 
       {
         data?.invites?.length === 0 &&
-        <div className="dc h-80 text-xs text-zinc-300">No shared servers found</div>
+        <div className="dc h-80 text-xs text-zinc-300">No shared Nidum Chain servers available</div>
       }
 
       {

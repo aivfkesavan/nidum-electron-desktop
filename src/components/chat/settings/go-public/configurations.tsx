@@ -44,7 +44,7 @@ function Configurations() {
     <Accordion value={val} type="single" collapsible>
       <AccordionItem value="1" className="p-6 m-4 mt-8 rounded-lg border shadow shadow-zinc-800">
         <AccordionTrigger
-          className="p-0 text-sm text-zinc-400 font-medium hover:text-zinc-300 hover:no-underline"
+          className="p-0 text-sm text-zinc-400 font-medium hover:text-zinc-300 hover:no-underline [&>svg]:rotate-180 [&[data-state=open]>svg]:rotate-0"
           onClick={scrollDown}
         >
           Troubleshoot Nidum Network Issues
