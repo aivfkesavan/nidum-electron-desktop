@@ -22,7 +22,7 @@ export function useConfigMutaate() {
     },
     onError(err) {
       console.log(err)
-      toast({ title: err?.message || "Something went wrong!" })
+      toast({ title: err?.message || "An error occurred. Please try again." })
     }
   })
 }
@@ -39,7 +39,7 @@ export function useConfigDeleteMutate() {
     },
     onError(err) {
       console.log(err)
-      toast({ title: err?.message || "Something went wrong!" })
+      toast({ title: err?.message || "An error occurred. Please try again." })
     }
   })
 }

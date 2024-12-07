@@ -51,9 +51,9 @@ function Main() {
 
   function onClk() {
     if (!isNidumSharedPublic) {
-      if (model_type !== "Local") return toast({ title: "Choose Local AI server to go public" })
-      if (!llamModel) return toast({ title: "Please choose a model to go public" })
-      if (!isOnline) return toast({ title: "Kindly ensure an internet connection to continue." })
+      if (model_type !== "Local") return toast({ title: "Please select a Local AI Server to enable public sharing." })
+      if (!llamModel) return toast({ title: "Please choose a model to proceed with public sharing." })
+      if (!isOnline) return toast({ title: "Please ensure your device is connected to the internet to proceed." })
       return mutateGoPublic()
     }
     return mutateStop()

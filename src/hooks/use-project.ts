@@ -36,11 +36,11 @@ export function useProjectMutate() {
       if (variables?._id) {
         queryClient.invalidateQueries({ queryKey: ["project", variables?._id] })
       }
-      toast({ title: `Project ${variables?._id ? "updated" : "created"} successfully` })
+      toast({ title: `Project have been ${variables?._id ? "updated" : "created"} successfully` })
     },
     onError(err) {
       console.log(err)
-      toast({ title: err?.message || "Something went wrong!" })
+      toast({ title: err?.message || "An error occurred. Please try again." })
     }
   })
 }
@@ -57,7 +57,7 @@ export function useProjectDeleteMutate() {
     },
     onError(err) {
       console.log(err)
-      toast({ title: err?.message || "Something went wrong!" })
+      toast({ title: err?.message || "An error occurred. Please try again." })
     }
   })
 }

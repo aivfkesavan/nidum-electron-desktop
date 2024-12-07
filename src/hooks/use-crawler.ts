@@ -38,7 +38,7 @@ export function useAddCrawl() {
     onError(err) {
       toast({
         // @ts-ignore
-        title: err?.response?.data?.error || "Something went wrong!"
+        title: err?.response?.data?.error || "An error occurred. Please try again."
       })
     }
   })
@@ -59,7 +59,7 @@ export function useDeleteCrawledLinks() {
     onError(err) {
       toast({
         // @ts-ignore
-        title: err?.response?.data?.error || "Something went wrong!"
+        title: err?.response?.data?.error || "An error occurred. Please try again."
       })
     }
   })

@@ -43,7 +43,7 @@ function Native() {
           voices &&
           <ControlledSelect
             name="voice"
-            label="Voice"
+            label="Voices"
             list={voices?.map(v => ({ id: v.name, name: v.name }))}
           />
         }

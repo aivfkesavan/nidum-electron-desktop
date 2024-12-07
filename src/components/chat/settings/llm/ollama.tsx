@@ -53,7 +53,7 @@ function Ollama() {
       const txt = await res.text()
 
       if (txt === "Ollama is running") {
-        toast({ title: "Ollama detected" })
+        toast({ title: "Ollama detected successfully." })
         let payload = {
           ollamaUrl: "http://localhost:11434",
           ollamaModel: "nidumai/nidum-limitless-gemma-2b",
@@ -64,7 +64,7 @@ function Ollama() {
       }
 
     } catch (error) {
-      toast({ title: "Cannot auto detect ollama" })
+      toast({ title: "Unable to auto-detect Ollama." })
 
       console.log(error)
     }

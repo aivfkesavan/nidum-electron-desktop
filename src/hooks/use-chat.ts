@@ -31,7 +31,7 @@ export function useChatMutate() {
     },
     onError(err) {
       console.log(err)
-      toast({ title: err?.message || "Something went wrong!" })
+      toast({ title: err?.message || "An error occurred. Please try again." })
     }
   })
 }
@@ -48,7 +48,7 @@ export function useChatDeleteMutate() {
     },
     onError(err) {
       console.log(err)
-      toast({ title: err?.message || "Something went wrong!" })
+      toast({ title: err?.message || "An error occurred. Please try again." })
     }
   })
 }

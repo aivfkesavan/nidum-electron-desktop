@@ -41,7 +41,7 @@ function Model() {
       }
 
       {
-        modelType === "SambaNova Systems" && <SambavaNova />
+        modelType === "SambaNova" && <SambavaNova />
       }
 
       {
