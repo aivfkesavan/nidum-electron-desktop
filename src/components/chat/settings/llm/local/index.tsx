@@ -58,7 +58,7 @@ function Local() {
     } else {
       toast({
         title: "Model not downloaded yet",
-        description: "Please download model to select"
+        description: "Please download the required model to proceed."
       })
     }
   }
@@ -121,7 +121,7 @@ function Local() {
                         className="-mt-1 -mr-1 p-0.5 text-base hover:bg-input"
                         onClick={() => {
                           if (!isOnline) {
-                            toast({ title: "Kindly ensure an internet connection to continue." })
+                            toast({ title: "Please ensure your device is connected to the internet to proceed." })
                           } else {
                             download(m)
                           }

@@ -57,7 +57,7 @@ const llmModels: listT[] = [
   {
     id: "7",
     logo: sambanova,
-    title: "SambaNova Systems",
+    title: "SambaNova",
     para: "Inference API from SambaNova Systems"
   },
   {

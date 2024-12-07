@@ -43,14 +43,7 @@ function Signup() {
 
     } catch (error) {
       let hasError = error?.message
-      if (hasError) {
-        toast({ title: hasError })
-      } else {
-        toast({
-          title: "Something went wrong!!!",
-          description: "Try again, later.",
-        })
-      }
+      toast({ title: hasError || "An error occurred. Please try again." })
     }
   }
 
@@ -62,14 +55,7 @@ function Signup() {
 
     } catch (error) {
       let hasError = error?.message
-      if (hasError) {
-        toast({ title: hasError })
-      } else {
-        toast({
-          title: "Something went wrong!!!",
-          description: "Try again, later.",
-        })
-      }
+      toast({ title: hasError || "An error occurred. Please try again." })
     }
   }
 
@@ -85,14 +71,7 @@ function Signup() {
 
     } catch (error) {
       let hasError = error?.message
-      if (hasError) {
-        toast({ title: hasError })
-      } else {
-        toast({
-          title: "Something went wrong!!!",
-          description: "Try again, later.",
-        })
-      }
+      toast({ title: hasError || "An error occurred. Please try again." })
     }
   }
 

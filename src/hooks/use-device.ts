@@ -39,7 +39,7 @@ export function useDeviceMutate() {
     },
     onError(err) {
       console.log(err)
-      toast({ title: err?.message || "Something went wrong!" })
+      toast({ title: err?.message || "An error occurred. Please try again." })
     }
   })
 }
@@ -91,7 +91,7 @@ export function useNidumChainSetupRetry() {
       queryClient.invalidateQueries({ queryKey: ["nidum-chain-setup-status"] })
     },
     onError(err) {
-      toast({ title: "Setup failed" })
+      toast({ title: "Setup failed. Please try again." })
     }
   })
 }
@@ -105,12 +105,12 @@ export function useGoPublicMutate() {
   return useMutation({
     mutationFn: () => goPublic(deviceId),
     onSuccess() {
-      toast({ title: "Public share enabled" })
+      toast({ title: "Public sharing has been enabled." })
       update({ isNidumSharedPublic: true })
     },
     onError(err) {
       console.log(err)
-      toast({ title: err?.message || "Something went wrong!" })
+      toast({ title: err?.message || "An error occurred. Please try again." })
     }
   })
 }
@@ -123,12 +123,12 @@ export function useStopShareMutate() {
   return useMutation({
     mutationFn: stopPublicShare,
     onSuccess() {
-      toast({ title: "Stoped public share" })
+      toast({ title: "Public sharing has been disabled." })
       update({ isNidumSharedPublic: false })
     },
     onError(err) {
       console.log(err)
-      toast({ title: err?.message || "Something went wrong!" })
+      toast({ title: err?.message || "An error occurred. Please try again." })
     }
   })
 }

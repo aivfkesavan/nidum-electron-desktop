@@ -39,7 +39,7 @@ function Delete() {
 
   function onClk(e: any) {
     e?.preventDefault()
-    if (!isOnline) return toast({ title: "Kindly ensure an internet connection to continue." })
+    if (!isOnline) return toast({ title: "Please ensure your device is connected to the internet to proceed." })
     showDelete ? onDelete() : onReq()
   }
 

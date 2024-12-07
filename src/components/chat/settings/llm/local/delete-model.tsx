@@ -25,7 +25,7 @@ function DeleteModel({ id, cancelModel, closeModel }: props) {
   const { mutate, isPending } = useMutation({
     mutationFn: () => deleteDownloadedModel(id),
     onSuccess() {
-      toast({ title: "Model deleted successfully" })
+      toast({ title: "Model deleted successfully." })
       quryClient.invalidateQueries({ queryKey: ["llama-models-downloaded"] })
       closeModel(id)
     },

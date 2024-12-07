@@ -28,7 +28,7 @@ function Reset() {
 
   function onReset(e: any) {
     e?.preventDefault()
-    if (!isOnline) return toast({ title: "Kindly ensure an internet connection to continue." })
+    if (!isOnline) return toast({ title: "Please ensure your device is connected to the internet to proceed." })
     if (!showConfirm) return setShowConfirm(true)
     mutate({ includeModels: true, deviceId })
   }

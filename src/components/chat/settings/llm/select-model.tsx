@@ -36,7 +36,7 @@ function SelectModel() {
 
   function onClk(e: any) {
     e?.preventDefault()
-    if (isNidumSharedPublic && isOnline) return toast({ title: "Stop 'Go Public' feature to change server" })
+    if (isNidumSharedPublic && isOnline) return toast({ title: "Please disable the 'Go Public' feature before changing the server." })
     return setOpen(true)
   }
 

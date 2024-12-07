@@ -69,7 +69,7 @@ function Chat() {
 
   function onChangeRag(key: "rag_enabled" | "web_enabled", val: boolean) {
     if (!isOnline && key === "web_enabled" && val) {
-      return toast({ title: "Kindly ensure an internet connection to continue." })
+      return toast({ title: "Please ensure your device is connected to the internet to proceed." })
     }
     let alterKey = key === "rag_enabled" ? "web_enabled" : "rag_enabled"
     setDetails(pr => ({
@@ -218,7 +218,7 @@ function Chat() {
       {
         !hasFiles &&
         <div className="text-[10px] text-white/60">
-          Note: For RAG, no file is currently uploaded. Please upload a file and enable RAG to proceed.
+          Note: No file has been uploaded for RAG. Please upload a file and enable RAG to proceed.
         </div>
       }
 

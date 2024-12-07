@@ -5,7 +5,7 @@ import useAuthStore from './auth';
 
 export type llm_modelsT =
   "Local" | "Nidum Shared" | "Nidum Decentralized" |
-  "Groq" | "Hugging Face" | "SambaNova Systems" |
+  "Groq" | "Hugging Face" | "SambaNova" |
   "Anthropic" | "OpenAI" | "Ollama";
 
 type state = {

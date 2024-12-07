@@ -10,7 +10,7 @@ import type { Message } from "../../../store/conversations";
 
 import { createContext, ragDefaultPrompt, duckDuckGoSerach, ragSearch, systemDefaultPrompt, webDefaultPrompt } from "../../../utils/improve-context";
 import { imgToBase64, setImgToBase64Map } from "../../../actions/img";
-import { genMongoId } from "../../../utils";
+import { basicTokenizer, genMongoId } from "../../../utils";
 import constants from "../../../utils/constants";
 
 import { useAudio } from "./use-speech";
@@ -68,6 +68,7 @@ function Messages() {
   const isOnline = useOnlineStatus()
 
   const [tempData, setTempData] = useState<Message[]>([])
+  const [timings, setTimings] = useState<number>(null)
   const [loading, setLoading] = useState(false)
   const [message, setMessage] = useState('')
   const [files, setFiles] = useState<File[]>([])
@@ -92,6 +93,7 @@ function Messages() {
     setTempData([])
     setLoading(false)
     setFiles([])
+    setTimings(null)
   }, [chat_id])
 
   useEffect(() => {
@@ -106,7 +108,7 @@ function Messages() {
     if (!isOnline && !loading) {
       if (!["Local"].includes(model_type)) { // "Ollama"
         updateContext({ model_type: "Local", model_mode: "" })
-        toast({ title: "Choosed Local AI Server due to connection error" })
+        toast({ title: "Defaulted to the Local AI Server due to a connection error." })
       }
     }
   }, [isOnline, loading, model_type])
@@ -137,42 +139,43 @@ function Messages() {
     try {
       if (msg && projectDetails) {
         if (model_type === "Groq") {
-          if (!groqApiKey) return toast({ title: "Please provide Groq API key" })
-          if (!groqModel) return toast({ title: "Please choose a Groq Model" })
+          if (!groqApiKey) return toast({ title: "Please enter the Groq API key to proceed." })
+          if (!groqModel) return toast({ title: "Please select a Groq Model to continue." })
         }
         else if (model_type === "Local") {
-          if (!llamaModel) return toast({ title: "Select a model to continue the chat" })
+          if (!llamaModel) return toast({ title: "Please choose a model to continue the chat." })
           if (!downloadedModels?.some((d: any) => d.fileName === llamaModel)) {
-            return toast({ title: "Model not available" })
+            return toast({ title: "The selected model is currently unavailable." })
           }
         }
         else if (model_type === "Hugging Face") {
-          if (!hfApiKey) return toast({ title: "Please provide Hugging Face API key" })
-          if (!hfModel) return toast({ title: "Please choose a Hugging Face Model" })
+          if (!hfApiKey) return toast({ title: "Please enter the Hugging Face API key to proceed." })
+          if (!hfModel) return toast({ title: "Please select a Hugging Face Model to continue." })
         }
-        else if (model_type === "SambaNova Systems") {
-          if (!sambaNovaApiKey) return toast({ title: "Please provide SambaNova API key" })
-          if (!sambaNovaModel) return toast({ title: "Please choose a SambaNova Model" })
+        else if (model_type === "SambaNova") {
+          if (!sambaNovaApiKey) return toast({ title: "Please provide the SambaNova API key." })
+          if (!sambaNovaModel) return toast({ title: "Please select a SambaNova Model to continue." })
         }
         else if (model_type === "Anthropic") {
-          if (!anthropicApiKey) return toast({ title: "Please provide Anthropic API key" })
-          if (!anthropicModel) return toast({ title: "Please choose a Anthropic Model" })
+          if (!anthropicApiKey) return toast({ title: "Please provide the Anthropic API key." })
+          if (!anthropicModel) return toast({ title: "Please choose an Anthropic Model." })
         }
         else if (model_type === "OpenAI") {
-          if (!openaiApiKey) return toast({ title: "Please provide OpenAI API key" })
-          if (!openaiModel) return toast({ title: "Please choose a OpenAI Model" })
+          if (!openaiApiKey) return toast({ title: "Please provide the OpenAI API key to proceed." })
+          if (!openaiModel) return toast({ title: "Please select an OpenAI Model to continue." })
         }
         else if (model_type === "Nidum Shared") {
-          if (!sharedDevice?.modelName) return toast({ title: "Provider not selected model" })
+          if (!sharedDevice?.modelName) return toast({ title: "A provider has not been selected for the model." })
         }
         else if (model_type === "Ollama") {
-          if (!ollamaUrl) return toast({ title: "Please provide Ollama base url" })
-          if (!ollamaModel) return toast({ title: "Please choose a Ollama Model" })
+          if (!ollamaUrl) return toast({ title: "Please provide the Ollama base URL." })
+          if (!ollamaModel) return toast({ title: "Please select an Ollama Model to proceed." })
         }
 
         setFiles([])
         setMessage('')
         setLoading(true)
+        setTimings(null)
         let temContextId = ""
 
         if (!chat_id) {
@@ -316,7 +319,7 @@ function Messages() {
           "Nidum Decentralized": nidumCentralised?.url,
           Groq: "https://api.groq.com/openai/v1/chat/completions",
           "Hugging Face": `https://api-inference.huggingface.co/models/${hfModel}/v1/chat/completions`,
-          "SambaNova Systems": `${constants.backendUrl}/ai/sambanova`,
+          "SambaNova": `${constants.backendUrl}/ai/sambanova`,
           Anthropic: "https://api.anthropic.com/v1/messages",
           OpenAI: "https://api.openai.com/v1/chat/completions",
           Ollama: `${ollamaUrl}/api/chat`,
@@ -368,7 +371,7 @@ function Messages() {
           }
         }
 
-        if (model_type === "SambaNova Systems") {
+        if (model_type === "SambaNova") {
           payload.model = sambaNovaModel
           payload.apiKey = sambaNovaApiKey
         }
@@ -468,11 +471,11 @@ function Messages() {
           const errMsg = err?.error?.message || err?.error
           setTempData([])
           setLoading(false)
-          toast({ title: errMsg || "Something went wrong!" })
+          toast({ title: errMsg || "An error occurred. Please try again." })
           return
         }
 
-        if (["Nidum", "Anthropic", "SambaNova Systems", "Nidum Shared"].includes(model_type)) {
+        if (["Nidum", "Anthropic", "SambaNova", "Nidum Shared"].includes(model_type)) {
           const res = await response.json()
           const content = res?.choices?.[0]?.message?.content || res?.content?.[0]?.text || res?.message?.content || ""
 
@@ -493,6 +496,9 @@ function Messages() {
           finalOutput.push(botReply)
           setTempData([])
           setLoading(false)
+          if (model_type === "Nidum Shared") {
+            setTimings(basicTokenizer(content))
+          }
           pushIntoMessages(project_id, currContextId, finalOutput)
           if (needAutoPlay) {
             speak(botReply.id, botReply.content)
@@ -524,6 +530,9 @@ function Messages() {
                 setTempData([])
                 setLoading(false)
                 pushIntoMessages(project_id, currContextId, finalOutput)
+                if (model_type === "Local") {
+                  setTimings(basicTokenizer(botRes))
+                }
                 if (needAutoPlay) {
                   speak(botReply.id, botReply.content)
                 }
@@ -570,7 +579,7 @@ function Messages() {
                   if (json?.error && !text) {
                     setTempData([])
                     setLoading(false)
-                    toast({ title: "Please use new chat" })
+                    toast({ title: "Chat limit exceeded. Please start a new chat." })
                     return
                   }
                   botRes += text
@@ -593,6 +602,9 @@ function Messages() {
                     finalOutput.push(botReply)
                     setTempData([])
                     setLoading(false)
+                    if (model_type === "Local") {
+                      setTimings(basicTokenizer(botRes))
+                    }
                     pushIntoMessages(project_id, currContextId, finalOutput)
                     if (needAutoPlay) {
                       speak(botReply.id, botReply.content)
@@ -626,7 +638,7 @@ function Messages() {
       setTempData([])
       if (error?.name !== "AbortError") {
         console.log(isOnline)
-        toast({ title: !isOnline ? "Device is not connected to the internet." : "Something went wrong!" })
+        toast({ title: !isOnline ? "Your device is not connected to the internet. Please check your connection." : "An error occurred. Please try again." })
       }
     }
   }
@@ -704,6 +716,11 @@ function Messages() {
         }
 
         <div className="flex-1 relative">
+          {
+            timings &&
+            <div className="absolute bottom-full right-4 text-xs text-zinc-300 bg-background">{timings} tok/sec</div>
+          }
+
           <input
             type="text"
             className="pl-4 pr-10 bg-transparent border-2 rounded-full"

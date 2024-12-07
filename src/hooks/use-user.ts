@@ -59,7 +59,7 @@ export function useLoginMutate() {
       to = to + `/c/${latestChatId?.id}`
     }
     navigate(to, { replace: true })
-    toast({ title: "User loggedin successfully" })
+    toast({ title: "Successfully logged in." })
   }
 
   async function offlineLogin(payload: { email: string, password: string }) {
@@ -78,7 +78,7 @@ export function useLoginMutate() {
     } else {
       toast({
         title: "User not found",
-        description: "Please check your network"
+        description: "Please check your network connection."
       })
     }
   }
@@ -105,16 +105,10 @@ export function useLoginMutate() {
       let hasError = err?.message
       if (!isOnline || hasError === "Network Error") {
         offlineLogin(variables)
-        toast({ title: "Please check your network connection to log in" })
-      }
-      else if (hasError) {
-        toast({ title: hasError })
+        toast({ title: "Unable to log in. Please check your network connection." })
       }
       else {
-        toast({
-          title: "Something went wrong!!!",
-          description: "Try again, later.",
-        })
+        toast({ title: hasError || "An error occurred. Please try again." })
       }
     }
   })
@@ -165,7 +159,7 @@ export function useGoogleAuthMutate() {
     mutationFn: window?.electronAPI?.googleAuth,
     onSuccess(res: any) {
       if (res?.error) {
-        toast({ title: res?.message || "Something went wrong!!!" })
+        toast({ title: res?.message || "An error occurred. Please try again." })
 
       } else {
         updateAuth({
@@ -187,20 +181,13 @@ export function useGoogleAuthMutate() {
         }
 
         navigate(to, { replace: true })
-        toast({ title: "User loggedin successfully" })
+        toast({ title: "Successfully logged in." })
       }
     },
     onError(err) {
       let hasError = err?.message
       if (hasError?.endsWith("prematurely")) return
-      if (hasError) {
-        toast({ title: hasError })
-      } else {
-        toast({
-          title: "Something went wrong!!!",
-          description: "Try again, later.",
-        })
-      }
+      toast({ title: hasError || "An error occurred. Please try again." })
     }
   })
 }
@@ -215,14 +202,7 @@ export function useUpdatePassMutate() {
     },
     onError(err) {
       let hasError = err?.message
-      if (hasError) {
-        toast({ title: hasError })
-      } else {
-        toast({
-          title: "Something went wrong!!!",
-          description: "Try again, later.",
-        })
-      }
+      toast({ title: hasError || "An error occurred. Please try again." })
     }
   })
 }
@@ -235,18 +215,11 @@ export function useFogetPassMutate() {
     mutationFn: forgetPass,
     onSuccess() {
       navigate("/reset-pass")
-      toast({ title: "Please check your email for OTP" })
+      toast({ title: "Check your email to retrieve the OTP." })
     },
     onError(err) {
       let hasError = err?.message
-      if (hasError) {
-        toast({ title: hasError })
-      } else {
-        toast({
-          title: "Something went wrong!!!",
-          description: "Try again, later.",
-        })
-      }
+      toast({ title: hasError || "An error occurred. Please try again." })
     }
   })
 }
@@ -263,14 +236,7 @@ export function useResetPassMutate() {
     },
     onError(err) {
       let hasError = err?.message
-      if (hasError) {
-        toast({ title: hasError })
-      } else {
-        toast({
-          title: "Something went wrong!!!",
-          description: "Try again, later.",
-        })
-      }
+      toast({ title: hasError || "An error occurred. Please try again." })
     }
   })
 }
@@ -283,11 +249,11 @@ export function useAddInviteMutate() {
     mutationFn: addInvite,
     onSuccess() {
       queryClient.invalidateQueries({ queryKey: ["invites"] })
-      toast({ title: "User invited successfully" })
+      toast({ title: "User successfully invited." })
     },
     onError(err) {
       console.log(err)
-      toast({ title: err?.message || "Something went wrong!" })
+      toast({ title: err?.message || "An error occurred. Please try again." })
     }
   })
 }
@@ -300,11 +266,11 @@ export function useRemoveInviteMutate() {
     mutationFn: removeInvite,
     onSuccess() {
       queryClient.invalidateQueries({ queryKey: ["invites"] })
-      toast({ title: "User removed from invites successfully" })
+      toast({ title: "User successfully removed from the invite list." })
     },
     onError(err) {
       console.log(err)
-      toast({ title: err?.message || "Something went wrong!" })
+      toast({ title: err?.message || "An error occurred. Please try again." })
     }
   })
 }
@@ -319,13 +285,13 @@ export function useLogoutMutate() {
     mutationFn: logout,
     onSuccess() {
       clearAuth()
-      toast({ title: "User logged out successfully" })
+      toast({ title: "Successfully logged out." })
     },
     onError(err) {
       if (!isOnline || err?.message === "Network Error") {
-        toast({ title: "Please check your network connection to log out" })
+        toast({ title: "Please check your network connection to log out." })
       } else {
-        toast({ title: err?.message || "Something went wrong!" })
+        toast({ title: err?.message || "An error occurred. Please try again." })
       }
     }
   })
@@ -351,13 +317,13 @@ export function useResetApp(showToast: boolean = true) {
       clearAuth()
       navigate("/login", { replace: true })
       if (showToast) {
-        toast({ title: "App data reseted successfully" })
+        toast({ title: "App data has been reset successfully." })
       }
     },
     onError(err) {
       console.log(err)
       if (showToast) {
-        toast({ title: err?.message || "Something went wrong!" })
+        toast({ title: err?.message || "An error occurred. Please try again." })
       }
     }
   })
@@ -369,18 +335,11 @@ export function useReqAccountDeleteMutate() {
   return useMutation({
     mutationFn: (v: any) => reqDeleteAccount(),
     onSuccess() {
-      toast({ title: "Please check your email for OTP" })
+      toast({ title: "Check your email to retrieve the OTP." })
     },
     onError(err) {
       let hasError = err?.message
-      if (hasError) {
-        toast({ title: hasError })
-      } else {
-        toast({
-          title: "Something went wrong!!!",
-          description: "Try again, later.",
-        })
-      }
+      toast({ title: hasError || "An error occurred. Please try again." })
     }
   })
 }
@@ -401,14 +360,7 @@ export function useAccountDeleteConfirmMutate() {
     },
     onError(err) {
       let hasError = err?.message
-      if (hasError) {
-        toast({ title: hasError })
-      } else {
-        toast({
-          title: "Something went wrong!!!",
-          description: "Try again, later.",
-        })
-      }
+      toast({ title: hasError || "An error occurred. Please try again." })
     }
   })
 }

@@ -19,7 +19,7 @@ function Configurations() {
 
   const handleRetry = () => mutate(null, {
     onSuccess() {
-      toast({ title: "Configurations updated successfully" })
+      toast({ title: "Configurations have been updated successfully" })
       setVal("")
       setTimeout(() => {
         const el = document.querySelector("#settings-cont")

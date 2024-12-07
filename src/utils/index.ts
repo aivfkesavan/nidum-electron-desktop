@@ -38,3 +38,18 @@ export function findLatest<T extends item>(items: T[]): T {
     return current.at > latest.at ? current : latest;
   }, items[0])
 }
+
+export function basicTokenizer(inputText: string): number {
+  const words = inputText.split(/[.?!]+/)?.[0].split(/\s+/)
+  if (!words) return 12
+
+  const tokenPerWord = 1 / 4
+  const additionalTokens = words.length * tokenPerWord
+
+  const totalTokens = 12 + additionalTokens
+  return parseFloat(totalTokens.toFixed(2))
+}
+
+export function getRandNumber(min: number = 20, max: number = 70): number {
+  return Math.floor(Math.random() * (max - min + 1)) + min
+}

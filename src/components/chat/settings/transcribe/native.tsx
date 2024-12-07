@@ -60,7 +60,7 @@ function Native() {
     try {
       setSelected("")
       updateContext({ nativeSttModelsDownloaded: "", nativeSttModel: "" })
-      toast({ title: "Speech to text setup reseted" })
+      toast({ title: "Speech-to-text setup has been reset." })
 
     } catch (error) {
       console.log(error)
@@ -106,7 +106,7 @@ function Native() {
                         className="-mt-1 -mr-1 p-0.5 text-base hover:bg-input"
                         onClick={() => {
                           if (!isOnline) {
-                            toast({ title: "Kindly ensure an internet connection to continue." })
+                            toast({ title: "Please ensure your device is connected to the internet to proceed." })
                           } else {
                             downloadIt(m.name)
                           }
