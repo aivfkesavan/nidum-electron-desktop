@@ -76,7 +76,7 @@ function Profile() {
         <div className="df justify-between">
           <div>
             <h3 className=" font-normal text-zinc-300">Reset App</h3>
-            <p className="text-xs text-zinc-400">Clears all app data and starts fresh.</p>
+            <p className="text-xs text-zinc-400">Erases all app data and initiates a fresh start.</p>
           </div>
           <Reset />
         </div>
@@ -84,7 +84,7 @@ function Profile() {
         <div className="df justify-between">
           <div>
             <h3 className=" font-normal text-zinc-300">Delete Account</h3>
-            <p className="text-xs text-zinc-400">Permanently deletes your account and all associated data.</p>
+            <p className="text-xs text-zinc-400">Permanently removes your account along with all associated data.</p>
           </div>
 
           <Delete />
