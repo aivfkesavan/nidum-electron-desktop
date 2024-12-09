@@ -3,7 +3,7 @@ import { persist } from 'zustand/middleware';
 import { create } from 'zustand';
 
 const alphabet = 'abcdefghijklmnopqrstuvwxyz0123456789'; // lowercase and digits only
-const nanoid = customAlphabet(alphabet, 20);
+export const nanoid = customAlphabet(alphabet, 20);
 
 type authState = {
   deviceId: string;

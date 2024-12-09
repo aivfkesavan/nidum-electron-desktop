@@ -1,4 +1,6 @@
 import axios from "axios";
+
+import useDeviceStore, { nanoid } from "../store/device";
 import { endPoints } from "../services/end-points";
 import sendApiReq from "../services/send-api-req";
 import constants from "../utils/constants";
@@ -17,6 +19,15 @@ export function getSharedDevice(deviceId: string) {
 
 type deviceT = { name?: string, _id: string, modelName?: string }
 export function updateDevice(data: deviceT) {
+  return sendApiReq({
+    url: endPoints.device,
+    method: "put",
+    data,
+  })
+}
+
+type deviceT2 = { appId: string, newAppId: string }
+export function updateDeviceAppId(data: deviceT2) {
   return sendApiReq({
     url: endPoints.device,
     method: "put",
@@ -50,12 +61,15 @@ export function nidumChainSetupStaus() {
 
 export async function nidumChainSetupFlow(deviceId: string, disable?: boolean) {
   try {
+    const newDeviceId = disable ? nanoid() : deviceId
     if (disable) {
+      await updateDeviceAppId({ appId: deviceId, newAppId: newDeviceId })
       await disableZrok(deviceId)
     }
     await nidumChainUrlConfig()
     await nidumChainEnable()
-    await nidumChainReserve(deviceId)
+    await nidumChainReserve(newDeviceId)
+    useDeviceStore.setState({ deviceId: newDeviceId })
 
   } catch (error) {
     console.log(error)

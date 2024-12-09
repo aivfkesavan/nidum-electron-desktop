@@ -25,6 +25,7 @@ export const endPoints = {
   // device
   initDevice: "/device/init", // :deviceId
   sharedDevice: "/device/shared", // :deviceId
+  deviceAppId: "/device/appId",
   device: "/device",
 
   config: "/config",
