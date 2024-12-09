@@ -141,6 +141,20 @@ if (!gotTheLock) {
                 });
               },
             },
+            {
+              label: "Chcek for update",
+              click: () => {
+                autoUpdater.checkForUpdatesAndNotify()
+
+                autoUpdater.once('update-not-available', () => {
+                  dialog.showMessageBox({
+                    type: 'info',
+                    title: 'No Updates Available',
+                    message: 'You are using the latest version of the application.',
+                  });
+                });
+              }
+            }
           ],
         },
       ];
