@@ -4,6 +4,7 @@ import express from 'express';
 
 import { readJSON, updateJSONArr } from "../utils/json-helper";
 import { createPath } from '../utils/path-helper';
+import { upload } from "../middleawres/upload";
 
 const router = express.Router()
 
@@ -19,9 +20,10 @@ router.get("/model-path/:selectedModel", async (req, res) => {
   }
 })
 
-router.get("/downloaded-models", async (req, res) => {
+router.get("/models/:type", async (req, res) => {
   try {
-    const modelJson = createPath(["models", "downloaded.json"])
+    const { type } = req.params
+    const modelJson = createPath(["models", `${type}.json`])
 
     const data = await readJSON(modelJson, [])
     return res.json(data)
@@ -34,7 +36,7 @@ router.get("/downloaded-models", async (req, res) => {
 router.post("/", async (req, res) => {
   try {
     const { id, model, fileName } = req.body
-    console.log(id, model, fileName)
+
     res.setHeader('Content-Type', 'text/event-stream');
     res.setHeader('Cache-Control', 'no-cache');
     res.setHeader('Connection', 'keep-alive');
@@ -64,6 +66,32 @@ router.post("/", async (req, res) => {
   }
 })
 
+router.post("/upload-llm/:folderName", upload.single('model'), async (req, res) => {
+  try {
+    await updateJSONArr({
+      filePath: createPath(["models", "downloaded.json"]),
+      newData: {
+        id: req?.file?.filename?.replace(".gguf", ""),
+        fileName: req?.file?.filename,
+      }
+    })
+
+    await updateJSONArr({
+      filePath: createPath(["models", "uploaded.json"]),
+      newData: {
+        id: req?.file?.filename?.replace(".gguf", ""),
+        fileName: req?.file?.filename,
+        ...req.body,
+      }
+    })
+
+    return res.json({ msg: "success" })
+
+  } catch (error) {
+    return res.status(500).json({ error })
+  }
+})
+
 router.delete("/downloaded-model/:fileName", async (req, res) => {
   try {
     const { fileName } = req.params
@@ -71,6 +99,12 @@ router.delete("/downloaded-model/:fileName", async (req, res) => {
     await fs.rm(createPath(["models", fileName]))
     await updateJSONArr({
       filePath: createPath(["models", "downloaded.json"]),
+      newData: { fileName },
+      isRemove: true,
+      by: "fileName",
+    })
+    await updateJSONArr({
+      filePath: createPath(["models", "uploaded.json"]),
       newData: { fileName },
       isRemove: true,
       by: "fileName",

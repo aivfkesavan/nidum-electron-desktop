@@ -21,7 +21,6 @@ function useRecord() {
     return () => {
       if (isRecording) {
         mediaRecorderService.cancelRecording().catch((e: any) => {
-          // console.log(e)
         })
       }
     }

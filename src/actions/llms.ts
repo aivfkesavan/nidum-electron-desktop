@@ -9,8 +9,13 @@ export async function getModelPath(path: string) {
   return axios.get(`${constants.backendUrl}/llama/model-path/${path}`).then(r => r.data)
 }
 
-export async function getLLamaDownloadedModels() {
-  return axios.get(`${constants.backendUrl}/llama/downloaded-models`).then(r => r.data)
+export type modelTypeT = "downloaded" | "uploaded"
+export async function getLLamaDownloadedModels(type: modelTypeT) {
+  return axios.get(`${constants.backendUrl}/llama/models/${type}`).then(r => r.data)
+}
+
+export async function uploadModel(payload: any) {
+  return axios.post(`${constants.backendUrl}/llama/upload-llm/models`, payload).then(r => r.data)
 }
 
 export async function deleteDownloadedModel(fileName: string) {

@@ -57,7 +57,7 @@ function Chat() {
 
   useStopShareOnAppLeave()
 
-  useLLamaDownloadedModels()
+  useLLamaDownloadedModels("downloaded")
   useLLMModels("llm2")
 
   return (

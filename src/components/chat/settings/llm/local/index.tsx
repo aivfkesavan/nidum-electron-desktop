@@ -11,6 +11,7 @@ import { useToast } from "../../../../../hooks/use-toast";
 import useAuthStore from "../../../../../store/auth";
 
 import { RadioGroup, RadioGroupItem } from "../../../../ui/radio-group";
+import UploadLocalLlm from "../../../modals/upload-local-llm";
 import { Label } from "../../../../ui/label";
 import DeleteModel from "./delete-model";
 import Footer from "../../common/footer";
@@ -26,7 +27,8 @@ function Local() {
 
   const { toast } = useToast()
 
-  const { data: downloaded, isLoading } = useLLamaDownloadedModels()
+  const { data: downloaded, isLoading } = useLLamaDownloadedModels("downloaded")
+  const { data: uploaded, isLoading: isLoading3 } = useLLamaDownloadedModels("uploaded")
   const { data: models, isLoading: isLoading2 } = useLLMModels("llm2")
 
   const queryClient = useQueryClient()
@@ -87,6 +89,8 @@ function Local() {
 
   return (
     <>
+      <UploadLocalLlm />
+
       <RadioGroup value={selected} onValueChange={onSelect} className="my-4">
         {
           models?.map((m: any) => (
@@ -137,6 +141,39 @@ function Local() {
                   <p>Size: {m?.size}</p>
 
                   <p className="w-fit px-2 py-0.5 rounded-full bg-input capitalize">{m?.category}</p>
+                </div>
+
+                <div className="text-[11px] text-white/60 line-clamp-2">
+                  {m?.description}
+                </div>
+              </div>
+            </div>
+          ))
+        }
+
+        {
+          uploaded?.map((m: any) => (
+            <div
+              key={m?.id}
+              className="p-4 mb-2 text-xs border rounded-md"
+            >
+              <div className="df mb-2">
+                <RadioGroupItem value={m?.fileName} id={m?.fileName} />
+                <Label htmlFor={m?.fileName} className="cursor-pointer">
+                  {m?.name}
+                </Label>
+                <button
+                  className="-mt-1 -mr-1 ml-auto p-0.5 text-base hover:bg-input"
+                  onClick={() => updateModel(m?.fileName)}
+                >
+                  <MdOutlineDeleteOutline />
+                </button>
+              </div>
+
+              <div className="text-[10px] text-white/80">
+                <div className="df justify-between my-1.5">
+                  <p>Size: {m?.size}</p>
+                  <p className="w-fit px-2 py-0.5 rounded-full bg-input capitalize">Local Model</p>
                 </div>
 
                 <div className="text-[11px] text-white/60 line-clamp-2">

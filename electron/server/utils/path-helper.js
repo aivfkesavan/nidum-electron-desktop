@@ -63,9 +63,18 @@ function configPathCheck() {
   }
 }
 
+function userModelsCheck() {
+  const uploadedPath = createPath(["models", "uploaded.json"])
+
+  if (!existsSync(uploadedPath)) {
+    writeFileSync(uploadedPath, JSON.stringify([]))
+  }
+}
+
 export function checkPathsSetup() {
   const directoryPath = getRoot()
   checkIsDirExists(directoryPath)
   modelsPathCheck()
   configPathCheck()
+  userModelsCheck()
 }
