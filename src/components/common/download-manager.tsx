@@ -173,7 +173,6 @@ export function DownloadProvider({ children }: props) {
       while (true) {
         const { done, value } = await reader?.read() || {}
         if (done) {
-          // console.log("at done")
           toast.success(model, {
             className: "py-2",
             richColors: true,
@@ -193,14 +192,10 @@ export function DownloadProvider({ children }: props) {
         }
 
         const chunk = decoder?.decode(value)
-        // console.log("chunk", chunk)
         const lines = chunk?.split('\n\n')
-        // console.log("lines", lines)
         lines?.forEach(line => {
           if (line?.startsWith('data: ')) {
-            // console.log("line?.slice(6)", line?.slice(6))
             const data = JSON?.parse(line?.slice(6))
-            // console.log("data", data)
             if (data) {
               let title = data?.name === "Whisper" ? "Setting up Speech to Text" : data?.name
               toast.loading(title, {

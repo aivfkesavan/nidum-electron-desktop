@@ -61,7 +61,7 @@ function Messages() {
   const addChat = useConvoStore(s => s.addChat)
 
   const { data: nidumCentralised } = useLLMModels("nidum-decentralised2")
-  const { data: downloadedModels } = useLLamaDownloadedModels()
+  const { data: downloadedModels } = useLLamaDownloadedModels("downloaded")
   const { data: sharedDevice } = useSharedDevice(sharedAppId, model_type === "Nidum Shared")
   const { data: crawlerData } = useCrawler()
   const { data: config } = useConfig()
@@ -637,7 +637,6 @@ function Messages() {
       setLoading(false)
       setTempData([])
       if (error?.name !== "AbortError") {
-        console.log(isOnline)
         toast({ title: !isOnline ? "Your device is not connected to the internet. Please check your connection." : "An error occurred. Please try again." })
       }
     }

@@ -1,6 +1,7 @@
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
-import { getLLMModels, getLLamaDownloadedModels } from "../actions/llms";
+import { getLLMModels, getLLamaDownloadedModels, modelTypeT, uploadModel } from "../actions/llms";
+import { useToast } from "./use-toast";
 
 export type llmT = "llm" | "llm2" | "groq" | "hf" | "hf-img-gen" | "sambanova-systems" | "anthropic" | "openai" | "nidum-decentralised" | "nidum-decentralised2" | ""
 
@@ -13,9 +14,26 @@ export function useLLMModels(llm: llmT) {
   })
 }
 
-export function useLLamaDownloadedModels() {
+export function useLLamaDownloadedModels(type: modelTypeT) {
   return useQuery({
-    queryKey: ["llama-models-downloaded"],
-    queryFn: getLLamaDownloadedModels,
+    queryKey: ["llama-models-downloaded", type],
+    queryFn: () => getLLamaDownloadedModels(type),
+    enabled: !!type,
+  })
+}
+
+export function useUploadModel() {
+  const queryClient = useQueryClient()
+  const { toast } = useToast()
+
+  return useMutation({
+    mutationFn: uploadModel,
+    onSuccess() {
+      queryClient.invalidateQueries({ queryKey: ["llama-models-downloaded"] })
+      toast({ title: "New Model added successfully" })
+    },
+    onError(err) {
+      toast({ title: err?.message || "An error occurred. Please try again." })
+    }
   })
 }
