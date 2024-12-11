@@ -54,6 +54,7 @@ router.post("/", async (req, res) => {
       }
     })
 
+    await llama?.dispose()
     res.end()
 
   } catch (error) {
@@ -98,6 +99,7 @@ router.post("/2", async (req, res) => {
       }
     })
 
+    await llama?.dispose()
     return res.json({ choices: [{ message: { content } }] })
 
   } catch (error) {
