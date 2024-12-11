@@ -20,16 +20,15 @@ jobs:
       - name: Install Chocolatey
         shell: powershell
         run: |
-          Set-ExecutionPolicy Bypass -Scope Process -Force; `
-          [System.Net.ServicePointManager]::SecurityProtocol = `
-          [System.Net.ServicePointManager]::SecurityProtocol -bor 3072; `
-          iex ((New-Object System.Net.WebClient).DownloadString('https://community.chocolatey.org/install.ps1'))
-          choco --version || exit 1
+          Set-ExecutionPolicy Bypass -Scope Process -Force
+          [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.ServicePointManager]::SecurityProtocol -bor 3072
+          Invoke-Expression ((New-Object System.Net.WebClient).DownloadString('https://community.chocolatey.org/install.ps1'))
+          choco --version
 
       - name: Install GTK for Canvas
         shell: powershell
         run: |
-          choco install gtk-runtime -y || exit 1
+          choco install gtk-runtime -y
           Write-Host "GTK runtime installed successfully."
         env:
           PATH: C:/tools/gtk3/bin:$env:PATH
@@ -46,12 +45,12 @@ jobs:
             Remove-Item -Force "package-lock.json"
           }
           Write-Host "Installing dependencies..."
-          npm install || exit 1
+          npm install
 
       - name: Install Windows SDK
         shell: powershell
         run: |
-          choco install winsdk -y || exit 1
+          choco install winsdk -y
           Write-Host "Windows SDK installed successfully."
 
       - name: Create Self-Signed Certificate
@@ -68,7 +67,7 @@ jobs:
           SIGN_KEY_PASSWORD: 1234
         shell: powershell
         run: |
-          npm run build-win || exit 1
+          npm run build-win
 
           $APP_PATH = Get-ChildItem -Path "./dist" -Filter "*.exe" -Recurse | Select-Object -First 1
           if (-not $APP_PATH) {
@@ -78,7 +77,7 @@ jobs:
           echo "APP_PATH=$($APP_PATH.FullName)" | Out-File -FilePath $env:GITHUB_ENV -Append
 
           # Sign the application
-          & signtool sign /f $env:SIGN_KEY_PATH /p $env:SIGN_KEY_PASSWORD /tr http://timestamp.digicert.com /td sha256 /fd sha256 $APP_PATH.FullName || exit 1
+          & signtool sign /f $env:SIGN_KEY_PATH /p $env:SIGN_KEY_PASSWORD /tr http://timestamp.digicert.com /td sha256 /fd sha256 $APP_PATH.FullName
 
       - name: Build NSI Installer
         shell: powershell
@@ -95,7 +94,7 @@ jobs:
             exit 1
           }
 
-          & $MAKENSIS $MAKENSIS_SCRIPT || exit 1
+          & $MAKENSIS $MAKENSIS_SCRIPT
 
           $NSI_PATH = Get-ChildItem -Path "./dist" -Filter "*.nsi" -Recurse | Select-Object -First 1
           if (-not $NSI_PATH) {
@@ -114,9 +113,9 @@ jobs:
         run: |
           if (gh release view "v$($env:VERSION)" 2>$null) {
             Write-Host "Updating existing release for version v$($env:VERSION)"
-            gh release upload "v$($env:VERSION)" "$($env:APP_PATH)" "$($env:NSI_PATH)" --clobber || exit 1
+            gh release upload "v$($env:VERSION)" "$($env:APP_PATH)" "$($env:NSI_PATH)" --clobber
           } else {
             Write-Host "Creating new release for version v$($env:VERSION)"
             gh release create "v$($env:VERSION)" "$($env:APP_PATH)" "$($env:NSI_PATH)" `
               --title "Release v$($env:VERSION)" `
-              --generate-notes || exit 1
+              --generate-notes
