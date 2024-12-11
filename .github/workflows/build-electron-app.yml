@@ -1,8 +1,10 @@
-name: "Nidum.ai macOS Build and Release"
+name: "Nidum.ai macOS and Windows Build and Release"
+
 on:
   push:
     branches:
       - main
+
 jobs:
   create-release:
     runs-on: macos-latest
@@ -27,7 +29,7 @@ jobs:
           echo "VERSION=$VERSION" >> $GITHUB_ENV
         shell: bash
 
-      - name: Build Electron App
+      - name: Build Electron App for macOS
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           APPLE_CERTIFICATE: ${{ secrets.APPLE_CERTIFICATE }}
@@ -37,94 +39,57 @@ jobs:
           APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
           KEYCHAIN_PASSWORD: ${{ secrets.KEYCHAIN_PASSWORD }}
         run: |
-          # Decode and import the Apple certificate
           echo $APPLE_CERTIFICATE | base64 --decode > certificate.p12
           security create-keychain -p "$KEYCHAIN_PASSWORD" build.keychain
           security default-keychain -s build.keychain
           security unlock-keychain -p "$KEYCHAIN_PASSWORD" build.keychain
           security import certificate.p12 -k build.keychain -P "$APPLE_CERTIFICATE_PASSWORD" -T /usr/bin/codesign
           security set-key-partition-list -S apple-tool:,apple:,codesign: -s -k "$KEYCHAIN_PASSWORD" build.keychain
-          
-          # Build the Electron app
           npm run build
-          # Verify that the app is correctly signed
-          APP_PATH=$(find "$PWD/dist" -name "*.app" -type d | head -n 1)
+
+  build-windows:
+    runs-on: windows-latest
+    steps:
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Create Self-Signed Certificate
+        run: |
+          openssl req -newkey rsa:2048 -nodes -keyout selfsign.key -x509 -days 365 -out selfsign.crt \
+            -subj "/C=US/ST=State/L=City/O=Organization/OU=Unit/CN=example.com"
+          openssl pkcs12 -export -out selfsign.pfx -inkey selfsign.key -in selfsign.crt -passout pass:1234
+          echo "Created self-signed certificate."
+
+      - name: Build Electron App for Windows
+        env:
+          SIGN_KEY_PATH: selfsign.pfx
+          SIGN_KEY_PASSWORD: 1234
+        run: |
+          npm run build:win
+          APP_PATH=$(find "dist" -name "*.exe" -type f | head -n 1)
           if [ -z "$APP_PATH" ]; then
-            echo "Error: App not found."
+            echo "Error: EXE file not found."
             exit 1
           fi
-          codesign --verify --deep --strict --verbose=2 "$APP_PATH"
-          if [ $? -ne 0 ]; then
-            echo "Error: Code signing verification failed."
-            exit 1
-          fi
-          # Locate the built DMG file
-          DMG_PATH=$(find "$PWD/dist" -name "*.dmg" -type f | head -n 1)
-          if [ -z "$DMG_PATH" ]; then
-            echo "Error: DMG file not found."
-            exit 1
-          fi
-          echo "DMG_PATH=$DMG_PATH" >> $GITHUB_ENV
-          # Locate the built PKG file
-          PKG_PATH=$(find "$PWD/dist" -name "*.pkg" -type f | head -n 1)
-          if [ -z "$PKG_PATH" ]; then
-            echo "Error: PKG file not found."
-            exit 1
-          fi
-          echo "PKG_PATH=$PKG_PATH" >> $GITHUB_ENV
-          # Notarize the DMG
-          xcrun notarytool submit "$DMG_PATH" --wait --apple-id "$APPLE_ID" --password "$APPLE_APP_SPECIFIC_PASSWORD" --team-id "$APPLE_TEAM_ID"
-          if [ $? -ne 0 ]; then
-            echo "Error: Notarization failed."
-            exit 1
-          fi
-          # Staple the notarization ticket
-          xcrun stapler staple "$DMG_PATH"
-          if [ $? -ne 0 ]; then
-            echo "Error: Stapling notarization ticket failed."
-            exit 1
-          fi
-      - name: Check if Release Exists
-        id: check_release
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          VERSION: ${{ env.VERSION }}
+          echo "APP_PATH=$APP_PATH" >> $GITHUB_ENV
+          signtool sign /f "$SIGN_KEY_PATH" /p "$SIGN_KEY_PASSWORD" /tr http://timestamp.digicert.com /td sha256 /fd sha256 "$APP_PATH"
+
+      - name: Build NSI Installer
         run: |
-          set -e
-          if gh release view "v${VERSION}" > /dev/null 2>&1; then
-            echo "RELEASE_EXISTS=true" >> $GITHUB_ENV
-          else
-            echo "RELEASE_EXISTS=false" >> $GITHUB_ENV
-          fi
-      - name: Locate Additional Files
-        id: locate_files
-        run: |
-          # Locate the ZIP and YAML files
-          ZIP_PATH=$(find "$PWD/dist" -name "*.zip" -type f | head -n 1)
-          YAML_PATH=$(find "$PWD/dist" -name "*.yml" -type f | head -n 1)
-          if [ -z "$ZIP_PATH" ] || [ -z "$YAML_PATH" ]; then
-            echo "Error: ZIP or YAML file not found."
+          MAKENSIS=$(which makensis)
+          if [ -z "$MAKENSIS" ]; then
+            echo "Error: NSIS is not installed."
             exit 1
           fi
-          echo "ZIP_PATH=$ZIP_PATH" >> $GITHUB_ENV
-          echo "YAML_PATH=$YAML_PATH" >> $GITHUB_ENV
-      - name: Create or Update Release
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          VERSION: ${{ env.VERSION }}
-          DMG_PATH: ${{ env.DMG_PATH }}
-          PKG_PATH: ${{ env.PKG_PATH }}
-          ZIP_PATH: ${{ env.ZIP_PATH }}
-          YAML_PATH: ${{ env.YAML_PATH }}
-          RELEASE_EXISTS: ${{ env.RELEASE_EXISTS }}
-        run: |
-          set -e
-          if [ "${RELEASE_EXISTS}" = "true" ]; then
-            echo "Updating existing release for version v${VERSION}"
-            gh release upload "v${VERSION}" "${DMG_PATH}" "${PKG_PATH}" "${ZIP_PATH}" "${YAML_PATH}" --clobber
-          else
-            echo "Creating new release for version v${VERSION}"
-            gh release create "v${VERSION}" "${DMG_PATH}" "${PKG_PATH}" "${ZIP_PATH}" "${YAML_PATH}" \
-              --title "Release v${VERSION}" \
-              --generate-notes
+          MAKENSIS_SCRIPT="installer_script.nsi"
+          if [ ! -f "$MAKENSIS_SCRIPT" ]; then
+            echo "Error: NSIS script not found."
+            exit 1
           fi
+          $MAKENSIS "$MAKENSIS_SCRIPT"
+          NSI_PATH=$(find "dist" -name "*.nsi" -type f | head -n 1)
+          if [ -z "$NSI_PATH" ]; then
+            echo "Error: NSI installer not found."
+            exit 1
+          fi
+          echo "NSI_PATH=$NSI_PATH" >> $GITHUB_ENV
