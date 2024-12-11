@@ -17,26 +17,22 @@ router.post("/", async (req, res) => {
 
   try {
     const { modelName, messages, message, ...restParams } = req.body
-    logger.error(modelName)
 
     const [systemPrompt, ...rest] = messages
 
     const llama = await getLlama()
-    logger.error(llama)
 
     const model = await llama.loadModel({
       modelPath: createPath(["models", modelName])
     })
-    logger.error(createPath(["models", modelName]))
-    logger.error(model)
 
     const context = await model.createContext()
-    logger.error(object)
+
     const session = new LlamaChatSession({
       contextSequence: context.getSequence(),
       systemPrompt: systemPrompt?.text || ""
     })
-    logger.error(session)
+
     if (rest?.length > 0) {
       session.setChatHistory(rest)
     }
