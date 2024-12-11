@@ -6,9 +6,10 @@ import SideBar from "./side-bar";
 import { useStopShareOnAppLeave, useNidumChainSetup } from "../../hooks/use-device";
 import { useLLMModels, useLLamaDownloadedModels } from "../../hooks/use-llm-models";
 import { useOfflineLoginCorrection } from "../../hooks/use-user";
+import { findLatest } from "../../utils";
 import useConvoStore from "../../store/conversations";
 import useAuthStore from "../../store/auth";
-import { findLatest } from "../../utils";
+import useUIStore from "../../store/ui";
 // import useContextStore from "@store/context";
 
 // import ImgGenerate from "./img-generate";
@@ -21,6 +22,7 @@ function Chat() {
 
   const navigate = useNavigate()
 
+  const updateModal = useUIStore(s => s.update)
   const user_id = useAuthStore(s => s._id)
   const convo = useConvoStore(s => s.data?.[user_id] || null)
   const init = useConvoStore(s => s.init)
@@ -49,6 +51,19 @@ function Chat() {
       document.body.classList.add("open")
     }
     document.documentElement.style.setProperty('--sidebar-width', '240px')
+  }, [])
+
+  useEffect(() => {
+    function handle(e: any, data: any) {
+      if (data !== "nidum://") {
+        updateModal({ open: "open-url", data })
+      }
+    }
+    window.ipcRenderer.on('open-url', handle)
+
+    return () => {
+      window.ipcRenderer.off('open-url', handle)
+    }
   }, [])
 
   useOfflineLoginCorrection()

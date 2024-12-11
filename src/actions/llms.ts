@@ -14,8 +14,26 @@ export async function getLLamaDownloadedModels(type: modelTypeT) {
   return axios.get(`${constants.backendUrl}/llama/models/${type}`).then(r => r.data)
 }
 
+export async function getHFModelDetails(id: string) {
+  return axios.get(`https://huggingface.co/api/models/${id}`).then(r => r.data)
+}
+
+type fileRes = {
+  oid: string
+  path: string
+  size: number
+  type: string
+}
+export async function getHFModelTree(id: string) {
+  return axios.get<fileRes[]>(`https://huggingface.co/api/models/${id}/tree/main`).then(r => r.data)
+}
+
 export async function uploadModel(payload: any) {
   return axios.post(`${constants.backendUrl}/llama/upload-llm/models`, payload).then(r => r.data)
+}
+
+export async function uploadHFModel(payload: any) {
+  return axios.post(`${constants.backendUrl}/llama/upload-hf-llm`, payload).then(r => r.data)
 }
 
 export async function deleteDownloadedModel(fileName: string) {

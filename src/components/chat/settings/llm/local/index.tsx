@@ -1,5 +1,4 @@
 import { useState } from "react";
-import { MdOutlineFileDownload, MdOutlineDeleteOutline, MdInfoOutline } from "react-icons/md";
 import { useQueryClient } from "@tanstack/react-query";
 
 import { useLLamaDownloadedModels } from "../../../../../hooks/use-llm-models";
@@ -10,11 +9,11 @@ import useContextStore from "../../../../../store/context";
 import { useToast } from "../../../../../hooks/use-toast";
 import useAuthStore from "../../../../../store/auth";
 
-import { RadioGroup, RadioGroupItem } from "../../../../ui/radio-group";
+import { RadioGroup } from "../../../../ui/radio-group";
 import UploadLocalLlm from "../../../modals/upload-local-llm";
-import { Label } from "../../../../ui/label";
 import DeleteModel from "./delete-model";
 import Footer from "../../common/footer";
+import Card from "./card";
 
 function Local() {
   const { downloads, downloadModel } = useDownloads()
@@ -94,93 +93,42 @@ function Local() {
       <RadioGroup value={selected} onValueChange={onSelect} className="my-4">
         {
           models?.map((m: any) => (
-            <div
-              key={m?.name}
-              className="p-4 mb-2 text-xs border rounded-md"
-            >
-              <div className="df mb-2">
-                <RadioGroupItem value={m?.file_name} id={m?.file_name} />
-                <Label htmlFor={m?.file_name} className="cursor-pointer">
-                  {m?.name}
-                </Label>
-                <a href={m?.info_url} target="_blank" className="mr-auto hover:text-blue-300">
-                  <MdInfoOutline />
-                </a>
-                {
-                  downloaded?.some((d: any) => d?.id === m?.id)
-                    ? (
-                      <button
-                        className="-mt-1 -mr-1 p-0.5 text-base hover:bg-input"
-                        onClick={() => updateModel(m?.file_name)}
-                      >
-                        <MdOutlineDeleteOutline />
-                      </button>
-                    ) :
-                    downloads[m?.id] ?
-                      <p className="shrink-0 text-[11px] text-white/70">
-                        {downloads[m?.id]?.progress}%
-                      </p>
-                      :
-                      <button
-                        className="-mt-1 -mr-1 p-0.5 text-base hover:bg-input"
-                        onClick={() => {
-                          if (!isOnline) {
-                            toast({ title: "Please ensure your device is connected to the internet to proceed." })
-                          } else {
-                            download(m)
-                          }
-                        }}
-                      >
-                        <MdOutlineFileDownload />
-                      </button>
+            <Card
+              key={m?.id}
+              name={m?.name}
+              fileName={m?.file_name}
+              info_url={m?.info_url}
+              size={m?.size}
+              category={m?.category}
+              description={m?.description}
+              progress={downloads[m?.id]?.progress ?? false}
+              isDownloaded={downloaded?.some((d: any) => d?.id === m?.id)}
+              updateModel={updateModel}
+              onDownload={() => {
+                if (!isOnline) {
+                  toast({ title: "Please ensure your device is connected to the internet to proceed." })
+                } else {
+                  download(m)
                 }
-              </div>
-
-              <div className="text-[10px] text-white/80">
-                <div className="df justify-between my-1.5">
-                  <p>Size: {m?.size}</p>
-
-                  <p className="w-fit px-2 py-0.5 rounded-full bg-input capitalize">{m?.category}</p>
-                </div>
-
-                <div className="text-[11px] text-white/60 line-clamp-2">
-                  {m?.description}
-                </div>
-              </div>
-            </div>
+              }}
+            />
           ))
         }
 
         {
           uploaded?.map((m: any) => (
-            <div
+            <Card
               key={m?.id}
-              className="p-4 mb-2 text-xs border rounded-md"
-            >
-              <div className="df mb-2">
-                <RadioGroupItem value={m?.fileName} id={m?.fileName} />
-                <Label htmlFor={m?.fileName} className="cursor-pointer">
-                  {m?.name}
-                </Label>
-                <button
-                  className="-mt-1 -mr-1 ml-auto p-0.5 text-base hover:bg-input"
-                  onClick={() => updateModel(m?.fileName)}
-                >
-                  <MdOutlineDeleteOutline />
-                </button>
-              </div>
-
-              <div className="text-[10px] text-white/80">
-                <div className="df justify-between my-1.5">
-                  <p>Size: {m?.size}</p>
-                  <p className="w-fit px-2 py-0.5 rounded-full bg-input capitalize">Local Model</p>
-                </div>
-
-                <div className="text-[11px] text-white/60 line-clamp-2">
-                  {m?.description}
-                </div>
-              </div>
-            </div>
+              name={m?.name}
+              fileName={m?.fileName}
+              size={m?.size}
+              category={m?.download_link ? "Hugging Face Model" : "Local Model"}
+              description={m?.description}
+              progress={downloads[m?.id]?.progress ?? false}
+              isDownloaded={downloaded?.some((d: any) => d?.id === m?.id)}
+              updateModel={updateModel}
+              onDownload={() => { }}
+            />
           ))
         }
       </RadioGroup>

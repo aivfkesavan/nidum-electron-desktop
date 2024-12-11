@@ -92,6 +92,20 @@ router.post("/upload-llm/:folderName", upload.single('model'), async (req, res) 
   }
 })
 
+router.post("/upload-hf-llm", async (req, res) => {
+  try {
+    await updateJSONArr({
+      filePath: createPath(["models", "uploaded.json"]),
+      newData: req.body
+    })
+
+    return res.json({ msg: "success" })
+
+  } catch (error) {
+    return res.status(500).json({ error })
+  }
+})
+
 router.delete("/downloaded-model/:fileName", async (req, res) => {
   try {
     const { fileName } = req.params

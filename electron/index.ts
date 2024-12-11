@@ -178,7 +178,7 @@ if (!gotTheLock) {
   })
 
   app.on('open-url', (event, url) => {
-    dialog.showErrorBox('Welcome Back', `You arrived from: ${url}`)
+    win?.webContents?.send("open-url", url)
   })
 }
 
