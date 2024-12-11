@@ -17,12 +17,18 @@ jobs:
         with:
           node-version: '20.16.0'
 
-      - name: Install Chocolatey
+      - name: Ensure Chocolatey is Installed
         shell: powershell
         run: |
-          Set-ExecutionPolicy Bypass -Scope Process -Force
-          [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.ServicePointManager]::SecurityProtocol -bor 3072
-          Invoke-Expression ((New-Object System.Net.WebClient).DownloadString('https://community.chocolatey.org/install.ps1'))
+          if (-Not (Test-Path "C:/ProgramData/Chocolatey/bin/choco.exe")) {
+            Write-Host "Chocolatey not found. Installing Chocolatey..."
+            Set-ExecutionPolicy Bypass -Scope Process -Force
+            [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.ServicePointManager]::SecurityProtocol -bor 3072
+            Invoke-Expression ((New-Object System.Net.WebClient).DownloadString('https://community.chocolatey.org/install.ps1'))
+          } else {
+            Write-Host "Chocolatey already installed."
+          }
+          $env:PATH += ";C:/ProgramData/Chocolatey/bin"
           choco --version
 
       - name: Install GTK for Canvas
