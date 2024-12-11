@@ -17,20 +17,34 @@ jobs:
         with:
           node-version: '20.16.0'
 
-      - name: Clean Node Modules and Lock File
+      - name: Install GTK for Canvas
+        shell: bash
+        run: |
+          curl -L https://github.com/tschaub/gtk-binaries/releases/download/2021-01-04/gtk+-bundle_3.6.4-2021-01-04_win64.zip -o gtk.zip
+          unzip gtk.zip -d C:/GTK
+          echo "GTK installed at C:/GTK"
+        env:
+          PATH: C:/GTK/bin:$PATH
+
+      - name: Install dependencies
         shell: bash
         run: |
           if [ -d "node_modules" ]; then
-            echo "Removing node_modules..."
+            echo "Cleaning existing node_modules..."
             rm -rf node_modules
           fi
           if [ -f "package-lock.json" ]; then
-            echo "Removing package-lock.json..."
+            echo "Removing existing package-lock.json..."
             rm package-lock.json
           fi
+          echo "Installing dependencies..."
+          npm install
 
-      - name: Install dependencies
-        run: npm install
+      - name: Install Windows SDK
+        shell: powershell
+        run: |
+          choco install winsdk -y
+          Write-Host "Windows SDK installed successfully."
 
       - name: Create Self-Signed Certificate
         shell: powershell
@@ -46,7 +60,7 @@ jobs:
           SIGN_KEY_PASSWORD: 1234
         shell: powershell
         run: |
-          npm run build-win
+          npm run build-win || exit 1
 
           $APP_PATH = Get-ChildItem -Path "./dist" -Filter "*.exe" -Recurse | Select-Object -First 1
           if (-not $APP_PATH) {
@@ -56,7 +70,7 @@ jobs:
           echo "APP_PATH=$($APP_PATH.FullName)" | Out-File -FilePath $env:GITHUB_ENV -Append
 
           # Sign the application
-          & signtool sign /f $env:SIGN_KEY_PATH /p $env:SIGN_KEY_PASSWORD /tr http://timestamp.digicert.com /td sha256 /fd sha256 $APP_PATH.FullName
+          & signtool sign /f $env:SIGN_KEY_PATH /p $env:SIGN_KEY_PASSWORD /tr http://timestamp.digicert.com /td sha256 /fd sha256 $APP_PATH.FullName || exit 1
 
       - name: Build NSI Installer
         shell: powershell
@@ -73,7 +87,7 @@ jobs:
             exit 1
           }
 
-          & $MAKENSIS $MAKENSIS_SCRIPT
+          & $MAKENSIS $MAKENSIS_SCRIPT || exit 1
 
           $NSI_PATH = Get-ChildItem -Path "./dist" -Filter "*.nsi" -Recurse | Select-Object -First 1
           if (-not $NSI_PATH) {
@@ -92,9 +106,10 @@ jobs:
         run: |
           if (gh release view "v$($env:VERSION)" 2>$null) {
             Write-Host "Updating existing release for version v$($env:VERSION)"
-            gh release upload "v$($env:VERSION)" "$($env:APP_PATH)" "$($env:NSI_PATH)" --clobber
+            gh release upload "v$($env:VERSION)" "$($env:APP_PATH)" "$($env:NSI_PATH)" --clobber || exit 1
           } else {
             Write-Host "Creating new release for version v$($env:VERSION)"
             gh release create "v$($env:VERSION)" "$($env:APP_PATH)" "$($env:NSI_PATH)" `
               --title "Release v$($env:VERSION)" `
-              --generate-notes
+              --generate-notes || exit 1
+          }
