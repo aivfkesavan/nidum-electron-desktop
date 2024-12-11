@@ -1,4 +1,4 @@
-name: "Nidum.ai macOS and Windows Build and Release"
+name: "Nidum.ai Windows Build and Release"
 
 on:
   push:
@@ -6,10 +6,8 @@ on:
       - main
 
 jobs:
-  create-release:
-    runs-on: macos-latest
-    permissions:
-      contents: write
+  build-windows:
+    runs-on: windows-latest
     steps:
       - name: Check out the repository
         uses: actions/checkout@v3
@@ -19,37 +17,13 @@ jobs:
         with:
           node-version: '20.16.0'
 
-      - name: Install dependencies
-        run: npm ci
-
-      - name: Get version from package.json
-        id: get_version
+      - name: Check for package-lock.json
         run: |
-          VERSION=$(node -p "require('./package.json').version")
-          echo "VERSION=$VERSION" >> $GITHUB_ENV
-        shell: bash
+          if [ ! -f package-lock.json ]; then
+            echo "package-lock.json not found. Running npm install to generate it."
+            npm install
+          fi
 
-      - name: Build Electron App for macOS
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          APPLE_CERTIFICATE: ${{ secrets.APPLE_CERTIFICATE }}
-          APPLE_CERTIFICATE_PASSWORD: ${{ secrets.APPLE_CERTIFICATE_PASSWORD }}
-          APPLE_ID: ${{ secrets.APPLE_ID }}
-          APPLE_APP_SPECIFIC_PASSWORD: ${{ secrets.APPLE_APP_SPECIFIC_PASSWORD }}
-          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
-          KEYCHAIN_PASSWORD: ${{ secrets.KEYCHAIN_PASSWORD }}
-        run: |
-          echo $APPLE_CERTIFICATE | base64 --decode > certificate.p12
-          security create-keychain -p "$KEYCHAIN_PASSWORD" build.keychain
-          security default-keychain -s build.keychain
-          security unlock-keychain -p "$KEYCHAIN_PASSWORD" build.keychain
-          security import certificate.p12 -k build.keychain -P "$APPLE_CERTIFICATE_PASSWORD" -T /usr/bin/codesign
-          security set-key-partition-list -S apple-tool:,apple:,codesign: -s -k "$KEYCHAIN_PASSWORD" build.keychain
-          npm run build
-
-  build-windows:
-    runs-on: windows-latest
-    steps:
       - name: Install dependencies
         run: npm ci
 
@@ -66,13 +40,21 @@ jobs:
           SIGN_KEY_PASSWORD: 1234
         run: |
           npm run build:win
+
           APP_PATH=$(find "dist" -name "*.exe" -type f | head -n 1)
           if [ -z "$APP_PATH" ]; then
             echo "Error: EXE file not found."
             exit 1
           fi
           echo "APP_PATH=$APP_PATH" >> $GITHUB_ENV
+
+          # Sign the application
           signtool sign /f "$SIGN_KEY_PATH" /p "$SIGN_KEY_PASSWORD" /tr http://timestamp.digicert.com /td sha256 /fd sha256 "$APP_PATH"
+
+          if [ $? -ne 0 ]; then
+            echo "Error: Signing failed."
+            exit 1
+          fi
 
       - name: Build NSI Installer
         run: |
@@ -81,15 +63,35 @@ jobs:
             echo "Error: NSIS is not installed."
             exit 1
           fi
+
           MAKENSIS_SCRIPT="installer_script.nsi"
           if [ ! -f "$MAKENSIS_SCRIPT" ]; then
             echo "Error: NSIS script not found."
             exit 1
           fi
+
           $MAKENSIS "$MAKENSIS_SCRIPT"
+
           NSI_PATH=$(find "dist" -name "*.nsi" -type f | head -n 1)
           if [ -z "$NSI_PATH" ]; then
             echo "Error: NSI installer not found."
             exit 1
           fi
           echo "NSI_PATH=$NSI_PATH" >> $GITHUB_ENV
+
+      - name: Create or Update Release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          VERSION: ${{ env.VERSION }}
+          APP_PATH: ${{ env.APP_PATH }}
+          NSI_PATH: ${{ env.NSI_PATH }}
+        run: |
+          set -e
+          if gh release view "v${VERSION}" > /dev/null 2>&1; then
+            echo "Updating existing release for version v${VERSION}"
+            gh release upload "v${VERSION}" "${APP_PATH}" "${NSI_PATH}" --clobber
+          else
+            echo "Creating new release for version v${VERSION}"
+            gh release create "v${VERSION}" "${APP_PATH}" "${NSI_PATH}" \
+              --title "Release v${VERSION}" \
+              --generate-notes
