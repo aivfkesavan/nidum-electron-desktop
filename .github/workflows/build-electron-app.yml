@@ -17,16 +17,20 @@ jobs:
         with:
           node-version: '20.16.0'
 
-      - name: Check for package-lock.json
-        shell: powershell
+      - name: Clean Node Modules and Lock File
+        shell: bash
         run: |
-          if (!(Test-Path "package-lock.json")) {
-            Write-Host "package-lock.json not found. Running npm install to generate it."
-            npm install
-          }
+          if [ -d "node_modules" ]; then
+            echo "Removing node_modules..."
+            rm -rf node_modules
+          fi
+          if [ -f "package-lock.json" ]; then
+            echo "Removing package-lock.json..."
+            rm package-lock.json
+          fi
 
       - name: Install dependencies
-        run: npm ci
+        run: npm install
 
       - name: Create Self-Signed Certificate
         shell: powershell
