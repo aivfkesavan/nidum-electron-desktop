@@ -102,7 +102,7 @@ function Local() {
               category={m?.category}
               description={m?.description}
               progress={downloads[m?.id]?.progress ?? false}
-              isDownloaded={downloaded?.some((d: any) => d?.id === m?.id)}
+              isDownloaded={downloaded && downloaded?.some((d: any) => d?.id === m?.id)}
               updateModel={updateModel}
               onDownload={() => {
                 if (!isOnline) {
@@ -125,7 +125,7 @@ function Local() {
               category={m?.download_link ? "Hugging Face Model" : "Local Model"}
               description={m?.description}
               progress={downloads[m?.id]?.progress ?? false}
-              isDownloaded={downloaded?.some((d: any) => d?.id === m?.id)}
+              isDownloaded={downloaded && downloaded?.some((d: any) => d?.id === m?.id)}
               updateModel={updateModel}
               onDownload={() => { }}
             />
