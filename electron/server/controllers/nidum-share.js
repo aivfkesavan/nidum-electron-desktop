@@ -5,11 +5,11 @@ import path from 'path';
 import os from 'os';
 import 'dotenv/config';
 
+import { readJSON, updateJSONObj, writeJSON } from '../utils/json-helper';
 import { execPromise, runCommandInBg } from '../utils/run-command';
 import { getConfigPath } from '../utils/path-helper';
 import logger from '../utils/logger';
 import delay from '../utils/delay';
-import { readJSON, updateJSONObj, writeJSON } from '../utils/json-helper';
 
 const router = express.Router();
 
