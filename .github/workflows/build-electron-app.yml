@@ -18,66 +18,65 @@ jobs:
           node-version: '20.16.0'
 
       - name: Check for package-lock.json
+        shell: powershell
         run: |
-          if [ ! -f package-lock.json ]; then
-            echo "package-lock.json not found. Running npm install to generate it."
+          if (!(Test-Path "package-lock.json")) {
+            Write-Host "package-lock.json not found. Running npm install to generate it."
             npm install
-          fi
+          }
 
       - name: Install dependencies
         run: npm ci
 
       - name: Create Self-Signed Certificate
+        shell: powershell
         run: |
-          openssl req -newkey rsa:2048 -nodes -keyout selfsign.key -x509 -days 365 -out selfsign.crt \
+          openssl req -newkey rsa:2048 -nodes -keyout selfsign.key -x509 -days 365 -out selfsign.crt `
             -subj "/C=US/ST=State/L=City/O=Organization/OU=Unit/CN=example.com"
           openssl pkcs12 -export -out selfsign.pfx -inkey selfsign.key -in selfsign.crt -passout pass:1234
-          echo "Created self-signed certificate."
+          Write-Host "Created self-signed certificate."
 
       - name: Build Electron App for Windows
         env:
           SIGN_KEY_PATH: selfsign.pfx
           SIGN_KEY_PASSWORD: 1234
+        shell: powershell
         run: |
           npm run build:win
 
-          APP_PATH=$(find "dist" -name "*.exe" -type f | head -n 1)
-          if [ -z "$APP_PATH" ]; then
-            echo "Error: EXE file not found."
+          $APP_PATH = Get-ChildItem -Path "./dist" -Filter "*.exe" -Recurse | Select-Object -First 1
+          if (-not $APP_PATH) {
+            Write-Error "Error: EXE file not found."
             exit 1
-          fi
-          echo "APP_PATH=$APP_PATH" >> $GITHUB_ENV
+          }
+          echo "APP_PATH=$($APP_PATH.FullName)" | Out-File -FilePath $env:GITHUB_ENV -Append
 
           # Sign the application
-          signtool sign /f "$SIGN_KEY_PATH" /p "$SIGN_KEY_PASSWORD" /tr http://timestamp.digicert.com /td sha256 /fd sha256 "$APP_PATH"
-
-          if [ $? -ne 0 ]; then
-            echo "Error: Signing failed."
-            exit 1
-          fi
+          & signtool sign /f $env:SIGN_KEY_PATH /p $env:SIGN_KEY_PASSWORD /tr http://timestamp.digicert.com /td sha256 /fd sha256 $APP_PATH.FullName
 
       - name: Build NSI Installer
+        shell: powershell
         run: |
-          MAKENSIS=$(which makensis)
-          if [ -z "$MAKENSIS" ]; then
-            echo "Error: NSIS is not installed."
+          $MAKENSIS = (Get-Command makensis -ErrorAction SilentlyContinue)
+          if (-not $MAKENSIS) {
+            Write-Error "Error: NSIS is not installed."
             exit 1
-          fi
+          }
 
-          MAKENSIS_SCRIPT="installer_script.nsi"
-          if [ ! -f "$MAKENSIS_SCRIPT" ]; then
-            echo "Error: NSIS script not found."
+          $MAKENSIS_SCRIPT = "installer_script.nsi"
+          if (!(Test-Path $MAKENSIS_SCRIPT)) {
+            Write-Error "Error: NSIS script not found."
             exit 1
-          fi
+          }
 
-          $MAKENSIS "$MAKENSIS_SCRIPT"
+          & $MAKENSIS $MAKENSIS_SCRIPT
 
-          NSI_PATH=$(find "dist" -name "*.nsi" -type f | head -n 1)
-          if [ -z "$NSI_PATH" ]; then
-            echo "Error: NSI installer not found."
+          $NSI_PATH = Get-ChildItem -Path "./dist" -Filter "*.nsi" -Recurse | Select-Object -First 1
+          if (-not $NSI_PATH) {
+            Write-Error "Error: NSI installer not found."
             exit 1
-          fi
-          echo "NSI_PATH=$NSI_PATH" >> $GITHUB_ENV
+          }
+          echo "NSI_PATH=$($NSI_PATH.FullName)" | Out-File -FilePath $env:GITHUB_ENV -Append
 
       - name: Create or Update Release
         env:
@@ -85,13 +84,13 @@ jobs:
           VERSION: ${{ env.VERSION }}
           APP_PATH: ${{ env.APP_PATH }}
           NSI_PATH: ${{ env.NSI_PATH }}
+        shell: powershell
         run: |
-          set -e
-          if gh release view "v${VERSION}" > /dev/null 2>&1; then
-            echo "Updating existing release for version v${VERSION}"
-            gh release upload "v${VERSION}" "${APP_PATH}" "${NSI_PATH}" --clobber
-          else
-            echo "Creating new release for version v${VERSION}"
-            gh release create "v${VERSION}" "${APP_PATH}" "${NSI_PATH}" \
-              --title "Release v${VERSION}" \
+          if (gh release view "v$($env:VERSION)" 2>$null) {
+            Write-Host "Updating existing release for version v$($env:VERSION)"
+            gh release upload "v$($env:VERSION)" "$($env:APP_PATH)" "$($env:NSI_PATH)" --clobber
+          } else {
+            Write-Host "Creating new release for version v$($env:VERSION)"
+            gh release create "v$($env:VERSION)" "$($env:APP_PATH)" "$($env:NSI_PATH)" `
+              --title "Release v$($env:VERSION)" `
               --generate-notes
