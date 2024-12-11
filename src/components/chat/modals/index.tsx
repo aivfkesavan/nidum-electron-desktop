@@ -3,6 +3,7 @@ import useUIStore from "../../../store/ui";
 import DeleteProject from "./delete-project";
 import DeleteChat from "./delete-chat";
 import Download from "./download";
+import OpenUrl from "./open-url";
 import Project from "./project";
 import Profile from "./profile";
 
@@ -34,6 +35,11 @@ function Modals() {
       {
         open === "download" &&
         <Download />
+      }
+
+      {
+        open === "open-url" &&
+        <OpenUrl />
       }
     </>
   )
