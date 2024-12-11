@@ -42,7 +42,7 @@ jobs:
           SIGN_KEY_PASSWORD: 1234
         shell: powershell
         run: |
-          npm run build:win
+          npm run build-win
 
           $APP_PATH = Get-ChildItem -Path "./dist" -Filter "*.exe" -Recurse | Select-Object -First 1
           if (-not $APP_PATH) {
