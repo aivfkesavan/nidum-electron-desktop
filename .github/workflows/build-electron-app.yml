@@ -18,27 +18,26 @@ jobs:
           node-version: '20.16.0'
 
       - name: Install GTK for Canvas
-        shell: bash
+        shell: powershell
         run: |
-          curl -L https://github.com/tschaub/gtk-binaries/releases/download/2021-01-04/gtk+-bundle_3.6.4-2021-01-04_win64.zip -o gtk.zip
-          unzip gtk.zip -d C:/GTK
-          echo "GTK installed at C:/GTK"
+          choco install gtk-runtime -y
+          Write-Host "GTK runtime installed successfully."
         env:
-          PATH: C:/GTK/bin:$PATH
+          PATH: C:/tools/gtk3/bin:$env:PATH
 
       - name: Install dependencies
-        shell: bash
+        shell: powershell
         run: |
-          if [ -d "node_modules" ]; then
-            echo "Cleaning existing node_modules..."
-            rm -rf node_modules
-          fi
-          if [ -f "package-lock.json" ]; then
-            echo "Removing existing package-lock.json..."
-            rm package-lock.json
-          fi
-          echo "Installing dependencies..."
-          npm install
+          if (Test-Path "node_modules") {
+            Write-Host "Cleaning existing node_modules..."
+            Remove-Item -Recurse -Force "node_modules"
+          }
+          if (Test-Path "package-lock.json") {
+            Write-Host "Removing existing package-lock.json..."
+            Remove-Item -Force "package-lock.json"
+          }
+          Write-Host "Installing dependencies..."
+          npm install || exit 1
 
       - name: Install Windows SDK
         shell: powershell
@@ -112,4 +111,3 @@ jobs:
             gh release create "v$($env:VERSION)" "$($env:APP_PATH)" "$($env:NSI_PATH)" `
               --title "Release v$($env:VERSION)" `
               --generate-notes || exit 1
-          }
