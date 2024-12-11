@@ -17,10 +17,19 @@ jobs:
         with:
           node-version: '20.16.0'
 
+      - name: Install Chocolatey
+        shell: powershell
+        run: |
+          Set-ExecutionPolicy Bypass -Scope Process -Force; `
+          [System.Net.ServicePointManager]::SecurityProtocol = `
+          [System.Net.ServicePointManager]::SecurityProtocol -bor 3072; `
+          iex ((New-Object System.Net.WebClient).DownloadString('https://community.chocolatey.org/install.ps1'))
+          choco --version || exit 1
+
       - name: Install GTK for Canvas
         shell: powershell
         run: |
-          choco install gtk-runtime -y
+          choco install gtk-runtime -y || exit 1
           Write-Host "GTK runtime installed successfully."
         env:
           PATH: C:/tools/gtk3/bin:$env:PATH
@@ -42,7 +51,7 @@ jobs:
       - name: Install Windows SDK
         shell: powershell
         run: |
-          choco install winsdk -y
+          choco install winsdk -y || exit 1
           Write-Host "Windows SDK installed successfully."
 
       - name: Create Self-Signed Certificate
