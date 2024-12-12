@@ -1,13 +1,13 @@
-name: "Nidum.ai Windows Build and Release"
-
+name: "Nidum.ai macOS Build and Release"
 on:
   push:
     branches:
       - main
-
 jobs:
-  build-windows:
-    runs-on: windows-latest
+  create-release:
+    runs-on: macos-latest
+    permissions:
+      contents: write
     steps:
       - name: Check out the repository
         uses: actions/checkout@v3
@@ -17,111 +17,114 @@ jobs:
         with:
           node-version: '20.16.0'
 
-      - name: Ensure Chocolatey is Installed
-        shell: powershell
-        run: |
-          if (-Not (Test-Path "C:/ProgramData/Chocolatey/bin/choco.exe")) {
-            Write-Host "Chocolatey not found. Installing Chocolatey..."
-            Set-ExecutionPolicy Bypass -Scope Process -Force
-            [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.ServicePointManager]::SecurityProtocol -bor 3072
-            Invoke-Expression ((New-Object System.Net.WebClient).DownloadString('https://community.chocolatey.org/install.ps1'))
-          } else {
-            Write-Host "Chocolatey already installed."
-          }
-          $env:PATH += ";C:/ProgramData/Chocolatey/bin"
-          choco --version
-
-      - name: Install GTK for Canvas
-        shell: powershell
-        run: |
-          choco install gtk-runtime -y
-          Write-Host "GTK runtime installed successfully."
-        env:
-          PATH: C:/tools/gtk3/bin:$env:PATH
-
       - name: Install dependencies
-        shell: powershell
-        run: |
-          if (Test-Path "node_modules") {
-            Write-Host "Cleaning existing node_modules..."
-            Remove-Item -Recurse -Force "node_modules"
-          }
-          if (Test-Path "package-lock.json") {
-            Write-Host "Removing existing package-lock.json..."
-            Remove-Item -Force "package-lock.json"
-          }
-          Write-Host "Installing dependencies..."
-          npm install
+        run: npm ci
 
-      - name: Install Windows SDK
-        shell: powershell
+      - name: Get version from package.json
+        id: get_version
         run: |
-          choco install winsdk -y
-          Write-Host "Windows SDK installed successfully."
+          VERSION=$(node -p "require('./package.json').version")
+          echo "VERSION=$VERSION" >> $GITHUB_ENV
+        shell: bash
 
-      - name: Create Self-Signed Certificate
-        shell: powershell
-        run: |
-          openssl req -newkey rsa:2048 -nodes -keyout selfsign.key -x509 -days 365 -out selfsign.crt `
-            -subj "/C=US/ST=State/L=City/O=Organization/OU=Unit/CN=example.com"
-          openssl pkcs12 -export -out selfsign.pfx -inkey selfsign.key -in selfsign.crt -passout pass:1234
-          Write-Host "Created self-signed certificate."
-
-      - name: Build Electron App for Windows
+      - name: Build Electron App
         env:
-          SIGN_KEY_PATH: selfsign.pfx
-          SIGN_KEY_PASSWORD: 1234
-        shell: powershell
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          APPLE_CERTIFICATE: ${{ secrets.APPLE_CERTIFICATE }}
+          APPLE_CERTIFICATE_PASSWORD: ${{ secrets.APPLE_CERTIFICATE_PASSWORD }}
+          APPLE_ID: ${{ secrets.APPLE_ID }}
+          APPLE_APP_SPECIFIC_PASSWORD: ${{ secrets.APPLE_APP_SPECIFIC_PASSWORD }}
+          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+          KEYCHAIN_PASSWORD: ${{ secrets.KEYCHAIN_PASSWORD }}
         run: |
-          npm run build-win
-
-          $APP_PATH = Get-ChildItem -Path "./dist" -Filter "*.exe" -Recurse | Select-Object -First 1
-          if (-not $APP_PATH) {
-            Write-Error "Error: EXE file not found."
+          # Decode and import the Apple certificate
+          echo $APPLE_CERTIFICATE | base64 --decode > certificate.p12
+          security create-keychain -p "$KEYCHAIN_PASSWORD" build.keychain
+          security default-keychain -s build.keychain
+          security unlock-keychain -p "$KEYCHAIN_PASSWORD" build.keychain
+          security import certificate.p12 -k build.keychain -P "$APPLE_CERTIFICATE_PASSWORD" -T /usr/bin/codesign
+          security set-key-partition-list -S apple-tool:,apple:,codesign: -s -k "$KEYCHAIN_PASSWORD" build.keychain
+          
+          # Build the Electron app
+          npm run build
+          # Verify that the app is correctly signed
+          APP_PATH=$(find "$PWD/dist" -name "*.app" -type d | head -n 1)
+          if [ -z "$APP_PATH" ]; then
+            echo "Error: App not found."
             exit 1
-          }
-          echo "APP_PATH=$($APP_PATH.FullName)" | Out-File -FilePath $env:GITHUB_ENV -Append
-
-          # Sign the application
-          & signtool sign /f $env:SIGN_KEY_PATH /p $env:SIGN_KEY_PASSWORD /tr http://timestamp.digicert.com /td sha256 /fd sha256 $APP_PATH.FullName
-
-      - name: Build NSI Installer
-        shell: powershell
+          fi
+          codesign --verify --deep --strict --verbose=2 "$APP_PATH"
+          if [ $? -ne 0 ]; then
+            echo "Error: Code signing verification failed."
+            exit 1
+          fi
+          # Locate the built DMG file
+          DMG_PATH=$(find "$PWD/dist" -name "*.dmg" -type f | head -n 1)
+          if [ -z "$DMG_PATH" ]; then
+            echo "Error: DMG file not found."
+            exit 1
+          fi
+          echo "DMG_PATH=$DMG_PATH" >> $GITHUB_ENV
+          # Locate the built PKG file
+          PKG_PATH=$(find "$PWD/dist" -name "*.pkg" -type f | head -n 1)
+          if [ -z "$PKG_PATH" ]; then
+            echo "Error: PKG file not found."
+            exit 1
+          fi
+          echo "PKG_PATH=$PKG_PATH" >> $GITHUB_ENV
+          # Notarize the DMG
+          xcrun notarytool submit "$DMG_PATH" --wait --apple-id "$APPLE_ID" --password "$APPLE_APP_SPECIFIC_PASSWORD" --team-id "$APPLE_TEAM_ID"
+          if [ $? -ne 0 ]; then
+            echo "Error: Notarization failed."
+            exit 1
+          fi
+          # Staple the notarization ticket
+          xcrun stapler staple "$DMG_PATH"
+          if [ $? -ne 0 ]; then
+            echo "Error: Stapling notarization ticket failed."
+            exit 1
+          fi
+      - name: Check if Release Exists
+        id: check_release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          VERSION: ${{ env.VERSION }}
         run: |
-          $MAKENSIS = (Get-Command makensis -ErrorAction SilentlyContinue)
-          if (-not $MAKENSIS) {
-            Write-Error "Error: NSIS is not installed."
+          set -e
+          if gh release view "v${VERSION}" > /dev/null 2>&1; then
+            echo "RELEASE_EXISTS=true" >> $GITHUB_ENV
+          else
+            echo "RELEASE_EXISTS=false" >> $GITHUB_ENV
+          fi
+      - name: Locate Additional Files
+        id: locate_files
+        run: |
+          # Locate the ZIP and YAML files
+          ZIP_PATH=$(find "$PWD/dist" -name "*.zip" -type f | head -n 1)
+          YAML_PATH=$(find "$PWD/dist" -name "*.yml" -type f | head -n 1)
+          if [ -z "$ZIP_PATH" ] || [ -z "$YAML_PATH" ]; then
+            echo "Error: ZIP or YAML file not found."
             exit 1
-          }
-
-          $MAKENSIS_SCRIPT = "installer_script.nsi"
-          if (!(Test-Path $MAKENSIS_SCRIPT)) {
-            Write-Error "Error: NSIS script not found."
-            exit 1
-          }
-
-          & $MAKENSIS $MAKENSIS_SCRIPT
-
-          $NSI_PATH = Get-ChildItem -Path "./dist" -Filter "*.nsi" -Recurse | Select-Object -First 1
-          if (-not $NSI_PATH) {
-            Write-Error "Error: NSI installer not found."
-            exit 1
-          }
-          echo "NSI_PATH=$($NSI_PATH.FullName)" | Out-File -FilePath $env:GITHUB_ENV -Append
-
+          fi
+          echo "ZIP_PATH=$ZIP_PATH" >> $GITHUB_ENV
+          echo "YAML_PATH=$YAML_PATH" >> $GITHUB_ENV
       - name: Create or Update Release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           VERSION: ${{ env.VERSION }}
-          APP_PATH: ${{ env.APP_PATH }}
-          NSI_PATH: ${{ env.NSI_PATH }}
-        shell: powershell
+          DMG_PATH: ${{ env.DMG_PATH }}
+          PKG_PATH: ${{ env.PKG_PATH }}
+          ZIP_PATH: ${{ env.ZIP_PATH }}
+          YAML_PATH: ${{ env.YAML_PATH }}
+          RELEASE_EXISTS: ${{ env.RELEASE_EXISTS }}
         run: |
-          if (gh release view "v$($env:VERSION)" 2>$null) {
-            Write-Host "Updating existing release for version v$($env:VERSION)"
-            gh release upload "v$($env:VERSION)" "$($env:APP_PATH)" "$($env:NSI_PATH)" --clobber
-          } else {
-            Write-Host "Creating new release for version v$($env:VERSION)"
-            gh release create "v$($env:VERSION)" "$($env:APP_PATH)" "$($env:NSI_PATH)" `
-              --title "Release v$($env:VERSION)" `
+          set -e
+          if [ "${RELEASE_EXISTS}" = "true" ]; then
+            echo "Updating existing release for version v${VERSION}"
+            gh release upload "v${VERSION}" "${DMG_PATH}" "${PKG_PATH}" "${ZIP_PATH}" "${YAML_PATH}" --clobber
+          else
+            echo "Creating new release for version v${VERSION}"
+            gh release create "v${VERSION}" "${DMG_PATH}" "${PKG_PATH}" "${ZIP_PATH}" "${YAML_PATH}" \
+              --title "Release v${VERSION}" \
               --generate-notes
+          fi
