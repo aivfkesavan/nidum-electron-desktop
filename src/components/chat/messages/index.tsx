@@ -25,6 +25,7 @@ import { useSharedDevice } from "../../../hooks/use-device";
 import useOnlineStatus from "../../../hooks/use-online-status";
 import { useCrawler } from "../../../hooks/use-crawler";
 import { useConfig } from "../../../hooks/use-config";
+import useTempStore from "../../../store/temp";
 
 import ManageResourses from "./manage-resourses";
 import SpeechToText from "./speech-to-text";
@@ -67,9 +68,13 @@ function Messages() {
   const { data: config } = useConfig()
   const isOnline = useOnlineStatus()
 
-  const [tempData, setTempData] = useState<Message[]>([])
+  const setTempData = useTempStore(s => s.setTempData)
+  const setLoading = useTempStore(s => s.setLoading)
+  const resetTemp = useTempStore(s => s.reset)
+  const tempData = useTempStore(s => s?.data?.[chat_id]?.data || [])
+  const loading = useTempStore(s => s?.data?.[chat_id]?.loading || false)
+
   const [timings, setTimings] = useState<number>(null)
-  const [loading, setLoading] = useState(false)
   const [message, setMessage] = useState('')
   const [files, setFiles] = useState<File[]>([])
 
@@ -88,21 +93,6 @@ function Messages() {
     anthropicApiKey, anthropicModel,
     openaiApiKey, openaiModel,
   } = config || {}
-
-  useEffect(() => {
-    setTempData([])
-    setLoading(false)
-    setFiles([])
-    setTimings(null)
-  }, [chat_id])
-
-  useEffect(() => {
-    const msg = sessionStorage.getItem("msg")
-    if (msg && chat_id) {
-      sessionStorage.removeItem("msg")
-      postData(msg)
-    }
-  }, [chat_id])
 
   useEffect(() => {
     if (!isOnline && !loading) {
@@ -136,6 +126,8 @@ function Messages() {
   }
 
   const postData = async (msg: string, needAutoPlay: boolean = false) => {
+    const currContextId = chat_id || window.location?.hash?.split("/c/")[1]
+
     try {
       if (msg && projectDetails) {
         if (model_type === "Groq") {
@@ -174,31 +166,16 @@ function Messages() {
 
         setFiles([])
         setMessage('')
-        setLoading(true)
+        setLoading(currContextId, true)
         setTimings(null)
-        let temContextId = ""
-
-        if (!chat_id) {
-          temContextId = genMongoId()
-
-          addChat(project_id, {
-            id: temContextId,
-            title: msg,
-          })
-
-          navigate(`/p/${project_id}/c/${temContextId}`)
-          sessionStorage.setItem("msg", msg)
-          return
-        }
 
         if (chat_id && data?.length === 0) {
           editChat(project_id, {
-            id: chat_id,
+            id: currContextId,
             title: msg,
           })
         }
 
-        const currContextId = temContextId || chat_id
         const user: Message = {
           id: nanoid(10),
           role: "user",
@@ -227,7 +204,7 @@ function Messages() {
           id: nanoid(10),
           content: "",
         })
-        setTempData(initial)
+        setTempData(currContextId, initial)
 
         let dataMap: any = []
         const onlyAllwedInputs = ["user", "assistant"]
@@ -273,7 +250,7 @@ function Messages() {
               context: searchResult.map((f: any) => f.body).join(","),
             })
           }
-          setTempData(prev => prev.map(p => {
+          setTempData(currContextId, prev => prev.map(p => {
             if (p.role === "web-searched") {
               return {
                 ...p,
@@ -426,7 +403,7 @@ function Messages() {
               id: nanoid(5),
             }
 
-            setTempData(prev => prev.map(p => {
+            setTempData(currContextId, prev => prev.map(p => {
               if (p.role === "assistant" || p.role === "loading") {
                 return botReply
               }
@@ -449,8 +426,7 @@ function Messages() {
             })
           }
           finalOutput.push(botReply)
-          setTempData([])
-          setLoading(false)
+          resetTemp(currContextId)
           pushIntoMessages(project_id, currContextId, finalOutput)
           if (needAutoPlay) {
             speak(botReply.id, botReply.content)
@@ -469,8 +445,7 @@ function Messages() {
         if (!response.ok) {
           const err = await response.json()
           const errMsg = err?.error?.message || err?.error
-          setTempData([])
-          setLoading(false)
+          resetTemp(currContextId)
           toast({ title: errMsg || "An error occurred. Please try again." })
           return
         }
@@ -494,8 +469,7 @@ function Messages() {
             })
           }
           finalOutput.push(botReply)
-          setTempData([])
-          setLoading(false)
+          resetTemp(currContextId)
           if (model_type === "Nidum Shared") {
             setTimings(basicTokenizer(content))
           }
@@ -527,8 +501,7 @@ function Messages() {
                   })
                 }
                 finalOutput.push(botReply)
-                setTempData([])
-                setLoading(false)
+                resetTemp(currContextId)
                 pushIntoMessages(project_id, currContextId, finalOutput)
                 if (model_type === "Local") {
                   setTimings(basicTokenizer(botRes))
@@ -577,8 +550,7 @@ function Messages() {
 
                   const hasFinishReason = ["stop", "length"].includes(finishReason)
                   if (json?.error && !text) {
-                    setTempData([])
-                    setLoading(false)
+                    resetTemp(currContextId)
                     toast({ title: "Chat limit exceeded. Please start a new chat." })
                     return
                   }
@@ -600,8 +572,7 @@ function Messages() {
                       })
                     }
                     finalOutput.push(botReply)
-                    setTempData([])
-                    setLoading(false)
+                    resetTemp(currContextId)
                     if (model_type === "Local") {
                       setTimings(basicTokenizer(botRes))
                     }
@@ -618,7 +589,7 @@ function Messages() {
                     id: nanoid(5),
                   }
 
-                  setTempData(prev => prev.map(p => {
+                  setTempData(currContextId, prev => prev.map(p => {
                     if (p.role === "assistant" || p.role === "loading") {
                       return botReply
                     }
@@ -634,8 +605,7 @@ function Messages() {
         }
       }
     } catch (error) {
-      setLoading(false)
-      setTempData([])
+      resetTemp(currContextId)
       if (error?.name !== "AbortError") {
         toast({ title: !isOnline ? "Your device is not connected to the internet. Please check your connection." : "An error occurred. Please try again." })
       }
@@ -644,16 +614,27 @@ function Messages() {
 
   const stopListening = () => {
     try {
+      const currContextId = chat_id || window.location?.hash?.split("/c/")[1]
       abortController?.current?.abort()
       abortController.current = new AbortController()
-      pushIntoMessages(project_id, chat_id, tempData.filter(f => f.role !== "loading"))
-      setLoading(false)
-      setTempData([])
+      pushIntoMessages(project_id, currContextId, tempData.filter(f => f.role !== "loading"))
+      resetTemp(currContextId)
     } catch (error) { }
   }
 
   const sentMessage = () => {
     if (message) {
+      if (!chat_id) {
+        const temContextId = genMongoId()
+
+        addChat(project_id, {
+          id: temContextId,
+          title: message,
+        })
+
+        navigate(`/p/${project_id}/c/${temContextId}`)
+      }
+
       postData(message)
     }
   }
