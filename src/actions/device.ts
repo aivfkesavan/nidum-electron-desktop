@@ -43,10 +43,6 @@ export function deleteDevice(deviceId: string) {
   })
 }
 
-export function nidumChainUrlConfig() {
-  return axios.post(`${constants.backendUrl}/nidum-chain/url-config`).then(r => r.data)
-}
-
 export function nidumChainEnable() {
   return axios.post(`${constants.backendUrl}/nidum-chain/enable`).then(r => r.data)
 }
@@ -66,7 +62,6 @@ export async function nidumChainSetupFlow(deviceId: string, disable?: boolean) {
       await updateDeviceAppId({ appId: deviceId, newAppId: newDeviceId })
       await disableZrok(deviceId)
     }
-    await nidumChainUrlConfig()
     await nidumChainEnable()
     await nidumChainReserve(newDeviceId)
     useDeviceStore.setState({ deviceId: newDeviceId })

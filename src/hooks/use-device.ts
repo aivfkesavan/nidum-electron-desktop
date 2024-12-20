@@ -59,7 +59,7 @@ export function useNidumChainSetup() {
 
   useEffect(() => {
     if (data) {
-      const isSuccess = data?.["nidum-chain-url-config"] && data?.["nidum-chain-enable"] && data?.["nidum-chain-reserve"]
+      const isSuccess = data?.["nidum-chain-enable"] && data?.["nidum-chain-reserve"]
       if (!isSuccess) {
         mutate(Object.keys(data).length === 0)
       }
