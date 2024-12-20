@@ -106,7 +106,9 @@ if (!gotTheLock) {
       win.focus()
     }
 
-    dialog.showErrorBox('Welcome Back', `You arrived from: ${commandLine?.pop()?.slice(0, -1)}`)
+    if (process.platform === "win32") {
+      win?.webContents?.send("open-url", commandLine?.pop())
+    }
   })
 
   app.whenReady().then(() => {
@@ -177,9 +179,11 @@ if (!gotTheLock) {
     }
   })
 
-  app.on('open-url', (event, url) => {
-    win?.webContents?.send("open-url", url)
-  })
+  if (process.platform !== "win32") {
+    app.on('open-url', (event, url) => {
+      win?.webContents?.send("open-url", url)
+    })
+  }
 }
 
 
