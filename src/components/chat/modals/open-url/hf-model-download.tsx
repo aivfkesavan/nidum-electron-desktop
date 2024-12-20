@@ -25,8 +25,7 @@ function HfModelDownload({ id }: props) {
 
   const { mutate } = useUploadHFModel()
   const queryClient = useQueryClient()
-  console.log(details)
-  console.log(files)
+
   function download(f: any) {
     const base = id?.replaceAll("/", "_") + f?.path
     const link = `https://huggingface.co/${id}/resolve/main/${f?.path}`
