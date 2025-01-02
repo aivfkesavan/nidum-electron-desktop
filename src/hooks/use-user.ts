@@ -2,7 +2,7 @@ import { useEffect } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
 
-import { addInvite, confirmDeleteAccount, forgetPass, getInvites, getSharedServers, login, logout, removeInvite, reqDeleteAccount, resetPass, updatePass } from "../actions/user";
+import { addInvite, confirmDeleteAccount, forgetPass, getInvites, getSharedServers, login, logout, removeInvite, reqDeleteAccount, resetPass, signup, updatePass } from "../actions/user";
 import { resetApp } from "../actions/general";
 
 import useOnlineStatus from "./use-online-status";
@@ -27,6 +27,24 @@ export function useInvites() {
   return useQuery({
     queryKey: ["invites"],
     queryFn: getInvites,
+  })
+}
+
+export function useSignupMutate() {
+  const navigate = useNavigate()
+
+  const { toast } = useToast()
+
+  return useMutation({
+    mutationFn: signup,
+    onSuccess() {
+      toast({ title: "Account created successfully" })
+      navigate("/login")
+    },
+    onError(error) {
+      let hasError = error?.message
+      toast({ title: hasError || "An error occurred. Please try again." })
+    }
   })
 }
 
