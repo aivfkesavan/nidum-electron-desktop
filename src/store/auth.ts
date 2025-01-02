@@ -3,10 +3,11 @@ import { persist } from 'zustand/middleware';
 
 type authState = {
   _id: string;
+  name: string;
   email: string;
   token: string;
+  isVerified: boolean;
   isLoggedIn: boolean;
-  isGoogleAuth: boolean;
   isOfflineLogin: boolean;
 }
 
@@ -17,10 +18,11 @@ type actions = {
 
 const payload = {
   _id: "",
+  name: "",
   email: '',
   token: '',
+  isVerified: false,
   isLoggedIn: false,
-  isGoogleAuth: false,
   isOfflineLogin: false,
 }
 
@@ -34,7 +36,7 @@ const useAuthStore = create<authState & actions>()((persist((set) => ({
     name: 'user-storage',
     version: 3,
     migrate: (persistedState: any, version) => {
-      if (!version || version < 3) {
+      if (!version || version < 4) {
         return { ...payload }
       }
       return persistedState

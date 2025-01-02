@@ -82,11 +82,16 @@ export default {
             opacity: '0',
           },
         },
+        "caret-blink": {
+          "0%,70%,100%": { opacity: "1" },
+          "20%,50%": { opacity: "0" },
+        },
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
         "accordion-up": "accordion-up 0.2s ease-out",
         blink: 'blink 1s steps(11) infinite 2s',
+        "caret-blink": "caret-blink 1.25s ease-out infinite",
       },
       transitionDuration: {
         "1_5s": "1.5s"

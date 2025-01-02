@@ -4,7 +4,6 @@ import { autoUpdater } from 'electron-updater';
 import log from 'electron-log';
 import path from "node:path";
 
-import googleAuth from "./google-auth";
 import server from './server';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -209,8 +208,6 @@ ipcMain.on('app:restart', () => {
   app.relaunch()
   app.exit(0)
 })
-
-ipcMain.handle('auth:google', googleAuth)
 
 autoUpdater.autoDownload = false
 autoUpdater.autoInstallOnAppQuit = true
