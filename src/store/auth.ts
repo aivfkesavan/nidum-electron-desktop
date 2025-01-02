@@ -34,7 +34,7 @@ const useAuthStore = create<authState & actions>()((persist((set) => ({
 }),
   {
     name: 'user-storage',
-    version: 3,
+    version: 4,
     migrate: (persistedState: any, version) => {
       if (!version || version < 4) {
         return { ...payload }

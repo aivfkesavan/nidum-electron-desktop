@@ -18,16 +18,16 @@ const __dirname = path.dirname(__filename);
 
 const zrokExecutable = {
   win32: "nidum.exe",
-  darwin: "./nidumchain",
+  darwin: "./nidum",
 }
 
-const zrokStart = zrokExecutable[os.platform()] || "nidumchain"
+const zrokStart = zrokExecutable[os.platform()] || "nidum"
 
 const zrokBinary = process.env.NODE_ENV === "development"
   ? path.join(__dirname, "..", "public", "bin")
   : path.join(process.resourcesPath, "bin");
 
-const stopZrokCmd = os.platform() === "win32" ? "taskkill /F /IM nidum.exe" : "pkill nidumchain"
+const stopZrokCmd = os.platform() === "win32" ? "taskkill /F /IM nidum.exe" : "pkill nidum"
 const zrokPath = path.join(zrokBinary, zrokStart)
 
 const configPath = getConfigPath()
