@@ -103,18 +103,10 @@ export function removeInvite(to: string) {
   })
 }
 
-export function reqDeleteAccount() {
-  return sendApiReq({
-    method: "post",
-    url: endPoints.deleteOtp,
-    data: {},
-  })
-}
-
-export function confirmDeleteAccount(otp: number) {
+export function confirmDeleteAccount() {
   return sendApiReq({
     method: "delete",
-    url: `${endPoints.deleteAccount}/${otp}`,
+    url: endPoints.deleteAccount,
     data: {}
   })
 }

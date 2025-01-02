@@ -2,7 +2,7 @@ import { useEffect } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
 
-import { addInvite, confirmDeleteAccount, forgetPass, getInvites, getSharedServers, login, logout, removeInvite, reqDeleteAccount, resetPass, signup, updatePass } from "../actions/user";
+import { addInvite, confirmDeleteAccount, forgetPass, getInvites, getSharedServers, login, logout, removeInvite, resetPass, signup, updatePass } from "../actions/user";
 import { resetApp } from "../actions/general";
 
 import useOnlineStatus from "./use-online-status";
@@ -336,6 +336,8 @@ export function useResetApp(showToast: boolean = true) {
       navigate("/login", { replace: true })
       if (showToast) {
         toast({ title: "App data has been reset successfully." })
+      } else {
+        toast({ title: "Account deleted successfully" })
       }
     },
     onError(err) {
@@ -343,21 +345,6 @@ export function useResetApp(showToast: boolean = true) {
       if (showToast) {
         toast({ title: err?.message || "An error occurred. Please try again." })
       }
-    }
-  })
-}
-
-export function useReqAccountDeleteMutate() {
-  const { toast } = useToast()
-
-  return useMutation({
-    mutationFn: (v: any) => reqDeleteAccount(),
-    onSuccess() {
-      toast({ title: "Check your email to retrieve the OTP." })
-    },
-    onError(err) {
-      let hasError = err?.message
-      toast({ title: hasError || "An error occurred. Please try again." })
     }
   })
 }
@@ -370,11 +357,7 @@ export function useAccountDeleteConfirmMutate() {
   return useMutation({
     mutationFn: confirmDeleteAccount,
     onSuccess() {
-      mutate({ includeModels: true, deviceId }, {
-        onSuccess() {
-          toast({ title: "Account deleted successfully" })
-        }
-      })
+      mutate({ includeModels: true, deviceId })
     },
     onError(err) {
       let hasError = err?.message
