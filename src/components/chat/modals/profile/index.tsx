@@ -1,5 +1,7 @@
 import { useState } from 'react';
+import { LuShieldCheck } from 'react-icons/lu';
 
+import { useSendOTP } from "../../../../hooks/use-user";
 import useAuthStore from '../../../../store/auth';
 import useUIStore from '../../../../store/ui';
 
@@ -17,13 +19,24 @@ import Delete from './delete';
 import Reset from './reset';
 
 function Profile() {
-  const isGoogleAuth = useAuthStore(s => s.isGoogleAuth)
+  const isVerified = useAuthStore(s => s.isVerified)
   const email = useAuthStore(s => s.email)
+  const update = useUIStore(s => s.update)
   const close = useUIStore(s => s.close)
+
+  const { mutate: mutateSendOtp, isPending: isPending1 } = useSendOTP()
 
   const [showUpdatePass, setShowUpdatePass] = useState(false)
 
   const updateShowPass = () => setShowUpdatePass(p => !p)
+
+  function sendOtp() {
+    mutateSendOtp(email, {
+      onSuccess() {
+        update({ data: null, open: "verify" })
+      }
+    })
+  }
 
   function onClose(v: boolean) {
     if (!v) {
@@ -43,7 +56,14 @@ function Profile() {
         </DialogHeader>
 
         <div>
-          <Label htmlFor="email" className='text-xs font-normal text-zinc-400'>Email</Label>
+          <div className='df'>
+            <Label htmlFor="email" className='text-xs font-normal text-zinc-400'>Email</Label>
+            {
+              isVerified &&
+              <p className='df gap-1 ml-auto text-xs text-green-400'><LuShieldCheck />  Verified</p>
+            }
+          </div>
+
           <input
             readOnly
             disabled
@@ -52,10 +72,24 @@ function Profile() {
             value={email}
             className="px-2.5 py-1.5 text-sm bg-muted cursor-not-allowed"
           />
+
+          {
+            !isVerified &&
+            <div className='mt-1 text-xs'>
+              Your email is not verified.{" "}
+              <button
+                disabled={isPending1}
+                onClick={sendOtp}
+                className=' ml-0.5 bg-yellow-400 text-black font-medium'
+              >
+                Verify now
+              </button>
+            </div>
+          }
         </div>
 
         {
-          !showUpdatePass && !isGoogleAuth &&
+          !showUpdatePass &&
           <button
             onClick={updateShowPass}
             className='px-4 py-1.5 text-xs bg-zinc-300 text-zinc-800 hover:bg-zinc-200'

@@ -1,6 +1,7 @@
 import useUIStore from "../../../store/ui";
 
 import DeleteProject from "./delete-project";
+import VerifyAccount from "./verify-account";
 import DeleteChat from "./delete-chat";
 import Download from "./download";
 import OpenUrl from "./open-url";
@@ -40,6 +41,11 @@ function Modals() {
       {
         open === "open-url" &&
         <OpenUrl />
+      }
+
+      {
+        open === "verify" &&
+        <VerifyAccount />
       }
     </>
   )

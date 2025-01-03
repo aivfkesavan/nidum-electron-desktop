@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { LuSendHorizonal } from "react-icons/lu";
+import { LuSendHorizontal } from "react-icons/lu";
 import { pipeline } from '@huggingface/transformers';
 import { IoMdMic } from "react-icons/io";
 import { LuX } from "react-icons/lu";
@@ -73,7 +73,7 @@ function NativeProvider({ disabled, postData }: props) {
       >
         {
           isRecording
-            ? <LuSendHorizonal />
+            ? <LuSendHorizontal />
             : <IoMdMic className=' text-white/60' />
         }
       </button>

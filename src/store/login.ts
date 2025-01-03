@@ -18,6 +18,7 @@ type actions = {
 }
 
 const useLoginStore = create<state & actions>()((persist((set, get) => ({
+  // @ts-ignore
   data: [],
 
   update: payload => {

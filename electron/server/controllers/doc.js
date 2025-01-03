@@ -5,6 +5,7 @@ import 'dotenv/config';
 import { queryIndex, indexFolder } from "../utils/llama";
 import { createPath } from "../utils/path-helper";
 import { upload } from "../middleawres/upload";
+import logger from '../utils/logger';
 
 const router = express.Router()
 
@@ -20,6 +21,7 @@ router.get("/:folderName", async (req, res) => {
     return res.json(result)
 
   } catch (error) {
+    logger.error(`${JSON.stringify(error)}, ${error?.message}`)
     return res.status(500).json({ error })
   }
 })
@@ -44,6 +46,7 @@ router.post("/:folderName", upload.array('files'), async (req, res) => {
     return res.json({ msg: "index stored" })
 
   } catch (error) {
+    logger.error(`${JSON.stringify(error)}, ${error?.message}`)
     return res.status(400).json({ error })
   }
 })
@@ -60,6 +63,7 @@ router.delete("/:folderName/:filename", async (req, res) => {
     return res.json({ msg: "index stored" })
 
   } catch (error) {
+    logger.error(`${JSON.stringify(error)}, ${error?.message}`)
     return res.status(400).json({ error })
   }
 })

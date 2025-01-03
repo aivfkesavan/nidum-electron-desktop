@@ -1,78 +1,34 @@
 import { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
 import { IoEye, IoEyeOff } from "react-icons/io5";
 import { useForm } from 'react-hook-form';
+import { Link } from 'react-router-dom';
 
-import { resendOtp as resendOtpAction, signup, verifyOtp as verifyOtpAction } from '../../actions/user';
-import { useToast } from '../../hooks/use-toast';
+import { useSignupMutate } from '../../hooks/use-user';
 
-// import GoogleAuthBtn from '../common/google-btn';
 import logo from '../../assets/imgs/logo.png';
 
-type dataType = { firstName: string, lastName: string, email: string, password: string, otp: string }
+type dataType = { firstName: string, lastName: string, email: string, password: string }
 
 function Signup() {
-  const { register, formState: { errors, isSubmitting }, handleSubmit, getValues } = useForm({
+  const { register, formState: { errors }, handleSubmit } = useForm({
     defaultValues: {
       firstName: "",
       lastName: "",
       email: "",
       password: "",
-      otp: "",
     },
   })
 
+  const { isPending, mutate } = useSignupMutate()
   const [showPass, setShowPass] = useState(false)
-  const [showOtp, setShowOtp] = useState(false)
-  const navigate = useNavigate()
-  const { toast } = useToast()
 
   const updateShowPass = (e: React.FormEvent<HTMLButtonElement>) => {
     e.preventDefault()
     setShowPass(p => !p)
   }
 
-  const verifyOtp = async (data: any) => {
-    try {
-      await verifyOtpAction({
-        email: data?.email,
-        otp: Number(data?.otp)
-      })
-      toast({ title: "Email verified successfully" })
-      navigate("/login")
-
-    } catch (error) {
-      let hasError = error?.message
-      toast({ title: hasError || "An error occurred. Please try again." })
-    }
-  }
-
-  const resendOtp = async () => {
-    try {
-      const email = getValues("email")
-      await resendOtpAction(email)
-      toast({ title: "OTP resended successfully" })
-
-    } catch (error) {
-      let hasError = error?.message
-      toast({ title: hasError || "An error occurred. Please try again." })
-    }
-  }
-
-  async function onSubmit(data: dataType) {
-    if (showOtp) return verifyOtp(data)
-
-    try {
-      const { otp, ...rest } = data
-
-      await signup(rest)
-      toast({ title: "Check your email for OTP" })
-      setShowOtp(true)
-
-    } catch (error) {
-      let hasError = error?.message
-      toast({ title: hasError || "An error occurred. Please try again." })
-    }
+  function onSubmit(data: dataType) {
+    mutate(data)
   }
 
   return (
@@ -206,79 +162,18 @@ function Signup() {
             }
           </div>
 
-          {
-            !showOtp &&
-            <button
-              type='submit'
-              className="w-full py-1.5 text-sm text-zinc-900 bg-zinc-50 hover:opacity-85 disabled:opacity-50"
-              disabled={isSubmitting}
-            >
-              Create account
-            </button>
-          }
-
-          {
-            showOtp &&
-            <>
-              <div className="relative mb-6">
-                <label
-                  htmlFor="Signup-otp"
-                  className="text-xs"
-                >
-                  OTP
-                </label>
-
-                <input
-                  type="number"
-                  id="Signup-otp"
-                  className="no-number-arrows py-1 text-sm border border-zinc-700 bg-transparent focus-visible:border-zinc-600"
-                  {...register("otp", {
-                    required: "OTP is required",
-                  })}
-                />
-
-                {
-                  errors.otp &&
-                  <div className="mt-0.5 text-xs text-red-600">
-                    {errors.otp.message}
-                  </div>
-                }
-              </div>
-
-              <button
-                type='submit'
-                className="w-full py-1.5 text-sm text-zinc-900 bg-zinc-50 hover:opacity-85 disabled:opacity-50"
-                disabled={isSubmitting}
-              >
-                Verify OTP
-              </button>
-
-              <button
-                type="button"
-                className='block ml-auto mt-1 p-0 text-xs text-primary hover:underline'
-                onClick={resendOtp}
-              >
-                Resend OTP
-              </button>
-            </>
-          }
+          <button
+            type='submit'
+            className="w-full py-1.5 text-sm text-zinc-900 bg-zinc-50 hover:opacity-85 disabled:opacity-50"
+            disabled={isPending}
+          >
+            Create account
+          </button>
         </form>
 
-        {
-          !showOtp &&
-          <>
-            {/* <div className="mt-5 text-xs text-center isolate relative text-zinc-400">
-              <span className="absolute top-2 inset-x-0 h-px bg-zinc-700 z-[-1]"></span>
-              <span className="px-2 bg-[#171717] z-[1]">Or</span>
-            </div>
-
-            <GoogleAuthBtn /> */}
-
-            <div className="mt-5 text-xs text-center text-zinc-400">
-              Already have an account? <Link to="/login" replace className="text-zinc-300 hover:underline">Log in</Link>
-            </div>
-          </>
-        }
+        <div className="mt-5 text-xs text-center text-zinc-400">
+          Already have an account? <Link to="/login" replace className="text-zinc-300 hover:underline">Log in</Link>
+        </div>
       </div>
     </section>
   )

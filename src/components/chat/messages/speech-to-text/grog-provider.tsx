@@ -1,4 +1,4 @@
-import { LuSendHorizonal, LuX } from "react-icons/lu";
+import { LuSendHorizontal, LuX } from "react-icons/lu";
 import { IoMdMic } from "react-icons/io";
 
 import { useConfig } from "../../../../hooks/use-config";
@@ -40,7 +40,7 @@ function GroqProvider({ disabled, postData }: Props) {
       >
         {
           isRecording
-            ? <LuSendHorizonal />
+            ? <LuSendHorizontal />
             : <IoMdMic className=' text-white/60' />
         }
       </button>

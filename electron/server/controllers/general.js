@@ -10,7 +10,6 @@ router.post("/remove-files", async (req, res) => {
     const root = getRoot()
     await fs.rm(root, { recursive: true })
 
-    checkPathsSetup()
     // const { includeModels } = req.body
 
     // const root = getRoot()
@@ -65,12 +64,13 @@ router.post("/remove-files", async (req, res) => {
     //   })
     // })
 
-    res.json({ message: "files deleted successfully" })
 
   } catch (error) {
     console.log(error)
-    res.status(500).json({ error: error.message })
   }
+
+  checkPathsSetup()
+  res.json({ message: "files deleted successfully" })
 })
 
 export default router

@@ -2,7 +2,7 @@ import { useEffect } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
 
-import { addInvite, confirmDeleteAccount, forgetPass, getInvites, getSharedServers, login, logout, removeInvite, reqDeleteAccount, resetPass, updatePass } from "../actions/user";
+import { addInvite, confirmDeleteAccount, forgetPass, getInvites, getSharedServers, login, logout, removeInvite, resendOtp, resetPass, signup, updatePass, verifyOtp } from "../actions/user";
 import { resetApp } from "../actions/general";
 
 import useOnlineStatus from "./use-online-status";
@@ -27,6 +27,57 @@ export function useInvites() {
   return useQuery({
     queryKey: ["invites"],
     queryFn: getInvites,
+  })
+}
+
+export function useSignupMutate() {
+  const navigate = useNavigate()
+
+  const { toast } = useToast()
+
+  return useMutation({
+    mutationFn: signup,
+    onSuccess() {
+      toast({ title: "Account created successfully" })
+      navigate("/login")
+    },
+    onError(error) {
+      let hasError = error?.message
+      toast({ title: hasError || "An error occurred. Please try again." })
+    }
+  })
+}
+
+export function useSendOTP() {
+  const { toast } = useToast()
+
+  return useMutation({
+    mutationFn: resendOtp,
+    onSuccess() {
+      toast({ title: "OTP has been sent successfully. Please check your email." })
+    },
+    onError(error) {
+      let hasError = error?.message
+      toast({ title: hasError || "An error occurred. Please try again." })
+    }
+  })
+}
+
+export function useVerifyEmail() {
+  const updateAuth = useAuthStore(s => s.update)
+
+  const { toast } = useToast()
+
+  return useMutation({
+    mutationFn: verifyOtp,
+    onSuccess() {
+      updateAuth({ isVerified: true })
+      toast({ title: "Account verified successfully" })
+    },
+    onError(error) {
+      let hasError = error?.message
+      toast({ title: hasError || "An error occurred. Please try again." })
+    }
   })
 }
 
@@ -143,53 +194,6 @@ export function useOfflineLoginCorrection() {
       }
     }
   }, [isOfflineLogin, isOnline, email, data])
-}
-
-export function useGoogleAuthMutate() {
-  const updateAuth = useAuthStore(s => s.update)
-  const initConvo = useConvoStore(s => s.init)
-  const init = useContextStore(s => s.init)
-
-  const navigate = useNavigate()
-
-  const { toast } = useToast()
-
-  return useMutation({
-    // @ts-ignore
-    mutationFn: window?.electronAPI?.googleAuth,
-    onSuccess(res: any) {
-      if (res?.error) {
-        toast({ title: res?.message || "An error occurred. Please try again." })
-
-      } else {
-        updateAuth({
-          _id: res?._id,
-          email: res?.email,
-          token: res?.token,
-          isLoggedIn: true,
-          isGoogleAuth: true,
-        })
-        init()
-        initConvo()
-        const convo = useConvoStore.getState().data[res?._id]
-        const latestProjectId = findLatest(Object.values(convo.projects))
-        const chats = convo.chats[latestProjectId.id]
-        const latestChatId = findLatest(chats)
-        let to = `/p/${latestProjectId?.id}`
-        if (chats?.length === 1 || chats?.[0]?.title === "New Chat") {
-          to = to + `/c/${latestChatId?.id}`
-        }
-
-        navigate(to, { replace: true })
-        toast({ title: "Successfully logged in." })
-      }
-    },
-    onError(err) {
-      let hasError = err?.message
-      if (hasError?.endsWith("prematurely")) return
-      toast({ title: hasError || "An error occurred. Please try again." })
-    }
-  })
 }
 
 export function useUpdatePassMutate() {
@@ -318,6 +322,8 @@ export function useResetApp(showToast: boolean = true) {
       navigate("/login", { replace: true })
       if (showToast) {
         toast({ title: "App data has been reset successfully." })
+      } else {
+        toast({ title: "Account deleted successfully" })
       }
     },
     onError(err) {
@@ -325,21 +331,6 @@ export function useResetApp(showToast: boolean = true) {
       if (showToast) {
         toast({ title: err?.message || "An error occurred. Please try again." })
       }
-    }
-  })
-}
-
-export function useReqAccountDeleteMutate() {
-  const { toast } = useToast()
-
-  return useMutation({
-    mutationFn: (v: any) => reqDeleteAccount(),
-    onSuccess() {
-      toast({ title: "Check your email to retrieve the OTP." })
-    },
-    onError(err) {
-      let hasError = err?.message
-      toast({ title: hasError || "An error occurred. Please try again." })
     }
   })
 }
@@ -352,11 +343,7 @@ export function useAccountDeleteConfirmMutate() {
   return useMutation({
     mutationFn: confirmDeleteAccount,
     onSuccess() {
-      mutate({ includeModels: true, deviceId }, {
-        onSuccess() {
-          toast({ title: "Account deleted successfully" })
-        }
-      })
+      mutate({ includeModels: true, deviceId })
     },
     onError(err) {
       let hasError = err?.message

@@ -4,7 +4,6 @@ import { autoUpdater } from 'electron-updater';
 import log from 'electron-log';
 import path from "node:path";
 
-import googleAuth from "./google-auth";
 import server from './server';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -106,7 +105,9 @@ if (!gotTheLock) {
       win.focus()
     }
 
-    dialog.showErrorBox('Welcome Back', `You arrived from: ${commandLine?.pop()?.slice(0, -1)}`)
+    if (process.platform === "win32") {
+      win?.webContents?.send("open-url", commandLine?.pop())
+    }
   })
 
   app.whenReady().then(() => {
@@ -177,9 +178,11 @@ if (!gotTheLock) {
     }
   })
 
-  app.on('open-url', (event, url) => {
-    win?.webContents?.send("open-url", url)
-  })
+  if (process.platform !== "win32") {
+    app.on('open-url', (event, url) => {
+      win?.webContents?.send("open-url", url)
+    })
+  }
 }
 
 
@@ -205,8 +208,6 @@ ipcMain.on('app:restart', () => {
   app.relaunch()
   app.exit(0)
 })
-
-ipcMain.handle('auth:google', googleAuth)
 
 autoUpdater.autoDownload = false
 autoUpdater.autoInstallOnAppQuit = true

@@ -2,6 +2,7 @@ import { getLlama, LlamaChatSession } from "node-llama-cpp";
 import express from 'express';
 
 import { createPath } from "../utils/path-helper";
+import logger from '../utils/logger';
 
 const router = express.Router()
 
@@ -16,14 +17,17 @@ router.post("/", async (req, res) => {
 
   try {
     const { modelName, messages, message, ...restParams } = req.body
+
     const [systemPrompt, ...rest] = messages
 
     const llama = await getLlama()
+
     const model = await llama.loadModel({
       modelPath: createPath(["models", modelName])
     })
 
     const context = await model.createContext()
+
     const session = new LlamaChatSession({
       contextSequence: context.getSequence(),
       systemPrompt: systemPrompt?.text || ""
@@ -50,10 +54,12 @@ router.post("/", async (req, res) => {
       }
     })
 
+    await llama?.dispose()
     res.end()
 
   } catch (error) {
     console.log(error)
+    logger.error(`${JSON.stringify(error)}, ${error?.message}`)
     res.write(`data: ${JSON.stringify({ error: "Something bad" })}\n\n`)
     return res.end()
   }
@@ -93,9 +99,11 @@ router.post("/2", async (req, res) => {
       }
     })
 
+    await llama?.dispose()
     return res.json({ choices: [{ message: { content } }] })
 
   } catch (error) {
+    logger.error(`${JSON.stringify(error)}, ${error?.message}`)
     return res.status(404).json({ msg: "cannot convert into base64" })
   }
 })

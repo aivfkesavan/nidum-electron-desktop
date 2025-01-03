@@ -8,7 +8,7 @@ function Header() {
   const isOnline = useOnlineStatus()
 
   return (
-    <div className="df draggable px-4 py-2 border-b">
+    <div className="df draggable px-4 py-2 border-b transition-all">
       <ModelSelect />
 
       {
