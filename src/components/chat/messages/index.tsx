@@ -95,6 +95,10 @@ function Messages() {
   } = config || {}
 
   useEffect(() => {
+    setTimings(null)
+  }, [chat_id])
+
+  useEffect(() => {
     if (!isOnline && !loading) {
       if (!["Local"].includes(model_type)) { // "Ollama"
         updateContext({ model_type: "Local", model_mode: "" })
@@ -125,44 +129,50 @@ function Messages() {
     })
   }
 
+  function hasAPiKeyError() {
+    if (model_type === "Groq") {
+      if (!groqApiKey) return "Please enter the Groq API key to proceed."
+      if (!groqModel) return "Please select a Groq Model to continue."
+    }
+    else if (model_type === "Local") {
+      if (!llamaModel) return "Please choose a model to continue the chat."
+      if (!downloadedModels?.some((d: any) => d.fileName === llamaModel)) {
+        return "The selected model is currently unavailable."
+      }
+    }
+    else if (model_type === "Hugging Face") {
+      if (!hfApiKey) return "Please enter the Hugging Face API key to proceed."
+      if (!hfModel) return "Please select a Hugging Face Model to continue."
+    }
+    else if (model_type === "SambaNova") {
+      if (!sambaNovaApiKey) return "Please provide the SambaNova API key."
+      if (!sambaNovaModel) return "Please select a SambaNova Model to continue."
+    }
+    else if (model_type === "Anthropic") {
+      if (!anthropicApiKey) return "Please provide the Anthropic API key."
+      if (!anthropicModel) return "Please choose an Anthropic Model."
+    }
+    else if (model_type === "OpenAI") {
+      if (!openaiApiKey) return "Please provide the OpenAI API key to proceed."
+      if (!openaiModel) return "Please select an OpenAI Model to continue."
+    }
+    else if (model_type === "Nidum Shared") {
+      if (!sharedDevice?.modelName) return "A provider has not been selected for the model."
+    }
+    else if (model_type === "Ollama") {
+      if (!ollamaUrl) return "Please provide the Ollama base URL."
+      if (!ollamaModel) return "Please select an Ollama Model to proceed."
+    }
+    return ""
+  }
+
   const postData = async (msg: string, needAutoPlay: boolean = false) => {
     const currContextId = chat_id || window.location?.hash?.split("/c/")[1]
 
     try {
       if (msg && projectDetails) {
-        if (model_type === "Groq") {
-          if (!groqApiKey) return toast({ title: "Please enter the Groq API key to proceed." })
-          if (!groqModel) return toast({ title: "Please select a Groq Model to continue." })
-        }
-        else if (model_type === "Local") {
-          if (!llamaModel) return toast({ title: "Please choose a model to continue the chat." })
-          if (!downloadedModels?.some((d: any) => d.fileName === llamaModel)) {
-            return toast({ title: "The selected model is currently unavailable." })
-          }
-        }
-        else if (model_type === "Hugging Face") {
-          if (!hfApiKey) return toast({ title: "Please enter the Hugging Face API key to proceed." })
-          if (!hfModel) return toast({ title: "Please select a Hugging Face Model to continue." })
-        }
-        else if (model_type === "SambaNova") {
-          if (!sambaNovaApiKey) return toast({ title: "Please provide the SambaNova API key." })
-          if (!sambaNovaModel) return toast({ title: "Please select a SambaNova Model to continue." })
-        }
-        else if (model_type === "Anthropic") {
-          if (!anthropicApiKey) return toast({ title: "Please provide the Anthropic API key." })
-          if (!anthropicModel) return toast({ title: "Please choose an Anthropic Model." })
-        }
-        else if (model_type === "OpenAI") {
-          if (!openaiApiKey) return toast({ title: "Please provide the OpenAI API key to proceed." })
-          if (!openaiModel) return toast({ title: "Please select an OpenAI Model to continue." })
-        }
-        else if (model_type === "Nidum Shared") {
-          if (!sharedDevice?.modelName) return toast({ title: "A provider has not been selected for the model." })
-        }
-        else if (model_type === "Ollama") {
-          if (!ollamaUrl) return toast({ title: "Please provide the Ollama base URL." })
-          if (!ollamaModel) return toast({ title: "Please select an Ollama Model to proceed." })
-        }
+        const hasError = hasAPiKeyError()
+        if (hasError) return toast({ title: hasError })
 
         setFiles([])
         setMessage('')
@@ -625,6 +635,9 @@ function Messages() {
   const sentMessage = () => {
     if (message) {
       if (!chat_id) {
+        const hasError = hasAPiKeyError()
+        if (hasError) return toast({ title: hasError })
+
         const temContextId = genMongoId()
 
         addChat(project_id, {

@@ -38,6 +38,21 @@ async function isLiveCheck(deviceId) {
   return status === 200
 }
 
+router.post("/url-config", async (req, res) => {
+  try {
+    const config = `${path.join(zrokBinary.replace(/ /g, '\\ '), zrokStart)} config set apiEndpoint https://api.chain.nidum.ai`;
+    await execPromise(config)
+    await updateJSONObj(configPath, { "nidum-chain-url-config": true })
+
+    return res.json({ msg: "Success" })
+
+  } catch (error) {
+    console.log(error);
+    logger.error(`${JSON.stringify(error)}, ${error?.message}`)
+    res.status(500).json({ error: error.message });
+  }
+})
+
 router.post("/enable", async (req, res) => {
   try {
     const enable = `"${zrokPath}" enable IuWuU5fe1A54`;
@@ -152,15 +167,6 @@ router.post("/disable", async (req, res) => {
       const homeDirectory = os.homedir()
       const zrokFolder = path.join(homeDirectory, ".zrok")
       await fs.rm(zrokFolder, { recursive: true })
-
-    } catch (error) {
-      console.log("in zrok delete", error)
-    }
-
-    try {
-      const homeDirectory = os.homedir()
-      const nidumchainFolder = path.join(homeDirectory, ".nidumchain")
-      await fs.rm(nidumchainFolder, { recursive: true })
       await writeJSON(configPath, {})
 
     } catch (error) {

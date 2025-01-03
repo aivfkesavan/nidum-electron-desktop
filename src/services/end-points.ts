@@ -5,16 +5,16 @@ export const root = {
 
 export const endPoints = {
   // auth
-  register: "/user/register",
+  register: "/user/v2/register",
   resendOtp: "/user/resend-otp",
-  verifyOtp: "/user/verify-otp",
+  verifyOtp: "/user/v2/verify-otp",
   updatePass: "/user/update-pass",
   forgetPass: "/user/forget-pass",
   resetPass: "/user/reset-pass",
   login: "/user/login",
   logout: "/user/logout",
   deleteOtp: "/user/delete-otp",
-  deleteAccount: "/user/account", // :otp
+  deleteAccount: "/user/v2/account", // :otp
 
   // user
   invites: "/user/invites",

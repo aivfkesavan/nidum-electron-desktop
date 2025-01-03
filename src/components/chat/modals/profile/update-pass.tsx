@@ -29,7 +29,7 @@ function UpdatePass({ updateShowPass }: props) {
 
   const onSubmit = (data: updatePass) => {
     mutate(data, {
-      onSettled() {
+      onSuccess() {
         updateShowPass()
       }
     })

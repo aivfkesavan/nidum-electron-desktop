@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { LuShieldCheck } from 'react-icons/lu';
 
 import { useSendOTP } from "../../../../hooks/use-user";
 import useAuthStore from '../../../../store/auth';
@@ -16,7 +17,6 @@ import { Label } from "../../../ui/label";
 import UpdatePass from './update-pass';
 import Delete from './delete';
 import Reset from './reset';
-import { LuShieldCheck } from 'react-icons/lu';
 
 function Profile() {
   const isVerified = useAuthStore(s => s.isVerified)
